@@ -13,8 +13,36 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @tags B2B Orders
+ */
 class B2BOrderController extends Controller
 {
+    /**
+     * Create B2B order
+     *
+     * Creates a new order using B2B account balance. The order is processed immediately
+     * and the eSIM will be provisioned automatically. Balance is deducted upon order creation.
+     *
+     * @authenticated
+     *
+     * @bodyParam package_id int required The ID of the package to purchase. Example: 1
+     *
+     * @response 201 {
+     *   "data": {
+     *     "order_id": 1,
+     *     "order_uuid": "550e8400-e29b-41d4-a716-446655440000",
+     *     "order_number": "ORD-241224-ABC123",
+     *     "status": "processing",
+     *     "amount": 19.99,
+     *     "message": "Order created and processing"
+     *   }
+     * }
+     * @response 403 {"error": "B2B account required"}
+     * @response 422 {"error": "Package not available"}
+     * @response 422 {"error": "Insufficient balance", "required": 19.99, "available": 10.00}
+     * @response 500 {"error": "Failed to create order", "message": "..."}
+     */
     public function store(Request $request): JsonResponse
     {
         $request->validate([
@@ -37,8 +65,8 @@ class B2BOrderController extends Controller
             ], 422);
         }
 
-        // Calculate price with discount
-        $price = $customer->calculateDiscountedPrice($package->retail_price);
+        // Calculate price with discount (using effective price which considers custom pricing)
+        $price = $customer->calculateDiscountedPrice((float) $package->effective_retail_price);
 
         // Check balance
         $balance = $customer->balance;

@@ -22,6 +22,12 @@ export interface NavItem {
     isActive?: boolean;
 }
 
+export interface LocaleOption {
+    code: string;
+    name: string;
+    nativeName: string;
+}
+
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
@@ -37,6 +43,8 @@ export interface SharedData {
         symbol: string;
         name: string;
     };
+    locale: string;
+    availableLocales: LocaleOption[];
     [key: string]: unknown;
 }
 

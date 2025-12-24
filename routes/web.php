@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Public\ArticleController;
 use App\Http\Controllers\Public\HomeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -10,6 +11,11 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/destinations', [HomeController::class, 'destinations'])->name('destinations');
 Route::get('/destinations/{country}', [HomeController::class, 'country'])->name('destinations.country');
 Route::get('/package/{package}', [HomeController::class, 'package'])->name('package.show');
+Route::get('/how-it-works', [HomeController::class, 'howItWorks'])->name('how-it-works');
+Route::get('/privacy', fn () => \Inertia\Inertia::render('public/privacy'))->name('privacy');
+Route::get('/terms', fn () => \Inertia\Inertia::render('public/terms'))->name('terms');
+Route::get('/faq', fn () => \Inertia\Inertia::render('public/faq'))->name('faq');
+Route::get('/help', fn () => \Inertia\Inertia::render('public/help'))->name('help');
 
 // Guest Checkout (no auth required)
 // Note: Specific routes must come BEFORE parametric routes to avoid conflicts
@@ -19,6 +25,10 @@ Route::get('/checkout/{package}', [\App\Http\Controllers\Public\CheckoutControll
 Route::post('/checkout/{package}', [\App\Http\Controllers\Public\CheckoutController::class, 'process'])->name('public.checkout.process');
 Route::get('/order/{order:uuid}', [\App\Http\Controllers\Public\CheckoutController::class, 'status'])->name('public.order.status');
 Route::get('/order/{order:uuid}/check', [\App\Http\Controllers\Public\CheckoutController::class, 'checkStatus'])->name('public.order.check');
+
+// Blog Routes
+Route::get('/blog', [ArticleController::class, 'index'])->name('blog.index');
+Route::get('/blog/{article:slug}', [ArticleController::class, 'show'])->name('blog.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
@@ -110,6 +120,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('currencies/update-rates', [\App\Http\Controllers\Admin\CurrencyController::class, 'updateRates'])->name('currencies.update-rates');
         Route::post('currencies/{currency}/toggle', [\App\Http\Controllers\Admin\CurrencyController::class, 'toggleActive'])->name('currencies.toggle');
         Route::post('currencies/{currency}/set-default', [\App\Http\Controllers\Admin\CurrencyController::class, 'setDefault'])->name('currencies.set-default');
+
+        // Articles (use :id explicitly since model uses slug as route key)
+        Route::get('articles', [\App\Http\Controllers\Admin\ArticleController::class, 'index'])->name('articles.index');
+        Route::get('articles/create', [\App\Http\Controllers\Admin\ArticleController::class, 'create'])->name('articles.create');
+        Route::post('articles', [\App\Http\Controllers\Admin\ArticleController::class, 'store'])->name('articles.store');
+        Route::post('articles/upload-image', [\App\Http\Controllers\Admin\ArticleController::class, 'uploadImage'])->name('articles.upload-image');
+        Route::get('articles/{article:id}', [\App\Http\Controllers\Admin\ArticleController::class, 'show'])->name('articles.show');
+        Route::get('articles/{article:id}/edit', [\App\Http\Controllers\Admin\ArticleController::class, 'edit'])->name('articles.edit');
+        Route::put('articles/{article:id}', [\App\Http\Controllers\Admin\ArticleController::class, 'update'])->name('articles.update');
+        Route::delete('articles/{article:id}', [\App\Http\Controllers\Admin\ArticleController::class, 'destroy'])->name('articles.destroy');
+        Route::post('articles/{article:id}/toggle-publish', [\App\Http\Controllers\Admin\ArticleController::class, 'togglePublish'])->name('articles.toggle-publish');
     });
 });
 

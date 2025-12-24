@@ -89,6 +89,12 @@ class HandleInertiaRequests extends Middleware
                 'symbol' => $defaultCurrency->symbol,
                 'name' => $defaultCurrency->name,
             ],
+            'locale' => app()->getLocale(),
+            'availableLocales' => [
+                ['code' => 'en', 'name' => 'English', 'nativeName' => 'English'],
+                ['code' => 'de', 'name' => 'German', 'nativeName' => 'Deutsch'],
+                ['code' => 'sq', 'name' => 'Albanian', 'nativeName' => 'Shqip'],
+            ],
         ];
     }
 }

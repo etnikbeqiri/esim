@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\LanguageController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
@@ -25,4 +26,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('settings/two-factor', [TwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
+
+    Route::get('settings/language', [LanguageController::class, 'edit'])->name('language.edit');
+    Route::patch('settings/language', [LanguageController::class, 'update'])->name('language.update');
 });
+
+// Public locale route (for guest and authenticated users)
+Route::post('locale', [LanguageController::class, 'setLocale'])->name('locale.set');

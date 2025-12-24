@@ -1,4 +1,4 @@
-import { NavMain } from '@/components/nav-main';
+import { NavMain, NavMainCollapsible } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
@@ -13,12 +13,15 @@ import { dashboard } from '@/routes';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
+    Briefcase,
     Coins,
+    FileText,
     Globe,
     LayoutGrid,
     Package,
     RefreshCw,
     Server,
+    Settings,
     ShoppingCart,
     Users,
     Wallet,
@@ -108,6 +111,11 @@ export function AppSidebar() {
                       href: '/admin/currencies',
                       icon: Coins,
                   },
+                  {
+                      title: 'Articles',
+                      href: '/admin/articles',
+                      icon: FileText,
+                  },
               ]
             : [];
 
@@ -132,9 +140,21 @@ export function AppSidebar() {
             <SidebarContent>
                 <NavMain items={mainNavItems} />
                 {clientNavItems.length > 0 && (
-                    <NavMain items={clientNavItems} label={user?.is_b2b ? 'Business' : 'My Account'} />
+                    <NavMainCollapsible
+                        items={clientNavItems}
+                        label={user?.is_b2b ? 'Business' : 'My Account'}
+                        icon={Briefcase}
+                        defaultOpen={true}
+                    />
                 )}
-                {adminNavItems.length > 0 && <NavMain items={adminNavItems} label="Admin" />}
+                {adminNavItems.length > 0 && (
+                    <NavMainCollapsible
+                        items={adminNavItems}
+                        label="Admin"
+                        icon={Settings}
+                        defaultOpen={true}
+                    />
+                )}
             </SidebarContent>
 
             <SidebarFooter>

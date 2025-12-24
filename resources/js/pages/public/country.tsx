@@ -1,9 +1,21 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, CheckCircle2, HardDrive, Sparkles, Timer, Zap } from 'lucide-react';
+import {
+    ArrowLeft,
+    Calendar,
+    CheckCircle2,
+    Database,
+    Globe,
+    Shield,
+    Smartphone,
+    Wifi,
+    Zap,
+} from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 interface Package {
     id: number;
@@ -14,6 +26,13 @@ interface Package {
     validity_label: string;
     retail_price: string | number;
     is_featured: boolean;
+    is_popular: boolean;
+    network_type: string | null;
+    sms_included: boolean;
+    voice_included: boolean;
+    hotspot_allowed: boolean;
+    coverage_type: string | null;
+    description: string | null;
 }
 
 interface Country {
@@ -28,7 +47,11 @@ interface Props {
     packages: Package[];
 }
 
+type SortOption = 'data' | 'price-asc' | 'price-desc' | 'validity';
+
 export default function CountryPage({ country, packages }: Props) {
+    const [sortBy, setSortBy] = useState<SortOption>('data');
+
     function getFlagEmoji(countryCode: string) {
         const codePoints = countryCode
             .toUpperCase()
@@ -37,27 +60,91 @@ export default function CountryPage({ country, packages }: Props) {
         return String.fromCodePoint(...codePoints);
     }
 
+    const sortedPackages = useMemo(() => {
+        const sorted = [...packages];
+        switch (sortBy) {
+            case 'data':
+                return sorted.sort((a, b) => a.data_mb - b.data_mb);
+            case 'price-asc':
+                return sorted.sort((a, b) => Number(a.retail_price) - Number(b.retail_price));
+            case 'price-desc':
+                return sorted.sort((a, b) => Number(b.retail_price) - Number(a.retail_price));
+            case 'validity':
+                return sorted.sort((a, b) => b.validity_days - a.validity_days);
+            default:
+                return sorted;
+        }
+    }, [packages, sortBy]);
+
+    const lowestPrice = packages.length > 0
+        ? Math.min(...packages.map((p) => Number(p.retail_price)))
+        : 0;
+
     return (
         <GuestLayout>
-            <Head title={`${country.name} eSIM Data Plans`} />
+            <Head title={`${country.name} eSIM Data Plans`}>
+                <meta
+                    name="description"
+                    content={`Buy eSIM data plans for ${country.name}. ${packages.length} plans available with instant delivery. No roaming fees.`}
+                />
+            </Head>
 
-            {/* Header */}
-            <section className="bg-gradient-to-b from-muted/50 to-background pb-8 pt-12 md:pt-16">
+            {/* Hero Header */}
+            <section className="relative overflow-hidden bg-gradient-to-b from-muted/50 to-background pb-12 pt-8 md:pb-16 md:pt-12">
                 <div className="container mx-auto px-4">
-                    <Button variant="ghost" size="sm" asChild className="mb-4">
-                        <Link href="/destinations">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            All Destinations
-                        </Link>
-                    </Button>
+                    {/* Back Link */}
+                    <Link
+                        href="/destinations"
+                        className="mb-6 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+                    >
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        All Destinations
+                    </Link>
 
-                    <div className="flex items-center gap-4">
-                        <span className="text-6xl">{getFlagEmoji(country.iso_code)}</span>
-                        <div>
-                            <h1 className="text-3xl font-bold md:text-4xl">{country.name}</h1>
-                            <p className="text-muted-foreground">
-                                {packages.length} data plans available
+                    {/* Country Info */}
+                    <div className="flex flex-col items-center text-center md:flex-row md:items-start md:text-left md:gap-8">
+                        {/* Flag */}
+                        <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-2xl bg-background shadow-lg md:mb-0 md:h-32 md:w-32">
+                            <span className="text-6xl md:text-7xl">{getFlagEmoji(country.iso_code)}</span>
+                        </div>
+
+                        {/* Details */}
+                        <div className="flex-1">
+                            <div className="mb-2 flex flex-wrap items-center justify-center gap-2 md:justify-start">
+                                {country.region && (
+                                    <Badge variant="secondary">
+                                        <Globe className="mr-1 h-3 w-3" />
+                                        {country.region}
+                                    </Badge>
+                                )}
+                                <Badge variant="outline">
+                                    {packages.length} Plan{packages.length !== 1 ? 's' : ''}
+                                </Badge>
+                            </div>
+
+                            <h1 className="mb-2 text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
+                                {country.name}
+                            </h1>
+
+                            <p className="mb-4 text-muted-foreground md:text-lg">
+                                Get instant mobile data with our eSIM plans. No physical SIM needed.
                             </p>
+
+                            {packages.length > 0 && (
+                                <div className="flex flex-wrap items-center justify-center gap-4 text-sm md:justify-start">
+                                    <div className="flex items-center gap-1.5">
+                                        <Zap className="h-4 w-4 text-primary" />
+                                        <span>Instant Delivery</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <Shield className="h-4 w-4 text-primary" />
+                                        <span>Secure Payment</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 font-semibold text-primary">
+                                        Starting from €{lowestPrice.toFixed(2)}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -68,8 +155,11 @@ export default function CountryPage({ country, packages }: Props) {
                 <div className="container mx-auto px-4">
                     {packages.length === 0 ? (
                         <div className="py-16 text-center">
-                            <h3 className="font-semibold">No plans available</h3>
-                            <p className="mt-1 text-sm text-muted-foreground">
+                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                                <Smartphone className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                            <h3 className="text-lg font-semibold">No plans available</h3>
+                            <p className="mt-1 text-muted-foreground">
                                 Check back later for available data plans
                             </p>
                             <Button variant="outline" className="mt-4" asChild>
@@ -77,104 +167,165 @@ export default function CountryPage({ country, packages }: Props) {
                             </Button>
                         </div>
                     ) : (
-                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {packages.map((pkg) => (
-                                <Card
-                                    key={pkg.id}
-                                    className={`relative overflow-hidden transition-all hover:shadow-lg ${
-                                        pkg.is_featured ? 'border-primary ring-1 ring-primary' : ''
-                                    }`}
-                                >
-                                    {pkg.is_featured && (
-                                        <div className="absolute right-0 top-0">
-                                            <Badge className="rounded-none rounded-bl-lg">
-                                                <Sparkles className="mr-1 h-3 w-3" />
-                                                Popular
-                                            </Badge>
-                                        </div>
-                                    )}
-                                    <CardHeader className="pb-2">
-                                        <h3 className="text-lg font-semibold">{pkg.name}</h3>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <div className="flex items-baseline gap-1">
-                                            <span className="text-3xl font-bold">
-                                                €{Number(pkg.retail_price).toFixed(2)}
-                                            </span>
-                                        </div>
+                        <>
+                            {/* Sort Controls */}
+                            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                <h2 className="text-xl font-semibold">
+                                    Choose Your Plan
+                                </h2>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-muted-foreground">Sort:</span>
+                                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                                        <SelectTrigger className="w-[160px]">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="data">Data Amount</SelectItem>
+                                            <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                                            <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                                            <SelectItem value="validity">Validity</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
 
-                                        <div className="space-y-2">
-                                            <div className="flex items-center gap-3 text-sm">
-                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
-                                                    <HardDrive className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                                </div>
-                                                <span className="font-medium">{pkg.data_label}</span>
+                            {/* Package Grid */}
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                {sortedPackages.map((pkg, index) => (
+                                    <Card
+                                        key={pkg.id}
+                                        className={`relative flex flex-col transition-all hover:shadow-lg ${
+                                            pkg.is_featured
+                                                ? 'border-primary shadow-md ring-1 ring-primary'
+                                                : ''
+                                        }`}
+                                    >
+                                        {/* Featured Badge */}
+                                        {pkg.is_featured && (
+                                            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                                                <Badge className="shadow-sm">
+                                                    Most Popular
+                                                </Badge>
                                             </div>
-                                            <div className="flex items-center gap-3 text-sm">
-                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900">
-                                                    <Timer className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                                                </div>
-                                                <span className="font-medium">{pkg.validity_label}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3 text-sm">
-                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-                                                    <Zap className="h-4 w-4 text-green-600 dark:text-green-400" />
-                                                </div>
-                                                <span className="font-medium">Instant Delivery</span>
-                                            </div>
-                                        </div>
+                                        )}
 
-                                        <div className="space-y-1.5 border-t pt-4 text-xs text-muted-foreground">
-                                            <div className="flex items-center gap-1.5">
-                                                <CheckCircle2 className="h-3 w-3 text-green-500" />
-                                                <span>Works with eSIM compatible devices</span>
+                                        <CardContent className={`flex-1 ${pkg.is_featured ? 'pt-8' : 'pt-6'}`}>
+                                            {/* Plan Name & Network */}
+                                            <div className="mb-4">
+                                                <h3 className="font-semibold">{pkg.name}</h3>
+                                                {pkg.network_type && (
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {pkg.network_type} Network
+                                                    </span>
+                                                )}
                                             </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <CheckCircle2 className="h-3 w-3 text-green-500" />
-                                                <span>Hotspot/Tethering supported</span>
+
+                                            {/* Price */}
+                                            <div className="mb-4">
+                                                <span className="text-3xl font-bold">
+                                                    €{Number(pkg.retail_price).toFixed(2)}
+                                                </span>
                                             </div>
-                                        </div>
-                                    </CardContent>
-                                    <CardFooter>
-                                        <Button className="w-full" asChild>
-                                            <Link href={`/checkout/${pkg.id}`}>Buy Now</Link>
-                                        </Button>
-                                    </CardFooter>
-                                </Card>
-                            ))}
-                        </div>
+
+                                            {/* Data & Validity */}
+                                            <div className="mb-4 space-y-2">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                                                        <Database className="h-4 w-4 text-primary" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium">{pkg.data_label}</p>
+                                                        <p className="text-xs text-muted-foreground">High-speed data</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                                                        <Calendar className="h-4 w-4 text-primary" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium">{pkg.validity_label}</p>
+                                                        <p className="text-xs text-muted-foreground">Validity period</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Features */}
+                                            <div className="space-y-1.5 text-sm text-muted-foreground">
+                                                <div className="flex items-center gap-2">
+                                                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                                    <span>Instant QR code delivery</span>
+                                                </div>
+                                                {pkg.hotspot_allowed && (
+                                                    <div className="flex items-center gap-2">
+                                                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                                        <span>Hotspot / Tethering</span>
+                                                    </div>
+                                                )}
+                                                <div className="flex items-center gap-2">
+                                                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                                    <span>24/7 Support</span>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+
+                                        <CardFooter className="pt-0">
+                                            <Button className="w-full" size="lg" asChild>
+                                                <Link href={`/checkout/${pkg.id}`}>
+                                                    Get This Plan
+                                                </Link>
+                                            </Button>
+                                        </CardFooter>
+                                    </Card>
+                                ))}
+                            </div>
+                        </>
                     )}
                 </div>
             </section>
 
-            {/* Info Section */}
-            <section className="bg-muted/30 py-12">
+            {/* Features Section */}
+            <section className="border-t bg-muted/30 py-12 md:py-16">
                 <div className="container mx-auto px-4">
-                    <div className="mx-auto max-w-2xl text-center">
-                        <h2 className="mb-4 text-xl font-semibold">How to Use Your eSIM in {country.name}</h2>
-                        <div className="grid gap-6 text-left md:grid-cols-3">
-                            <div>
-                                <div className="mb-2 text-2xl font-bold text-primary">1</div>
-                                <h3 className="mb-1 font-medium">Purchase</h3>
-                                <p className="text-sm text-muted-foreground">
-                                    Select your plan and complete the checkout
-                                </p>
+                    <h2 className="mb-8 text-center text-2xl font-bold">
+                        Why Choose Our eSIM?
+                    </h2>
+                    <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                                <Zap className="h-7 w-7 text-primary" />
                             </div>
-                            <div>
-                                <div className="mb-2 text-2xl font-bold text-primary">2</div>
-                                <h3 className="mb-1 font-medium">Install</h3>
-                                <p className="text-sm text-muted-foreground">
-                                    Scan the QR code we send to your email
-                                </p>
-                            </div>
-                            <div>
-                                <div className="mb-2 text-2xl font-bold text-primary">3</div>
-                                <h3 className="mb-1 font-medium">Connect</h3>
-                                <p className="text-sm text-muted-foreground">
-                                    Activate when you arrive and enjoy data
-                                </p>
-                            </div>
+                            <h3 className="mb-2 font-semibold">Instant Activation</h3>
+                            <p className="text-sm text-muted-foreground">
+                                Get your eSIM QR code instantly after purchase. No waiting, no shipping.
+                            </p>
                         </div>
+                        <div className="flex flex-col items-center text-center">
+                            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                                <Wifi className="h-7 w-7 text-primary" />
+                            </div>
+                            <h3 className="mb-2 font-semibold">Stay Connected</h3>
+                            <p className="text-sm text-muted-foreground">
+                                High-speed data on local networks. Works as soon as you land.
+                            </p>
+                        </div>
+                        <div className="flex flex-col items-center text-center">
+                            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                                <Shield className="h-7 w-7 text-primary" />
+                            </div>
+                            <h3 className="mb-2 font-semibold">No Hidden Fees</h3>
+                            <p className="text-sm text-muted-foreground">
+                                Transparent pricing. No roaming charges, no surprises.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="mt-10 flex justify-center gap-3">
+                        <Button variant="outline" asChild>
+                            <Link href="/how-it-works">How It Works</Link>
+                        </Button>
+                        <Button variant="outline" asChild>
+                            <Link href="/help">Need Help?</Link>
+                        </Button>
                     </div>
                 </div>
             </section>

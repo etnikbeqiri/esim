@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Country;
 use App\Models\Package;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -13,22 +14,29 @@ class HomeController extends Controller
 {
     public function index(): Response
     {
-        // Get featured countries with package counts and min prices
+        // Get featured countries with package counts
         $featuredCountries = Country::query()
             ->where('is_active', true)
             ->whereHas('packages', fn ($q) => $q->where('is_active', true))
             ->withCount(['packages' => fn ($q) => $q->where('is_active', true)])
-            ->withMin(['packages' => fn ($q) => $q->where('is_active', true)], 'retail_price')
             ->orderByDesc('packages_count')
             ->limit(8)
             ->get()
-            ->map(fn ($country) => [
-                'id' => $country->id,
-                'name' => $country->name,
-                'iso_code' => $country->iso_code,
-                'package_count' => $country->packages_count,
-                'min_price' => $country->packages_min_retail_price,
-            ]);
+            ->map(function ($country) {
+                // Calculate min effective price (considering custom prices)
+                $minPrice = $country->packages()
+                    ->where('is_active', true)
+                    ->get()
+                    ->min(fn ($p) => $p->effective_retail_price);
+
+                return [
+                    'id' => $country->id,
+                    'name' => $country->name,
+                    'iso_code' => $country->iso_code,
+                    'package_count' => $country->packages_count,
+                    'min_price' => $minPrice,
+                ];
+            });
 
         $totalCountries = Country::where('is_active', true)
             ->whereHas('packages', fn ($q) => $q->where('is_active', true))
@@ -49,7 +57,6 @@ class HomeController extends Controller
             ->where('is_active', true)
             ->whereHas('packages', fn ($q) => $q->where('is_active', true))
             ->withCount(['packages' => fn ($q) => $q->where('is_active', true)])
-            ->withMin(['packages' => fn ($q) => $q->where('is_active', true)], 'retail_price')
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%");
             })
@@ -58,14 +65,22 @@ class HomeController extends Controller
             })
             ->orderBy('name')
             ->get()
-            ->map(fn ($country) => [
-                'id' => $country->id,
-                'name' => $country->name,
-                'iso_code' => $country->iso_code,
-                'region' => $country->region,
-                'package_count' => $country->packages_count,
-                'min_price' => $country->packages_min_retail_price,
-            ]);
+            ->map(function ($country) {
+                // Calculate min effective price (considering custom prices)
+                $minPrice = $country->packages()
+                    ->where('is_active', true)
+                    ->get()
+                    ->min(fn ($p) => $p->effective_retail_price);
+
+                return [
+                    'id' => $country->id,
+                    'name' => $country->name,
+                    'iso_code' => $country->iso_code,
+                    'region' => $country->region,
+                    'package_count' => $country->packages_count,
+                    'min_price' => $minPrice,
+                ];
+            });
 
         // Get unique regions for filtering
         $regions = Country::query()
@@ -94,7 +109,7 @@ class HomeController extends Controller
             ->where('country_id', $country->id)
             ->where('is_active', true)
             ->orderBy('data_mb')
-            ->orderBy('retail_price')
+            ->orderByRaw('COALESCE(custom_retail_price, retail_price) ASC')
             ->get()
             ->map(fn ($package) => [
                 'id' => $package->id,
@@ -103,8 +118,15 @@ class HomeController extends Controller
                 'data_label' => $package->data_label,
                 'validity_days' => $package->validity_days,
                 'validity_label' => $package->validity_label,
-                'retail_price' => $package->retail_price,
+                'retail_price' => $package->effective_retail_price,
                 'is_featured' => $package->is_featured,
+                'is_popular' => $package->is_popular,
+                'network_type' => $package->network_type,
+                'sms_included' => $package->sms_included,
+                'voice_included' => $package->voice_included,
+                'hotspot_allowed' => $package->hotspot_allowed,
+                'coverage_type' => $package->coverage_type,
+                'description' => $package->description,
             ]);
 
         return Inertia::render('public/country', [
@@ -134,13 +156,24 @@ class HomeController extends Controller
                 'data_label' => $package->data_label,
                 'validity_days' => $package->validity_days,
                 'validity_label' => $package->validity_label,
-                'retail_price' => $package->retail_price,
+                'retail_price' => $package->effective_retail_price,
                 'description' => $package->description,
                 'country' => $package->country ? [
                     'name' => $package->country->name,
                     'iso_code' => $package->country->iso_code,
                 ] : null,
             ],
+        ]);
+    }
+
+    public function howItWorks(): Response
+    {
+        $totalCountries = Country::where('is_active', true)
+            ->whereHas('packages', fn ($q) => $q->where('is_active', true))
+            ->count();
+
+        return Inertia::render('public/how-it-works', [
+            'totalCountries' => $totalCountries,
         ]);
     }
 }

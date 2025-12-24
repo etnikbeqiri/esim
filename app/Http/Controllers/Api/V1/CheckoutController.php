@@ -8,6 +8,9 @@ use App\Services\CheckoutService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * @tags Checkout
+ */
 class CheckoutController extends Controller
 {
     public function __construct(
@@ -15,10 +18,37 @@ class CheckoutController extends Controller
     ) {}
 
     /**
-     * Create a checkout session for a package.
+     * Create checkout session
      *
-     * B2B customers: Immediate balance deduction, no redirect
-     * B2C customers: Payrexx checkout URL returned
+     * Creates a checkout session for purchasing an eSIM package.
+     *
+     * For **B2B customers**: Payment is deducted from balance immediately.
+     * The response includes `instant_payment: true` and the order starts processing.
+     *
+     * For **B2C customers**: A payment gateway URL is returned.
+     * Redirect the user to complete payment, then poll the verify endpoint.
+     *
+     * @authenticated
+     *
+     * @bodyParam package_id int required The ID of the package to purchase. Example: 1
+     * @bodyParam success_url string required URL to redirect after successful payment. Example: https://example.com/success
+     * @bodyParam cancel_url string required URL to redirect if payment is cancelled. Example: https://example.com/cancel
+     * @bodyParam fail_url string URL to redirect if payment fails. Example: https://example.com/fail
+     * @bodyParam language string Language for payment page (en, de, fr, it). Example: en
+     *
+     * @response 201 {
+     *   "success": true,
+     *   "data": {
+     *     "checkout_url": "https://payment.example.com/session/...",
+     *     "order_uuid": "550e8400-e29b-41d4-a716-446655440000",
+     *     "provider": "balance",
+     *     "amount": 19.99,
+     *     "instant_payment": true,
+     *     "order_number": "ORD-241224-ABC123"
+     *   }
+     * }
+     * @response 403 {"error": "Customer account required", "message": "..."}
+     * @response 422 {"success": false, "error": "Insufficient balance", "provider": "balance"}
      */
     public function store(Request $request): JsonResponse
     {
@@ -82,7 +112,23 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Verify checkout status / poll for completion.
+     * Verify checkout
+     *
+     * Verifies the checkout status and confirms if payment was successful.
+     * Use this endpoint to poll for payment completion after redirecting
+     * from the payment gateway.
+     *
+     * @authenticated
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "order": {
+     *     "uuid": "550e8400-e29b-41d4-a716-446655440000",
+     *     "status": "processing",
+     *     "payment_status": "completed"
+     *   }
+     * }
+     * @response 404 {"success": false, "error": "Order not found"}
      */
     public function verify(Request $request, string $orderUuid): JsonResponse
     {
@@ -111,7 +157,20 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Get checkout status for polling.
+     * Get checkout status
+     *
+     * Returns the current status of a checkout/order for polling purposes.
+     * Use this to display order progress to the user.
+     *
+     * @authenticated
+     *
+     * @response 200 {
+     *   "found": true,
+     *   "status": "processing",
+     *   "payment_status": "completed",
+     *   "esim_ready": false
+     * }
+     * @response 404 {"found": false}
      */
     public function status(Request $request, string $orderUuid): JsonResponse
     {

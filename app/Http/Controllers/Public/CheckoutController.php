@@ -51,7 +51,7 @@ class CheckoutController extends Controller
                 'data_label' => $package->data_label,
                 'validity_days' => $package->validity_days,
                 'validity_label' => $package->validity_label,
-                'retail_price' => $package->retail_price,
+                'retail_price' => $package->effective_retail_price,
                 'country' => $package->country ? [
                     'name' => $package->country->name,
                     'iso_code' => $package->country->iso_code,

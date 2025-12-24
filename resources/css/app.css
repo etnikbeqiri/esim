@@ -141,3 +141,105 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* Article Content Styling */
+.article-content {
+    @apply text-foreground leading-relaxed;
+}
+
+.article-content h1 {
+    @apply text-3xl font-bold mt-10 mb-4 text-foreground;
+}
+
+.article-content h2 {
+    @apply text-2xl font-bold mt-10 mb-4 text-foreground border-b pb-2;
+}
+
+.article-content h3 {
+    @apply text-xl font-semibold mt-8 mb-3 text-foreground;
+}
+
+.article-content h4 {
+    @apply text-lg font-semibold mt-6 mb-2 text-foreground;
+}
+
+.article-content p {
+    @apply my-4 text-muted-foreground leading-7;
+}
+
+.article-content a {
+    @apply text-primary underline underline-offset-4 hover:text-primary/80 transition-colors;
+}
+
+.article-content strong {
+    @apply font-semibold text-foreground;
+}
+
+.article-content em {
+    @apply italic;
+}
+
+.article-content ul {
+    @apply my-6 ml-6 list-disc space-y-2;
+}
+
+.article-content ol {
+    @apply my-6 ml-6 list-decimal space-y-2;
+}
+
+.article-content li {
+    @apply text-muted-foreground leading-7;
+}
+
+.article-content li::marker {
+    @apply text-primary;
+}
+
+.article-content blockquote {
+    @apply my-6 border-l-4 border-primary bg-muted/50 py-4 px-6 rounded-r-lg italic;
+}
+
+.article-content blockquote p {
+    @apply my-0 text-foreground;
+}
+
+.article-content code {
+    @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-foreground;
+}
+
+.article-content pre {
+    @apply my-6 bg-muted border rounded-lg p-4 overflow-x-auto;
+}
+
+.article-content pre code {
+    @apply bg-transparent p-0 text-sm;
+}
+
+.article-content img {
+    @apply my-8 rounded-xl shadow-lg max-w-full h-auto mx-auto;
+}
+
+.article-content hr {
+    @apply my-8 border-border;
+}
+
+.article-content table {
+    @apply my-6 w-full border-collapse border rounded-lg overflow-hidden;
+}
+
+.article-content th {
+    @apply bg-muted px-4 py-3 text-left font-semibold border-b;
+}
+
+.article-content td {
+    @apply px-4 py-3 border-b text-muted-foreground;
+}
+
+.article-content tr:last-child td {
+    @apply border-b-0;
+}
+
+/* First paragraph styling (lead paragraph) */
+.article-content > p:first-of-type {
+    @apply text-lg text-foreground leading-8;
+}

@@ -8,8 +8,50 @@ use App\Models\Package;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * @tags Packages
+ */
 class PackageController extends Controller
 {
+    /**
+     * List all packages
+     *
+     * Returns a paginated list of all available eSIM packages. Supports filtering by country,
+     * data amount, price range, and features like popular or featured packages.
+     *
+     * @queryParam country_id int Filter by country ID. Example: 1
+     * @queryParam country_code string Filter by country ISO code (2-letter). Example: DE
+     * @queryParam min_data_mb int Minimum data amount in MB. Example: 1024
+     * @queryParam max_data_mb int Maximum data amount in MB. Example: 10240
+     * @queryParam min_price float Minimum price in EUR. Example: 5.00
+     * @queryParam max_price float Maximum price in EUR. Example: 50.00
+     * @queryParam popular bool Filter only popular packages. Example: true
+     * @queryParam featured bool Filter only featured packages. Example: true
+     * @queryParam sort_by string Field to sort by (retail_price, data_mb, validity_days, name). Example: retail_price
+     * @queryParam sort_dir string Sort direction (asc, desc). Example: asc
+     * @queryParam per_page int Items per page (max 100). Example: 20
+     *
+     * @response 200 {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "name": "Germany 5GB",
+     *       "slug": "germany-5gb",
+     *       "data_mb": 5120,
+     *       "validity_days": 30,
+     *       "retail_price": 19.99,
+     *       "country": {"id": 1, "name": "Germany", "iso_code": "DE"},
+     *       "provider": {"id": 1, "name": "Provider"}
+     *     }
+     *   ],
+     *   "meta": {
+     *     "current_page": 1,
+     *     "last_page": 5,
+     *     "per_page": 20,
+     *     "total": 100
+     *   }
+     * }
+     */
     public function index(Request $request): JsonResponse
     {
         $query = Package::with(['country', 'provider'])
@@ -74,6 +116,31 @@ class PackageController extends Controller
         ]);
     }
 
+    /**
+     * Get package details
+     *
+     * Returns detailed information about a specific eSIM package including
+     * country information, provider details, and coverage data.
+     *
+     * @response 200 {
+     *   "data": {
+     *     "id": 1,
+     *     "name": "Germany 5GB",
+     *     "slug": "germany-5gb",
+     *     "description": "5GB data plan for Germany",
+     *     "data_mb": 5120,
+     *     "validity_days": 30,
+     *     "retail_price": 19.99,
+     *     "network_type": "4G/LTE",
+     *     "sms_included": false,
+     *     "voice_included": false,
+     *     "hotspot_allowed": true,
+     *     "country": {"id": 1, "name": "Germany", "iso_code": "DE"},
+     *     "provider": {"id": 1, "name": "Provider"}
+     *   }
+     * }
+     * @response 404 {"error": "Package not available"}
+     */
     public function show(Package $package): JsonResponse
     {
         if (!$package->isAvailable()) {
@@ -89,6 +156,25 @@ class PackageController extends Controller
         ]);
     }
 
+    /**
+     * Get popular packages
+     *
+     * Returns up to 12 popular eSIM packages, sorted by price ascending.
+     * Useful for featuring on homepage or landing pages.
+     *
+     * @response 200 {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "name": "Germany 5GB",
+     *       "data_mb": 5120,
+     *       "validity_days": 30,
+     *       "retail_price": 19.99,
+     *       "country": {"id": 1, "name": "Germany", "iso_code": "DE"}
+     *     }
+     *   ]
+     * }
+     */
     public function popular(): JsonResponse
     {
         $packages = Package::with(['country'])
@@ -103,6 +189,31 @@ class PackageController extends Controller
         ]);
     }
 
+    /**
+     * Get packages by country
+     *
+     * Returns all available eSIM packages for a specific country,
+     * sorted by data amount and then by price.
+     *
+     * @response 200 {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "name": "Germany 5GB",
+     *       "data_mb": 5120,
+     *       "validity_days": 30,
+     *       "retail_price": 19.99,
+     *       "provider": {"id": 1, "name": "Provider"}
+     *     }
+     *   ],
+     *   "country": {
+     *     "id": 1,
+     *     "name": "Germany",
+     *     "iso_code": "DE",
+     *     "flag_emoji": "..."
+     *   }
+     * }
+     */
     public function byCountry(Country $country): JsonResponse
     {
         $packages = Package::with(['provider'])
