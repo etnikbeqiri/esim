@@ -1,0 +1,61 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Documentation
+*.md
+LICENSE
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing
+tests
+phpunit.xml
+.phpunit.result.cache
+
+# Development dependencies
+node_modules
+vendor
+
+# Build artifacts (will be generated in container)
+public/build
+public/hot
+public/storage
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs and cache
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+
+# Docker files (not needed in image)
+docker-compose.yml
+docker-compose*.yml
+Dockerfile
+
+# Claude/AI
+.claude
+
+# Misc
+*.log
+npm-debug.log
+yarn-error.log
