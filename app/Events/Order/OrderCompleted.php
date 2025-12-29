@@ -5,6 +5,7 @@ namespace App\Events\Order;
 use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Services\EmailService;
+use App\Services\InvoiceService;
 use App\States\OrderState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
@@ -46,9 +47,9 @@ class OrderCompleted extends Event
             'completed_at' => now(),
         ]);
 
-        // Queue emails only when not replaying
+        // Queue emails and generate invoice only when not replaying
         Verbs::unlessReplaying(function () use ($state) {
-            $order = Order::with(['customer.user', 'esimProfile', 'package'])->find($this->order_id);
+            $order = Order::with(['customer.user', 'esimProfile', 'package', 'payment'])->find($this->order_id);
 
             if (!$order) {
                 return;
@@ -61,6 +62,20 @@ class OrderCompleted extends Event
 
             // Send admin notification for new completed order
             $emailService->notifyAdminNewOrder($order);
+
+            // Generate invoice for B2B orders
+            if ($order->isB2B() && $order->customer) {
+                $invoiceService = app(InvoiceService::class);
+
+                // Prevent duplicate invoices
+                if (! $invoiceService->hasOrderInvoice($order)) {
+                    $invoiceService->createPurchaseInvoice(
+                        $order->customer,
+                        $order,
+                        $order->payment
+                    );
+                }
+            }
         });
     }
 }

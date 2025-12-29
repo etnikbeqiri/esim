@@ -71,6 +71,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('balance', [\App\Http\Controllers\Client\BalanceController::class, 'index'])->middleware('b2b')->name('balance.index');
         Route::post('balance/topup', [\App\Http\Controllers\Client\BalanceController::class, 'topUp'])->middleware('b2b')->name('balance.topup');
         Route::get('balance/topup/callback', [\App\Http\Controllers\Client\BalanceController::class, 'topUpCallback'])->middleware('b2b')->name('balance.topup.callback');
+
+        // Invoices (B2B only)
+        Route::middleware('b2b')->group(function () {
+            Route::get('invoices', [\App\Http\Controllers\Client\InvoiceController::class, 'index'])->name('invoices.index');
+            Route::get('invoices/statement', [\App\Http\Controllers\Client\InvoiceController::class, 'statement'])->name('invoices.statement');
+            Route::get('invoices/{invoice}', [\App\Http\Controllers\Client\InvoiceController::class, 'show'])->name('invoices.show');
+            Route::get('invoices/{invoice}/download', [\App\Http\Controllers\Client\InvoiceController::class, 'download'])->name('invoices.download');
+        });
     });
 
     // Admin Routes - protected by admin middleware
@@ -133,6 +141,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('articles/{article:id}', [\App\Http\Controllers\Admin\ArticleController::class, 'update'])->name('articles.update');
         Route::delete('articles/{article:id}', [\App\Http\Controllers\Admin\ArticleController::class, 'destroy'])->name('articles.destroy');
         Route::post('articles/{article:id}/toggle-publish', [\App\Http\Controllers\Admin\ArticleController::class, 'togglePublish'])->name('articles.toggle-publish');
+
+        // Invoices
+        Route::get('invoices/generate', [\App\Http\Controllers\Admin\InvoiceController::class, 'generate'])->name('invoices.generate');
+        Route::post('invoices/generate', [\App\Http\Controllers\Admin\InvoiceController::class, 'store'])->name('invoices.store');
+        Route::get('invoices/search-customers', [\App\Http\Controllers\Admin\InvoiceController::class, 'searchCustomers'])->name('invoices.search-customers');
+        Route::get('invoices/customers/{customer}/uninvoiced-orders', [\App\Http\Controllers\Admin\InvoiceController::class, 'uninvoicedOrders'])->name('invoices.uninvoiced-orders');
+        Route::get('invoices/customers/{customer}/uninvoiced-transactions', [\App\Http\Controllers\Admin\InvoiceController::class, 'uninvoicedTransactions'])->name('invoices.uninvoiced-transactions');
+        Route::get('invoices', [\App\Http\Controllers\Admin\InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('invoices/{invoice}', [\App\Http\Controllers\Admin\InvoiceController::class, 'show'])->name('invoices.show');
+        Route::get('invoices/{invoice}/download', [\App\Http\Controllers\Admin\InvoiceController::class, 'download'])->name('invoices.download');
+        Route::post('invoices/{invoice}/void', [\App\Http\Controllers\Admin\InvoiceController::class, 'void'])->name('invoices.void');
     });
 });
 

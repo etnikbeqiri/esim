@@ -79,6 +79,26 @@ class CustomerController extends Controller
             'pending_orders' => $customer->orders()->whereIn('status', ['pending', 'awaiting_payment', 'processing', 'pending_retry'])->count(),
         ];
 
+        // Get recent invoices for B2B customers
+        $invoices = $customer->isB2B()
+            ? $customer->invoices()
+                ->orderByDesc('invoice_date')
+                ->limit(10)
+                ->get()
+                ->map(fn ($invoice) => [
+                    'id' => $invoice->id,
+                    'uuid' => $invoice->uuid,
+                    'invoice_number' => $invoice->invoice_number,
+                    'type' => $invoice->type->value,
+                    'type_label' => $invoice->type->shortLabel(),
+                    'status' => $invoice->status->value,
+                    'status_label' => $invoice->status->label(),
+                    'status_color' => $invoice->status->color(),
+                    'total' => $invoice->total,
+                    'invoice_date' => $invoice->invoice_date->format('M j, Y'),
+                ])
+            : [];
+
         return Inertia::render('admin/customers/show', [
             'customer' => $this->formatCustomer($customer, includeOrders: false),
             'orders' => $orders->through(fn ($order) => [
@@ -96,6 +116,7 @@ class CustomerController extends Controller
                 'created_at' => $order->created_at->toISOString(),
             ]),
             'stats' => $stats,
+            'invoices' => $invoices,
         ]);
     }
 

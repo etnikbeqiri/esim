@@ -15,6 +15,7 @@ import {
     Clock,
     Loader2,
     Play,
+    Receipt,
     RefreshCw,
     XCircle,
 } from 'lucide-react';
@@ -87,6 +88,13 @@ interface Order {
         provider: string;
         amount: string | number;
         gateway_session_id: string | null;
+    } | null;
+    invoice: {
+        id: number;
+        uuid: string;
+        invoice_number: string;
+        status: string;
+        status_label: string;
     } | null;
 }
 
@@ -648,6 +656,31 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* Invoice */}
+                    {order.invoice && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Receipt className="h-5 w-5" />
+                                    Invoice
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="font-mono font-semibold">{order.invoice.invoice_number}</p>
+                                        <p className="text-sm text-muted-foreground">{order.invoice.status_label}</p>
+                                    </div>
+                                    <Button variant="outline" size="sm" asChild>
+                                        <Link href={`/admin/invoices/${order.invoice.uuid}`}>
+                                            View Invoice
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
             </div>
         </AppLayout>

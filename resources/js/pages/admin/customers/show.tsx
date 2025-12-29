@@ -30,6 +30,7 @@ import {
     Loader2,
     LogIn,
     Pencil,
+    Receipt,
     RefreshCw,
     ShoppingCart,
     XCircle,
@@ -98,10 +99,24 @@ interface Stats {
     pending_orders: number;
 }
 
+interface Invoice {
+    id: number;
+    uuid: string;
+    invoice_number: string;
+    type: string;
+    type_label: string;
+    status: string;
+    status_label: string;
+    status_color: string;
+    total: number;
+    invoice_date: string;
+}
+
 interface Props {
     customer: Customer;
     orders: PaginatedOrders;
     stats: Stats;
+    invoices: Invoice[];
 }
 
 function getStatusBadgeClass(color: string): string {
@@ -136,7 +151,7 @@ function getStatusIcon(status: string, size = 'h-3 w-3') {
     }
 }
 
-export default function CustomerShow({ customer, orders, stats }: Props) {
+export default function CustomerShow({ customer, orders, stats, invoices }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
         { title: 'Customers', href: '/admin/customers' },
@@ -234,6 +249,12 @@ export default function CustomerShow({ customer, orders, stats }: Props) {
                                 </>
                             )}
                         </TooltipProvider>
+                        <Button variant="outline" size="sm" asChild>
+                            <Link href={`/admin/invoices/generate?customer_id=${customer.id}`}>
+                                <Receipt className="mr-2 h-4 w-4" />
+                                Generate Invoice
+                            </Link>
+                        </Button>
                         <Button variant="outline" size="sm" asChild>
                             <Link href={`/admin/customers/${customer.id}/edit`}>
                                 <Pencil className="mr-2 h-4 w-4" />
@@ -574,6 +595,75 @@ export default function CustomerShow({ customer, orders, stats }: Props) {
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Invoices Table (B2B only) */}
+                {customer.type === 'b2b' && invoices.length > 0 && (
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <CardTitle className="flex items-center gap-2">
+                                <Receipt className="h-5 w-5" />
+                                Recent Invoices
+                            </CardTitle>
+                            <Button variant="outline" size="sm" asChild>
+                                <Link href={`/admin/invoices?customer_id=${customer.id}`}>
+                                    View All
+                                </Link>
+                            </Button>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Invoice #</TableHead>
+                                        <TableHead>Type</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Amount</TableHead>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {invoices.map((invoice) => (
+                                        <TableRow key={invoice.id}>
+                                            <TableCell>
+                                                <Link
+                                                    href={`/admin/invoices/${invoice.uuid}`}
+                                                    className="font-mono text-sm hover:underline text-primary"
+                                                >
+                                                    {invoice.invoice_number}
+                                                </Link>
+                                            </TableCell>
+                                            <TableCell>
+                                                <span className="text-sm">{invoice.type_label}</span>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge
+                                                    variant="outline"
+                                                    className={getStatusBadgeClass(invoice.status_color)}
+                                                >
+                                                    {invoice.status_label}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="font-medium">
+                                                €{Number(invoice.total).toFixed(2)}
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground text-sm">
+                                                {invoice.invoice_date}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <Button variant="ghost" size="sm" asChild>
+                                                    <Link href={`/admin/invoices/${invoice.uuid}`}>
+                                                        View
+                                                    </Link>
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
         </AppLayout>
     );

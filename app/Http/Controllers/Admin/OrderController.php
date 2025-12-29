@@ -67,7 +67,7 @@ class OrderController extends Controller
 
     public function show(Order $order): Response
     {
-        $order->load(['customer.user', 'package.provider', 'package.country', 'esimProfile', 'payments']);
+        $order->load(['customer.user', 'package.provider', 'package.country', 'esimProfile', 'payments', 'invoice']);
 
         $payment = $order->payments->first();
 
@@ -146,6 +146,13 @@ class OrderController extends Controller
                     'provider' => $payment->provider?->label() ?? 'Unknown',
                     'amount' => $payment->amount,
                     'gateway_session_id' => $payment->gateway_session_id,
+                ] : null,
+                'invoice' => $order->invoice ? [
+                    'id' => $order->invoice->id,
+                    'uuid' => $order->invoice->uuid,
+                    'invoice_number' => $order->invoice->invoice_number,
+                    'status' => $order->invoice->status->value,
+                    'status_label' => $order->invoice->status->label(),
                 ] : null,
             ],
             'defaultCurrency' => Currency::getDefault(),

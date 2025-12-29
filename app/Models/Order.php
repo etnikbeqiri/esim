@@ -161,6 +161,16 @@ class Order extends Model
         return $this->hasMany(BalanceTransaction::class);
     }
 
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
     public function scopeByStatus($query, OrderStatus $status)
     {
         return $query->where('status', $status);

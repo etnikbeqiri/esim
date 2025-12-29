@@ -19,6 +19,7 @@ import {
     Globe,
     LayoutGrid,
     Package,
+    Receipt,
     RefreshCw,
     Server,
     Settings,
@@ -64,12 +65,17 @@ export function AppSidebar() {
               ]
             : [];
 
-        // B2B gets Balance page
+        // B2B gets Balance and Invoices pages
         if (isB2B && hasCustomer) {
             clientNavItems.push({
                 title: 'Balance',
                 href: '/client/balance',
                 icon: Wallet,
+            });
+            clientNavItems.push({
+                title: 'Invoices',
+                href: '/client/invoices',
+                icon: Receipt,
             });
         }
 
@@ -115,6 +121,11 @@ export function AppSidebar() {
                       title: 'Articles',
                       href: '/admin/articles',
                       icon: FileText,
+                  },
+                  {
+                      title: 'Invoices',
+                      href: '/admin/invoices',
+                      icon: Receipt,
                   },
               ]
             : [];
