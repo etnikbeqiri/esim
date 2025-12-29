@@ -52,9 +52,13 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Copy the cron job file
 COPY docker/cron/laravel-cron /etc/cron.d/laravel-cron
 
-# Set permissions for the cron job file
+# Copy entrypoint script
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+# Set permissions for the cron job file and entrypoint
 RUN chmod 0644 /etc/cron.d/laravel-cron && \
-    crontab /etc/cron.d/laravel-cron
+    crontab /etc/cron.d/laravel-cron && \
+    chmod +x /usr/local/bin/entrypoint.sh
 
 WORKDIR /var/www/html
 
@@ -67,11 +71,8 @@ RUN COMPOSE_BAKE=true composer install --optimize-autoloader --no-interaction
 # Install frontend dependencies and build assets
 RUN npm install && npm run build
 
-# Optimize caches and create storage link
-RUN php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache && \
-    php artisan storage:link
+# Create storage link (config caching done at runtime via entrypoint)
+RUN php artisan storage:link
 
 # Fix storage permissions
 RUN mkdir -p storage/logs \
@@ -84,5 +85,5 @@ RUN mkdir -p storage/logs \
 
 EXPOSE 80
 
-# Run Supervisor, which starts php-fpm + nginx + dcron
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Run entrypoint which caches config then starts Supervisor
+CMD ["/usr/local/bin/entrypoint.sh"]
