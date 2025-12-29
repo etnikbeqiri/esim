@@ -38,10 +38,7 @@ enum PaymentProvider: string
             self::Stripe => [
                 'visa' => ['name' => 'Visa', 'icon' => 'visa'],
                 'mastercard' => ['name' => 'Mastercard', 'icon' => 'mastercard'],
-                'amex' => ['name' => 'American Express', 'icon' => 'amex'],
-                'discover' => ['name' => 'Discover', 'icon' => 'discover'],
-                'diners' => ['name' => 'Diners Club', 'icon' => 'diners'],
-                'jcb' => ['name' => 'JCB', 'icon' => 'jcb'],
+                'maestro' => ['name' => 'Maestro', 'icon' => 'maestro'],
             ],
             self::Payrexx => [
                 'visa' => ['name' => 'Visa', 'icon' => 'visa'],
@@ -116,7 +113,7 @@ enum PaymentProvider: string
      */
     public static function publicProviders(): array
     {
-        return [self::Stripe, self::Payrexx];
+        return [self::Stripe];
     }
 
     /**

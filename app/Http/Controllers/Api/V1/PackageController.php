@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CountryResource;
+use App\Http\Resources\PackageResource;
 use App\Models\Country;
 use App\Models\Package;
 use Illuminate\Http\JsonResponse;
@@ -54,7 +56,13 @@ class PackageController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Package::with(['country', 'provider'])
+        // Only load provider for admin users
+        $relations = ['country'];
+        if ($request->user()?->isAdmin()) {
+            $relations[] = 'provider';
+        }
+
+        $query = Package::with($relations)
             ->available();
 
         // Filter by country
@@ -106,7 +114,7 @@ class PackageController extends Controller
         $packages = $query->paginate($perPage);
 
         return response()->json([
-            'data' => $packages->items(),
+            'data' => PackageResource::collection($packages->items()),
             'meta' => [
                 'current_page' => $packages->currentPage(),
                 'last_page' => $packages->lastPage(),
@@ -141,7 +149,7 @@ class PackageController extends Controller
      * }
      * @response 404 {"error": "Package not available"}
      */
-    public function show(Package $package): JsonResponse
+    public function show(Request $request, Package $package): JsonResponse
     {
         if (!$package->isAvailable()) {
             return response()->json([
@@ -149,10 +157,16 @@ class PackageController extends Controller
             ], 404);
         }
 
-        $package->load(['country', 'provider']);
+        // Only load provider for admin users
+        $relations = ['country'];
+        if ($request->user()?->isAdmin()) {
+            $relations[] = 'provider';
+        }
+
+        $package->load($relations);
 
         return response()->json([
-            'data' => $package,
+            'data' => new PackageResource($package),
         ]);
     }
 
@@ -175,7 +189,7 @@ class PackageController extends Controller
      *   ]
      * }
      */
-    public function popular(): JsonResponse
+    public function popular(Request $request): JsonResponse
     {
         $packages = Package::with(['country'])
             ->available()
@@ -185,7 +199,7 @@ class PackageController extends Controller
             ->get();
 
         return response()->json([
-            'data' => $packages,
+            'data' => PackageResource::collection($packages),
         ]);
     }
 
@@ -214,9 +228,15 @@ class PackageController extends Controller
      *   }
      * }
      */
-    public function byCountry(Country $country): JsonResponse
+    public function byCountry(Request $request, Country $country): JsonResponse
     {
-        $packages = Package::with(['provider'])
+        // Only load provider for admin users
+        $relations = [];
+        if ($request->user()?->isAdmin()) {
+            $relations[] = 'provider';
+        }
+
+        $packages = Package::with($relations)
             ->available()
             ->where('country_id', $country->id)
             ->orderBy('data_mb')
@@ -224,8 +244,8 @@ class PackageController extends Controller
             ->get();
 
         return response()->json([
-            'data' => $packages,
-            'country' => $country,
+            'data' => PackageResource::collection($packages),
+            'country' => new CountryResource($country),
         ]);
     }
 }

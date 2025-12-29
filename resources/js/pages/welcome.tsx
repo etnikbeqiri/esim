@@ -28,14 +28,6 @@ export default function Welcome({
 }: Props) {
     const { name } = usePage<SharedData>().props;
 
-    function getFlagEmoji(countryCode: string) {
-        const codePoints = countryCode
-            .toUpperCase()
-            .split('')
-            .map((char) => 127397 + char.charCodeAt(0));
-        return String.fromCodePoint(...codePoints);
-    }
-
     return (
         <GuestLayout>
             <Head title={`${name} - Stay Connected Worldwide`}>

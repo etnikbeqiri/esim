@@ -1,3 +1,4 @@
+import { CountryFlag } from '@/components/country-flag';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { HeroSection } from '@/components/hero-section';
@@ -29,14 +30,6 @@ export default function Destinations({ countries, regions, filters }: Props) {
     const { name } = usePage<SharedData>().props;
     const [searchQuery, setSearchQuery] = useState(filters.search || '');
     const [activeRegion, setActiveRegion] = useState<string>('all');
-
-    function getFlagEmoji(countryCode: string) {
-        const codePoints = countryCode
-            .toUpperCase()
-            .split('')
-            .map((char) => 127397 + char.charCodeAt(0));
-        return String.fromCodePoint(...codePoints);
-    }
 
     // Filter countries locally for instant feedback
     const filteredCountries = useMemo(() => {
@@ -143,7 +136,7 @@ export default function Destinations({ countries, regions, filters }: Props) {
                                     >
                                         <Card className="group h-full cursor-pointer transition-all hover:border-primary/50 hover:shadow-md">
                                             <CardContent className="flex items-center gap-3 p-4">
-                                                <span className="text-3xl">{getFlagEmoji(country.iso_code)}</span>
+                                                <CountryFlag countryCode={country.iso_code} size="lg" />
                                                 <div className="min-w-0 flex-1">
                                                     <h3 className="truncate font-medium transition-colors group-hover:text-primary">
                                                         {country.name}

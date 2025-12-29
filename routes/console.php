@@ -1,7 +1,9 @@
 <?php
 
+use App\Jobs\Sync\SyncEsimUsageJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -21,3 +23,9 @@ Artisan::command('inspire', function () {
 | * * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
 |
 */
+
+// Sync eSIM usage data every 20 minutes for activated eSIMs
+Schedule::job(new SyncEsimUsageJob())
+    ->cron('*/20 * * * *')
+    ->withoutOverlapping()
+    ->name('sync-esim-usage');

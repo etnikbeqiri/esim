@@ -2,11 +2,9 @@
 
 namespace App\Events\Order;
 
-use App\Enums\EmailTemplate;
 use App\Enums\OrderStatus;
-use App\Jobs\Email\SendQueuedEmail;
-use App\Models\EmailQueue;
 use App\Models\Order;
+use App\Services\EmailService;
 use App\States\OrderState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
@@ -48,28 +46,21 @@ class OrderCompleted extends Event
             'completed_at' => now(),
         ]);
 
-        // Queue delivery email for B2C orders
+        // Queue emails only when not replaying
         Verbs::unlessReplaying(function () use ($state) {
-            if ($state->isB2C()) {
-                $order = Order::with('customer.user')->find($this->order_id);
+            $order = Order::with(['customer.user', 'esimProfile', 'package'])->find($this->order_id);
 
-                if ($order) {
-                    $email = EmailQueue::create([
-                        'customer_id' => $state->customer_id,
-                        'order_id' => $this->order_id,
-                        'template' => EmailTemplate::EsimDelivery,
-                        'to_email' => $order->customer_email ?? $order->customer->user->email,
-                        'to_name' => $order->customer_name ?? $order->customer->user->name,
-                        'priority' => EmailTemplate::EsimDelivery->priority(),
-                        'data' => [
-                            'order_uuid' => $state->uuid,
-                            'order_number' => $state->order_number,
-                        ],
-                    ]);
-
-                    SendQueuedEmail::dispatch($email->id);
-                }
+            if (!$order) {
+                return;
             }
+
+            $emailService = app(EmailService::class);
+
+            // Send eSIM delivery email to customer
+            $emailService->sendEsimDelivery($order);
+
+            // Send admin notification for new completed order
+            $emailService->notifyAdminNewOrder($order);
         });
     }
 }

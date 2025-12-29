@@ -1,10 +1,9 @@
-import { PaymentMethodIcons } from '@/components/payment-method-icons';
+import { CountryFlag } from '@/components/country-flag';
+import { PaymentProviderSelect } from '@/components/payment-provider-select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
@@ -69,14 +68,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Packages', href: '/client/packages' },
     { title: 'Checkout', href: '#' },
 ];
-
-function getFlagEmoji(countryCode: string) {
-    const codePoints = countryCode
-        .toUpperCase()
-        .split('')
-        .map((char) => 127397 + char.charCodeAt(0));
-    return String.fromCodePoint(...codePoints);
-}
 
 export default function CheckoutShow({ package: pkg, customer, paymentProviders, defaultProvider }: Props) {
     const [processing, setProcessing] = useState(false);
@@ -161,54 +152,11 @@ export default function CheckoutShow({ package: pkg, customer, paymentProviders,
                                         // B2C - Payment Provider Selection
                                         <>
                                             {paymentProviders.length > 0 ? (
-                                                <RadioGroup
+                                                <PaymentProviderSelect
+                                                    providers={paymentProviders}
                                                     value={selectedProvider}
-                                                    onValueChange={setSelectedProvider}
-                                                    className="space-y-3"
-                                                >
-                                                    {paymentProviders.map((provider) => (
-                                                        <div key={provider.id} className="relative">
-                                                            <RadioGroupItem
-                                                                value={provider.id}
-                                                                id={provider.id}
-                                                                className="peer sr-only"
-                                                            />
-                                                            <Label
-                                                                htmlFor={provider.id}
-                                                                className="flex cursor-pointer flex-col rounded-lg border bg-muted/30 p-4 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5"
-                                                            >
-                                                                <div className="flex items-center justify-between">
-                                                                    <div className="flex items-center gap-3">
-                                                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                                                                            <CreditCard className="h-5 w-5 text-primary" />
-                                                                        </div>
-                                                                        <div>
-                                                                            <p className="font-medium">{provider.name}</p>
-                                                                            <p className="text-xs text-muted-foreground">
-                                                                                {provider.description}
-                                                                            </p>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div
-                                                                        className={`h-4 w-4 rounded-full border-2 ${selectedProvider === provider.id ? 'border-primary bg-primary' : 'border-muted-foreground'}`}
-                                                                    >
-                                                                        {selectedProvider === provider.id && (
-                                                                            <div className="flex h-full w-full items-center justify-center">
-                                                                                <div className="h-1.5 w-1.5 rounded-full bg-white" />
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                                <div className="mt-3">
-                                                                    <p className="mb-2 text-xs text-muted-foreground">
-                                                                        Accepted payment methods:
-                                                                    </p>
-                                                                    <PaymentMethodIcons methods={provider.payment_methods} />
-                                                                </div>
-                                                            </Label>
-                                                        </div>
-                                                    ))}
-                                                </RadioGroup>
+                                                    onChange={setSelectedProvider}
+                                                />
                                             ) : (
                                                 <Alert variant="destructive">
                                                     <AlertCircle className="h-4 w-4" />
@@ -286,7 +234,7 @@ export default function CheckoutShow({ package: pkg, customer, paymentProviders,
                                 <CardContent className="space-y-4">
                                     {/* Package Info with Flag */}
                                     <div className="flex items-start gap-3">
-                                        {pkg.country_iso && <span className="text-3xl">{getFlagEmoji(pkg.country_iso)}</span>}
+                                        {pkg.country_iso && <CountryFlag countryCode={pkg.country_iso} size="lg" />}
                                         <div className="flex-1">
                                             <h3 className="font-medium">{pkg.name}</h3>
                                             {pkg.country && <p className="text-sm text-muted-foreground">{pkg.country}</p>}

@@ -32,7 +32,7 @@ const quickFaqs: FAQItem[] = [
 ];
 
 export default function Help() {
-    const { name } = usePage<SharedData>().props;
+    const { name, contact } = usePage<SharedData>().props;
 
     return (
         <GuestLayout>
@@ -119,7 +119,7 @@ export default function Help() {
                     </div>
 
                     <div className="mx-auto grid max-w-2xl gap-6 md:grid-cols-2">
-                        <a href="mailto:support@example.com">
+                        <a href={`mailto:${contact.supportEmail}`}>
                             <div className="flex items-center gap-4 rounded-xl border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-md">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
                                     <Mail className="h-6 w-6 text-primary" />
@@ -127,7 +127,7 @@ export default function Help() {
                                 <div>
                                     <h3 className="font-semibold">Email Support</h3>
                                     <p className="text-sm text-muted-foreground">
-                                        support@example.com
+                                        {contact.supportEmail}
                                     </p>
                                 </div>
                             </div>

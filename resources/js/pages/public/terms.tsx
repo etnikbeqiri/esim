@@ -4,7 +4,7 @@ import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 
 export default function Terms() {
-    const { name } = usePage<SharedData>().props;
+    const { name, contact } = usePage<SharedData>().props;
 
     return (
         <GuestLayout>
@@ -138,10 +138,10 @@ export default function Terms() {
                     <p>
                         For questions about these Terms of Service, please contact us at{' '}
                         <a
-                            href="mailto:legal@example.com"
+                            href={`mailto:${contact.legalEmail}`}
                             className="text-primary hover:underline"
                         >
-                            legal@example.com
+                            {contact.legalEmail}
                         </a>
                     </p>
                 </LegalSection>

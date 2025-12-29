@@ -23,7 +23,8 @@ Route::get('/checkout/callback', [\App\Http\Controllers\Public\CheckoutControlle
 Route::get('/checkout/success/{order:uuid}', [\App\Http\Controllers\Public\CheckoutController::class, 'success'])->name('public.checkout.success');
 Route::get('/checkout/{package}', [\App\Http\Controllers\Public\CheckoutController::class, 'show'])->name('public.checkout.show');
 Route::post('/checkout/{package}', [\App\Http\Controllers\Public\CheckoutController::class, 'process'])->name('public.checkout.process');
-Route::get('/order/{order:uuid}', [\App\Http\Controllers\Public\CheckoutController::class, 'status'])->name('public.order.status');
+Route::get('/order/{order:uuid}', [\App\Http\Controllers\Public\CheckoutController::class, 'status'])->name('public.order.show');
+Route::get('/order/{order:uuid}/status', [\App\Http\Controllers\Public\CheckoutController::class, 'status'])->name('public.order.status');
 Route::get('/order/{order:uuid}/check', [\App\Http\Controllers\Public\CheckoutController::class, 'checkStatus'])->name('public.order.check');
 
 // Blog Routes
@@ -103,6 +104,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('orders/{order}', [\App\Http\Controllers\Admin\OrderController::class, 'show'])->name('orders.show');
         Route::post('orders/{order}/retry', [\App\Http\Controllers\Admin\OrderController::class, 'retry'])->name('orders.retry');
         Route::post('orders/{order}/fail', [\App\Http\Controllers\Admin\OrderController::class, 'fail'])->name('orders.fail');
+        Route::post('orders/{order}/sync-esim', [\App\Http\Controllers\Admin\OrderController::class, 'syncEsim'])->name('orders.sync-esim');
 
         Route::get('customers', [\App\Http\Controllers\Admin\CustomerController::class, 'index'])->name('customers.index');
         Route::get('customers/{customer}', [\App\Http\Controllers\Admin\CustomerController::class, 'show'])->name('customers.show');

@@ -28,6 +28,14 @@ export interface LocaleOption {
     nativeName: string;
 }
 
+export interface ContactInfo {
+    supportEmail: string;
+    legalEmail: string;
+    privacyEmail: string;
+    phone: string | null;
+    whatsapp: string | null;
+}
+
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
@@ -45,6 +53,7 @@ export interface SharedData {
     };
     locale: string;
     availableLocales: LocaleOption[];
+    contact: ContactInfo;
     [key: string]: unknown;
 }
 

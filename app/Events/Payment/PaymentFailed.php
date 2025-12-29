@@ -4,10 +4,13 @@ namespace App\Events\Payment;
 
 use App\Enums\PaymentStatus;
 use App\Events\Order\OrderFailed;
+use App\Models\Order;
 use App\Models\Payment;
+use App\Services\EmailService;
 use App\States\PaymentState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
+use Thunk\Verbs\Facades\Verbs;
 
 class PaymentFailed extends Event
 {
@@ -46,7 +49,28 @@ class PaymentFailed extends Event
             'failure_message' => $this->failure_message,
         ]);
 
-        // Optionally trigger order failure
+        // Send payment failed email
+        Verbs::unlessReplaying(function () use ($state) {
+            if ($state->order_id) {
+                $order = Order::with(['customer.user', 'package'])->find($state->order_id);
+
+                if ($order) {
+                    $emailService = app(EmailService::class);
+
+                    // Send payment failed email to customer
+                    $emailService->sendPaymentFailed($order, $this->failure_message ?? 'Payment was declined');
+
+                    // Send admin notification
+                    $emailService->notifyAdminPaymentFailed(
+                        $order,
+                        $this->failure_code ?? '',
+                        $this->failure_message ?? ''
+                    );
+                }
+            }
+        });
+
+        // Trigger order failure
         if ($state->order_id) {
             OrderFailed::fire(
                 order_id: $state->order_id,

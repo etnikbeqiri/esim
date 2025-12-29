@@ -7,6 +7,7 @@ use App\Events\Order\OrderFailed;
 use App\Events\Payment\PaymentFailed;
 use App\Http\Controllers\Controller;
 use App\Jobs\Order\ProcessProviderPurchase;
+use App\Jobs\Sync\SyncEsimUsageJob;
 use App\Models\Currency;
 use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
@@ -115,19 +116,36 @@ class OrderController extends Controller
                     ] : null,
                 ] : null,
                 'esim_profile' => $order->esimProfile ? [
+                    'id' => $order->esimProfile->id,
                     'iccid' => $order->esimProfile->iccid,
                     'activation_code' => $order->esimProfile->activation_code,
                     'smdp_address' => $order->esimProfile->smdp_address,
+                    'lpa_string' => $order->esimProfile->lpa_string,
+                    'pin' => $order->esimProfile->pin,
+                    'puk' => $order->esimProfile->puk,
+                    'apn' => $order->esimProfile->apn,
                     'status' => $order->esimProfile->status?->value,
+                    'status_label' => $order->esimProfile->status?->label(),
+                    'status_color' => $order->esimProfile->status?->color(),
+                    'is_activated' => $order->esimProfile->is_activated,
+                    'topup_available' => $order->esimProfile->topup_available,
                     'data_used_bytes' => $order->esimProfile->data_used_bytes ?? 0,
                     'data_total_bytes' => $order->esimProfile->data_total_bytes ?? 0,
+                    'data_used_mb' => $order->esimProfile->data_used_mb,
+                    'data_total_mb' => $order->esimProfile->data_total_mb,
+                    'data_remaining_bytes' => $order->esimProfile->data_remaining_bytes,
+                    'data_usage_percentage' => $order->esimProfile->data_usage_percentage,
+                    'activated_at' => $order->esimProfile->activated_at?->format('M j, Y H:i'),
+                    'expires_at' => $order->esimProfile->expires_at?->format('M j, Y H:i'),
+                    'last_usage_check_at' => $order->esimProfile->last_usage_check_at?->format('M j, Y H:i'),
+                    'provider_data' => $order->esimProfile->provider_data,
                 ] : null,
                 'payment' => $payment ? [
                     'id' => $payment->id,
                     'status' => $payment->status->value,
-                    'type' => $payment->type->value,
+                    'provider' => $payment->provider?->label() ?? 'Unknown',
                     'amount' => $payment->amount,
-                    'stripe_session_id' => $payment->stripe_session_id,
+                    'gateway_session_id' => $payment->gateway_session_id,
                 ] : null,
             ],
             'defaultCurrency' => Currency::getDefault(),
@@ -185,5 +203,17 @@ class OrderController extends Controller
         );
 
         return back()->with('success', 'Order has been marked as failed.');
+    }
+
+    public function syncEsim(Order $order): RedirectResponse
+    {
+        if (!$order->esimProfile) {
+            return back()->with('error', 'This order has no eSIM profile to sync.');
+        }
+
+        // Dispatch the sync job for this specific eSIM profile
+        SyncEsimUsageJob::dispatch($order->esimProfile->id);
+
+        return back()->with('success', 'eSIM usage sync has been triggered. Refresh the page in a few seconds to see updated data.');
     }
 }

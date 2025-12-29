@@ -1,24 +1,18 @@
+import { EsimQrCard } from '@/components/esim-qr-card';
+import { OrderSummaryCard } from '@/components/order-summary-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     CheckCircle2,
     ChevronRight,
-    Copy,
-    Database,
-    Calendar,
-    Download,
     HelpCircle,
     Loader2,
-    Mail,
-    QrCode,
-    Smartphone,
     XCircle,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 interface Order {
     uuid: string;
@@ -47,9 +41,6 @@ interface Props {
 }
 
 export default function CheckoutSuccess({ order }: Props) {
-    const [copied, setCopied] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'qr' | 'manual'>('qr');
-
     const isProcessing = ['processing', 'pending', 'pending_retry'].includes(order.status);
     const isCompleted = order.status === 'completed';
     const isFailed = order.status === 'failed';
@@ -64,20 +55,6 @@ export default function CheckoutSuccess({ order }: Props) {
 
         return () => clearInterval(interval);
     }, [isProcessing, order.status]);
-
-    function copyToClipboard(text: string, field: string) {
-        navigator.clipboard.writeText(text);
-        setCopied(field);
-        setTimeout(() => setCopied(null), 2000);
-    }
-
-    function getFlagEmoji(countryCode: string) {
-        const codePoints = countryCode
-            .toUpperCase()
-            .split('')
-            .map((char) => 127397 + char.charCodeAt(0));
-        return String.fromCodePoint(...codePoints);
-    }
 
     return (
         <GuestLayout>
@@ -142,257 +119,63 @@ export default function CheckoutSuccess({ order }: Props) {
                         </div>
 
                         {/* Order Summary Card */}
-                        <Card className="mb-6 overflow-hidden">
-                            <div className="bg-muted/50 px-6 py-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Order Number</p>
-                                        <p className="font-mono font-semibold">{order.order_number}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-sm text-muted-foreground">Confirmation sent to</p>
-                                        <p className="font-medium">{order.customer_email}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            {order.package && (
-                                <CardContent className="p-6">
-                                    <div className="flex items-center gap-4">
-                                        {order.package.country_iso && (
-                                            <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-muted">
-                                                <span className="text-4xl">
-                                                    {getFlagEmoji(order.package.country_iso)}
-                                                </span>
-                                            </div>
-                                        )}
-                                        <div className="flex-1">
-                                            <h3 className="text-lg font-semibold">{order.package.name}</h3>
-                                            {order.package.country && (
-                                                <p className="text-muted-foreground">{order.package.country}</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <Separator className="my-4" />
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                                                <Database className="h-5 w-5 text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-muted-foreground">Data</p>
-                                                <p className="font-semibold">{order.package.data_label}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                                                <Calendar className="h-5 w-5 text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-muted-foreground">Validity</p>
-                                                <p className="font-semibold">{order.package.validity_label}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            )}
-                        </Card>
+                        <OrderSummaryCard
+                            orderNumber={order.order_number}
+                            customerEmail={order.customer_email}
+                            package={order.package}
+                            className="mb-6"
+                        />
 
                         {/* eSIM Installation (when completed) */}
                         {isCompleted && order.esim && (
-                            <Card className="mb-6">
-                                <CardContent className="p-6">
-                                    {/* Tabs */}
-                                    <div className="mb-6 flex gap-2">
-                                        <Button
-                                            variant={activeTab === 'qr' ? 'default' : 'outline'}
-                                            size="sm"
-                                            onClick={() => setActiveTab('qr')}
-                                            className="flex-1"
-                                        >
-                                            <QrCode className="mr-2 h-4 w-4" />
-                                            QR Code
-                                        </Button>
-                                        <Button
-                                            variant={activeTab === 'manual' ? 'default' : 'outline'}
-                                            size="sm"
-                                            onClick={() => setActiveTab('manual')}
-                                            className="flex-1"
-                                        >
-                                            <Smartphone className="mr-2 h-4 w-4" />
-                                            Manual Setup
-                                        </Button>
-                                    </div>
+                            <div className="mb-6">
+                                <EsimQrCard
+                                    esim={order.esim}
+                                    title="Your eSIM"
+                                    description="Scan the QR code with your phone to install the eSIM"
+                                />
 
-                                    {activeTab === 'qr' && order.esim.qr_code_data && (
-                                        <div className="text-center">
-                                            <div className="mx-auto mb-6 inline-block rounded-2xl bg-white p-6 shadow-lg">
-                                                <img
-                                                    src={order.esim.qr_code_data}
-                                                    alt="eSIM QR Code"
-                                                    className="h-56 w-56"
-                                                />
-                                            </div>
-                                            <div className="mx-auto max-w-md space-y-4">
-                                                <h3 className="font-semibold">How to Install</h3>
-                                                <div className="space-y-3 text-left">
-                                                    <div className="flex items-start gap-3">
-                                                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                                                            1
-                                                        </div>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            Go to <strong>Settings → Cellular/Mobile Data</strong>
-                                                        </p>
-                                                    </div>
-                                                    <div className="flex items-start gap-3">
-                                                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                                                            2
-                                                        </div>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            Tap <strong>Add eSIM</strong> or <strong>Add Cellular Plan</strong>
-                                                        </p>
-                                                    </div>
-                                                    <div className="flex items-start gap-3">
-                                                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                                                            3
-                                                        </div>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            Scan the QR code above with your phone camera
-                                                        </p>
-                                                    </div>
-                                                    <div className="flex items-start gap-3">
-                                                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                                                            4
-                                                        </div>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            Follow the prompts and enable <strong>Data Roaming</strong>
-                                                        </p>
-                                                    </div>
+                                {/* Installation Instructions */}
+                                <Card className="mt-4">
+                                    <CardContent className="p-6">
+                                        <h3 className="font-semibold mb-4">How to Install</h3>
+                                        <div className="space-y-3">
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                                                    1
                                                 </div>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Go to <strong>Settings → Cellular/Mobile Data</strong>
+                                                </p>
+                                            </div>
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                                                    2
+                                                </div>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Tap <strong>Add eSIM</strong> or <strong>Add Cellular Plan</strong>
+                                                </p>
+                                            </div>
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                                                    3
+                                                </div>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Scan the QR code above with your phone camera
+                                                </p>
+                                            </div>
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                                                    4
+                                                </div>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Follow the prompts and enable <strong>Data Roaming</strong>
+                                                </p>
                                             </div>
                                         </div>
-                                    )}
-
-                                    {activeTab === 'manual' && (
-                                        <div className="space-y-4">
-                                            <p className="text-sm text-muted-foreground">
-                                                If you can't scan the QR code, enter these details manually in your phone's eSIM settings.
-                                            </p>
-
-                                            {order.esim.smdp_address && (
-                                                <div className="space-y-2">
-                                                    <div className="flex items-center justify-between">
-                                                        <label className="text-sm font-medium">SM-DP+ Address</label>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-7"
-                                                            onClick={() => copyToClipboard(order.esim!.smdp_address!, 'smdp')}
-                                                        >
-                                                            {copied === 'smdp' ? (
-                                                                <span className="text-green-600">Copied!</span>
-                                                            ) : (
-                                                                <>
-                                                                    <Copy className="mr-1 h-3 w-3" />
-                                                                    Copy
-                                                                </>
-                                                            )}
-                                                        </Button>
-                                                    </div>
-                                                    <div className="rounded-lg bg-muted p-3">
-                                                        <code className="text-sm break-all font-mono">
-                                                            {order.esim.smdp_address}
-                                                        </code>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {order.esim.activation_code && (
-                                                <div className="space-y-2">
-                                                    <div className="flex items-center justify-between">
-                                                        <label className="text-sm font-medium">Activation Code</label>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-7"
-                                                            onClick={() => copyToClipboard(order.esim!.activation_code!, 'activation')}
-                                                        >
-                                                            {copied === 'activation' ? (
-                                                                <span className="text-green-600">Copied!</span>
-                                                            ) : (
-                                                                <>
-                                                                    <Copy className="mr-1 h-3 w-3" />
-                                                                    Copy
-                                                                </>
-                                                            )}
-                                                        </Button>
-                                                    </div>
-                                                    <div className="rounded-lg bg-muted p-3">
-                                                        <code className="text-sm break-all font-mono">
-                                                            {order.esim.activation_code}
-                                                        </code>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {order.esim.lpa_string && (
-                                                <div className="space-y-2">
-                                                    <div className="flex items-center justify-between">
-                                                        <label className="text-sm font-medium">Full LPA String</label>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-7"
-                                                            onClick={() => copyToClipboard(order.esim!.lpa_string!, 'lpa')}
-                                                        >
-                                                            {copied === 'lpa' ? (
-                                                                <span className="text-green-600">Copied!</span>
-                                                            ) : (
-                                                                <>
-                                                                    <Copy className="mr-1 h-3 w-3" />
-                                                                    Copy
-                                                                </>
-                                                            )}
-                                                        </Button>
-                                                    </div>
-                                                    <div className="rounded-lg bg-muted p-3">
-                                                        <code className="text-xs break-all font-mono">
-                                                            {order.esim.lpa_string}
-                                                        </code>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {order.esim.iccid && (
-                                                <div className="space-y-2">
-                                                    <div className="flex items-center justify-between">
-                                                        <label className="text-sm font-medium">ICCID</label>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-7"
-                                                            onClick={() => copyToClipboard(order.esim!.iccid, 'iccid')}
-                                                        >
-                                                            {copied === 'iccid' ? (
-                                                                <span className="text-green-600">Copied!</span>
-                                                            ) : (
-                                                                <>
-                                                                    <Copy className="mr-1 h-3 w-3" />
-                                                                    Copy
-                                                                </>
-                                                            )}
-                                                        </Button>
-                                                    </div>
-                                                    <div className="rounded-lg bg-muted p-3">
-                                                        <code className="text-sm break-all font-mono">
-                                                            {order.esim.iccid}
-                                                        </code>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
+                                    </CardContent>
+                                </Card>
+                            </div>
                         )}
 
                         {/* Processing State */}

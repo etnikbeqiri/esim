@@ -1,3 +1,4 @@
+import { EsimQrCard } from '@/components/esim-qr-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +13,6 @@ import {
     Ban,
     CheckCircle2,
     Clock,
-    Copy,
     Loader2,
     Play,
     RefreshCw,
@@ -57,19 +57,36 @@ interface Order {
         country: { name: string } | null;
     } | null;
     esim_profile: {
+        id: number;
         iccid: string;
         activation_code: string;
         smdp_address: string;
+        lpa_string: string | null;
+        pin: string | null;
+        puk: string | null;
+        apn: string | null;
         status: string | null;
+        status_label: string | null;
+        status_color: string | null;
+        is_activated: boolean;
+        topup_available: boolean;
         data_used_bytes: number;
         data_total_bytes: number;
+        data_used_mb: number;
+        data_total_mb: number;
+        data_remaining_bytes: number;
+        data_usage_percentage: number;
+        activated_at: string | null;
+        expires_at: string | null;
+        last_usage_check_at: string | null;
+        provider_data: Record<string, unknown> | null;
     } | null;
     payment: {
         id: number;
         status: string;
-        type: string;
+        provider: string;
         amount: string | number;
-        stripe_session_id: string | null;
+        gateway_session_id: string | null;
     } | null;
 }
 
@@ -116,16 +133,7 @@ function getStatusBadgeClass(color: string): string {
     return colors[color] || colors.gray;
 }
 
-function formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
-}
-
 export default function OrderShow({ order, defaultCurrency }: Props) {
-    const [copied, setCopied] = useState<string | null>(null);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
@@ -148,6 +156,18 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
 
     const retryForm = useForm({});
     const failForm = useForm({ reason: 'Manually failed by admin' });
+    const syncForm = useForm({});
+    const [syncSuccess, setSyncSuccess] = useState(false);
+
+    function handleSyncEsim() {
+        syncForm.post(`/admin/orders/${order.uuid}/sync-esim`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setSyncSuccess(true);
+                setTimeout(() => setSyncSuccess(false), 3000);
+            },
+        });
+    }
 
     function handleRetry() {
         retryForm.post(`/admin/orders/${order.uuid}/retry`, {
@@ -174,12 +194,6 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
 
         return () => clearInterval(interval);
     }, [isActive, order.status]);
-
-    function copyToClipboard(text: string, field: string) {
-        navigator.clipboard.writeText(text);
-        setCopied(field);
-        setTimeout(() => setCopied(null), 2000);
-    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -445,136 +459,193 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
 
                     {/* eSIM Profile */}
                     {order.esim_profile && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>eSIM Profile</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-muted-foreground">Status</span>
-                                    <Badge variant="outline">{order.esim_profile.status || 'unknown'}</Badge>
-                                </div>
-                                <Separator />
+                        <Card className="md:col-span-2">
+                            <CardHeader className="flex flex-row items-center justify-between">
                                 <div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground text-sm">ICCID</span>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => copyToClipboard(order.esim_profile!.iccid, 'iccid')}
-                                        >
-                                            {copied === 'iccid' ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                                        </Button>
-                                    </div>
-                                    <p className="font-mono text-sm">{order.esim_profile.iccid}</p>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground text-sm">SM-DP+ Address</span>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => copyToClipboard(order.esim_profile!.smdp_address, 'smdp')}
-                                        >
-                                            {copied === 'smdp' ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                                        </Button>
-                                    </div>
-                                    <p className="font-mono text-sm truncate">{order.esim_profile.smdp_address}</p>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Data Used</span>
-                                    <span>{formatBytes(order.esim_profile.data_used_bytes)} / {formatBytes(order.esim_profile.data_total_bytes)}</span>
-                                </div>
-                                <div className="pt-2">
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="text-muted-foreground text-sm">Activation Code</span>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => copyToClipboard(order.esim_profile!.activation_code, 'code')}
-                                        >
-                                            {copied === 'code' ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                                        </Button>
-                                    </div>
-                                    <p className="font-mono text-xs break-all bg-muted p-2 rounded">
-                                        {order.esim_profile.activation_code}
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {/* Payment */}
-                    {order.payment && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Payment</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-2">
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Status</span>
-                                    <Badge variant={order.payment.status === 'completed' ? 'default' : 'outline'}>
-                                        {order.payment.status}
-                                    </Badge>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Type</span>
-                                    <span className="capitalize">{order.payment.type}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Amount</span>
-                                    <span>{currencySymbol}{Number(order.payment.amount).toFixed(2)}</span>
-                                </div>
-                                {order.payment.stripe_session_id && (
-                                    <div className="pt-2">
-                                        <span className="text-muted-foreground text-sm">Stripe Session</span>
-                                        <p className="font-mono text-xs break-all bg-muted p-2 rounded mt-1">
-                                            {order.payment.stripe_session_id}
+                                    <CardTitle>eSIM Profile</CardTitle>
+                                    {order.esim_profile.last_usage_check_at && (
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            Last synced: {order.esim_profile.last_usage_check_at}
                                         </p>
+                                    )}
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleSyncEsim}
+                                    disabled={syncForm.processing}
+                                >
+                                    {syncForm.processing ? (
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : syncSuccess ? (
+                                        <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                                    ) : (
+                                        <RefreshCw className="mr-2 h-4 w-4" />
+                                    )}
+                                    {syncForm.processing ? 'Syncing...' : syncSuccess ? 'Synced!' : 'Sync'}
+                                </Button>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                {/* Status & Data Usage Row */}
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    {/* Status */}
+                                    <div className="space-y-3">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <Badge
+                                                variant="outline"
+                                                className={getStatusBadgeClass(order.esim_profile.status_color || 'gray')}
+                                            >
+                                                {order.esim_profile.status_label || order.esim_profile.status || 'Unknown'}
+                                            </Badge>
+                                            {order.esim_profile.is_activated ? (
+                                                <Badge className="bg-green-100 text-green-700 border-green-200">
+                                                    <CheckCircle2 className="mr-1 h-3 w-3" />
+                                                    Activated
+                                                </Badge>
+                                            ) : (
+                                                <Badge variant="outline" className="text-muted-foreground">
+                                                    Not Activated
+                                                </Badge>
+                                            )}
+                                            {order.esim_profile.topup_available && (
+                                                <Badge variant="outline" className="bg-blue-50 text-blue-700">Top-up</Badge>
+                                            )}
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3 text-sm">
+                                            {order.esim_profile.activated_at && (
+                                                <div>
+                                                    <p className="text-muted-foreground text-xs">Activated</p>
+                                                    <p className="font-medium">{order.esim_profile.activated_at}</p>
+                                                </div>
+                                            )}
+                                            {order.esim_profile.expires_at && (
+                                                <div>
+                                                    <p className="text-muted-foreground text-xs">Expires</p>
+                                                    <p className="font-medium">{order.esim_profile.expires_at}</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
+
+                                    {/* Data Usage */}
+                                    <div className="p-4 bg-muted/50 rounded-lg">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-sm font-medium">Data Usage</span>
+                                            <span className="text-sm font-mono">
+                                                {order.esim_profile.data_used_mb.toFixed(1)} / {order.esim_profile.data_total_mb.toFixed(1)} MB
+                                            </span>
+                                        </div>
+                                        <Progress value={order.esim_profile.data_usage_percentage} className="h-2" />
+                                        <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                                            <span>{order.esim_profile.data_usage_percentage.toFixed(1)}% used</span>
+                                            <span>{(order.esim_profile.data_remaining_bytes / (1024 * 1024)).toFixed(1)} MB left</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <Separator />
+
+                                {/* QR Code */}
+                                {order.esim_profile.lpa_string && (
+                                    <EsimQrCard
+                                        esim={{
+                                            iccid: order.esim_profile.iccid,
+                                            lpa_string: order.esim_profile.lpa_string,
+                                            smdp_address: order.esim_profile.smdp_address,
+                                            activation_code: order.esim_profile.activation_code,
+                                            pin: order.esim_profile.pin,
+                                            puk: order.esim_profile.puk,
+                                            apn: order.esim_profile.apn,
+                                        }}
+                                        title="Installation QR Code"
+                                        description="Scan to install on device"
+                                        compact
+                                    />
+                                )}
+
+                                {/* Provider Data */}
+                                {order.esim_profile.provider_data && Object.keys(order.esim_profile.provider_data).length > 0 && (
+                                    <>
+                                        <Separator />
+                                        <details>
+                                            <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
+                                                Raw Provider Data
+                                            </summary>
+                                            <pre className="mt-2 p-3 bg-muted rounded-lg text-xs overflow-auto max-h-48">
+                                                {JSON.stringify(order.esim_profile.provider_data, null, 2)}
+                                            </pre>
+                                        </details>
+                                    </>
                                 )}
                             </CardContent>
                         </Card>
                     )}
 
-                    {/* Timeline */}
-                    <Card>
+                    {/* Payment & Timeline */}
+                    <Card className="md:col-span-2">
                         <CardHeader>
-                            <CardTitle>Timeline & Provider</CardTitle>
+                            <CardTitle>Payment & Timeline</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-2">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Created</span>
-                                <span>{order.created_at}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Updated</span>
-                                <span>{order.updated_at}</span>
-                            </div>
-                            {order.completed_at && (
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Completed</span>
-                                    <span>{order.completed_at}</span>
+                        <CardContent>
+                            <div className="grid gap-6 md:grid-cols-2">
+                                {/* Payment Info */}
+                                <div className="space-y-3">
+                                    <h4 className="text-sm font-medium text-muted-foreground">Payment</h4>
+                                    {order.payment ? (
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between">
+                                                <span className="text-muted-foreground">Status</span>
+                                                <Badge variant={order.payment.status === 'completed' ? 'default' : 'outline'}>
+                                                    {order.payment.status}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-muted-foreground">Provider</span>
+                                                <span>{order.payment.provider}</span>
+                                            </div>
+                                            {order.payment.gateway_session_id && (
+                                                <div className="pt-2">
+                                                    <p className="text-muted-foreground text-xs mb-1">Gateway Session ID</p>
+                                                    <p className="font-mono text-xs break-all bg-muted p-2 rounded">
+                                                        {order.payment.gateway_session_id}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground">No payment record</p>
+                                    )}
                                 </div>
-                            )}
-                            {order.provider_order_id && (
-                                <>
-                                    <Separator />
-                                    <div>
-                                        <span className="text-muted-foreground text-sm">Provider Order ID</span>
-                                        <p className="font-mono text-sm mt-1">{order.provider_order_id}</p>
+
+                                {/* Timeline */}
+                                <div className="space-y-3">
+                                    <h4 className="text-sm font-medium text-muted-foreground">Timeline</h4>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-muted-foreground">Created</span>
+                                            <span>{order.created_at}</span>
+                                        </div>
+                                        {order.completed_at && (
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-muted-foreground">Completed</span>
+                                                <span className="text-green-600">{order.completed_at}</span>
+                                            </div>
+                                        )}
+                                        {order.next_retry_at && isPendingRetry && (
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-muted-foreground">Next Retry</span>
+                                                <span className="text-orange-600">{order.next_retry_at}</span>
+                                            </div>
+                                        )}
+                                        {order.provider_order_id && (
+                                            <div className="pt-2">
+                                                <p className="text-muted-foreground text-xs mb-1">Provider Order ID</p>
+                                                <p className="font-mono text-xs bg-muted p-2 rounded">{order.provider_order_id}</p>
+                                            </div>
+                                        )}
                                     </div>
-                                </>
-                            )}
-                            {order.next_retry_at && isPendingRetry && (
-                                <>
-                                    <Separator />
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Next Retry</span>
-                                        <span className="text-orange-600">{order.next_retry_at}</span>
-                                    </div>
-                                </>
-                            )}
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>

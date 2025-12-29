@@ -15,6 +15,7 @@ class SmsPoolProvider extends BaseProvider
         return [
             'Content-Type' => 'application/x-www-form-urlencoded',
             'Accept' => 'application/json',
+            'Origin' => 'https://www.smspool.net',
         ];
     }
 
@@ -165,9 +166,8 @@ class SmsPoolProvider extends BaseProvider
         try {
             $response = $this->makePostRequest('/esim/pricing', [
                 'key' => $this->apiKey,
-                'start' => 0,
+                'start' => 1,
                 'length' => 1000,
-                'search' => '',
             ]);
 
             $packages = $response['data'] ?? [];

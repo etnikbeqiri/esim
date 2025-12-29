@@ -1,3 +1,4 @@
+import { CountryFlag } from '@/components/country-flag';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -52,14 +53,6 @@ type SortOption = 'data' | 'price-asc' | 'price-desc' | 'validity';
 export default function CountryPage({ country, packages }: Props) {
     const [sortBy, setSortBy] = useState<SortOption>('data');
 
-    function getFlagEmoji(countryCode: string) {
-        const codePoints = countryCode
-            .toUpperCase()
-            .split('')
-            .map((char) => 127397 + char.charCodeAt(0));
-        return String.fromCodePoint(...codePoints);
-    }
-
     const sortedPackages = useMemo(() => {
         const sorted = [...packages];
         switch (sortBy) {
@@ -104,8 +97,8 @@ export default function CountryPage({ country, packages }: Props) {
                     {/* Country Info */}
                     <div className="flex flex-col items-center text-center md:flex-row md:items-start md:text-left md:gap-8">
                         {/* Flag */}
-                        <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-2xl bg-background shadow-lg md:mb-0 md:h-32 md:w-32">
-                            <span className="text-6xl md:text-7xl">{getFlagEmoji(country.iso_code)}</span>
+                        <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-2xl bg-background shadow-lg md:mb-0 md:h-32 md:w-32 overflow-hidden">
+                            <CountryFlag countryCode={country.iso_code} className="h-16 w-24 md:h-20 md:w-28" />
                         </div>
 
                         {/* Details */}

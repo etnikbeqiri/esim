@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -46,7 +47,13 @@ class OrderController extends Controller
             return response()->json(['data' => [], 'meta' => ['total' => 0]]);
         }
 
-        $query = Order::with(['package.country', 'esimProfile'])
+        // Only load provider for admin users
+        $relations = ['package.country', 'esimProfile'];
+        if ($request->user()?->isAdmin()) {
+            $relations[] = 'provider';
+        }
+
+        $query = Order::with($relations)
             ->where('customer_id', $customer->id)
             ->orderByDesc('created_at');
 
@@ -59,7 +66,7 @@ class OrderController extends Controller
         $orders = $query->paginate($perPage);
 
         return response()->json([
-            'data' => $orders->items(),
+            'data' => OrderResource::collection($orders->items()),
             'meta' => [
                 'current_page' => $orders->currentPage(),
                 'last_page' => $orders->lastPage(),
@@ -101,10 +108,16 @@ class OrderController extends Controller
             return response()->json(['error' => 'Order not found'], 404);
         }
 
-        $order->load(['package.country', 'provider', 'esimProfile', 'payments']);
+        // Only load provider for admin users
+        $relations = ['package.country', 'esimProfile', 'payments'];
+        if ($request->user()?->isAdmin()) {
+            $relations[] = 'provider';
+        }
+
+        $order->load($relations);
 
         return response()->json([
-            'data' => $order,
+            'data' => new OrderResource($order),
         ]);
     }
 

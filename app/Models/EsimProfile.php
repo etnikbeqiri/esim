@@ -50,6 +50,8 @@ class EsimProfile extends Model
     protected $hidden = [
         'pin',
         'puk',
+        'provider_data',
+        'last_usage_check_at',
     ];
 
     public function order(): BelongsTo

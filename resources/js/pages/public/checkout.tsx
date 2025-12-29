@@ -1,11 +1,11 @@
+import { CountryFlag } from '@/components/country-flag';
+import { PaymentProviderSelect } from '@/components/payment-provider-select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { PaymentMethodIcons } from '@/components/payment-method-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
@@ -13,7 +13,6 @@ import {
     AlertCircle,
     ArrowLeft,
     CheckCircle2,
-    CreditCard,
     HardDrive,
     Loader2,
     Lock,
@@ -22,6 +21,7 @@ import {
     Shield,
     Timer,
     User,
+    CreditCard,
 } from 'lucide-react';
 import { useEffect } from 'react';
 
@@ -84,20 +84,10 @@ export default function Checkout({ package: pkg, paymentProviders, defaultProvid
 
     const { auth } = usePage().props as any;
 
-    function getFlagEmoji(countryCode: string) {
-        const codePoints = countryCode
-            .toUpperCase()
-            .split('')
-            .map((char) => 127397 + char.charCodeAt(0));
-        return String.fromCodePoint(...codePoints);
-    }
-
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         post(`/checkout/${pkg.id}`);
     }
-
-    const selectedProvider = paymentProviders.find(p => p.id === data.payment_provider) || paymentProviders[0];
 
     return (
         <GuestLayout>
@@ -213,55 +203,11 @@ export default function Checkout({ package: pkg, paymentProviders, defaultProvid
                                             <Separator />
 
                                             {/* Payment Method Selection */}
-                                            <div className="space-y-3">
-                                                <Label>Payment Method</Label>
-                                                <RadioGroup
-                                                    value={data.payment_provider}
-                                                    onValueChange={(value) => setData('payment_provider', value)}
-                                                    className="space-y-3"
-                                                >
-                                                    {paymentProviders.map((provider) => (
-                                                        <div key={provider.id} className="relative">
-                                                            <RadioGroupItem
-                                                                value={provider.id}
-                                                                id={provider.id}
-                                                                className="peer sr-only"
-                                                            />
-                                                            <Label
-                                                                htmlFor={provider.id}
-                                                                className="flex cursor-pointer flex-col rounded-lg border bg-muted/30 p-4 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5"
-                                                            >
-                                                                <div className="flex items-center justify-between">
-                                                                    <div className="flex items-center gap-3">
-                                                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                                                                            <CreditCard className="h-5 w-5 text-primary" />
-                                                                        </div>
-                                                                        <div>
-                                                                            <p className="font-medium">{provider.name}</p>
-                                                                            <p className="text-xs text-muted-foreground">
-                                                                                {provider.description}
-                                                                            </p>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className={`h-4 w-4 rounded-full border-2 ${data.payment_provider === provider.id ? 'border-primary bg-primary' : 'border-muted-foreground'}`}>
-                                                                        {data.payment_provider === provider.id && (
-                                                                            <div className="h-full w-full flex items-center justify-center">
-                                                                                <div className="h-1.5 w-1.5 rounded-full bg-white" />
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                                <div className="mt-3">
-                                                                    <p className="mb-2 text-xs text-muted-foreground">
-                                                                        Accepted payment methods:
-                                                                    </p>
-                                                                    <PaymentMethodIcons methods={provider.payment_methods} />
-                                                                </div>
-                                                            </Label>
-                                                        </div>
-                                                    ))}
-                                                </RadioGroup>
-                                            </div>
+                                            <PaymentProviderSelect
+                                                providers={paymentProviders}
+                                                value={data.payment_provider}
+                                                onChange={(value) => setData('payment_provider', value)}
+                                            />
 
                                             <Separator />
 
@@ -342,9 +288,7 @@ export default function Checkout({ package: pkg, paymentProviders, defaultProvid
                                         {/* Package Info */}
                                         <div className="flex items-start gap-3">
                                             {pkg.country && (
-                                                <span className="text-3xl">
-                                                    {getFlagEmoji(pkg.country.iso_code)}
-                                                </span>
+                                                <CountryFlag countryCode={pkg.country.iso_code} size="lg" />
                                             )}
                                             <div className="flex-1">
                                                 <h3 className="font-medium">{pkg.name}</h3>

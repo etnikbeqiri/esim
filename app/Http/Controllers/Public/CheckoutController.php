@@ -159,7 +159,7 @@ class CheckoutController extends Controller
      */
     public function status(Order $order): Response
     {
-        $order->load(['package.country', 'esimProfile']);
+        $order->load(['package.country', 'esimProfile', 'payment']);
 
         return Inertia::render('public/order-status', [
             'order' => $this->formatOrderForView($order, includeStatus: true),
@@ -207,6 +207,10 @@ class CheckoutController extends Controller
             $data['status_color'] = $order->status->color();
             $data['created_at'] = $order->created_at->format('M j, Y H:i');
             $data['completed_at'] = $order->completed_at?->format('M j, Y H:i');
+            $data['paid_at'] = $order->paid_at?->format('M j, Y H:i');
+            $data['customer_name'] = $order->customer_name;
+            $data['amount'] = $order->amount;
+            $data['payment_method'] = $order->payment?->provider?->label() ?? 'Card';
         }
 
         return $data;

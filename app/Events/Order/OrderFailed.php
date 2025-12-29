@@ -7,6 +7,7 @@ use App\Enums\OrderStatus;
 use App\Events\Balance\BalanceRefunded;
 use App\Models\BalanceTransaction;
 use App\Models\Order;
+use App\Services\EmailService;
 use App\States\OrderState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
@@ -42,24 +43,31 @@ class OrderFailed extends Event
 
         // Refund B2B balance if applicable (only if not already refunded)
         Verbs::unlessReplaying(function () use ($state) {
-            if (!$state->isB2B()) {
-                return;
+            $order = Order::with(['customer.user', 'package'])->find($this->order_id);
+            $emailService = app(EmailService::class);
+
+            if ($state->isB2B()) {
+                $alreadyRefunded = BalanceTransaction::where('order_id', $this->order_id)
+                    ->where('type', BalanceTransactionType::Refund)
+                    ->exists();
+
+                if (!$alreadyRefunded) {
+                    BalanceRefunded::fire(
+                        customer_id: $state->customer_id,
+                        amount: $state->amount,
+                        order_id: $this->order_id,
+                        description: "Refund for failed order #{$state->order_number}",
+                    );
+                }
             }
 
-            $alreadyRefunded = BalanceTransaction::where('order_id', $this->order_id)
-                ->where('type', BalanceTransactionType::Refund)
-                ->exists();
+            if ($order) {
+                // Send order failed email to customer
+                $emailService->sendOrderFailed($order, $this->failure_reason);
 
-            if ($alreadyRefunded) {
-                return;
+                // Send admin notification
+                $emailService->notifyAdminOrderFailed($order, $this->failure_reason);
             }
-
-            BalanceRefunded::fire(
-                customer_id: $state->customer_id,
-                amount: $state->amount,
-                order_id: $this->order_id,
-                description: "Refund for failed order #{$state->order_number}",
-            );
         });
     }
 }

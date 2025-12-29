@@ -95,6 +95,13 @@ class HandleInertiaRequests extends Middleware
                 ['code' => 'de', 'name' => 'German', 'nativeName' => 'Deutsch'],
                 ['code' => 'sq', 'name' => 'Albanian', 'nativeName' => 'Shqip'],
             ],
+            'contact' => [
+                'supportEmail' => config('contact.support_email'),
+                'legalEmail' => config('contact.legal_email'),
+                'privacyEmail' => config('contact.privacy_email'),
+                'phone' => config('contact.phone'),
+                'whatsapp' => config('contact.whatsapp'),
+            ],
         ];
     }
 }

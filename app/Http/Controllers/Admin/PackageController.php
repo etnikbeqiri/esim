@@ -27,6 +27,11 @@ class PackageController extends Controller
             ->paginate(50)
             ->withQueryString();
 
+        // Make hidden fields visible for admin
+        $packages->getCollection()->transform(function ($package) {
+            return $package->makeVisible(['cost_price', 'retail_price', 'custom_retail_price', 'provider_package_id']);
+        });
+
         return Inertia::render('admin/packages/index', [
             'packages' => $packages,
             'providers' => Provider::select('id', 'name')->orderBy('name')->get(),
@@ -45,6 +50,9 @@ class PackageController extends Controller
             'orders' => fn ($q) => $q->latest()->limit(10),
         ]);
 
+        // Make hidden fields visible for admin
+        $package->makeVisible(['cost_price', 'retail_price', 'custom_retail_price', 'provider_package_id', 'source_cost_price', 'source_currency_id']);
+
         return Inertia::render('admin/packages/show', [
             'package' => $package,
             'defaultCurrency' => Currency::getDefault(),
@@ -54,6 +62,9 @@ class PackageController extends Controller
     public function edit(Package $package): Response
     {
         $package->load(['provider', 'country', 'sourceCurrency']);
+
+        // Make hidden fields visible for admin
+        $package->makeVisible(['cost_price', 'retail_price', 'custom_retail_price', 'provider_package_id', 'source_cost_price', 'source_currency_id']);
 
         return Inertia::render('admin/packages/edit', [
             'package' => $package,

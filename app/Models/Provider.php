@@ -10,6 +10,20 @@ class Provider extends Model
 {
     use HasFactory;
 
+    /**
+     * Always hide sensitive provider information from API responses.
+     */
+    protected $hidden = [
+        'api_base_url',
+        'config',
+        'rate_limit_ms',
+        'markup_percentage',
+        'last_synced_at',
+        'custom_regions',
+        'created_at',
+        'updated_at',
+    ];
+
     protected $fillable = [
         'slug',
         'name',

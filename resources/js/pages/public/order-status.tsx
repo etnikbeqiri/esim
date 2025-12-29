@@ -1,6 +1,8 @@
+import { EsimQrCard } from '@/components/esim-qr-card';
+import { OrderSummaryCard } from '@/components/order-summary-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link, router } from '@inertiajs/react';
@@ -8,16 +10,11 @@ import {
     Calendar,
     CheckCircle2,
     Clock,
-    Copy,
-    HardDrive,
     Loader2,
-    Mail,
-    QrCode,
     RefreshCw,
-    Timer,
     XCircle,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 interface Order {
     uuid: string;
@@ -40,7 +37,10 @@ interface Order {
         activation_code: string | null;
     } | null;
     customer_email: string;
+    amount: string | number;
+    payment_method: string;
     created_at: string;
+    paid_at: string | null;
     completed_at: string | null;
 }
 
@@ -76,8 +76,6 @@ function getStatusBadgeClass(color: string): string {
 }
 
 export default function OrderStatus({ order }: Props) {
-    const [copied, setCopied] = useState<string | null>(null);
-
     const isProcessing = ['processing', 'pending', 'pending_retry', 'awaiting_payment'].includes(order.status);
     const isCompleted = order.status === 'completed';
     const isFailed = order.status === 'failed';
@@ -93,20 +91,6 @@ export default function OrderStatus({ order }: Props) {
         return () => clearInterval(interval);
     }, [isProcessing, order.status]);
 
-    function copyToClipboard(text: string, field: string) {
-        navigator.clipboard.writeText(text);
-        setCopied(field);
-        setTimeout(() => setCopied(null), 2000);
-    }
-
-    function getFlagEmoji(countryCode: string) {
-        const codePoints = countryCode
-            .toUpperCase()
-            .split('')
-            .map((char) => 127397 + char.charCodeAt(0));
-        return String.fromCodePoint(...codePoints);
-    }
-
     return (
         <GuestLayout>
             <Head title={`Order ${order.order_number}`} />
@@ -115,24 +99,20 @@ export default function OrderStatus({ order }: Props) {
                 <div className="container mx-auto px-4">
                     <div className="mx-auto max-w-2xl">
                         {/* Header */}
-                        <div className="mb-8">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <h1 className="text-2xl font-bold md:text-3xl">
-                                        Order #{order.order_number}
-                                    </h1>
-                                    <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                                        <Calendar className="h-4 w-4" />
-                                        <span>{order.created_at}</span>
-                                    </div>
-                                </div>
-                                <Badge
-                                    variant="outline"
-                                    className={`${getStatusBadgeClass(order.status_color)} flex items-center gap-2 px-3 py-1.5`}
-                                >
-                                    {getStatusIcon(order.status)}
-                                    {order.status_label}
-                                </Badge>
+                        <div className="mb-8 text-center">
+                            <Badge
+                                variant="outline"
+                                className={`${getStatusBadgeClass(order.status_color)} mb-4 inline-flex items-center gap-2 px-4 py-2 text-sm`}
+                            >
+                                {getStatusIcon(order.status)}
+                                {order.status_label}
+                            </Badge>
+                            <h1 className="text-2xl font-bold md:text-3xl">
+                                Order Status
+                            </h1>
+                            <div className="mt-2 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                                <Calendar className="h-4 w-4" />
+                                <span>Placed on {order.created_at}</span>
                             </div>
                         </div>
 
@@ -169,126 +149,21 @@ export default function OrderStatus({ order }: Props) {
                             </Card>
                         )}
 
-                        {/* Package Details */}
-                        <Card className="mb-6">
-                            <CardHeader>
-                                <CardTitle className="text-base">Package Details</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                {order.package && (
-                                    <>
-                                        <div className="flex items-center gap-3">
-                                            {order.package.country_iso && (
-                                                <span className="text-3xl">
-                                                    {getFlagEmoji(order.package.country_iso)}
-                                                </span>
-                                            )}
-                                            <div>
-                                                <h3 className="font-medium">{order.package.name}</h3>
-                                                {order.package.country && (
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {order.package.country}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-6 text-sm">
-                                            <div className="flex items-center gap-2">
-                                                <HardDrive className="h-4 w-4 text-muted-foreground" />
-                                                <span>{order.package.data_label}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Timer className="h-4 w-4 text-muted-foreground" />
-                                                <span>{order.package.validity_label}</span>
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <Mail className="h-4 w-4" />
-                                    <span>{order.customer_email}</span>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        {/* Order Summary */}
+                        <OrderSummaryCard
+                            orderNumber={order.order_number}
+                            customerEmail={order.customer_email}
+                            package={order.package}
+                            className="mb-6"
+                        />
 
                         {/* eSIM Details */}
                         {isCompleted && order.esim && (
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2 text-base">
-                                        <QrCode className="h-5 w-5" />
-                                        Your eSIM
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Scan the QR code with your phone to install the eSIM
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-6">
-                                    {/* QR Code */}
-                                    {order.esim.qr_code_data && (
-                                        <div className="flex justify-center">
-                                            <div className="rounded-xl border-2 border-dashed border-muted-foreground/25 bg-white p-4">
-                                                <img
-                                                    src={order.esim.qr_code_data}
-                                                    alt="eSIM QR Code"
-                                                    className="h-48 w-48"
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* LPA String */}
-                                    {order.esim.lpa_string && (
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between">
-                                                <label className="text-sm font-medium">Activation Code</label>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-7"
-                                                    onClick={() => copyToClipboard(order.esim!.lpa_string!, 'lpa')}
-                                                >
-                                                    {copied === 'lpa' ? (
-                                                        <span className="text-green-600">Copied!</span>
-                                                    ) : (
-                                                        <>
-                                                            <Copy className="mr-1 h-3 w-3" />
-                                                            Copy
-                                                        </>
-                                                    )}
-                                                </Button>
-                                            </div>
-                                            <div className="rounded-lg bg-muted p-3">
-                                                <code className="text-xs break-all font-mono">
-                                                    {order.esim.lpa_string}
-                                                </code>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <Separator />
-
-                                    {/* ICCID */}
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="text-muted-foreground">ICCID</span>
-                                        <div className="flex items-center gap-2">
-                                            <code className="font-mono text-xs">{order.esim.iccid}</code>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-6 w-6 p-0"
-                                                onClick={() => copyToClipboard(order.esim!.iccid, 'iccid')}
-                                            >
-                                                {copied === 'iccid' ? (
-                                                    <CheckCircle2 className="h-3 w-3 text-green-500" />
-                                                ) : (
-                                                    <Copy className="h-3 w-3" />
-                                                )}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            <EsimQrCard
+                                esim={order.esim}
+                                title="Your eSIM"
+                                description="Scan the QR code with your phone to install the eSIM"
+                            />
                         )}
 
                         {/* Not completed yet */}
@@ -305,6 +180,30 @@ export default function OrderStatus({ order }: Props) {
                                 </CardContent>
                             </Card>
                         )}
+
+                        {/* Payment Summary */}
+                        <Card className="mt-6">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-base">Payment Summary</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Payment Method</span>
+                                    <span className="font-medium">{order.payment_method}</span>
+                                </div>
+                                {order.paid_at && (
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-muted-foreground">Paid On</span>
+                                        <span className="font-medium">{order.paid_at}</span>
+                                    </div>
+                                )}
+                                <Separator />
+                                <div className="flex justify-between items-center pt-1">
+                                    <span className="font-medium">Total Paid</span>
+                                    <span className="text-xl font-bold">€{Number(order.amount).toFixed(2)}</span>
+                                </div>
+                            </CardContent>
+                        </Card>
 
                         {/* Actions */}
                         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">

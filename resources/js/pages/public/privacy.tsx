@@ -4,7 +4,7 @@ import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 
 export default function Privacy() {
-    const { name } = usePage<SharedData>().props;
+    const { name, contact } = usePage<SharedData>().props;
 
     return (
         <GuestLayout>
@@ -120,10 +120,10 @@ export default function Privacy() {
                     <p>
                         If you have questions about this Privacy Policy, please contact us at{' '}
                         <a
-                            href="mailto:privacy@example.com"
+                            href={`mailto:${contact.privacyEmail}`}
                             className="text-primary hover:underline"
                         >
-                            privacy@example.com
+                            {contact.privacyEmail}
                         </a>
                     </p>
                 </LegalSection>

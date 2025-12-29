@@ -4,10 +4,13 @@ namespace App\Events\Payment;
 
 use App\Enums\PaymentStatus;
 use App\Events\Order\OrderPaymentCompleted;
+use App\Models\Order;
 use App\Models\Payment;
+use App\Services\EmailService;
 use App\States\PaymentState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
+use Thunk\Verbs\Facades\Verbs;
 
 class PaymentSucceeded extends Event
 {
@@ -62,5 +65,24 @@ class PaymentSucceeded extends Event
                 payment_id: $this->payment_id,
             );
         }
+
+        // Send payment receipt email
+        Verbs::unlessReplaying(function () use ($state) {
+            if (!$state->order_id) {
+                return;
+            }
+
+            $order = Order::with(['customer.user', 'package', 'payments'])->find($state->order_id);
+
+            if ($order) {
+                $emailService = app(EmailService::class);
+
+                // Send order confirmation email
+                $emailService->sendOrderConfirmation($order);
+
+                // Send payment receipt
+                $emailService->sendPaymentReceipt($order);
+            }
+        });
     }
 }

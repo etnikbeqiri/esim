@@ -12,6 +12,18 @@ class Package extends Model
 {
     use HasFactory;
 
+    /**
+     * Hide sensitive provider-related fields from API responses.
+     */
+    protected $hidden = [
+        'provider_id',
+        'provider_package_id',
+        'cost_price',
+        'source_cost_price',
+        'source_currency_id',
+        'custom_retail_price',
+    ];
+
     protected $fillable = [
         'provider_id',
         'country_id',

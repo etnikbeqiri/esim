@@ -171,6 +171,9 @@ class CheckoutController extends Controller
                 'esim' => $orderModel->esimProfile ? [
                     'iccid' => $orderModel->esimProfile->iccid,
                     'qr_code_data' => $orderModel->esimProfile->qr_code_data,
+                    'lpa_string' => $orderModel->esimProfile->lpa_string,
+                    'smdp_address' => $orderModel->esimProfile->smdp_address,
+                    'activation_code' => $orderModel->esimProfile->activation_code,
                 ] : null,
             ],
             'payment_status' => $paymentStatus,

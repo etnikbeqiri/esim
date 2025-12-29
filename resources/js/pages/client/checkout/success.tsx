@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { CheckCircle, Download, Loader2, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useState } from 'react';
 
 interface Order {
@@ -22,6 +23,9 @@ interface Order {
     esim: {
         iccid: string;
         qr_code_data: string | null;
+        lpa_string: string | null;
+        smdp_address: string | null;
+        activation_code: string | null;
     } | null;
 }
 
@@ -117,9 +121,13 @@ export default function CheckoutSuccess({ order, payment_status }: Props) {
                         {currentOrder.has_esim && currentOrder.esim ? (
                             <div className="space-y-4">
                                 <div className="flex justify-center">
-                                    {currentOrder.esim.qr_code_data ? (
-                                        <div className="p-4 bg-white rounded-lg">
-                                            <QrCode className="h-48 w-48" />
+                                    {(currentOrder.esim.lpa_string || currentOrder.esim.qr_code_data) ? (
+                                        <div className="p-4 bg-white rounded-lg border">
+                                            <QRCodeSVG
+                                                value={currentOrder.esim.lpa_string || currentOrder.esim.qr_code_data || ''}
+                                                size={192}
+                                                level="M"
+                                            />
                                             <p className="text-center text-sm text-muted-foreground mt-2">
                                                 Scan to install eSIM
                                             </p>
@@ -137,6 +145,13 @@ export default function CheckoutSuccess({ order, payment_status }: Props) {
                                     <p className="text-sm text-muted-foreground">ICCID</p>
                                     <p className="font-mono">{currentOrder.esim.iccid}</p>
                                 </div>
+                                {currentOrder.esim.lpa_string && (
+                                    <div className="text-center text-xs text-muted-foreground">
+                                        <p className="break-all font-mono bg-muted p-2 rounded">
+                                            {currentOrder.esim.lpa_string}
+                                        </p>
+                                    </div>
+                                )}
                                 <Button className="w-full" variant="outline">
                                     <Download className="mr-2 h-4 w-4" />
                                     Download Installation Guide

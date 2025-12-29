@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Str;
 
 class Order extends Model
@@ -17,6 +18,24 @@ class Order extends Model
     use HasFactory;
 
     public $incrementing = false;
+
+    /**
+     * Hide sensitive provider-related fields from API responses.
+     */
+    protected $hidden = [
+        'provider_id',
+        'provider_order_id',
+        'cost_price',
+        'profit',
+        'retry_count',
+        'max_retries',
+        'next_retry_at',
+        'failure_reason',
+        'failure_code',
+        'ip_address',
+        'user_agent',
+        'metadata',
+    ];
 
     protected $fillable = [
         'id',
@@ -107,6 +126,29 @@ class Order extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Get the latest payment for the order.
+     */
+    public function payment(): HasOne
+    {
+        return $this->hasOne(Payment::class)->latestOfMany();
+    }
+
+    /**
+     * Get the country through the package.
+     */
+    public function country(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Country::class,
+            Package::class,
+            'id',        // Foreign key on packages table
+            'id',        // Foreign key on countries table
+            'package_id', // Local key on orders table
+            'country_id'  // Local key on packages table
+        );
     }
 
     public function emailQueue(): HasMany
