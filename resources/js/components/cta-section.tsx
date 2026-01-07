@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { GoldButton } from '@/components/ui/gold-button';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ArrowRight, CheckCircle2, Globe } from 'lucide-react';
@@ -12,42 +12,84 @@ interface CTASectionProps {
 }
 
 export function CTASection({
-    title = 'Your Next Adventure Awaits',
+    title = 'Ready to Travel Connected?',
     description,
-    buttonText = 'Find Your Destination',
+    buttonText = 'Browse Destinations',
     buttonHref = '/destinations',
 }: CTASectionProps) {
-    const { name } = usePage<SharedData>().props;
+    const { name, totalCountries, totalPackages } = usePage<SharedData>().props;
 
-    const defaultDescription = `Join thousands of travelers who stay connected with ${name}. Get your eSIM in minutes and travel worry-free.`;
+    const defaultDescription = `Browse our ${totalPackages || '50'}+ data plans across ${totalCountries || '4'}+ countries and get instant connectivity for your next trip.`;
 
     return (
-        <section className="bg-secondary py-16 text-secondary-foreground md:py-20">
-            <div className="container mx-auto px-4 text-center">
-                <Globe className="mx-auto mb-6 h-12 w-12 opacity-80" />
-                <h2 className="mb-4 text-2xl font-bold md:text-3xl">{title}</h2>
-                <p className="mx-auto mb-8 max-w-xl text-lg opacity-90">
+        <section className="relative overflow-hidden py-20 md:py-28">
+            {/* Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-100 via-primary-50 to-accent-50" />
+
+            {/* Decorative Elements */}
+            <div className="absolute top-0 left-1/4 h-96 w-96 rounded-full bg-primary-200/40 blur-3xl" />
+            <div className="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-accent-200/30 blur-3xl" />
+
+            {/* Glass overlay */}
+            <div className="absolute inset-0 backdrop-blur-[1px]" />
+
+            <div className="relative z-10 container mx-auto px-4 text-center">
+                {/* Icon */}
+                <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-3xl border border-white/60 bg-white/70 shadow-xl backdrop-blur-sm">
+                    <Globe className="h-10 w-10 text-primary-500" />
+                </div>
+
+                {/* Title */}
+                <h2 className="mb-6 text-3xl font-extrabold tracking-tight text-primary-900 md:text-4xl lg:text-5xl">
+                    {title}
+                </h2>
+
+                {/* Description */}
+                <p className="mx-auto mb-10 max-w-2xl text-lg text-primary-700">
                     {description || defaultDescription}
                 </p>
+
+                {/* CTA Button */}
                 <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                    <Button size="lg" asChild>
+                    <GoldButton
+                        size="lg"
+                        asChild
+                        className="h-14 min-w-[220px] px-8 text-base"
+                    >
                         <Link href={buttonHref}>
                             {buttonText}
-                            <ArrowRight className="ml-2 h-4 w-4" />
+                            <ArrowRight className="ml-2 h-5 w-5" />
                         </Link>
-                    </Button>
+                    </GoldButton>
                 </div>
-                <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                    <Badge variant="outline" className="px-3 py-1.5 text-sm">
-                        <CheckCircle2 className="mr-1.5 h-4 w-4 text-green-500" />
+
+                {/* Trust Badges */}
+                <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
+                    <Badge
+                        variant="outline"
+                        className="border-primary-200 bg-white/70 px-4 py-2 text-sm font-medium text-primary-700 shadow-sm backdrop-blur-sm"
+                    >
+                        <span className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-accent-300">
+                            <CheckCircle2 className="h-3 w-3 text-accent-950" />
+                        </span>
                         Instant Delivery
                     </Badge>
-                    <Badge variant="outline" className="px-3 py-1.5 text-sm">
-                        <CheckCircle2 className="mr-1.5 h-4 w-4 text-green-500" />
+                    <Badge
+                        variant="outline"
+                        className="border-primary-200 bg-white/70 px-4 py-2 text-sm font-medium text-primary-700 shadow-sm backdrop-blur-sm"
+                    >
+                        <span className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-accent-300">
+                            <CheckCircle2 className="h-3 w-3 text-accent-950" />
+                        </span>
                         24/7 Support
                     </Badge>
-                    <Badge variant="outline" className="px-3 py-1.5 text-sm">
-                        <CheckCircle2 className="mr-1.5 h-4 w-4 text-green-500" />
+                    <Badge
+                        variant="outline"
+                        className="border-primary-200 bg-white/70 px-4 py-2 text-sm font-medium text-primary-700 shadow-sm backdrop-blur-sm"
+                    >
+                        <span className="mr-2 flex h-5 w-5 items-center justify-center rounded bg-accent-300">
+                            <CheckCircle2 className="h-3 w-3 text-accent-950" />
+                        </span>
                         Secure Payment
                     </Badge>
                 </div>

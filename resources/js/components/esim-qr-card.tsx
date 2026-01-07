@@ -46,18 +46,22 @@ export function EsimQrCard({
     }
 
     return (
-        <Card>
+        <Card className="border-primary-100 bg-white shadow-sm">
             <CardHeader className={compact ? 'pb-2' : undefined}>
-                <CardTitle className="flex items-center gap-2 text-base">
-                    <QrCode className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-base text-primary-900">
+                    <QrCode className="h-5 w-5 text-primary-600" />
                     {title}
                 </CardTitle>
-                {description && <CardDescription>{description}</CardDescription>}
+                {description && (
+                    <CardDescription className="text-primary-600">
+                        {description}
+                    </CardDescription>
+                )}
             </CardHeader>
             <CardContent className={compact ? 'space-y-4' : 'space-y-6'}>
                 {/* QR Code */}
                 <div className="flex justify-center">
-                    <div className="rounded-xl border-2 border-dashed border-muted-foreground/25 bg-white p-4">
+                    <div className="rounded-xl border-2 border-dashed border-primary-200 bg-white p-4">
                         {esim.qr_code_data ? (
                             <img
                                 src={esim.qr_code_data}
@@ -78,15 +82,17 @@ export function EsimQrCard({
                 {esim.lpa_string && (
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <label className="text-sm font-medium">Activation Code</label>
+                            <label className="text-sm font-medium text-primary-900">
+                                Activation Code
+                            </label>
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-7"
+                                className="h-7 text-primary-600 hover:bg-primary-50 hover:text-primary-700"
                                 onClick={() => copyToClipboard(esim.lpa_string!, 'lpa')}
                             >
                                 {copied === 'lpa' ? (
-                                    <span className="text-green-600">Copied!</span>
+                                    <span className="text-accent-600">Copied!</span>
                                 ) : (
                                     <>
                                         <Copy className="mr-1 h-3 w-3" />
@@ -95,8 +101,8 @@ export function EsimQrCard({
                                 )}
                             </Button>
                         </div>
-                        <div className="rounded-lg bg-muted p-3">
-                            <code className="text-xs break-all font-mono">
+                        <div className="rounded-lg bg-primary-50 p-3">
+                            <code className="text-xs break-all font-mono text-primary-800">
                                 {esim.lpa_string}
                             </code>
                         </div>
@@ -105,21 +111,23 @@ export function EsimQrCard({
 
                 {showDetails && (
                     <>
-                        <Separator />
+                        <Separator className="bg-primary-100" />
 
                         {/* ICCID */}
                         <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">ICCID</span>
+                            <span className="text-primary-500">ICCID</span>
                             <div className="flex items-center gap-2">
-                                <code className="font-mono text-xs">{esim.iccid}</code>
+                                <code className="font-mono text-xs text-primary-800">
+                                    {esim.iccid}
+                                </code>
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="h-6 w-6 p-0"
+                                    className="h-6 w-6 p-0 text-primary-500 hover:bg-primary-50 hover:text-primary-700"
                                     onClick={() => copyToClipboard(esim.iccid, 'iccid')}
                                 >
                                     {copied === 'iccid' ? (
-                                        <CheckCircle2 className="h-3 w-3 text-green-500" />
+                                        <CheckCircle2 className="h-3 w-3 text-accent-600" />
                                     ) : (
                                         <Copy className="h-3 w-3" />
                                     )}
@@ -130,17 +138,19 @@ export function EsimQrCard({
                         {/* SM-DP+ Address */}
                         {esim.smdp_address && (
                             <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">SM-DP+ Address</span>
+                                <span className="text-primary-500">SM-DP+ Address</span>
                                 <div className="flex items-center gap-2">
-                                    <code className="font-mono text-xs">{esim.smdp_address}</code>
+                                    <code className="font-mono text-xs text-primary-800">
+                                        {esim.smdp_address}
+                                    </code>
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="h-6 w-6 p-0"
+                                        className="h-6 w-6 p-0 text-primary-500 hover:bg-primary-50 hover:text-primary-700"
                                         onClick={() => copyToClipboard(esim.smdp_address!, 'smdp')}
                                     >
                                         {copied === 'smdp' ? (
-                                            <CheckCircle2 className="h-3 w-3 text-green-500" />
+                                            <CheckCircle2 className="h-3 w-3 text-accent-600" />
                                         ) : (
                                             <Copy className="h-3 w-3" />
                                         )}
@@ -154,20 +164,20 @@ export function EsimQrCard({
                             <div className="grid grid-cols-3 gap-4 text-sm">
                                 {esim.pin && (
                                     <div>
-                                        <span className="text-muted-foreground text-xs">PIN</span>
-                                        <p className="font-mono">{esim.pin}</p>
+                                        <span className="text-xs text-primary-500">PIN</span>
+                                        <p className="font-mono text-primary-800">{esim.pin}</p>
                                     </div>
                                 )}
                                 {esim.puk && (
                                     <div>
-                                        <span className="text-muted-foreground text-xs">PUK</span>
-                                        <p className="font-mono">{esim.puk}</p>
+                                        <span className="text-xs text-primary-500">PUK</span>
+                                        <p className="font-mono text-primary-800">{esim.puk}</p>
                                     </div>
                                 )}
                                 {esim.apn && (
                                     <div>
-                                        <span className="text-muted-foreground text-xs">APN</span>
-                                        <p className="font-mono">{esim.apn}</p>
+                                        <span className="text-xs text-primary-500">APN</span>
+                                        <p className="font-mono text-primary-800">{esim.apn}</p>
                                     </div>
                                 )}
                             </div>

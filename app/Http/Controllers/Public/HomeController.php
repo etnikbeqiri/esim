@@ -127,6 +127,7 @@ class HomeController extends Controller
                 'hotspot_allowed' => $package->hotspot_allowed,
                 'coverage_type' => $package->coverage_type,
                 'description' => $package->description,
+                'networks' => $package->supported_networks,
             ]);
 
         return Inertia::render('public/country', [

@@ -109,13 +109,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 function getStatusBadgeClass(color: string): string {
     const colors: Record<string, string> = {
-        green: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400',
-        yellow: 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400',
-        red: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400',
-        blue: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400',
-        gray: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800/50 dark:text-gray-400',
-        purple: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400',
-        orange: 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400',
+        green: 'bg-primary-100 text-primary-700 border-primary-200',
+        yellow: 'bg-accent-100 text-accent-700 border-accent-200',
+        red: 'bg-red-100 text-red-700 border-red-200',
+        blue: 'bg-primary-100 text-primary-700 border-primary-200',
+        gray: 'bg-neutral-100 text-neutral-700 border-neutral-200',
+        purple: 'bg-purple-100 text-purple-700 border-purple-200',
+        orange: 'bg-orange-100 text-orange-700 border-orange-200',
     };
     return colors[color] || colors.gray;
 }
@@ -123,9 +123,9 @@ function getStatusBadgeClass(color: string): string {
 function getStatusIcon(status: string, size = 'h-3 w-3') {
     switch (status) {
         case 'completed':
-            return <CheckCircle2 className={`${size} text-green-500`} />;
+            return <CheckCircle2 className={`${size} text-primary-500`} />;
         case 'processing':
-            return <Loader2 className={`${size} text-blue-500 animate-spin`} />;
+            return <Loader2 className={`${size} text-primary-500 animate-spin`} />;
         case 'pending_retry':
             return <RefreshCw className={`${size} text-orange-500`} />;
         case 'failed':
@@ -133,7 +133,7 @@ function getStatusIcon(status: string, size = 'h-3 w-3') {
             return <XCircle className={`${size} text-red-500`} />;
         case 'awaiting_payment':
         case 'pending':
-            return <Clock className={`${size} text-yellow-500`} />;
+            return <Clock className={`${size} text-accent-500`} />;
         default:
             return null;
     }
@@ -171,7 +171,7 @@ export default function ClientDashboard({
                         <h1 className="text-2xl font-semibold flex items-center gap-2">
                             Welcome{customer ? `, ${customer.display_name}` : ''}
                             {isB2B && customer?.company_name && (
-                                <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400">
+                                <Badge variant="outline" className="bg-primary-100 text-primary-700 border-primary-200">
                                     <Building2 className="h-3 w-3 mr-1" />
                                     {customer.company_name}
                                 </Badge>
@@ -180,14 +180,14 @@ export default function ClientDashboard({
                         {customer && (
                             <p className="text-muted-foreground flex items-center gap-2 mt-1">
                                 <Badge variant="outline" className={isB2B
-                                    ? 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400'
-                                    : 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400'
+                                    ? 'bg-primary-100 text-primary-700 border-primary-200'
+                                    : 'bg-purple-100 text-purple-700 border-purple-200'
                                 }>
                                     {isB2B ? <Building2 className="h-3 w-3 mr-1" /> : <User className="h-3 w-3 mr-1" />}
                                     {customer.type_label}
                                 </Badge>
                                 {customer.discount_percentage && Number(customer.discount_percentage) > 0 && (
-                                    <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                    <Badge variant="secondary" className="bg-primary-100 text-primary-700">
                                         {customer.discount_percentage}% discount
                                     </Badge>
                                 )}
@@ -205,23 +205,23 @@ export default function ClientDashboard({
                 {/* Stats Cards */}
                 <div className={`grid gap-4 ${isB2B ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}>
                     {isB2B && (
-                        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/30 border-blue-200 dark:border-blue-800">
+                        <Card className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200">
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-400">
+                                <CardTitle className="text-sm font-medium text-primary-700">
                                     Available Balance
                                 </CardTitle>
-                                <Wallet className="h-4 w-4 text-blue-500" />
+                                <Wallet className="h-4 w-4 text-primary-500" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">
+                                <div className="text-2xl font-bold text-primary-700">
                                     {formatCurrency(customer?.available_balance || 0)}
                                 </div>
                                 {Number(customer?.reserved_balance || 0) > 0 && (
-                                    <p className="text-xs text-blue-600 dark:text-blue-500">
+                                    <p className="text-xs text-primary-600">
                                         {formatCurrency(customer?.reserved_balance || 0)} reserved
                                     </p>
                                 )}
-                                <Link href="/client/balance" className="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-1 inline-block">
+                                <Link href="/client/balance" className="text-xs text-primary-600 hover:underline mt-1 inline-block">
                                     View transactions →
                                 </Link>
                             </CardContent>
@@ -246,10 +246,10 @@ export default function ClientDashboard({
                             <CardTitle className="text-sm font-medium text-muted-foreground">
                                 Completed
                             </CardTitle>
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            <CheckCircle2 className="h-4 w-4 text-primary-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-green-600">{stats?.completed_orders ?? 0}</div>
+                            <div className="text-2xl font-bold text-primary-600">{stats?.completed_orders ?? 0}</div>
                             <p className="text-xs text-muted-foreground">Successful orders</p>
                         </CardContent>
                     </Card>
@@ -258,7 +258,7 @@ export default function ClientDashboard({
                             <CardTitle className="text-sm font-medium text-muted-foreground">
                                 Active eSIMs
                             </CardTitle>
-                            <Wifi className="h-4 w-4 text-blue-500" />
+                            <Wifi className="h-4 w-4 text-primary-500" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats?.active_esims ?? 0}</div>
@@ -286,7 +286,7 @@ export default function ClientDashboard({
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <Smartphone className="h-5 w-5 text-blue-500" />
+                                <Smartphone className="h-5 w-5 text-primary-500" />
                                 Your Active eSIMs
                             </CardTitle>
                             <CardDescription>Monitor your eSIM data usage</CardDescription>
@@ -380,7 +380,7 @@ export default function ClientDashboard({
                                             <div className="text-right">
                                                 <span className="font-bold">{formatCurrency(order.amount)}</span>
                                                 {order.has_esim && (
-                                                    <p className="text-xs text-green-600 flex items-center justify-end gap-1">
+                                                    <p className="text-xs text-primary-600 flex items-center justify-end gap-1">
                                                         <Wifi className="h-3 w-3" />
                                                         eSIM Ready
                                                     </p>
@@ -421,9 +421,9 @@ export default function ClientDashboard({
                                                 className="flex items-center justify-between p-3 rounded-lg border"
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`p-2 rounded-full ${isCredit ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
+                                                    <div className={`p-2 rounded-full ${isCredit ? 'bg-primary-100' : 'bg-red-100'}`}>
                                                         {isCredit ? (
-                                                            <ArrowDownLeft className="h-4 w-4 text-green-600" />
+                                                            <ArrowDownLeft className="h-4 w-4 text-primary-600" />
                                                         ) : (
                                                             <ArrowUpRight className="h-4 w-4 text-red-600" />
                                                         )}
@@ -436,7 +436,7 @@ export default function ClientDashboard({
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <span className={`font-bold ${isCredit ? 'text-green-600' : 'text-red-600'}`}>
+                                                    <span className={`font-bold ${isCredit ? 'text-primary-600' : 'text-red-600'}`}>
                                                         {isCredit ? '+' : '-'}{formatCurrency(tx.amount)}
                                                     </span>
                                                     <p className="text-xs text-muted-foreground">

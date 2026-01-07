@@ -39,7 +39,11 @@ export default function LanguageSwitcher({
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant={variant} size={size}>
+                <Button
+                    variant={variant}
+                    size={size}
+                    className="border-primary-200 text-primary-700 hover:bg-primary-100 hover:text-primary-900"
+                >
                     <Languages className="h-4 w-4" />
                     {showLabel && currentLocale && (
                         <span className="ml-2">{currentLocale.nativeName}</span>
@@ -51,10 +55,10 @@ export default function LanguageSwitcher({
                     <DropdownMenuItem
                         key={loc.code}
                         onClick={() => handleLocaleChange(loc.code)}
-                        className={locale === loc.code ? 'bg-muted' : ''}
+                        className={locale === loc.code ? 'bg-primary-100 text-primary-900' : ''}
                     >
                         <span className="font-medium">{loc.nativeName}</span>
-                        <span className="ml-2 text-muted-foreground text-xs">
+                        <span className="ml-2 text-primary-500 text-xs">
                             ({loc.name})
                         </span>
                     </DropdownMenuItem>

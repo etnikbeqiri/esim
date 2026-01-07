@@ -1,7 +1,4 @@
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import GuestLayout from '@/layouts/guest-layout';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -11,11 +8,12 @@ import {
     BookOpen,
     Calendar,
     Clock,
+    Copy,
     Facebook,
-    FileText,
     Linkedin,
-    Share2,
+    Sparkles,
     Twitter,
+    User,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -52,11 +50,10 @@ interface Props {
 
 export default function BlogShow({ article, relatedArticles, meta }: Props) {
     const { name } = usePage<SharedData>().props;
-    const [showShareMenu, setShowShareMenu] = useState(false);
+    const [copied, setCopied] = useState(false);
     const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
     const canonicalUrl = `${siteUrl}/blog/${article.slug}`;
 
-    // Add JSON-LD structured data for SEO
     useEffect(() => {
         const structuredData = {
             '@context': 'https://schema.org',
@@ -100,138 +97,175 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
     function shareOnTwitter() {
         window.open(
             `https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=${encodeURIComponent(canonicalUrl)}`,
-            '_blank'
+            '_blank',
         );
     }
 
     function shareOnFacebook() {
         window.open(
             `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonicalUrl)}`,
-            '_blank'
+            '_blank',
         );
     }
 
     function shareOnLinkedIn() {
         window.open(
             `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonicalUrl)}`,
-            '_blank'
+            '_blank',
         );
     }
 
     function copyLink() {
         navigator.clipboard.writeText(canonicalUrl);
-        setShowShareMenu(false);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     }
 
     return (
         <GuestLayout>
             <Head title={`${meta.title} - ${name}`}>
-                {meta.description ? <meta name="description" content={meta.description} /> : null}
-                {meta.keywords ? <meta name="keywords" content={meta.keywords} /> : null}
+                {meta.description ? (
+                    <meta name="description" content={meta.description} />
+                ) : null}
+                {meta.keywords ? (
+                    <meta name="keywords" content={meta.keywords} />
+                ) : null}
                 <link rel="canonical" href={canonicalUrl} />
-
-                {/* Open Graph */}
                 <meta property="og:title" content={meta.title || ''} />
-                {meta.description ? <meta property="og:description" content={meta.description} /> : null}
+                {meta.description ? (
+                    <meta
+                        property="og:description"
+                        content={meta.description}
+                    />
+                ) : null}
                 <meta property="og:type" content="article" />
                 <meta property="og:url" content={canonicalUrl} />
-                {meta.image ? <meta property="og:image" content={meta.image} /> : null}
-                {meta.published_time ? <meta property="article:published_time" content={meta.published_time} /> : null}
-                {meta.author ? <meta property="article:author" content={meta.author} /> : null}
-
-                {/* Twitter Card */}
-                <meta name="twitter:card" content={meta.image ? 'summary_large_image' : 'summary'} />
+                {meta.image ? (
+                    <meta property="og:image" content={meta.image} />
+                ) : null}
+                {meta.published_time ? (
+                    <meta
+                        property="article:published_time"
+                        content={meta.published_time}
+                    />
+                ) : null}
+                {meta.author ? (
+                    <meta property="article:author" content={meta.author} />
+                ) : null}
+                <meta
+                    name="twitter:card"
+                    content={meta.image ? 'summary_large_image' : 'summary'}
+                />
                 <meta name="twitter:title" content={meta.title || ''} />
-                {meta.description ? <meta name="twitter:description" content={meta.description} /> : null}
-                {meta.image ? <meta name="twitter:image" content={meta.image} /> : null}
+                {meta.description ? (
+                    <meta
+                        name="twitter:description"
+                        content={meta.description}
+                    />
+                ) : null}
+                {meta.image ? (
+                    <meta name="twitter:image" content={meta.image} />
+                ) : null}
             </Head>
 
             <article>
-                {/* Back Navigation */}
-                <div className="bg-gradient-to-b from-muted/50 to-muted/30 pt-6">
-                    <div className="container mx-auto px-4">
+                {/* Header Section */}
+                <section className="relative overflow-hidden bg-gradient-to-b from-primary-50 via-primary-50/50 to-white pt-6 pb-8 md:pb-12">
+                    {/* Decorative elements */}
+                    <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-accent-400/10 blur-3xl" />
+                    <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary-400/10 blur-3xl" />
+
+                    <div className="relative z-10 container mx-auto px-4">
+                        {/* Back link */}
                         <Link
                             href="/blog"
-                            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                            className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary-200 bg-white/80 px-4 py-2 text-sm font-semibold text-primary-600 shadow-sm backdrop-blur-sm transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-700 hover:shadow-md"
                         >
                             <ArrowLeft className="h-4 w-4" />
                             Back to Blog
                         </Link>
-                    </div>
-                </div>
 
-                {/* Article Header */}
-                <section className="bg-gradient-to-b from-muted/30 to-background pb-8 pt-6 md:pb-12 md:pt-8">
-                    <div className="container mx-auto px-4">
-                        <div className="mx-auto max-w-4xl">
-                            {/* Meta Info */}
-                            <div className="mb-4 flex flex-wrap items-center gap-3">
-                                <Badge variant="secondary">
-                                    <BookOpen className="mr-1 h-3 w-3" />
+                        <div className="mx-auto max-w-3xl">
+                            {/* Meta badges */}
+                            <div className="mb-6 flex flex-wrap items-center gap-3">
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-200 bg-accent-50/80 px-3 py-1 text-xs font-semibold text-accent-700 backdrop-blur-sm">
+                                    <BookOpen className="h-3.5 w-3.5 text-accent-600" />
                                     Article
-                                </Badge>
-                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                    <span className="flex items-center gap-1">
-                                        <Clock className="h-4 w-4" />
-                                        {article.reading_time} min read
+                                </span>
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white/50 px-3 py-1 text-xs font-medium text-primary-600 backdrop-blur-sm">
+                                    <Clock className="h-3.5 w-3.5" />
+                                    {article.reading_time} min read
+                                </span>
+                                {article.formatted_date && (
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white/50 px-3 py-1 text-xs font-medium text-primary-600 backdrop-blur-sm">
+                                        <Calendar className="h-3.5 w-3.5" />
+                                        {article.formatted_date}
                                     </span>
-                                    {article.formatted_date && (
-                                        <span className="flex items-center gap-1">
-                                            <Calendar className="h-4 w-4" />
-                                            {article.formatted_date}
-                                        </span>
-                                    )}
-                                </div>
+                                )}
                             </div>
 
                             {/* Title */}
-                            <h1 className="mb-6 text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
+                            <h1 className="mb-6 text-3xl leading-tight font-extrabold tracking-tight text-primary-900 md:text-4xl lg:text-5xl">
                                 {article.title}
                             </h1>
 
                             {/* Excerpt */}
                             {article.excerpt && (
-                                <p className="mb-6 text-lg text-muted-foreground md:text-xl">
+                                <p className="mb-8 text-xl leading-relaxed font-medium text-primary-600/90">
                                     {article.excerpt}
                                 </p>
                             )}
 
-                            {/* Share */}
-                            <div className="flex flex-wrap items-center justify-end gap-4">
+                            {/* Author & Share */}
+                            <div className="flex flex-wrap items-center justify-between gap-6 border-t border-primary-200/60 pt-6">
+                                {article.author && (
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-accent-200 to-accent-500 shadow-md ring-2 shadow-accent-500/20 ring-white">
+                                            <User className="h-6 w-6 text-accent-950" />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-primary-900">
+                                                {article.author.name}
+                                            </p>
+                                            <p className="text-xs font-medium tracking-wider text-primary-500 uppercase">
+                                                Author
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="flex items-center gap-2">
-                                    <span className="text-sm text-muted-foreground mr-2">Share:</span>
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="h-8 w-8"
+                                    <span className="mr-2 text-sm font-medium text-primary-500">
+                                        Share:
+                                    </span>
+                                    <button
                                         onClick={shareOnTwitter}
+                                        className="flex h-10 w-10 items-center justify-center rounded-full border border-primary-200 bg-white text-primary-600 transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-700 hover:shadow-md"
                                     >
                                         <Twitter className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="h-8 w-8"
+                                    </button>
+                                    <button
                                         onClick={shareOnFacebook}
+                                        className="flex h-10 w-10 items-center justify-center rounded-full border border-primary-200 bg-white text-primary-600 transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-700 hover:shadow-md"
                                     >
                                         <Facebook className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="h-8 w-8"
+                                    </button>
+                                    <button
                                         onClick={shareOnLinkedIn}
+                                        className="flex h-10 w-10 items-center justify-center rounded-full border border-primary-200 bg-white text-primary-600 transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-700 hover:shadow-md"
                                     >
                                         <Linkedin className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="h-8 w-8"
+                                    </button>
+                                    <button
                                         onClick={copyLink}
+                                        className="flex h-10 w-10 items-center justify-center rounded-full border border-primary-200 bg-white text-primary-600 transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-700 hover:shadow-md"
                                     >
-                                        <Share2 className="h-4 w-4" />
-                                    </Button>
+                                        <Copy className="h-4 w-4" />
+                                    </button>
+                                    {copied && (
+                                        <span className="ml-1 rounded-full bg-accent-100 px-2 py-0.5 text-xs font-bold text-accent-700">
+                                            Copied!
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -241,7 +275,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                 {/* Featured Image */}
                 <section className="pb-8 md:pb-12">
                     <div className="container mx-auto px-4">
-                        <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl">
+                        <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-primary-100 shadow-lg">
                             {article.featured_image_url ? (
                                 <img
                                     src={article.featured_image_url}
@@ -249,41 +283,23 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                     className="h-auto w-full object-cover"
                                 />
                             ) : (
-                                <div className="aspect-[21/9] bg-gradient-to-br from-primary/10 via-primary/5 to-muted flex items-center justify-center relative overflow-hidden">
-                                    {/* Decorative background pattern */}
-                                    <div className="absolute inset-0 opacity-[0.04]">
-                                        <div className="absolute top-8 left-12">
-                                            <FileText className="h-16 w-16" />
-                                        </div>
-                                        <div className="absolute top-16 right-20">
-                                            <BookOpen className="h-12 w-12" />
-                                        </div>
-                                        <div className="absolute bottom-12 left-24">
-                                            <Clock className="h-10 w-10" />
-                                        </div>
-                                        <div className="absolute bottom-8 right-12">
-                                            <FileText className="h-14 w-14" />
-                                        </div>
-                                        <div className="absolute top-1/2 left-1/4 -translate-y-1/2">
-                                            <BookOpen className="h-8 w-8" />
-                                        </div>
-                                        <div className="absolute top-1/3 right-1/3">
-                                            <FileText className="h-10 w-10" />
-                                        </div>
-                                    </div>
-                                    {/* Main content */}
-                                    <div className="relative flex flex-col items-center gap-4">
-                                        <div className="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span className="text-4xl font-bold text-primary/60">
-                                                {article.title.charAt(0).toUpperCase()}
+                                <div className="relative flex aspect-[21/9] items-center justify-center overflow-hidden bg-gradient-to-br from-primary-100 via-primary-50 to-accent-50">
+                                    <div className="text-center">
+                                        <div className="mb-4 inline-flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-300 to-accent-500 shadow-xl shadow-accent-400/30">
+                                            <span className="text-4xl font-bold text-accent-950">
+                                                {article.title
+                                                    .charAt(0)
+                                                    .toUpperCase()}
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground/70">
+                                        <div className="flex items-center justify-center gap-2 text-sm text-primary-500">
                                             <BookOpen className="h-4 w-4" />
                                             <span>Article</span>
                                             <span className="mx-1">•</span>
                                             <Clock className="h-4 w-4" />
-                                            <span>{article.reading_time} min read</span>
+                                            <span>
+                                                {article.reading_time} min read
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -297,32 +313,54 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                     <div className="container mx-auto px-4">
                         <div className="mx-auto max-w-3xl">
                             <div
-                                className="article-content"
-                                dangerouslySetInnerHTML={{ __html: article.content || '' }}
+                                className="article-content prose prose-headings:font-bold prose-a:text-primary-600 prose-a:no-underline hover:prose-a:text-primary-700 prose-strong:text-foreground"
+                                dangerouslySetInnerHTML={{
+                                    __html: article.content || '',
+                                }}
                             />
                         </div>
                     </div>
                 </section>
 
                 {/* Share Footer */}
-                <section className="border-t border-b py-8">
+                <section className="border-y border-primary-100 bg-gradient-to-r from-primary-50 via-white to-primary-50 py-8">
                     <div className="container mx-auto px-4">
                         <div className="mx-auto max-w-3xl">
-                            <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
+                            <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:justify-between sm:text-left">
                                 <div>
-                                    <p className="font-medium">Enjoyed this article?</p>
-                                    <p className="text-sm text-muted-foreground">Share it with your friends</p>
+                                    <p className="font-bold text-primary-900">
+                                        Enjoyed this article?
+                                    </p>
+                                    <p className="text-sm text-primary-600">
+                                        Share it with your friends and
+                                        colleagues
+                                    </p>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Button variant="outline" size="sm" onClick={shareOnTwitter}>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={shareOnTwitter}
+                                        className="border-primary-200 bg-white text-primary-700 transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-800"
+                                    >
                                         <Twitter className="mr-2 h-4 w-4" />
                                         Twitter
                                     </Button>
-                                    <Button variant="outline" size="sm" onClick={shareOnFacebook}>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={shareOnFacebook}
+                                        className="border-primary-200 bg-white text-primary-700 transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-800"
+                                    >
                                         <Facebook className="mr-2 h-4 w-4" />
                                         Facebook
                                     </Button>
-                                    <Button variant="outline" size="sm" onClick={shareOnLinkedIn}>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={shareOnLinkedIn}
+                                        className="border-primary-200 bg-white text-primary-700 transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-800"
+                                    >
                                         <Linkedin className="mr-2 h-4 w-4" />
                                         LinkedIn
                                     </Button>
@@ -335,70 +373,105 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
 
             {/* Related Articles */}
             {relatedArticles.length > 0 && (
-                <section className="py-12 md:py-16">
+                <section className="bg-gradient-to-b from-white via-primary-50/30 to-white py-12 md:py-16">
                     <div className="container mx-auto px-4">
-                        <div className="mb-8 text-center">
-                            <h2 className="text-2xl font-bold">Continue Reading</h2>
-                            <p className="mt-2 text-muted-foreground">
-                                More articles you might find interesting
+                        <div className="mb-12 text-center">
+                            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent-200 bg-accent-50/80 px-4 py-2 text-sm font-semibold text-accent-700 backdrop-blur-sm">
+                                <BookOpen className="h-4 w-4 text-accent-500" />
+                                Continue Reading
+                            </div>
+                            <h2 className="text-2xl font-extrabold text-primary-900 md:text-3xl lg:text-4xl">
+                                More{' '}
+                                <span className="bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
+                                    Articles
+                                </span>
+                            </h2>
+                            <p className="mt-3 text-primary-600">
+                                Discover more insights and guides about eSIM
+                                technology
                             </p>
                         </div>
-                        <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
+                        <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-2 lg:grid-cols-3">
                             {relatedArticles.map((related) => (
-                                <Link key={related.id} href={`/blog/${related.slug}`}>
-                                    <Card className="group h-full cursor-pointer overflow-hidden transition-all hover:shadow-lg hover:border-primary/50">
-                                        {related.featured_image_url ? (
-                                            <div className="aspect-video overflow-hidden">
+                                <Link
+                                    key={related.id}
+                                    href={`/blog/${related.slug}`}
+                                    className="group"
+                                >
+                                    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-accent-200 hover:shadow-2xl hover:shadow-primary-500/10">
+                                        <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-primary-100 to-primary-50">
+                                            {related.featured_image_url ? (
                                                 <img
-                                                    src={related.featured_image_url}
+                                                    src={
+                                                        related.featured_image_url
+                                                    }
                                                     alt={related.title}
-                                                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                                                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                                                 />
-                                            </div>
-                                        ) : (
-                                            <div className="aspect-video bg-gradient-to-br from-primary/10 via-primary/5 to-muted flex items-center justify-center relative overflow-hidden">
-                                                <div className="absolute inset-0 opacity-[0.03]">
-                                                    <div className="absolute top-3 left-3">
-                                                        <FileText className="h-6 w-6" />
-                                                    </div>
-                                                    <div className="absolute bottom-3 right-3">
-                                                        <BookOpen className="h-5 w-5" />
-                                                    </div>
-                                                </div>
-                                                <div className="relative flex flex-col items-center gap-2">
-                                                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                                                        <span className="text-xl font-bold text-primary/60 group-hover:text-primary/80 transition-colors">
-                                                            {related.title.charAt(0).toUpperCase()}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1 text-xs text-muted-foreground/60">
-                                                        <BookOpen className="h-3 w-3" />
-                                                        <span>Article</span>
+                                            ) : (
+                                                <div className="bg-mesh flex h-full items-center justify-center opacity-80">
+                                                    <div className="text-center">
+                                                        <div className="mb-2 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-accent-300 to-accent-500 shadow-lg shadow-accent-400/30 transition-transform duration-500 group-hover:scale-110">
+                                                            <span className="text-xl font-bold text-accent-950">
+                                                                {related.title
+                                                                    .charAt(0)
+                                                                    .toUpperCase()}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                        <CardContent className="p-5">
-                                            <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                                                {related.title}
-                                            </h3>
-                                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                                                <span className="flex items-center gap-1">
-                                                    <Clock className="h-3 w-3" />
+                                            )}
+
+                                            <div className="absolute inset-0 bg-gradient-to-t from-primary-900/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+                                            <div className="absolute bottom-3 left-3 z-10">
+                                                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-2.5 py-1 text-xs font-bold text-primary-700 shadow-sm backdrop-blur-md">
+                                                    <Clock className="h-3 w-3 text-accent-500" />
                                                     {related.reading_time} min
                                                 </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-1 flex-col p-5">
+                                            <div className="mb-3">
                                                 {related.formatted_date && (
-                                                    <span>{related.formatted_date}</span>
+                                                    <span className="text-xs font-semibold tracking-wider text-accent-600 uppercase">
+                                                        {related.formatted_date}
+                                                    </span>
                                                 )}
                                             </div>
-                                        </CardContent>
-                                    </Card>
+                                            <h3 className="mb-4 line-clamp-2 flex-1 leading-snug font-bold text-primary-900 transition-colors group-hover:text-primary-600">
+                                                {related.title}
+                                            </h3>
+                                            <div className="flex items-center justify-between border-t border-primary-50 pt-4">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-primary-200 to-primary-300 text-[9px] font-bold text-primary-800">
+                                                        {related.author?.name?.charAt(
+                                                            0,
+                                                        ) || 'A'}
+                                                    </div>
+                                                    <span className="text-xs font-medium text-primary-500">
+                                                        {related.author?.name}
+                                                    </span>
+                                                </div>
+                                                <span className="inline-flex items-center gap-1.5 text-xs font-bold tracking-wide text-primary-600 uppercase transition-colors group-hover:text-accent-600">
+                                                    Read
+                                                    <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </article>
                                 </Link>
                             ))}
                         </div>
-                        <div className="mt-10 text-center">
-                            <Button variant="outline" size="lg" asChild>
+                        <div className="mt-12 text-center">
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                className="border-primary-300 bg-white text-primary-700 transition-all hover:border-accent-300 hover:bg-primary-50 hover:text-accent-700"
+                                asChild
+                            >
                                 <Link href="/blog">
+                                    <BookOpen className="mr-2 h-4 w-4" />
                                     View All Articles
                                     <ArrowRight className="ml-2 h-4 w-4" />
                                 </Link>
@@ -409,19 +482,46 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
             )}
 
             {/* CTA Section */}
-            <section className="border-t bg-muted/30 py-12 md:py-16">
-                <div className="container mx-auto px-4">
+            <section className="relative overflow-hidden border-t border-primary-100 bg-gradient-to-br from-primary-50 via-white to-accent-50/30 py-16">
+                <div className="pointer-events-none absolute top-20 -right-20 h-64 w-64 rounded-full bg-accent-400/10 blur-3xl" />
+                <div className="pointer-events-none absolute bottom-20 -left-20 h-64 w-64 rounded-full bg-primary-400/10 blur-3xl" />
+                <div className="relative z-10 container mx-auto px-4">
                     <div className="mx-auto max-w-2xl text-center">
-                        <h2 className="mb-4 text-2xl font-bold">Ready to Stay Connected?</h2>
-                        <p className="mb-6 text-muted-foreground">
-                            Get your eSIM today and enjoy seamless connectivity wherever you travel.
+                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary-200 bg-white/80 px-4 py-2 text-sm font-medium text-primary-700 shadow-sm backdrop-blur-sm">
+                            <Sparkles className="h-4 w-4 text-accent-500" />
+                            Start Your Journey
+                        </div>
+                        <h2 className="mb-4 text-2xl font-extrabold text-primary-900 md:text-3xl lg:text-4xl">
+                            Ready to{' '}
+                            <span className="bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
+                                Stay Connected
+                            </span>
+                            ?
+                        </h2>
+                        <p className="mb-8 text-lg text-primary-600">
+                            Get your eSIM today and enjoy seamless connectivity
+                            wherever you travel.
                         </p>
-                        <div className="flex justify-center gap-3">
-                            <Button size="lg" asChild>
-                                <Link href="/destinations">Browse Plans</Link>
+                        <div className="flex flex-col justify-center gap-4 sm:flex-row sm:gap-3">
+                            <Button
+                                size="lg"
+                                className="btn-gold shadow-lg shadow-accent-500/25 transition-shadow hover:shadow-accent-500/40"
+                                asChild
+                            >
+                                <Link href="/destinations">
+                                    <Sparkles className="mr-2 h-4 w-4" />
+                                    Browse Plans
+                                </Link>
                             </Button>
-                            <Button variant="outline" size="lg" asChild>
-                                <Link href="/how-it-works">Learn More</Link>
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                className="border-primary-300 bg-white text-primary-700 shadow-sm transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-800 hover:shadow-md"
+                                asChild
+                            >
+                                <Link href="/how-it-works">
+                                    Learn How It Works
+                                </Link>
                             </Button>
                         </div>
                     </div>

@@ -1,6 +1,5 @@
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { GoldButton } from '@/components/ui/gold-button';
 import { Check } from 'lucide-react';
 
 interface Plan {
@@ -68,89 +67,107 @@ const plans: Plan[] = [
 
 export function PlansSection() {
     return (
-        <section className="bg-muted/30 py-16 md:py-24">
-            <div className="container mx-auto px-4">
+        <section className="relative overflow-hidden bg-white py-16 md:py-24">
+            {/* Subtle background pattern */}
+            <div className="absolute inset-0 bg-[radial-gradient(#0d9488_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] [background-size:24px_24px] opacity-[0.02]" />
+
+            <div className="relative z-10 container mx-auto px-4">
                 <div className="mb-12 text-center">
-                    <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+                    <h2 className="mb-4 text-3xl font-bold text-primary-900 md:text-4xl">
                         discover our plans
                     </h2>
                 </div>
 
                 <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
                     {plans.map((plan) => (
-                        <Card
+                        <div
                             key={plan.id}
-                            className={`relative ${plan.popular ? 'scale-105 border-primary shadow-lg' : ''}`}
+                            className={`relative overflow-hidden rounded-2xl border bg-white transition-all duration-300 ${
+                                plan.popular
+                                    ? 'scale-105 border-accent-400 shadow-xl shadow-accent-500/10 md:scale-110'
+                                    : 'border-primary-100 hover:border-primary-200 hover:shadow-lg'
+                            }`}
                         >
                             {plan.popular && (
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                                    <Badge className="bg-primary px-3 py-1 text-primary-foreground">
-                                        Popular
-                                    </Badge>
+                                <div className="absolute -top-3 left-1/2 z-10 -translate-x-1/2">
+                                    <div className="relative">
+                                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-accent-400 to-accent-600 opacity-60 blur-md" />
+                                        <div className="relative rounded-full bg-gradient-to-r from-accent-500 via-accent-400 to-accent-600 px-4 py-1.5 text-xs font-bold tracking-wider text-accent-950 uppercase shadow-lg">
+                                            Popular
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
-                            <CardHeader className="pb-4 text-center">
-                                <div className="mb-2">
+                            <div className="p-6 text-center">
+                                <div className="mb-4">
                                     <img
                                         src={`/img/${plan.id}-plan-label.png`}
                                         alt={`${plan.name} plan`}
                                         className="mx-auto h-8"
                                         onError={(e) => {
-                                            // Fallback if image doesn't exist
                                             e.currentTarget.style.display =
                                                 'none';
                                         }}
                                     />
                                 </div>
-                                <CardTitle className="text-2xl">
+                                <h3 className="mb-3 text-2xl font-bold text-primary-900">
                                     {plan.name}
-                                </CardTitle>
-                                <div className="text-lg font-semibold text-primary">
+                                </h3>
+                                <div className="text-gradient-gold mb-2 text-lg font-semibold">
                                     {plan.price}
                                 </div>
-                                <p className="text-muted-foreground">
+                                <p className="text-sm text-primary-600">
                                     {plan.description}
                                 </p>
-                            </CardHeader>
+                            </div>
 
-                            <CardContent>
+                            <div className="px-6 pb-6">
                                 <ul className="mb-6 space-y-3">
                                     {plan.features.map((feature, index) => (
                                         <li
                                             key={index}
                                             className="flex items-start gap-3"
                                         >
-                                            <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
-                                            <span className="text-sm">
+                                            <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent-500" />
+                                            <span className="text-sm text-primary-700">
                                                 {feature}
                                             </span>
                                         </li>
                                     ))}
                                 </ul>
 
-                                <Button
-                                    className="w-full"
-                                    variant={plan.buttonVariant || 'default'}
-                                    size="lg"
-                                >
-                                    {plan.buttonText}
-                                </Button>
-                            </CardContent>
-                        </Card>
+                                {plan.buttonVariant === 'outline' ? (
+                                    <Button
+                                        className="w-full border-primary-200 text-primary-700 hover:bg-primary-50"
+                                        variant="outline"
+                                        size="lg"
+                                    >
+                                        {plan.buttonText}
+                                    </Button>
+                                ) : (
+                                    <GoldButton
+                                        className="w-full"
+                                        size="lg"
+                                    >
+                                        {plan.buttonText}
+                                    </GoldButton>
+                                )}
+                            </div>
+                        </div>
                     ))}
                 </div>
 
                 <div className="mt-12 text-center">
-                    <h3 className="mb-2 text-xl font-semibold">
+                    <h3 className="mb-2 text-xl font-semibold text-primary-900">
                         Fair prices, No hidden fees
                     </h3>
-                    <p className="mb-6 text-muted-foreground">
+                    <p className="mb-6 text-primary-600">
                         Calculate See what best fits your travel plans
                     </p>
-                    <Button variant="outline" size="lg">
+                    <GoldButton size="lg">
                         Calculate
-                    </Button>
+                    </GoldButton>
                 </div>
             </div>
         </section>

@@ -54,35 +54,38 @@ export default function Welcome({
                     {
                         title: 'Choose Your Plan',
                         description:
-                            'Select your destination and pick a data plan that fits your needs.',
+                            'Select your destination and pick a data plan that fits your needs and budget.',
                         features: [
                             'Browse plans by country or region',
                             'Compare data, validity, and price',
                             'Transparent pricing with no hidden fees',
                         ],
                         icon: Search,
+                        image: '/img/hero/hero-1.webp',
                     },
                     {
-                        title: 'Scan QR Code',
+                        title: 'Save on Roaming',
                         description:
-                            'Receive your eSIM instantly via email and scan to install.',
+                            'Skip expensive roaming fees. Pay once and stay connected without surprises.',
                         features: [
-                            'Instant delivery to your email',
-                            'Easy QR code scanning',
-                            'Works on all eSIM devices',
+                            'Up to 90% cheaper than roaming',
+                            'No surprise charges',
+                            'Fixed price for your trip',
                         ],
                         icon: QrCode,
+                        image: '/img/hero/hero-2.webp',
                     },
                     {
                         title: 'Stay Connected',
                         description:
-                            'Activate when you arrive and enjoy high-speed data.',
+                            'Activate when you arrive and enjoy seamless high-speed connectivity.',
                         features: [
                             'High-speed 4G/5G connectivity',
                             'Activate when you land',
                             'Use apps like normal',
                         ],
                         icon: Smartphone,
+                        image: '/img/hero/hero-3.webp',
                     },
                 ]}
             />

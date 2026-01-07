@@ -1,4 +1,3 @@
-import { Card, CardContent } from '@/components/ui/card';
 import { CTASection } from '@/components/cta-section';
 import { FAQSection } from '@/components/faq-section';
 import { HeroSection } from '@/components/hero-section';
@@ -11,7 +10,6 @@ import {
     QrCode,
     Search,
     Settings,
-    Smartphone,
     Wifi,
 } from 'lucide-react';
 
@@ -74,193 +72,114 @@ export default function HowItWorks({ totalCountries }: Props) {
             <StepsSection
                 steps={[
                     {
-                        title: 'Choose Your Destination & Plan',
-                        description: `Browse our selection of ${totalCountries}+ countries and find the perfect data plan for your trip. We offer various data packages to suit every travel need, from short weekend getaways to extended stays.`,
+                        title: 'Pick Your Perfect Plan',
+                        description: `Explore ${totalCountries}+ destinations worldwide and select a data plan tailored to your journey. Whether it's a quick business trip or a month-long adventure, we have the right package for you.`,
                         features: [
-                            'Compare plans by data, validity, and price',
-                            'Regional plans for multi-country trips',
-                            'Transparent pricing with no hidden fees',
+                            'Filter by data size, duration & budget',
+                            'Multi-country regional plans available',
+                            'No hidden fees - pay what you see',
                         ],
                         icon: Search,
                     },
                     {
-                        title: 'Purchase & Receive Instantly',
-                        description: "Complete your purchase securely and receive your eSIM immediately. We'll send you an email with your QR code and detailed installation instructions.",
+                        title: 'Instant Checkout & Delivery',
+                        description: 'Complete your order in under 60 seconds with our secure checkout. Your eSIM QR code is delivered instantly to your inbox - no waiting, no shipping delays.',
                         features: [
-                            'Secure payment processing',
-                            'Instant delivery to your email',
-                            'QR code available in your account',
+                            'Multiple secure payment methods',
+                            'QR code delivered in seconds',
+                            'Access anytime from your dashboard',
                         ],
                         icon: CreditCard,
                     },
                     {
-                        title: 'Scan & Install Your eSIM',
-                        description: "Open your phone's camera and scan the QR code we sent you. Follow the on-screen prompts to add the eSIM to your device. It only takes a minute!",
+                        title: 'Scan QR & Install in 1 Minute',
+                        description: 'Simply open your camera, scan the QR code, and follow the prompts. Your eSIM installs automatically - no tech skills needed. We recommend doing this before your trip.',
                         features: [
-                            'Simply scan with your phone camera',
-                            'Follow easy step-by-step instructions',
-                            'Install before you travel (recommended)',
+                            'Works with iPhone & Android cameras',
+                            'Step-by-step guided installation',
+                            'Install at home before traveling',
                         ],
                         icon: QrCode,
                     },
                     {
-                        title: 'Activate & Stay Connected',
-                        description: "When you arrive at your destination, simply enable your eSIM in your phone settings and turn on data roaming. You'll be connected to a local network instantly!",
+                        title: 'Land & Connect Instantly',
+                        description: 'Touch down at your destination, enable your eSIM, and you\'re online. Enjoy blazing-fast local network speeds while keeping your home SIM active for calls and texts.',
                         features: [
-                            'Activate when you land',
-                            'High-speed 4G/5G connectivity',
-                            'Keep your main number active',
+                            'One tap activation on arrival',
+                            'Premium 4G/5G network speeds',
+                            'Dual SIM - keep your home number',
                         ],
                         icon: Wifi,
                     },
                 ]}
             />
 
-            {/* Device Compatibility */}
-            <section className="bg-muted/30 py-16 md:py-24">
-                <div className="container mx-auto px-4">
-                    <div className="mb-12 text-center">
-                        <h2 className="mb-4 text-2xl font-bold md:text-3xl">
-                            Compatible Devices
-                        </h2>
-                        <p className="mx-auto max-w-2xl text-muted-foreground">
-                            eSIM is supported on most modern smartphones. Check if your device is
-                            compatible.
-                        </p>
-                    </div>
-
-                    <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
-                        <Card>
-                            <CardContent className="p-6">
-                                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
-                                    <Smartphone className="h-6 w-6" />
-                                </div>
-                                <h3 className="mb-2 font-semibold">Apple iPhone</h3>
-                                <p className="text-sm text-muted-foreground">
-                                    iPhone XS, XR and newer models including iPhone 11, 12, 13, 14,
-                                    15, and 16 series
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardContent className="p-6">
-                                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
-                                    <Smartphone className="h-6 w-6" />
-                                </div>
-                                <h3 className="mb-2 font-semibold">Samsung Galaxy</h3>
-                                <p className="text-sm text-muted-foreground">
-                                    Galaxy S20 and newer, Galaxy Note 20+, Galaxy Z Fold/Flip
-                                    series, and select A series
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardContent className="p-6">
-                                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
-                                    <Smartphone className="h-6 w-6" />
-                                </div>
-                                <h3 className="mb-2 font-semibold">Google Pixel</h3>
-                                <p className="text-sm text-muted-foreground">
-                                    Pixel 3 and newer models including Pixel 4, 5, 6, 7, 8, and 9
-                                    series
-                                </p>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    <p className="mt-8 text-center text-sm text-muted-foreground">
-                        Other compatible devices include Huawei P40+, Xiaomi, Oppo, and more.{' '}
-                        <Link href="/destinations" className="text-primary hover:underline">
-                            Check device compatibility
-                        </Link>
-                    </p>
-                </div>
-            </section>
-
             {/* Quick Setup Guide */}
-            <section className="py-16 md:py-24">
-                <div className="container mx-auto px-4">
+            <section className="relative overflow-hidden border-t border-primary-100 py-16 md:py-24">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-accent-50/30" />
+
+                <div className="relative z-10 container mx-auto px-4">
                     <div className="mb-12 text-center">
-                        <h2 className="mb-4 text-2xl font-bold md:text-3xl">
+                        <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-primary-900 md:text-4xl">
                             Quick Setup Guide
                         </h2>
-                        <p className="mx-auto max-w-2xl text-muted-foreground">
+                        <p className="mx-auto max-w-2xl text-lg text-primary-600">
                             Follow these steps to install your eSIM on iPhone or Android
                         </p>
                     </div>
 
-                    <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
-                        <Card>
-                            <CardContent className="p-6">
-                                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                                    <Settings className="h-5 w-5" />
+                    <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
+                        <div className="group overflow-hidden rounded-2xl border border-primary-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
+                            <div className="mb-5 flex items-center gap-3">
+                                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent-300 transition-colors group-hover:bg-accent-400">
+                                    <Settings className="h-5 w-5 text-accent-950" />
+                                </div>
+                                <h3 className="text-xl font-bold text-primary-900">
                                     iPhone Setup
                                 </h3>
-                                <ol className="space-y-3 text-sm text-muted-foreground">
-                                    <li className="flex gap-3">
-                                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                                            1
+                            </div>
+                            <ol className="space-y-4">
+                                {[
+                                    'Go to Settings → Cellular → Add Cellular Plan',
+                                    'Scan the QR code from your email',
+                                    'Label your eSIM (e.g., "Travel Data")',
+                                    'Enable Data Roaming in Cellular settings',
+                                ].map((step, i) => (
+                                    <li key={i} className="flex items-start gap-3">
+                                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-600 text-xs font-bold text-white">
+                                            {i + 1}
                                         </span>
-                                        Go to Settings → Cellular → Add Cellular Plan
+                                        <span className="text-sm text-primary-700">{step}</span>
                                     </li>
-                                    <li className="flex gap-3">
-                                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                                            2
-                                        </span>
-                                        Scan the QR code from your email
-                                    </li>
-                                    <li className="flex gap-3">
-                                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                                            3
-                                        </span>
-                                        Label your eSIM (e.g., "Travel Data")
-                                    </li>
-                                    <li className="flex gap-3">
-                                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                                            4
-                                        </span>
-                                        Enable Data Roaming in Cellular settings
-                                    </li>
-                                </ol>
-                            </CardContent>
-                        </Card>
+                                ))}
+                            </ol>
+                        </div>
 
-                        <Card>
-                            <CardContent className="p-6">
-                                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                                    <Settings className="h-5 w-5" />
+                        <div className="group overflow-hidden rounded-2xl border border-primary-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
+                            <div className="mb-5 flex items-center gap-3">
+                                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent-300 transition-colors group-hover:bg-accent-400">
+                                    <Settings className="h-5 w-5 text-accent-950" />
+                                </div>
+                                <h3 className="text-xl font-bold text-primary-900">
                                     Android Setup
                                 </h3>
-                                <ol className="space-y-3 text-sm text-muted-foreground">
-                                    <li className="flex gap-3">
-                                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                                            1
+                            </div>
+                            <ol className="space-y-4">
+                                {[
+                                    'Go to Settings → Network → SIM cards → Add eSIM',
+                                    'Scan the QR code from your email',
+                                    'Confirm and download the eSIM profile',
+                                    'Enable the eSIM and turn on Data Roaming',
+                                ].map((step, i) => (
+                                    <li key={i} className="flex items-start gap-3">
+                                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-600 text-xs font-bold text-white">
+                                            {i + 1}
                                         </span>
-                                        Go to Settings → Network → SIM cards → Add eSIM
+                                        <span className="text-sm text-primary-700">{step}</span>
                                     </li>
-                                    <li className="flex gap-3">
-                                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                                            2
-                                        </span>
-                                        Scan the QR code from your email
-                                    </li>
-                                    <li className="flex gap-3">
-                                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                                            3
-                                        </span>
-                                        Confirm and download the eSIM profile
-                                    </li>
-                                    <li className="flex gap-3">
-                                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                                            4
-                                        </span>
-                                        Enable the eSIM and turn on Data Roaming
-                                    </li>
-                                </ol>
-                            </CardContent>
-                        </Card>
+                                ))}
+                            </ol>
+                        </div>
                     </div>
                 </div>
             </section>
