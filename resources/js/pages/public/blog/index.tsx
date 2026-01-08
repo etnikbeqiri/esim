@@ -1,3 +1,4 @@
+import { HeroSection } from '@/components/hero-section';
 import { Button } from '@/components/ui/button';
 import GuestLayout from '@/layouts/guest-layout';
 import { type SharedData } from '@/types';
@@ -7,7 +8,6 @@ import {
     ArrowRight,
     BookOpen,
     Clock,
-    Search,
     Sparkles,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -114,52 +114,17 @@ export default function BlogIndex({ articles, meta }: Props) {
                 <meta property="og:type" content="website" />
             </Head>
 
-            {/* Hero Section */}
-            <section className="relative overflow-hidden bg-gradient-to-b from-primary-50 to-white py-16 md:py-24">
-                {/* Decorative elements */}
-                <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-accent-400/10 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-primary-400/10 blur-3xl" />
-
-                <div className="relative z-10 container mx-auto px-4">
-                    <div className="mx-auto max-w-3xl text-center">
-                        {/* Badge */}
-                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent-400/30 bg-accent-50/50 px-4 py-2 text-sm font-medium text-accent-700 backdrop-blur-sm transition-all hover:bg-accent-50 hover:shadow-lg hover:shadow-accent-500/20">
-                            <Sparkles className="h-4 w-4 text-accent-500" />
-                            {articles.total} Article
-                            {articles.total !== 1 ? 's' : ''} Available
-                        </div>
-
-                        <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-primary-900 md:text-5xl lg:text-6xl">
-                            Travel Tips &{' '}
-                            <span className="bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
-                                eSIM Guides
-                            </span>
-                        </h1>
-
-                        <p className="mb-8 text-lg text-primary-600 md:text-xl">
-                            Expert insights, detailed guides, and latest news
-                            about eSIM technology and staying connected while
-                            traveling
-                        </p>
-
-                        {/* Search */}
-                        <div className="mx-auto max-w-lg">
-                            <div className="group relative">
-                                <Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-primary-400 transition-colors group-focus-within:text-primary-500" />
-                                <input
-                                    type="text"
-                                    placeholder="Search articles..."
-                                    value={searchQuery}
-                                    onChange={(e) =>
-                                        setSearchQuery(e.target.value)
-                                    }
-                                    className="w-full rounded-full border border-primary-200 bg-white/80 py-4 pr-4 pl-12 text-primary-900 shadow-sm backdrop-blur-sm transition-all group-hover:shadow-md placeholder:text-primary-400 focus:border-primary-400 focus:bg-white focus:ring-4 focus:ring-primary-400/10 focus:outline-none"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <HeroSection
+                badge={`${articles.total} Article${articles.total !== 1 ? 's' : ''} Available`}
+                title="Travel Tips &"
+                titleHighlight="eSIM Guides"
+                description="Expert insights, detailed guides, and latest news about eSIM technology and staying connected while traveling"
+                showSearch={true}
+                showStats={false}
+                searchValue={searchQuery}
+                onSearchChange={setSearchQuery}
+                searchPlaceholder="Search articles..."
+            />
 
             {/* Articles Grid */}
             <section className="py-12 md:py-16">
@@ -255,8 +220,8 @@ export default function BlogIndex({ articles, meta }: Props) {
 
                                                 {/* Reading time badge */}
                                                 <div className="absolute bottom-3 left-3 z-10">
-                                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-primary-700 shadow-sm backdrop-blur-md">
-                                                        <Clock className="h-3 w-3 text-accent-500" />
+                                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-400 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 px-3 py-1 text-xs font-bold text-accent-950 shadow-sm">
+                                                        <Clock className="h-3 w-3" />
                                                         {article.reading_time}{' '}
                                                         min read
                                                     </span>
@@ -361,8 +326,8 @@ export default function BlogIndex({ articles, meta }: Props) {
                 <div className="pointer-events-none absolute bottom-20 -left-20 h-64 w-64 rounded-full bg-primary-400/10 blur-3xl" />
                 <div className="relative z-10 container mx-auto px-4">
                     <div className="mx-auto max-w-2xl text-center">
-                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary-200 bg-white/80 px-4 py-2 text-sm font-medium text-primary-700 shadow-sm backdrop-blur-sm">
-                            <Sparkles className="h-4 w-4 text-accent-500" />
+                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent-500 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 px-4 py-2 text-sm font-bold text-accent-950 shadow-lg shadow-accent-500/25">
+                            <Sparkles className="h-4 w-4" />
                             Start Your Journey
                         </div>
                         <h2 className="mb-4 text-2xl font-extrabold text-primary-900 md:text-3xl lg:text-4xl">

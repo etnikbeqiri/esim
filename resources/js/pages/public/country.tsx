@@ -135,7 +135,7 @@ function NetworkCoverageDialog({ networks, isFeatured }: { networks: NetworkData
                             placeholder="Search..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full rounded-md border border-primary-200 bg-primary-50 py-1.5 pl-8 pr-3 text-xs text-gray-950 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-400/20 md:rounded-lg md:py-2 md:pl-10 md:pr-4 md:text-sm"
+                            className="w-full rounded-md border border-primary-200 bg-primary-50 py-1.5 pl-8 pr-3 text-base text-gray-950 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-400/20 md:rounded-lg md:py-2 md:pl-10 md:pr-4 md:text-sm"
                         />
                     </div>
                 )}

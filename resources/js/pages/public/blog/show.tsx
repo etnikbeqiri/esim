@@ -182,17 +182,17 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                         <div className="mx-auto max-w-3xl">
                             {/* Meta badges */}
                             <div className="mb-6 flex flex-wrap items-center gap-3">
-                                <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-200 bg-accent-50/80 px-3 py-1 text-xs font-semibold text-accent-700 backdrop-blur-sm">
-                                    <BookOpen className="h-3.5 w-3.5 text-accent-600" />
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-500 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 px-3 py-1.5 text-xs font-bold text-accent-950 shadow-sm">
+                                    <BookOpen className="h-3.5 w-3.5" />
                                     Article
                                 </span>
-                                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white/50 px-3 py-1 text-xs font-medium text-primary-600 backdrop-blur-sm">
-                                    <Clock className="h-3.5 w-3.5" />
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white px-3 py-1.5 text-xs font-medium text-primary-700 shadow-sm">
+                                    <Clock className="h-3.5 w-3.5 text-accent-500" />
                                     {article.reading_time} min read
                                 </span>
                                 {article.formatted_date && (
-                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white/50 px-3 py-1 text-xs font-medium text-primary-600 backdrop-blur-sm">
-                                        <Calendar className="h-3.5 w-3.5" />
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white px-3 py-1.5 text-xs font-medium text-primary-700 shadow-sm">
+                                        <Calendar className="h-3.5 w-3.5 text-accent-500" />
                                         {article.formatted_date}
                                     </span>
                                 )}
@@ -214,14 +214,14 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                             <div className="flex flex-wrap items-center justify-between gap-6 border-t border-primary-200/60 pt-6">
                                 {article.author && (
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-accent-200 to-accent-500 shadow-md ring-2 shadow-accent-500/20 ring-white">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-accent-300 via-accent-400 to-accent-300 shadow-md ring-2 shadow-accent-500/25 ring-white">
                                             <User className="h-6 w-6 text-accent-950" />
                                         </div>
                                         <div>
                                             <p className="font-bold text-primary-900">
                                                 {article.author.name}
                                             </p>
-                                            <p className="text-xs font-medium tracking-wider text-primary-500 uppercase">
+                                            <p className="text-xs font-bold tracking-wider text-accent-600 uppercase">
                                                 Author
                                             </p>
                                         </div>
@@ -370,8 +370,8 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                 <section className="bg-gradient-to-b from-white via-primary-50/30 to-white py-12 md:py-16">
                     <div className="container mx-auto px-4">
                         <div className="mb-12 text-center">
-                            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent-200 bg-accent-50/80 px-4 py-2 text-sm font-semibold text-accent-700 backdrop-blur-sm">
-                                <BookOpen className="h-4 w-4 text-accent-500" />
+                            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent-500 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 px-4 py-2 text-sm font-bold text-accent-950 shadow-lg shadow-accent-500/25">
+                                <BookOpen className="h-4 w-4" />
                                 Continue Reading
                             </div>
                             <h2 className="text-2xl font-extrabold text-primary-900 md:text-3xl lg:text-4xl">
@@ -419,8 +419,8 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                             <div className="absolute inset-0 bg-gradient-to-t from-primary-900/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
                                             <div className="absolute bottom-3 left-3 z-10">
-                                                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-2.5 py-1 text-xs font-bold text-primary-700 shadow-sm backdrop-blur-md">
-                                                    <Clock className="h-3 w-3 text-accent-500" />
+                                                <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-400 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 px-2.5 py-1 text-xs font-bold text-accent-950 shadow-sm">
+                                                    <Clock className="h-3 w-3" />
                                                     {related.reading_time} min
                                                 </span>
                                             </div>
@@ -461,7 +461,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                             <Button
                                 variant="outline"
                                 size="lg"
-                                className="border-primary-300 bg-white text-primary-700 transition-all hover:border-accent-300 hover:bg-primary-50 hover:text-accent-700"
+                                className="border-primary-200 bg-white text-primary-700 shadow-sm transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-800 hover:shadow-md"
                                 asChild
                             >
                                 <Link href="/blog">
@@ -481,8 +481,8 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                 <div className="pointer-events-none absolute bottom-20 -left-20 h-64 w-64 rounded-full bg-primary-400/10 blur-3xl" />
                 <div className="relative z-10 container mx-auto px-4">
                     <div className="mx-auto max-w-2xl text-center">
-                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary-200 bg-white/80 px-4 py-2 text-sm font-medium text-primary-700 shadow-sm backdrop-blur-sm">
-                            <Sparkles className="h-4 w-4 text-accent-500" />
+                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent-500 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 px-4 py-2 text-sm font-bold text-accent-950 shadow-lg shadow-accent-500/25">
+                            <Sparkles className="h-4 w-4" />
                             Start Your Journey
                         </div>
                         <h2 className="mb-4 text-2xl font-extrabold text-primary-900 md:text-3xl lg:text-4xl">

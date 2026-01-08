@@ -192,7 +192,7 @@ export default function Checkout({
                                                     id="email"
                                                     type="email"
                                                     placeholder="you@example.com"
-                                                    className="h-10 rounded-lg border-primary-200 bg-white pl-10 text-sm text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 md:h-12 md:rounded-xl md:pl-11 md:text-base"
+                                                    className="h-10 rounded-lg border-primary-200 bg-white pl-10 text-base text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 md:h-12 md:rounded-xl md:pl-11"
                                                     value={data.email}
                                                     onChange={(e) =>
                                                         setData('email', e.target.value)
@@ -225,7 +225,7 @@ export default function Checkout({
                                                     id="name"
                                                     type="text"
                                                     placeholder="John Doe"
-                                                    className="h-10 rounded-lg border-primary-200 bg-white pl-10 text-sm text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 md:h-12 md:rounded-xl md:pl-11 md:text-base"
+                                                    className="h-10 rounded-lg border-primary-200 bg-white pl-10 text-base text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 md:h-12 md:rounded-xl md:pl-11"
                                                     value={data.name}
                                                     onChange={(e) =>
                                                         setData('name', e.target.value)
@@ -257,7 +257,7 @@ export default function Checkout({
                                                     id="phone"
                                                     type="tel"
                                                     placeholder="+1 234 567 8900"
-                                                    className="h-10 rounded-lg border-primary-200 bg-white pl-10 text-sm text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 md:h-12 md:rounded-xl md:pl-11 md:text-base"
+                                                    className="h-10 rounded-lg border-primary-200 bg-white pl-10 text-base text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 md:h-12 md:rounded-xl md:pl-11"
                                                     value={data.phone}
                                                     onChange={(e) =>
                                                         setData('phone', e.target.value)
