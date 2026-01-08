@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/back-button';
 import { CountryFlag } from '@/components/country-flag';
 import { PaymentProviderSelect } from '@/components/payment-provider-select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -10,7 +11,6 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
-    ArrowLeft,
     CheckCircle,
     CheckCircle2,
     CreditCard,
@@ -95,12 +95,7 @@ export default function CheckoutShow({ package: pkg, customer, paymentProviders,
             <Head title="Checkout" />
             <div className="p-4 md:p-6">
                 {/* Back Button */}
-                <Button variant="ghost" size="sm" asChild className="mb-6">
-                    <Link href="/client/packages">
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Packages
-                    </Link>
-                </Button>
+                <BackButton href="/client/packages" label="Back to Packages" variant="ghost" className="mb-6" />
 
                 <div className="mx-auto max-w-5xl">
                     <h1 className="mb-6 text-2xl font-semibold md:text-3xl">Checkout</h1>

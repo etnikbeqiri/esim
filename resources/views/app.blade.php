@@ -22,11 +22,12 @@
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {
-                background-color: #f7fefe; /* primary-50 */
+                background-color: #eef5f0; /* primary-50 - royal green */
+                overflow-x: hidden;
             }
 
             html.dark {
-                background-color: #2d8a82; /* primary-900 - lighter dark mode */
+                background-color: #002a18; /* primary-900 - royal green dark */
             }
         </style>
 

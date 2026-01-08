@@ -51,24 +51,24 @@ export function HeroSection({
     }
 
     return (
-        <section className="bg-mesh relative overflow-hidden pt-16 pb-20 md:pt-24 md:pb-28">
+        <section className="bg-mesh relative overflow-hidden pt-8 pb-12 md:pt-24 md:pb-28">
             {/* Abstract Background Shapes */}
-            <div className="animate-float absolute top-20 -left-20 h-96 w-96 rounded-full bg-primary-200/30 blur-3xl filter" />
-            <div className="animate-float-delayed bg-accent-200/30 absolute -right-20 bottom-20 h-96 w-96 rounded-full blur-3xl filter" />
+            <div className="animate-float absolute top-20 -left-20 h-64 w-64 rounded-full bg-primary-200/30 blur-3xl filter md:h-96 md:w-96" />
+            <div className="animate-float-delayed bg-accent-200/30 absolute -right-20 bottom-20 h-64 w-64 rounded-full blur-3xl filter md:h-96 md:w-96" />
 
             <div className="relative z-10 container mx-auto px-4">
                 <div className="mx-auto max-w-4xl text-center">
                     <Badge
                         variant="outline"
-                        className={`animate-fade-in-up mb-8 inline-flex rounded-full border border-primary-100 bg-white/50 px-6 py-2 text-sm font-medium text-primary-800 shadow-sm backdrop-blur-md transition-transform hover:scale-105`}
+                        className={`animate-fade-in-up mb-4 inline-flex rounded-full border border-primary-100 bg-white/50 px-4 py-1.5 text-xs font-medium text-primary-800 shadow-sm backdrop-blur-md transition-transform hover:scale-105 md:mb-8 md:px-6 md:py-2 md:text-sm`}
                     >
-                        <Sparkles className="mr-2 h-4 w-4 text-accent-500" />
+                        <Sparkles className="mr-1.5 h-3.5 w-3.5 text-accent-500 md:mr-2 md:h-4 md:w-4" />
                         <span className="bg-gradient-to-r from-primary-800 to-primary-600 bg-clip-text text-transparent">
                             {badge}
                         </span>
                     </Badge>
 
-                    <h1 className="mb-6 text-4xl leading-[1.1] font-extrabold tracking-tight text-primary-900 sm:text-5xl md:text-6xl lg:text-7xl">
+                    <h1 className="mb-4 text-3xl leading-[1.15] font-extrabold tracking-tight text-primary-900 sm:text-4xl md:mb-6 md:text-6xl lg:text-7xl">
                         {title}
                         {titleHighlight && (
                             <span className="relative block whitespace-nowrap">
@@ -80,7 +80,7 @@ export function HeroSection({
                         )}
                     </h1>
 
-                    <p className="mb-10 mx-auto max-w-2xl text-base leading-relaxed text-primary-600 sm:text-lg md:text-xl">
+                    <p className="mx-auto mb-6 max-w-2xl text-sm leading-relaxed text-primary-600 sm:text-base md:mb-10 md:text-xl">
                         {description}
                     </p>
 
@@ -106,33 +106,28 @@ export function HeroSection({
                                             setSearchQuery(e.target.value)
                                         }
                                     />
-                                    {isControlled ? (
-                                        searchQuery && (
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    setSearchQuery('')
-                                                }
-                                                className="shrink-0 rounded-full p-1.5 text-primary-400 transition-colors hover:bg-primary-50 hover:text-primary-600"
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </button>
-                                        )
-                                    ) : (
-                                        <GoldButton
-                                            type="submit"
-                                            className="h-10 shrink-0 rounded-full px-6 text-sm"
+                                    {isControlled && searchQuery && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setSearchQuery('')}
+                                            className="shrink-0 rounded-full p-1.5 text-primary-400 transition-colors hover:bg-primary-50 hover:text-primary-600"
                                         >
-                                            Search
-                                        </GoldButton>
+                                            <X className="h-4 w-4" />
+                                        </button>
                                     )}
+                                    <GoldButton
+                                        type="submit"
+                                        className="h-10 shrink-0 rounded-full px-4 text-sm md:px-6"
+                                    >
+                                        Search
+                                    </GoldButton>
                                 </div>
                             </form>
                         </div>
                     )}
 
                     {showStats && (
-                        <div className="mt-12 flex flex-wrap items-center justify-center gap-6 gap-x-12">
+                        <div className="mt-6 flex items-center justify-center gap-4 md:mt-12 md:gap-x-12">
                             {[
                                 {
                                     icon: Globe,
@@ -152,16 +147,16 @@ export function HeroSection({
                             ].map((stat, i) => (
                                 <div
                                     key={i}
-                                    className="group flex items-center gap-3"
+                                    className="group flex items-center gap-2 md:gap-3"
                                 >
-                                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-primary-500 shadow-md ring-1 ring-primary-100 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg">
-                                        <stat.icon className="h-5 w-5" />
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-primary-500 shadow-md ring-1 ring-primary-100 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg md:h-11 md:w-11 md:rounded-xl">
+                                        <stat.icon className="h-4 w-4 md:h-5 md:w-5" />
                                     </div>
                                     <div>
-                                        <div className="text-base font-bold text-primary-900">
+                                        <div className="text-sm font-bold text-primary-900 md:text-base">
                                             {stat.value}
                                         </div>
-                                        <div className="text-xs font-medium text-primary-400">
+                                        <div className="text-[10px] font-medium text-primary-400 md:text-xs">
                                             {stat.label}
                                         </div>
                                     </div>
@@ -172,8 +167,8 @@ export function HeroSection({
                 </div>
             </div>
 
-            {/* Scroll Indicator */}
-            <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 opacity-50">
+            {/* Scroll Indicator - hidden on mobile */}
+            <div className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 opacity-50 md:flex">
                 <span className="text-xs font-medium tracking-widest text-primary-400 uppercase">
                     Scroll
                 </span>

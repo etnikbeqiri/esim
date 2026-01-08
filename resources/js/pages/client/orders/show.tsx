@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/back-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -415,12 +416,7 @@ export default function OrderShow({ order, customer }: Props) {
 
                 {/* Actions */}
                 <div className="flex flex-wrap gap-3">
-                    <Button variant="outline" asChild>
-                        <Link href="/client/orders">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Orders
-                        </Link>
-                    </Button>
+                    <BackButton href="/client/orders" label="Back to Orders" variant="outline" />
                     {(isFailed || isCompleted) && (
                         <Button asChild>
                             <Link href="/client/packages">

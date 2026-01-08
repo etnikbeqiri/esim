@@ -1,8 +1,8 @@
+import { BackButton } from '@/components/back-button';
 import { CountryFlag } from '@/components/country-flag';
 import { PaymentProviderSelect } from '@/components/payment-provider-select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,6 @@ import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
-    ArrowLeft,
     CheckCircle2,
     CreditCard,
     HardDrive,
@@ -106,23 +105,15 @@ export default function Checkout({
 
                 <div className="relative z-10 container mx-auto max-w-6xl px-4">
                     {/* Back Button */}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        className="mb-8 gap-2 rounded-full text-primary-700 hover:bg-white hover:text-primary-900"
-                    >
-                        <Link
-                            href={
-                                pkg.country
-                                    ? `/destinations/${pkg.country.iso_code.toLowerCase()}`
-                                    : '/destinations'
-                            }
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                            Back to Plans
-                        </Link>
-                    </Button>
+                    <BackButton
+                        href={
+                            pkg.country
+                                ? `/destinations/${pkg.country.iso_code.toLowerCase()}`
+                                : '/destinations'
+                        }
+                        label="Back to Plans"
+                        className="mb-8"
+                    />
 
                     {/* Page Header - centered like hero */}
                     <div className="mb-12 text-center">

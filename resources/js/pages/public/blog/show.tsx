@@ -1,9 +1,9 @@
+import { BackButton } from '@/components/back-button';
 import { Button } from '@/components/ui/button';
 import GuestLayout from '@/layouts/guest-layout';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
-    ArrowLeft,
     ArrowRight,
     BookOpen,
     Calendar,
@@ -177,13 +177,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
 
                     <div className="relative z-10 container mx-auto px-4">
                         {/* Back link */}
-                        <Link
-                            href="/blog"
-                            className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary-200 bg-white/80 px-4 py-2 text-sm font-semibold text-primary-600 shadow-sm backdrop-blur-sm transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-700 hover:shadow-md"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                            Back to Blog
-                        </Link>
+                        <BackButton href="/blog" label="Back to Blog" className="mb-8" />
 
                         <div className="mx-auto max-w-3xl">
                             {/* Meta badges */}

@@ -65,18 +65,18 @@
 
     /* --- EXTENDED PALETTE (Luxury Tech) --- */
 
-    /* Primary = Very Light Teal (Soft Palette) */
-    --color-primary-50: #f7fefe;
-    --color-primary-100: #e6faf8;
-    --color-primary-200: #c9f5f0;
-    --color-primary-300: #a3ede5;
-    --color-primary-400: #7de5da;
-    --color-primary-500: #5dd9cc;
-    --color-primary-600: #4cc9bc;
-    --color-primary-700: #3fb5a9;
-    --color-primary-800: #359e94;
-    --color-primary-900: #2d8a82;
-    --color-primary-950: #1a5450;
+    /* Primary = Deep Royal Green (Luxury Palette) */
+    --color-primary-50: #eef5f0;
+    --color-primary-100: #d5e8da;
+    --color-primary-200: #aad1b6;
+    --color-primary-300: #7ab68d;
+    --color-primary-400: #4d9968;
+    --color-primary-500: #006039;
+    --color-primary-600: #005331;
+    --color-primary-700: #004528;
+    --color-primary-800: #003720;
+    --color-primary-900: #002a18;
+    --color-primary-950: #00150c;
 
     /* Accent = Real Gold */
     --color-accent-50: #fefce8;
@@ -119,7 +119,7 @@
     --popover: #ffffff;
     --popover-foreground: var(--color-primary-900);
 
-    /* Primary Brand Color (Lighter Teal for softer UI) */
+    /* Primary Brand Color (Royal Green for premium UI) */
     --primary: var(--color-primary-500);
     --primary-foreground: #ffffff;
 
@@ -164,7 +164,7 @@
 }
 
 .dark {
-    /* Backgrounds - Use lighter teal shades for dark mode */
+    /* Backgrounds - Use darker royal green shades for dark mode */
     --background: var(--color-primary-900);
     --foreground: var(--color-primary-50);
 
@@ -175,7 +175,7 @@
     --popover: var(--color-primary-800);
     --popover-foreground: var(--color-primary-50);
 
-    /* Primary Brand Color (Lighter Teal for dark mode) */
+    /* Primary Brand Color (Royal Green for dark mode) */
     --primary: var(--color-primary-400);
     --primary-foreground: var(--color-primary-900);
 
@@ -206,7 +206,7 @@
     --chart-4: oklch(0.627 0.265 303.9);
     --chart-5: oklch(0.645 0.246 16.439);
 
-    /* Sidebar - Lighter dark mode */
+    /* Sidebar - Royal green dark mode */
     --sidebar: var(--color-primary-800);
     --sidebar-foreground: var(--color-primary-50);
     --sidebar-primary: var(--color-primary-400);
@@ -220,6 +220,11 @@
 @layer base {
     * {
         @apply border-border;
+    }
+
+    html,
+    body {
+        @apply overflow-x-hidden;
     }
 
     body {
