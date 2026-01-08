@@ -9,18 +9,32 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('invoices', function (Blueprint $table) {
-            // Rename _eur columns to simpler names
-            $table->renameColumn('subtotal_eur', 'subtotal');
-            $table->renameColumn('vat_amount_eur', 'vat_amount');
-            $table->renameColumn('total_eur', 'total');
-            $table->renameColumn('balance_before_eur', 'balance_before');
-            $table->renameColumn('balance_after_eur', 'balance_after');
+            // Only rename if old columns exist (make migration idempotent)
+            if (Schema::hasColumn('invoices', 'subtotal_eur')) {
+                $table->renameColumn('subtotal_eur', 'subtotal');
+            }
+            if (Schema::hasColumn('invoices', 'vat_amount_eur')) {
+                $table->renameColumn('vat_amount_eur', 'vat_amount');
+            }
+            if (Schema::hasColumn('invoices', 'total_eur')) {
+                $table->renameColumn('total_eur', 'total');
+            }
+            if (Schema::hasColumn('invoices', 'balance_before_eur')) {
+                $table->renameColumn('balance_before_eur', 'balance_before');
+            }
+            if (Schema::hasColumn('invoices', 'balance_after_eur')) {
+                $table->renameColumn('balance_after_eur', 'balance_after');
+            }
 
-            // Add currency relationship
-            $table->foreignId('currency_id')->nullable()->after('total')->constrained()->nullOnDelete();
+            // Add currency relationship if not exists
+            if (!Schema::hasColumn('invoices', 'currency_id')) {
+                $table->foreignId('currency_id')->nullable()->after('total')->constrained()->nullOnDelete();
+            }
 
-            // Drop old currency_code column
-            $table->dropColumn('currency_code');
+            // Drop old currency_code column if exists
+            if (Schema::hasColumn('invoices', 'currency_code')) {
+                $table->dropColumn('currency_code');
+            }
         });
     }
 
