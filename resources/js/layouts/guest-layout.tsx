@@ -1,9 +1,10 @@
+import AppLogoIcon from '@/components/app-logo-icon';
 import LanguageSwitcher from '@/components/language-switcher';
 import { Button } from '@/components/ui/button';
 import { GoldButton } from '@/components/ui/gold-button';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Globe, Menu, User, X } from 'lucide-react';
+import { Menu, User, X } from 'lucide-react';
 import { useState } from 'react';
 
 interface GuestLayoutProps {
@@ -20,9 +21,9 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
             <header className="sticky top-0 z-50 w-full border-b border-primary-100 bg-white/80 backdrop-blur-lg">
                 <div className="container mx-auto flex h-20 items-center justify-between px-4">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2.5">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-500 shadow-lg shadow-primary-500/25 transition-transform hover:scale-105">
-                            <Globe className="h-6 w-6 text-white" />
+                    <Link href="/" className="flex items-center gap-3">
+                        <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-accent-600 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 shadow-[0px_4px_20px_rgba(212,175,55,0.4),0px_0px_30px_rgba(255,215,0,0.3)] before:absolute before:top-0 before:h-full before:w-[80%] before:skew-x-[-20deg] before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent before:animate-[logo-shimmer_5s_ease-in-out_infinite]">
+                            <AppLogoIcon className="h-7 w-7 text-white" />
                         </div>
                         <span className="text-xl font-bold tracking-tight text-primary-900">
                             {name}
@@ -92,17 +93,20 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                         )}
                     </div>
 
-                    {/* Mobile Menu Button */}
-                    <button
-                        className="rounded-lg p-2 text-primary-800 hover:bg-primary-50 md:hidden"
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    >
-                        {mobileMenuOpen ? (
-                            <X className="h-6 w-6" />
-                        ) : (
-                            <Menu className="h-6 w-6" />
-                        )}
-                    </button>
+                    {/* Mobile Language Switcher & Menu Button */}
+                    <div className="flex items-center gap-2 md:hidden">
+                        <LanguageSwitcher />
+                        <button
+                            className="rounded-lg p-2 text-primary-800 hover:bg-primary-50"
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        >
+                            {mobileMenuOpen ? (
+                                <X className="h-6 w-6" />
+                            ) : (
+                                <Menu className="h-6 w-6" />
+                            )}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Mobile Menu */}
@@ -194,10 +198,10 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                         <div className="md:col-span-1">
                             <Link
                                 href="/"
-                                className="flex items-center gap-2.5"
+                                className="flex items-center gap-3"
                             >
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-500 shadow-lg shadow-primary-500/25">
-                                    <Globe className="h-6 w-6 text-white" />
+                                <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-accent-600 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 shadow-[0px_4px_20px_rgba(212,175,55,0.4),0px_0px_30px_rgba(255,215,0,0.3)] before:absolute before:top-0 before:h-full before:w-[80%] before:skew-x-[-20deg] before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent before:animate-[logo-shimmer_5s_ease-in-out_infinite]">
+                                    <AppLogoIcon className="h-7 w-7 text-white" />
                                 </div>
                                 <span className="text-xl font-bold text-primary-900">
                                     {name}

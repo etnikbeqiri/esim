@@ -5,7 +5,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 const goldButtonVariants = cva(
-    'relative overflow-hidden inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-bold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-accent-600 text-accent-950 shadow-[0px_4px_15px_rgba(212,175,55,0.3)] bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 bg-[length:200%_auto] before:absolute before:inset-0 before:bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.4)_50%,transparent_100%)] before:left-[-100%] before:transition-none hover:before:animate-[btn-shimmer_1.5s_ease-in-out_infinite]',
+    'relative overflow-hidden inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-bold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-accent-600 text-accent-950 shadow-[0px_4px_15px_rgba(212,175,55,0.3)] bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 bg-[length:200%_auto] before:absolute before:top-0 before:h-full before:w-[80%] before:skew-x-[-20deg] before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent before:left-[-150%] hover:before:animate-[logo-shimmer_3s_ease-in-out_infinite]',
     {
         variants: {
             size: {
