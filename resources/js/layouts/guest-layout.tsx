@@ -21,8 +21,8 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
             <header className="sticky top-0 z-50 w-full border-b border-primary-100 bg-white/80 backdrop-blur-lg">
                 <div className="container mx-auto flex h-20 items-center justify-between px-4">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-0">
-                        <AppLogoIcon size="lg" />
+                    <Link href="/" className="flex items-center gap-3">
+                        <img alt="Logo" className="h-12 w-12 object-contain" src="/logo.png" />
                         <span className="text-xl font-bold tracking-tight text-primary-900">
                             {name}
                         </span>
@@ -196,9 +196,9 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                         <div className="md:col-span-1">
                             <Link
                                 href="/"
-                                className="flex items-center gap-0"
+                                className="flex items-center gap-3"
                             >
-                                <AppLogoIcon size="lg" />
+                                <img alt="Logo" className="h-12 w-12 object-contain" src="/logo.png" />
                                 <span className="text-xl font-bold text-primary-900">
                                     {name}
                                 </span>
