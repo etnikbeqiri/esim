@@ -163,50 +163,32 @@
     --sidebar-ring: var(--color-primary-400);
 }
 
+/*
 .dark {
-    /* Backgrounds - Use darker royal green shades for dark mode */
     --background: var(--color-primary-900);
     --foreground: var(--color-primary-50);
-
-    /* Cards & Surfaces */
     --card: var(--color-primary-800);
     --card-foreground: var(--color-primary-50);
-
     --popover: var(--color-primary-800);
     --popover-foreground: var(--color-primary-50);
-
-    /* Primary Brand Color (Royal Green for dark mode) */
     --primary: var(--color-primary-400);
     --primary-foreground: var(--color-primary-900);
-
-    /* Secondary / Muted */
     --secondary: var(--color-primary-700);
     --secondary-foreground: var(--color-primary-50);
-
     --muted: var(--color-primary-800);
     --muted-foreground: var(--color-primary-300);
-
-    /* Accent (Gold) */
     --accent: var(--color-accent-500);
     --accent-foreground: var(--color-accent-950);
-
-    /* Destructive */
     --destructive: oklch(0.396 0.141 25.723);
     --destructive-foreground: oklch(0.637 0.237 25.331);
-
-    /* Borders & Inputs */
     --border: var(--color-primary-700);
     --input: var(--color-primary-700);
     --ring: var(--color-primary-400);
-
-    /* Charts */
     --chart-1: oklch(0.488 0.243 264.376);
     --chart-2: oklch(0.696 0.17 162.48);
     --chart-3: oklch(0.769 0.188 70.08);
     --chart-4: oklch(0.627 0.265 303.9);
     --chart-5: oklch(0.645 0.246 16.439);
-
-    /* Sidebar - Royal green dark mode */
     --sidebar: var(--color-primary-800);
     --sidebar-foreground: var(--color-primary-50);
     --sidebar-primary: var(--color-primary-400);
@@ -216,6 +198,7 @@
     --sidebar-border: var(--color-primary-600);
     --sidebar-ring: var(--color-primary-400);
 }
+*/
 
 @layer base {
     * {
@@ -322,7 +305,8 @@
         --color-neutral-950: #09090b !important;
     }
 
-    /* Neutral theme - DARK MODE */
+    /* Neutral theme - DARK MODE - DISABLED to force light mode only */
+    /*
     .neutral-theme.dark {
         background-color: #09090b !important;
         --background: #09090b !important;
@@ -352,13 +336,11 @@
         --sidebar-accent-foreground: #fafafa !important;
         --sidebar-border: #27272a !important;
         --sidebar-ring: #d4d4d8 !important;
-        /* Chart colors (adjusted for dark) */
         --chart-1: #2662d9 !important;
         --chart-2: #2eb88a !important;
         --chart-3: #e88c30 !important;
         --chart-4: #af57db !important;
         --chart-5: #e23670 !important;
-        /* Primary palette (zinc - inverted for dark) */
         --color-primary-50: #09090b !important;
         --color-primary-100: #18181b !important;
         --color-primary-200: #27272a !important;
@@ -370,7 +352,6 @@
         --color-primary-800: #e4e4e7 !important;
         --color-primary-900: #f4f4f5 !important;
         --color-primary-950: #fafafa !important;
-        /* Accent palette (zinc - inverted for dark) */
         --color-accent-50: #09090b !important;
         --color-accent-100: #18181b !important;
         --color-accent-200: #27272a !important;
@@ -382,7 +363,6 @@
         --color-accent-800: #e4e4e7 !important;
         --color-accent-900: #f4f4f5 !important;
         --color-accent-950: #fafafa !important;
-        /* Neutral palette (zinc - inverted for dark) */
         --color-neutral-50: #09090b !important;
         --color-neutral-100: #18181b !important;
         --color-neutral-200: #27272a !important;
@@ -395,6 +375,7 @@
         --color-neutral-900: #f4f4f5 !important;
         --color-neutral-950: #fafafa !important;
     }
+    */
 
     .btn-gold {
         background: linear-gradient(
