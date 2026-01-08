@@ -181,22 +181,18 @@ export default function Destinations({ countries, regions, filters }: Props) {
                             guide or contact our support team.
                         </p>
                         <div className="flex justify-center gap-3">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                asChild
-                                className="rounded-full border-primary-200 text-primary-700 hover:bg-primary-50"
+                            <Link
+                                href="/how-it-works"
+                                className="inline-flex h-8 items-center justify-center rounded-full border border-primary-200 bg-white px-4 text-sm font-medium text-primary-700 shadow-sm transition-colors hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700"
                             >
-                                <Link href="/how-it-works">How It Works</Link>
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                asChild
-                                className="rounded-full border-primary-200 text-primary-700 hover:bg-primary-50"
+                                How It Works
+                            </Link>
+                            <Link
+                                href="/help"
+                                className="inline-flex h-8 items-center justify-center rounded-full border border-primary-200 bg-white px-4 text-sm font-medium text-primary-700 shadow-sm transition-colors hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700"
                             >
-                                <Link href="/help">Get Help</Link>
-                            </Button>
+                                Get Help
+                            </Link>
                         </div>
                     </div>
                 </div>

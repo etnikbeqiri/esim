@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Country;
 use App\Models\Package;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -176,5 +177,43 @@ class HomeController extends Controller
         return Inertia::render('public/how-it-works', [
             'totalCountries' => $totalCountries,
         ]);
+    }
+
+    public function searchDestinations(Request $request): JsonResponse
+    {
+        $query = $request->get('q', '');
+
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $countries = Country::query()
+            ->where('is_active', true)
+            ->whereHas('packages', fn ($q) => $q->where('is_active', true))
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                  ->orWhere('iso_code', 'like', "%{$query}%");
+            })
+            ->withCount(['packages' => fn ($q) => $q->where('is_active', true)])
+            ->orderByRaw("CASE WHEN name LIKE ? THEN 0 ELSE 1 END", ["{$query}%"])
+            ->orderBy('name')
+            ->limit(6)
+            ->get()
+            ->map(function ($country) {
+                $minPrice = $country->packages()
+                    ->where('is_active', true)
+                    ->get()
+                    ->min(fn ($p) => $p->effective_retail_price);
+
+                return [
+                    'id' => $country->id,
+                    'name' => $country->name,
+                    'iso_code' => $country->iso_code,
+                    'package_count' => $country->packages_count,
+                    'min_price' => $minPrice,
+                ];
+            });
+
+        return response()->json($countries);
     }
 }

@@ -8,6 +8,7 @@ use Laravel\Fortify\Features;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/api/destinations/search', [HomeController::class, 'searchDestinations'])->name('api.destinations.search');
 Route::get('/destinations', [HomeController::class, 'destinations'])->name('destinations');
 Route::get('/destinations/{country}', [HomeController::class, 'country'])->name('destinations.country');
 Route::get('/package/{package}', [HomeController::class, 'package'])->name('package.show');
