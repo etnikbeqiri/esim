@@ -98,10 +98,10 @@ export default function Checkout({
         <GuestLayout>
             <Head title="Checkout" />
 
-            <section className="bg-mesh relative min-h-screen py-12 md:py-16">
+            <section className="bg-mesh relative min-h-screen py-6 md:py-16">
                 {/* Abstract Background Shapes - same as hero */}
-                <div className="animate-float absolute top-20 -left-20 h-96 w-96 rounded-full bg-primary-200/30 blur-3xl filter" />
-                <div className="animate-float-delayed absolute -right-20 bottom-20 h-96 w-96 rounded-full bg-accent-200/30 blur-3xl filter" />
+                <div className="animate-float absolute top-20 -left-20 h-64 w-64 rounded-full bg-primary-200/30 blur-3xl filter md:h-96 md:w-96" />
+                <div className="animate-float-delayed absolute -right-20 bottom-20 h-64 w-64 rounded-full bg-accent-200/30 blur-3xl filter md:h-96 md:w-96" />
 
                 <div className="relative z-10 container mx-auto max-w-6xl px-4">
                     {/* Back Button */}
@@ -111,33 +111,33 @@ export default function Checkout({
                                 ? `/destinations/${pkg.country.iso_code.toLowerCase()}`
                                 : '/destinations'
                         }
-                        label="Back to Plans"
-                        className="mb-8"
+                        label="Back"
+                        className="mb-4 md:mb-8"
                     />
 
                     {/* Page Header - centered like hero */}
-                    <div className="mb-12 text-center">
+                    <div className="mb-6 text-center md:mb-12">
                         <Badge
                             variant="outline"
-                            className="mb-6 inline-flex rounded-full border border-primary-100 bg-white/50 px-6 py-2 text-sm font-medium shadow-sm backdrop-blur-md"
+                            className="mb-3 inline-flex rounded-full border border-primary-100 bg-white/50 px-4 py-1.5 text-xs font-medium shadow-sm backdrop-blur-md md:mb-6 md:px-6 md:py-2 md:text-sm"
                         >
-                            <Sparkles className="mr-2 h-4 w-4 text-accent-500" />
+                            <Sparkles className="mr-1.5 h-3.5 w-3.5 text-accent-500 md:mr-2 md:h-4 md:w-4" />
                             <span className="bg-gradient-to-r from-primary-800 to-primary-600 bg-clip-text text-transparent">
                                 Secure Checkout
                             </span>
                         </Badge>
-                        <h1 className="mb-4 text-3xl font-extrabold tracking-tight text-primary-900 md:text-4xl lg:text-5xl">
+                        <h1 className="mb-2 text-xl font-extrabold tracking-tight text-primary-900 md:mb-4 md:text-4xl lg:text-5xl">
                             Complete Your Order
                         </h1>
-                        <p className="mx-auto max-w-xl text-lg text-primary-600">
+                        <p className="mx-auto max-w-xl text-sm text-primary-600 md:text-lg">
                             You're just a few steps away from staying connected.
                         </p>
                     </div>
 
-                    <div className="flex flex-col-reverse gap-8 md:flex-row md:items-start">
+                    <div className="flex flex-col-reverse gap-4 md:flex-row md:items-start md:gap-8">
                         {/* Left Column - Form */}
                         <div className="w-full md:flex-1">
-                            <form onSubmit={handleSubmit} className="space-y-6">
+                            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
                                 {/* General Error */}
                                 {/* @ts-ignore */}
                                 {errors.error && (
@@ -154,17 +154,17 @@ export default function Checkout({
                                 )}
 
                                 {/* Your Details Section */}
-                                <div className="overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm">
-                                    <div className="border-b border-primary-100 bg-primary-50/50 px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-primary-500 shadow-md ring-1 ring-primary-100">
-                                                <User className="h-5 w-5" />
+                                <div className="overflow-hidden rounded-xl border border-primary-100 bg-white shadow-sm md:rounded-2xl">
+                                    <div className="border-b border-primary-100 bg-primary-50/50 px-4 py-3 md:px-6 md:py-4">
+                                        <div className="flex items-center gap-2.5 md:gap-3">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-primary-500 shadow-md ring-1 ring-primary-100 md:h-10 md:w-10 md:rounded-xl">
+                                                <User className="h-4 w-4 md:h-5 md:w-5" />
                                             </div>
                                             <div>
-                                                <h2 className="font-bold text-primary-900">
+                                                <h2 className="text-sm font-bold text-primary-900 md:text-base">
                                                     Your Details
                                                 </h2>
-                                                <p className="text-sm text-primary-600">
+                                                <p className="text-xs text-primary-600 md:text-sm">
                                                     Where should we send your eSIM?
                                                     {auth?.user && (
                                                         <span className="ml-1 text-primary-400">
@@ -176,23 +176,23 @@ export default function Checkout({
                                         </div>
                                     </div>
 
-                                    <div className="space-y-5 p-6">
+                                    <div className="space-y-4 p-4 md:space-y-5 md:p-6">
                                         {/* Email */}
-                                        <div className="space-y-2">
+                                        <div className="space-y-1.5 md:space-y-2">
                                             <Label
                                                 htmlFor="email"
-                                                className="text-sm font-semibold text-primary-800"
+                                                className="text-xs font-semibold text-primary-800 md:text-sm"
                                             >
                                                 Email Address
                                                 <span className="ml-1 text-red-500">*</span>
                                             </Label>
                                             <div className="group relative">
-                                                <Mail className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-primary-400 transition-colors group-focus-within:text-primary-600" />
+                                                <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-primary-400 transition-colors group-focus-within:text-primary-600" />
                                                 <Input
                                                     id="email"
                                                     type="email"
                                                     placeholder="you@example.com"
-                                                    className="h-12 rounded-xl border-primary-200 bg-white pl-11 text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+                                                    className="h-10 rounded-lg border-primary-200 bg-white pl-10 text-sm text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 md:h-12 md:rounded-xl md:pl-11 md:text-base"
                                                     value={data.email}
                                                     onChange={(e) =>
                                                         setData('email', e.target.value)
@@ -201,31 +201,31 @@ export default function Checkout({
                                                 />
                                             </div>
                                             {errors.email && (
-                                                <p className="text-sm font-medium text-red-600">
+                                                <p className="text-xs font-medium text-red-600 md:text-sm">
                                                     {errors.email}
                                                 </p>
                                             )}
-                                            <p className="text-xs text-primary-400">
+                                            <p className="text-[10px] text-primary-400 md:text-xs">
                                                 Your eSIM QR code will be sent here
                                             </p>
                                         </div>
 
                                         {/* Full Name */}
-                                        <div className="space-y-2">
+                                        <div className="space-y-1.5 md:space-y-2">
                                             <Label
                                                 htmlFor="name"
-                                                className="text-sm font-semibold text-primary-800"
+                                                className="text-xs font-semibold text-primary-800 md:text-sm"
                                             >
                                                 Full Name
                                                 <span className="ml-1 text-red-500">*</span>
                                             </Label>
                                             <div className="group relative">
-                                                <User className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-primary-400 transition-colors group-focus-within:text-primary-600" />
+                                                <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-primary-400 transition-colors group-focus-within:text-primary-600" />
                                                 <Input
                                                     id="name"
                                                     type="text"
                                                     placeholder="John Doe"
-                                                    className="h-12 rounded-xl border-primary-200 bg-white pl-11 text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+                                                    className="h-10 rounded-lg border-primary-200 bg-white pl-10 text-sm text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 md:h-12 md:rounded-xl md:pl-11 md:text-base"
                                                     value={data.name}
                                                     onChange={(e) =>
                                                         setData('name', e.target.value)
@@ -234,30 +234,30 @@ export default function Checkout({
                                                 />
                                             </div>
                                             {errors.name && (
-                                                <p className="text-sm font-medium text-red-600">
+                                                <p className="text-xs font-medium text-red-600 md:text-sm">
                                                     {errors.name}
                                                 </p>
                                             )}
                                         </div>
 
                                         {/* Phone */}
-                                        <div className="space-y-2">
+                                        <div className="space-y-1.5 md:space-y-2">
                                             <Label
                                                 htmlFor="phone"
-                                                className="text-sm font-semibold text-primary-800"
+                                                className="text-xs font-semibold text-primary-800 md:text-sm"
                                             >
-                                                Phone Number
-                                                <span className="ml-1.5 text-xs font-normal text-primary-400">
+                                                Phone
+                                                <span className="ml-1.5 text-[10px] font-normal text-primary-400 md:text-xs">
                                                     (Optional)
                                                 </span>
                                             </Label>
                                             <div className="group relative">
-                                                <Phone className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-primary-400 transition-colors group-focus-within:text-primary-600" />
+                                                <Phone className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-primary-400 transition-colors group-focus-within:text-primary-600" />
                                                 <Input
                                                     id="phone"
                                                     type="tel"
                                                     placeholder="+1 234 567 8900"
-                                                    className="h-12 rounded-xl border-primary-200 bg-white pl-11 text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+                                                    className="h-10 rounded-lg border-primary-200 bg-white pl-10 text-sm text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 md:h-12 md:rounded-xl md:pl-11 md:text-base"
                                                     value={data.phone}
                                                     onChange={(e) =>
                                                         setData('phone', e.target.value)
@@ -265,7 +265,7 @@ export default function Checkout({
                                                 />
                                             </div>
                                             {errors.phone && (
-                                                <p className="text-sm font-medium text-red-600">
+                                                <p className="text-xs font-medium text-red-600 md:text-sm">
                                                     {errors.phone}
                                                 </p>
                                             )}
@@ -274,24 +274,24 @@ export default function Checkout({
                                 </div>
 
                                 {/* Payment Method Section */}
-                                <div className="overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm">
-                                    <div className="border-b border-primary-100 bg-primary-50/50 px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-primary-500 shadow-md ring-1 ring-primary-100">
-                                                <CreditCard className="h-5 w-5" />
+                                <div className="overflow-hidden rounded-xl border border-primary-100 bg-white shadow-sm md:rounded-2xl">
+                                    <div className="border-b border-primary-100 bg-primary-50/50 px-4 py-3 md:px-6 md:py-4">
+                                        <div className="flex items-center gap-2.5 md:gap-3">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-primary-500 shadow-md ring-1 ring-primary-100 md:h-10 md:w-10 md:rounded-xl">
+                                                <CreditCard className="h-4 w-4 md:h-5 md:w-5" />
                                             </div>
                                             <div>
-                                                <h2 className="font-bold text-primary-900">
+                                                <h2 className="text-sm font-bold text-primary-900 md:text-base">
                                                     Payment Method
                                                 </h2>
-                                                <p className="text-sm text-primary-600">
+                                                <p className="text-xs text-primary-600 md:text-sm">
                                                     Choose how you'd like to pay
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="p-6">
+                                    <div className="p-4 md:p-6">
                                         <PaymentProviderSelect
                                             providers={paymentProviders}
                                             value={data.payment_provider}
@@ -303,8 +303,8 @@ export default function Checkout({
                                 </div>
 
                                 {/* Terms & Submit - Mobile only */}
-                                <div className="space-y-5 md:hidden">
-                                    <div className="flex items-start gap-3 rounded-xl border border-primary-100 bg-white p-4">
+                                <div className="space-y-3 md:hidden">
+                                    <div className="flex items-start gap-2.5 rounded-lg border border-primary-100 bg-white p-3">
                                         <Checkbox
                                             id="accept_terms_mobile"
                                             checked={data.accept_terms}
@@ -312,60 +312,60 @@ export default function Checkout({
                                                 setData('accept_terms', checked === true)
                                             }
                                             required
-                                            className="mt-0.5 border-primary-300 data-[state=checked]:border-primary-600 data-[state=checked]:bg-primary-600"
+                                            className="mt-0.5 h-4 w-4 border-accent-400 data-[state=checked]:border-accent-500 data-[state=checked]:bg-accent-400 data-[state=checked]:text-accent-950"
                                         />
                                         <Label
                                             htmlFor="accept_terms_mobile"
-                                            className="text-sm leading-relaxed text-primary-700"
+                                            className="text-xs leading-relaxed text-primary-700"
                                         >
                                             I agree to the{' '}
                                             <Link
                                                 href="/terms"
-                                                className="font-medium text-primary-600 underline underline-offset-2 hover:text-primary-800"
+                                                className="font-medium text-primary-600 underline underline-offset-2"
                                             >
-                                                Terms of Service
+                                                Terms
                                             </Link>{' '}
                                             and{' '}
                                             <Link
                                                 href="/privacy"
-                                                className="font-medium text-primary-600 underline underline-offset-2 hover:text-primary-800"
+                                                className="font-medium text-primary-600 underline underline-offset-2"
                                             >
                                                 Privacy Policy
                                             </Link>
                                         </Label>
                                     </div>
                                     {errors.accept_terms && (
-                                        <p className="text-sm font-medium text-red-600">
+                                        <p className="text-xs font-medium text-red-600">
                                             {errors.accept_terms}
                                         </p>
                                     )}
 
                                     <GoldButton
                                         type="submit"
-                                        className="h-14 w-full rounded-xl text-base font-semibold"
+                                        className="h-11 w-full rounded-lg text-sm font-semibold"
                                         disabled={processing || !data.accept_terms}
                                     >
                                         {processing ? (
                                             <>
-                                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                                 Processing...
                                             </>
                                         ) : (
                                             <>
-                                                <Lock className="mr-2 h-4 w-4" />
+                                                <Lock className="mr-1.5 h-3.5 w-3.5" />
                                                 Pay €{Number(pkg.retail_price).toFixed(2)}
                                             </>
                                         )}
                                     </GoldButton>
 
-                                    <div className="flex items-center justify-center gap-4 text-xs text-primary-400">
-                                        <div className="flex items-center gap-1.5">
-                                            <Shield className="h-3.5 w-3.5" />
+                                    <div className="flex items-center justify-center gap-3 text-[10px] text-primary-400">
+                                        <div className="flex items-center gap-1">
+                                            <Shield className="h-3 w-3" />
                                             <span>SSL Encrypted</span>
                                         </div>
-                                        <div className="flex items-center gap-1.5">
-                                            <Lock className="h-3.5 w-3.5" />
-                                            <span>Secure Checkout</span>
+                                        <div className="flex items-center gap-1">
+                                            <Lock className="h-3 w-3" />
+                                            <span>Secure</span>
                                         </div>
                                     </div>
                                 </div>
@@ -374,31 +374,32 @@ export default function Checkout({
 
                         {/* Right Column - Order Summary (Sticky) */}
                         <div className="w-full shrink-0 md:sticky md:top-28 md:w-[380px]">
-                            <div className="overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-lg">
+                            <div className="overflow-hidden rounded-xl border border-primary-100 bg-white shadow-lg md:rounded-2xl">
                                 {/* Header */}
-                                <div className="border-b border-primary-100 bg-primary-50/50 px-6 py-4">
-                                    <h2 className="text-lg font-bold text-primary-900">
+                                <div className="border-b border-primary-100 bg-primary-50/50 px-4 py-3 md:px-6 md:py-4">
+                                    <h2 className="text-sm font-bold text-primary-900 md:text-lg">
                                         Order Summary
                                     </h2>
                                 </div>
 
-                                <div className="p-6">
+                                <div className="p-4 md:p-6">
                                     {/* Package Card */}
-                                    <div className="mb-6 flex items-center gap-4 rounded-xl border border-primary-100 bg-primary-50/50 p-4">
+                                    <div className="mb-4 flex items-center gap-3 rounded-lg border border-primary-100 bg-primary-50/50 p-3 md:mb-6 md:gap-4 md:rounded-xl md:p-4">
                                         {pkg.country && (
-                                            <div className="overflow-hidden rounded-lg shadow-md ring-2 ring-white">
+                                            <div className="overflow-hidden rounded-md shadow-md ring-2 ring-white md:rounded-lg">
                                                 <CountryFlag
                                                     countryCode={pkg.country.iso_code}
-                                                    size="lg"
+                                                    size="md"
+                                                    className="md:h-10 md:w-14"
                                                 />
                                             </div>
                                         )}
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="truncate font-bold text-primary-900">
+                                            <h3 className="truncate text-sm font-bold text-primary-900 md:text-base">
                                                 {pkg.name}
                                             </h3>
                                             {pkg.country && (
-                                                <p className="text-sm text-primary-600">
+                                                <p className="text-xs text-primary-600 md:text-sm">
                                                     {pkg.country.name}
                                                 </p>
                                             )}
@@ -406,34 +407,34 @@ export default function Checkout({
                                     </div>
 
                                     {/* Package Details */}
-                                    <div className="mb-6 space-y-3">
+                                    <div className="mb-4 space-y-2 md:mb-6 md:space-y-3">
                                         <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2.5 text-primary-600">
-                                                <HardDrive className="h-4 w-4" />
-                                                <span className="text-sm">Data</span>
+                                            <div className="flex items-center gap-2 text-primary-600">
+                                                <HardDrive className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                                                <span className="text-xs md:text-sm">Data</span>
                                             </div>
-                                            <span className="font-bold text-primary-900">
+                                            <span className="text-xs font-bold text-primary-900 md:text-sm">
                                                 {pkg.data_label}
                                             </span>
                                         </div>
                                         <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2.5 text-primary-600">
-                                                <Timer className="h-4 w-4" />
-                                                <span className="text-sm">Validity</span>
+                                            <div className="flex items-center gap-2 text-primary-600">
+                                                <Timer className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                                                <span className="text-xs md:text-sm">Validity</span>
                                             </div>
-                                            <span className="font-bold text-primary-900">
+                                            <span className="text-xs font-bold text-primary-900 md:text-sm">
                                                 {pkg.validity_label}
                                             </span>
                                         </div>
                                     </div>
 
                                     {/* Divider */}
-                                    <div className="mb-6 h-px bg-primary-100" />
+                                    <div className="mb-4 h-px bg-primary-100 md:mb-6" />
 
                                     {/* Total */}
-                                    <div className="mb-6 flex items-baseline justify-between">
-                                        <span className="text-primary-600">Total</span>
-                                        <span className="text-3xl font-extrabold text-primary-900">
+                                    <div className="mb-4 flex items-baseline justify-between md:mb-6">
+                                        <span className="text-xs text-primary-600 md:text-sm">Total</span>
+                                        <span className="text-xl font-extrabold text-primary-900 md:text-3xl">
                                             €{Number(pkg.retail_price).toFixed(2)}
                                         </span>
                                     </div>
@@ -448,7 +449,7 @@ export default function Checkout({
                                                     setData('accept_terms', checked === true)
                                                 }
                                                 required
-                                                className="mt-0.5 border-primary-300 data-[state=checked]:border-primary-600 data-[state=checked]:bg-primary-600"
+                                                className="mt-0.5 border-accent-400 data-[state=checked]:border-accent-500 data-[state=checked]:bg-accent-400 data-[state=checked]:text-accent-950"
                                             />
                                             <Label
                                                 htmlFor="accept_terms_desktop"
@@ -509,7 +510,7 @@ export default function Checkout({
                                     </div>
 
                                     {/* Benefits - styled like trust section */}
-                                    <div className="mt-6 space-y-3 border-t border-primary-100 pt-6">
+                                    <div className="hidden space-y-2 border-t border-primary-100 pt-4 md:mt-6 md:block md:space-y-3 md:pt-6">
                                         {[
                                             { icon: Zap, text: 'Instant delivery via email' },
                                             { icon: CheckCircle2, text: 'Easy QR code installation' },

@@ -63,8 +63,8 @@ export function PaymentProviderSelect({ providers, value, onChange, className = 
                                 htmlFor={provider.id}
                                 className={`flex cursor-pointer flex-col rounded-xl border-2 p-4 transition-all duration-200 ${
                                     isSelected
-                                        ? 'border-primary-500 bg-primary-50/50 shadow-sm'
-                                        : 'border-primary-100 bg-white hover:border-primary-200 hover:bg-primary-50/30'
+                                        ? 'border-accent-400 bg-accent-50/50 shadow-sm'
+                                        : 'border-primary-100 bg-white hover:border-accent-200 hover:bg-accent-50/30'
                                 }`}
                             >
                                 <div className="flex items-center justify-between">
@@ -85,7 +85,7 @@ export function PaymentProviderSelect({ providers, value, onChange, className = 
                                     </div>
                                     <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${
                                         isSelected
-                                            ? 'border-primary-500 bg-primary-500'
+                                            ? 'border-accent-500 bg-accent-400'
                                             : 'border-primary-300 bg-white'
                                     }`}>
                                         {isSelected && (
