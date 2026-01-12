@@ -84,8 +84,12 @@ class CheckoutController extends Controller
         // Validate payment provider for B2C
         $paymentProvider = null;
         if (!$customer->isB2B()) {
+            $allowedProviders = collect(PaymentProvider::publicProviders())
+                ->map(fn (PaymentProvider $provider) => $provider->value)
+                ->implode(',');
+
             $validated = $request->validate([
-                'payment_provider' => 'nullable|string|in:stripe,payrexx',
+                'payment_provider' => "nullable|string|in:{$allowedProviders}",
             ]);
             $paymentProvider = isset($validated['payment_provider'])
                 ? PaymentProvider::tryFrom($validated['payment_provider'])
