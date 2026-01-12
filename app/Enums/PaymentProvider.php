@@ -6,6 +6,7 @@ enum PaymentProvider: string
 {
     case Stripe = 'stripe';
     case Payrexx = 'payrexx';
+    case Paysera = 'paysera';
     case Balance = 'balance';
 
     public function label(): string
@@ -13,6 +14,7 @@ enum PaymentProvider: string
         return match ($this) {
             self::Stripe => 'Stripe',
             self::Payrexx => 'Payrexx',
+            self::Paysera => 'Paysera',
             self::Balance => 'Balance',
         };
     }
@@ -22,6 +24,7 @@ enum PaymentProvider: string
         return match ($this) {
             self::Stripe => 'Pay securely with card',
             self::Payrexx => 'Pay securely with card or other methods',
+            self::Paysera => 'Pay securely with card or other methods',
             self::Balance => 'Pay from your account balance',
         };
     }
@@ -51,6 +54,12 @@ enum PaymentProvider: string
                 'unionpay' => ['name' => 'UnionPay', 'icon' => 'unionpay'],
                 'paypal' => ['name' => 'PayPal', 'icon' => 'paypal'],
             ],
+            self::Paysera => [
+                'visa' => ['name' => 'Visa', 'icon' => 'visa'],
+                'mastercard' => ['name' => 'Mastercard', 'icon' => 'mastercard'],
+                'maestro' => ['name' => 'Maestro', 'icon' => 'maestro'],
+                'amex' => ['name' => 'American Express', 'icon' => 'amex'],
+            ],
             self::Balance => [
                 'balance' => ['name' => 'Account Balance', 'icon' => 'wallet'],
             ],
@@ -75,6 +84,7 @@ enum PaymentProvider: string
         return match ($this) {
             self::Stripe => true,
             self::Payrexx => true,
+            self::Paysera => true,
             self::Balance => false,
         };
     }
@@ -102,6 +112,7 @@ enum PaymentProvider: string
         return match ($this) {
             self::Stripe => !empty(config('services.stripe.key')) && !empty(config('services.stripe.secret')),
             self::Payrexx => !empty(config('services.payrexx.instance')) && !empty(config('services.payrexx.secret')),
+            self::Paysera => !empty(config('services.paysera.project_id')) && !empty(config('services.paysera.password')),
             self::Balance => true, // Balance is always available for B2B
         };
     }
@@ -113,7 +124,7 @@ enum PaymentProvider: string
      */
     public static function publicProviders(): array
     {
-        return [self::Stripe];
+        return [self::Stripe, self::Paysera];
     }
 
     /**

@@ -74,4 +74,10 @@ return [
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
+    'paysera' => [
+        'project_id' => env('PAYSERA_PROJECT_ID'),
+        'password' => env('PAYSERA_PASSWORD'),
+        'test_mode' => env('PAYSERA_TEST_MODE', false),
+    ],
+
 ];
