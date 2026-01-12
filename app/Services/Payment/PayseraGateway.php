@@ -85,24 +85,20 @@ class PayseraGateway implements PaymentGatewayContract
                 'language' => $this->mapLanguage($language),
                 'payment' => 'Cards', // Default to card payments
                 'country' => 'AL', // Albania
+                'version' => '1.9',
             ];
 
             // Add order information
             if ($order->package) {
                 $paymentData['p_email'] = $order->customer_email;
-                $paymentData['description'] = "eSIM Package: {$order->package->name}";
+                $paymentData['paytext'] = "eSIM Package: {$order->package->name}";
             }
 
-            // Generate sign
-            $paymentData['sign'] = $this->generateSign($paymentData);
-            $paymentData['time_limit'] = now()->addMinutes(30)->timestamp;
+            $encodedData = $this->encodePaymentData($paymentData);
+            $sign = $this->generateSign($encodedData);
 
-            // Build Paysera redirect URL
-            $baseUrl = $this->testMode
-                ? 'https://www.paysera.com/pay/public/'
-                : 'https://www.paysera.com/pay/public/';
-
-            $checkoutUrl = $baseUrl . '?' . http_build_query($paymentData);
+            $baseUrl = 'https://www.paysera.com/pay/';
+            $checkoutUrl = $baseUrl . '?data=' . $encodedData . '&sign=' . $sign;
 
             Log::info('Paysera checkout created', [
                 'order_uuid' => $order->uuid,
@@ -268,17 +264,15 @@ class PayseraGateway implements PaymentGatewayContract
                 'language' => 'en',
                 'payment' => 'Cards',
                 'p_email' => $customerEmail,
-                'description' => 'Balance Top-Up: €' . number_format($amount, 2),
+                'paytext' => 'Balance Top-Up: €' . number_format($amount, 2),
+                'version' => '1.9',
             ];
 
-            $paymentData['sign'] = $this->generateSign($paymentData);
-            $paymentData['time_limit'] = now()->addMinutes(30)->timestamp;
+            $encodedData = $this->encodePaymentData($paymentData);
+            $sign = $this->generateSign($encodedData);
 
-            $baseUrl = $this->testMode
-                ? 'https://www.paysera.com/pay/public/'
-                : 'https://www.paysera.com/pay/public/';
-
-            $checkoutUrl = $baseUrl . '?' . http_build_query($paymentData);
+            $baseUrl = 'https://www.paysera.com/pay/';
+            $checkoutUrl = $baseUrl . '?data=' . $encodedData . '&sign=' . $sign;
 
             Log::info('Paysera balance top-up checkout created', [
                 'payment_uuid' => $payment->uuid,
@@ -310,10 +304,7 @@ class PayseraGateway implements PaymentGatewayContract
         }
     }
 
-    /**
-     * Generate MD5 sign for Paysera request.
-     */
-    private function generateSign(array $data): string
+    private function encodePaymentData(array $data): string
     {
         unset($data['sign']);
 
@@ -322,12 +313,16 @@ class PayseraGateway implements PaymentGatewayContract
         $query = http_build_query($data, '', '&', PHP_QUERY_RFC3986);
         $query = str_replace(['%20', '%7E'], ['+', '~'], $query);
 
-        return md5($query . $this->password);
+        $b64 = base64_encode($query);
+
+        return str_replace(['/', '+'], ['_', '-'], $b64);
     }
 
-    /**
-     * Verify Paysera webhook signature.
-     */
+    private function generateSign(string $data): string
+    {
+        return md5($data . $this->password);
+    }
+
     private function verifyWebhookSignature(array $data): bool
     {
         $providedSign = $data['sign'] ?? null;
@@ -335,7 +330,17 @@ class PayseraGateway implements PaymentGatewayContract
             return false;
         }
 
-        $expectedSign = $this->generateSign($data);
+        unset($data['sign']);
+
+        ksort($data);
+
+        $query = http_build_query($data, '', '&', PHP_QUERY_RFC3986);
+        $query = str_replace(['%20', '%7E'], ['+', '~'], $query);
+
+        $b64 = base64_encode($query);
+        $encodedData = str_replace(['/', '+'], ['_', '-'], $b64);
+
+        $expectedSign = md5($encodedData . $this->password);
 
         return hash_equals($expectedSign, $providedSign);
     }
