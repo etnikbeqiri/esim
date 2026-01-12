@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\PaymentProvider;
 use App\Services\CurrencyService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
@@ -101,6 +102,9 @@ class HandleInertiaRequests extends Middleware
                 'privacyEmail' => config('contact.privacy_email'),
                 'phone' => config('contact.phone'),
                 'whatsapp' => config('contact.whatsapp'),
+            ],
+            'payment' => [
+                'providers' => PaymentProvider::activePublicProvidersArray(),
             ],
         ];
     }

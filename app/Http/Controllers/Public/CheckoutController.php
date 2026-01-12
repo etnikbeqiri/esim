@@ -70,12 +70,17 @@ class CheckoutController extends Controller
     {
         abort_unless($package->is_active, 404);
 
+        // Get allowed payment providers from enum
+        $allowedProviders = collect(PaymentProvider::publicProviders())
+            ->map(fn (PaymentProvider $provider) => $provider->value)
+            ->implode(',');
+
         $validated = $request->validate([
             'email' => 'required|email|max:255',
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:50',
             'accept_terms' => 'required|accepted',
-            'payment_provider' => 'nullable|string|in:stripe,payrexx',
+            "payment_provider" => "nullable|string|in:{$allowedProviders}",
         ]);
 
         // Get selected payment provider or use default

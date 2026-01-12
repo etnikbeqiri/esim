@@ -1,5 +1,6 @@
 import AppLogoIcon from '@/components/app-logo-icon';
 import LanguageSwitcher from '@/components/language-switcher';
+import { PayseraTrustBadge } from '@/components/paysera-trust-badge';
 import { Button } from '@/components/ui/button';
 import { GoldButton } from '@/components/ui/gold-button';
 import { type SharedData } from '@/types';
@@ -308,6 +309,9 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                             reserved.
                         </p>
                     </div>
+
+                    {/* Paysera Trust Badge */}
+                    <PayseraTrustBadge />
                 </div>
             </footer>
         </div>

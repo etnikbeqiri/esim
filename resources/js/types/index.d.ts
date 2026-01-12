@@ -36,6 +36,15 @@ export interface ContactInfo {
     whatsapp: string | null;
 }
 
+export interface PaymentInfo {
+    providers: Array<{
+        id: string;
+        name: string;
+        description: string;
+        payment_methods: Array<{ name: string; icon: string }>;
+    }>;
+}
+
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
@@ -54,6 +63,7 @@ export interface SharedData {
     locale: string;
     availableLocales: LocaleOption[];
     contact: ContactInfo;
+    payment: PaymentInfo;
     [key: string]: unknown;
 }
 

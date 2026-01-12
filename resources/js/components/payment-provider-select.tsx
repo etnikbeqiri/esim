@@ -18,6 +18,34 @@ function StripeLogo({ className }: { className?: string }) {
     );
 }
 
+function PayseraLogo({ className }: { className?: string }) {
+    return (
+        <svg
+            className={className}
+            viewBox="0 0 32 32"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <path d="M16 2C8.268 2 2 8.268 2 16s6.268 14 14 14 14-6.268 14-14S23.732 2 16 2zm0 3c2.5 0 4.5 2 4.5 4.5S18.5 14 16 14s-4.5-2-4.5-4.5S13.5 5 16 5zm0 18c-3.5 0-6.5-1.5-8.5-4 0-2.5 5-3.5 8.5-3.5s8.5 1 8.5 3.5c-2 2.5-5 4-8.5 4z"/>
+        </svg>
+    );
+}
+
+function ProviderLogo({ provider, className }: { provider: string; className?: string }) {
+    switch (provider) {
+        case 'stripe':
+            return <StripeLogo className={className} />;
+        case 'paysera':
+            return <PayseraLogo className={className} />;
+        default:
+            return (
+                <div className={`flex items-center justify-center ${className}`}>
+                    <span className="text-xs font-bold">{provider?.[0]?.toUpperCase() ?? provider}</span>
+                </div>
+            );
+    }
+}
+
 interface PaymentMethod {
     name: string;
     icon: string;
@@ -51,6 +79,12 @@ export function PaymentProviderSelect({ providers, value, onChange, className = 
             >
                 {providers.map((provider) => {
                     const isSelected = value === provider.id;
+                    const providerColor = provider.id === 'paysera'
+                        ? 'bg-[#1a73e8] text-white ring-[#1a73e8]'
+                        : 'bg-[#635bff] text-white ring-[#635bff]';
+                    const providerColorInactive = provider.id === 'paysera'
+                        ? 'text-[#1a73e8]'
+                        : 'text-[#635bff]';
 
                     return (
                         <div key={provider.id} className="relative">
@@ -71,10 +105,10 @@ export function PaymentProviderSelect({ providers, value, onChange, className = 
                                     <div className="flex items-center gap-3">
                                         <div className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-sm ring-1 ${
                                             isSelected
-                                                ? 'bg-[#635bff] text-white ring-[#635bff]'
-                                                : 'bg-white text-[#635bff] ring-primary-100'
+                                                ? providerColor
+                                                : `bg-white ${providerColorInactive} ring-primary-100`
                                         }`}>
-                                            <StripeLogo className="h-5 w-5" />
+                                            <ProviderLogo provider={provider.id} className="h-5 w-5" />
                                         </div>
                                         <div>
                                             <p className="font-semibold text-gray-900">{provider.name}</p>
