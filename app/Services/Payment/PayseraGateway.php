@@ -84,7 +84,7 @@ class PayseraGateway implements PaymentGatewayContract
                 'test' => $this->testMode ? 1 : 0,
                 'language' => $this->mapLanguage($language),
                 'payment' => 'Cards', // Default to card payments
-                'country' => 'LT', // Paysera default
+                'country' => 'AL', // Albania
             ];
 
             // Add order information
