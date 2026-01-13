@@ -16,8 +16,8 @@
 
     <x-email.summary>
         <x-email.summary-row :label="$package->name" :value="number_format($order->amount, 2) . ' ' . config('invoice.currency')" />
-        <x-email.summary-row :label="'Data: ' . $package->data_label" value="" />
-        <x-email.summary-row :label="'Duration: ' . $package->validity_label" value="" />
+        <x-email.summary-row label="Data" :value="$package->data_label" />
+        <x-email.summary-row label="Duration" :value="$package->validity_label" />
         <x-email.summary-row label="Total Charged" :value="number_format($order->amount, 2) . ' ' . config('invoice.currency')" :bold="true" />
     </x-email.summary>
 
