@@ -12,7 +12,7 @@ class EmailPreviewController extends Controller
     public function index()
     {
         // Only allow in local/staging environments or for admin users
-        if (!app()->environment(['local', 'staging']) && !auth()->user()?->isAdmin()) {
+        if (!app()->environment(['local', 'staging']) && !(auth()->check() && auth()->user()->isAdmin())) {
             abort(403, 'Email preview is only available in local/staging environments or for admin users.');
         }
 
@@ -30,7 +30,7 @@ class EmailPreviewController extends Controller
     public function preview(string $template)
     {
         // Only allow in local/staging environments or for admin users
-        if (!app()->environment(['local', 'staging']) && !auth()->user()?->isAdmin()) {
+        if (!app()->environment(['local', 'staging']) && !(auth()->check() && auth()->user()->isAdmin())) {
             abort(403, 'Email preview is only available in local/staging environments or for admin users.');
         }
 
@@ -222,19 +222,27 @@ class EmailPreviewController extends Controller
      */
     protected function generateTestQRCode(): string
     {
-        // Try to use the QRCode library if available
-        if (class_exists(\Endroid\QrCode\Builder\Builder::class)) {
-            $result = \Endroid\QrCode\Builder\Builder::create()
-                ->data('LPA:1$smdp.example.com$ABCD1EFG2HI3JK4LMN5OP6QR7ST8UV9WX')
-                ->size(300)
-                ->margin(10)
-                ->build();
-
-            return base64_encode($result->getString());
+        // Use BaconQrCode which is already installed
+        if (class_exists(\BaconQrCode\Writer::class)) {
+            // Create a clean, high-contrast QR code style
+            // Size: 300px, Margin: 1 (minimal margin to maximize content)
+            $style = new \BaconQrCode\Renderer\RendererStyle\RendererStyle(
+                300, 
+                1
+            );
+            
+            $renderer = new \BaconQrCode\Renderer\ImageRenderer(
+                $style,
+                new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
+            );
+            
+            $writer = new \BaconQrCode\Writer($renderer);
+            $qrCode = $writer->writeString('LPA:1$smdp.example.com$ABCD1EFG2HI3JK4LMN5OP6QR7ST8UV9WX');
+            
+            return base64_encode($qrCode);
         }
 
-        // Final fallback: Return a placeholder PNG (skip external API - too slow/unreliable)
-        // This creates a simple checkerboard pattern that's visible
+        // Final fallback: Return a placeholder PNG
         return $this->generatePlaceholderQR();
     }
 

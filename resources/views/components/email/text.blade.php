@@ -1,12 +1,13 @@
-@props(['muted' => false, 'small' => false, 'center' => false])
+@props(['muted' => false, 'small' => false, 'center' => false, 'bold' => false])
 
 @php
-$color = $muted ? '#71717a' : '#52525b';
-$size = $small ? '13px' : '15px';
-$margin = $small ? '0 0 10px 0' : '0 0 12px 0';
+$color = $muted ? '#71717a' : '#09090b';
+$size = $small ? '13px' : '14px';
+$margin = '0 0 16px 0';
+$weight = $bold ? 'font-weight: 600;' : '';
 $align = $center ? 'text-align: center;' : '';
 @endphp
 
-<p style="{{ $margin }}; color: {{ $color }}; font-size: {{ $size }}; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Helvetica, Arial, sans-serif; {{ $align }}">
+<p style="{{ $margin }}; {{ $align }} color: {{ $color }}; font-size: {{ $size }}; line-height: 1.5; {{ $weight }} font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
     {{ $slot }}
 </p>
