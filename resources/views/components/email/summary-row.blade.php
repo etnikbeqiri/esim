@@ -1,12 +1,19 @@
 @props(['label', 'value', 'bold' => false])
 
 @php
-$borderStyle = $bold ? 'border-bottom: none;' : 'border-bottom: 1px solid #aad1b6;';
-$fontWeight = $bold ? 'font-weight: 700; font-size: 18px;' : 'font-weight: 500;';
-$padding = $bold ? 'padding-top: 16px;' : '';
+$border = $bold ? '' : 'border-bottom: 1px solid #e4e4e7;';
+$weight = $bold ? 'font-weight: 600;' : 'font-weight: 500;';
+$paddingTop = $bold ? 'padding-top: 8px;' : 'padding-top: 4px;';
+$paddingBottom = $bold ? 'padding-bottom: 4px;' : 'padding-bottom: 4px;';
 @endphp
 
-<div style="display: flex; justify-content: space-between; padding: 10px 0; {{ $borderStyle }} {{ $fontWeight }} {{ $padding }}">
-    <span style="color: #004528;">{{ $label }}</span>
-    <span style="color: #002a18;">{{ $value }}</span>
-</div>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+        <td style="{{ $paddingTop }} {{ $paddingBottom }} {{ $border }} {{ $weight }} color: #52525b; font-size: 14px; width: 50%;">
+            {{ $label }}
+        </td>
+        <td style="{{ $paddingTop }} {{ $paddingBottom }} {{ $border }} {{ $weight }} color: #18181b; font-size: 14px; text-align: right; width: 50%;">
+            {{ $value }}
+        </td>
+    </tr>
+</table>

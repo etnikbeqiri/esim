@@ -1,5 +1,5 @@
 <x-email.layout title="Order Confirmation">
-    <x-email.heading>Order Confirmed! ✓</x-email.heading>
+    <x-email.heading>Order Confirmed</x-email.heading>
 
     <x-email.text>Hello {{ $customerName ?? 'there' }},</x-email.text>
 
@@ -23,25 +23,23 @@
 
     <x-email.heading :level="2">What's Next?</x-email.heading>
 
-    <x-email.steps>
-        <x-email.step number="1" title="We Process Your Order">
-            Our system is preparing your eSIM. This usually takes just a few seconds.
-        </x-email.step>
+    <x-email.step number="1" title="We Process Your Order">
+        Our system is preparing your eSIM. This usually takes just a few seconds.
+    </x-email.step>
 
-        <x-email.step number="2" title="You'll Receive Your eSIM">
-            You'll receive another email with your eSIM QR code and installation instructions.
-        </x-email.step>
+    <x-email.step number="2" title="You'll Receive Your eSIM">
+        You'll receive another email with your eSIM QR code and installation instructions.
+    </x-email.step>
 
-        <x-email.step number="3" title="Install Before Your Trip">
-            Install the eSIM while connected to WiFi. You can do this before you travel.
-        </x-email.step>
-    </x-email.steps>
+    <x-email.step number="3" title="Install Before Your Trip">
+        Install the eSIM while connected to WiFi. You can do this before you travel.
+    </x-email.step>
 
-    <div style="text-align: center; margin-top: 24px;">
+    <div style="text-align: center; margin-top: 16px;">
         <x-email.button :href="config('app.url') . '/client/orders'">View Your Orders</x-email.button>
     </div>
 
-    <x-email.text muted small center class="mt-4">
+    <x-email.text muted small center>
         If you have any questions, our support team is here to help.
     </x-email.text>
 </x-email.layout>

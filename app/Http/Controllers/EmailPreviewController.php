@@ -157,7 +157,7 @@ class EmailPreviewController extends Controller
             EmailTemplate::BalanceTopUp => [
                 'customerName' => 'John Doe',
                 'amount' => 500.00,
-                'new_balance' => 1500.00,
+                'newBalance' => 1500.00,
                 'currency' => $currency,
             ],
 
@@ -233,19 +233,7 @@ class EmailPreviewController extends Controller
             return base64_encode($result->getString());
         }
 
-        // Fallback: Use a QR code API image encoded as base64
-        $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode('LPA:1$smdp.example.com$ABCD1EFG2HI3JK4LMN5OP6QR7ST8UV9WX');
-
-        try {
-            $image = file_get_contents($qrUrl);
-            if ($image !== false) {
-                return base64_encode($image);
-            }
-        } catch (\Exception $e) {
-            // Continue to fallback
-        }
-
-        // Final fallback: Return a larger placeholder PNG (200x200)
+        // Final fallback: Return a placeholder PNG (skip external API - too slow/unreliable)
         // This creates a simple checkerboard pattern that's visible
         return $this->generatePlaceholderQR();
     }

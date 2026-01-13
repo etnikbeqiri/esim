@@ -1,8 +1,16 @@
 @props(['title' => null])
 
-<div style="background: linear-gradient(135deg, #eef5f0 0%, #fefce8 100%); border: 1px solid #d5e8da; border-radius: 12px; padding: 20px; margin: 20px 0;">
-    @if($title)
-        <div style="font-weight: 600; color: #002a18; margin-bottom: 10px; font-size: 14px;">{{ $title }}</div>
-    @endif
-    <div style="color: #004528; font-family: 'Courier New', monospace; word-break: break-all; font-size: 14px;">{{ $slot }}</div>
-</div>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 16px 0;">
+    <tr>
+        <td style="background-color: #fafafa; border: 1px solid #e4e4e7; border-radius: 6px; padding: 14px;">
+            @if($title)
+                <div style="font-weight: 600; color: #18181b; margin-bottom: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">
+                    {{ $title }}
+                </div>
+            @endif
+            <div style="color: #52525b; font-family: 'SF Mono', 'Monaco', 'Courier New', 'Consolas', monospace; font-size: 13px; word-break: break-all; line-height: 1.5; mso-line-height-rule: exactly;">
+                {{ $slot }}
+            </div>
+        </td>
+    </tr>
+</table>

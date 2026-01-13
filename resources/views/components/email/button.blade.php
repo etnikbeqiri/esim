@@ -1,28 +1,70 @@
-@props(['href' => '#', 'variant' => 'gold', 'size' => 'default'])
+@props(['href' => '#', 'variant' => 'default', 'size' => 'default'])
 
 @php
 $variant = strtolower($variant);
 
-// Gold gradient matching the TSX gold-button component
-$goldGradient = 'background: linear-gradient(90deg, #fef9c3 0%, #fef08a 25%, #fde047 50%, #fef08a 75%, #fef9c3 100%); background-size: 200% auto;';
-$goldBorder = 'border: 1px solid #b8860b;';
-$goldText = 'color: #1a1a00;';
-$goldShadow = 'box-shadow: 0px 4px 15px rgba(212,175,55,0.3);';
+if ($variant === 'default') {
+    $bg = '#18181b';
+    $text = '#ffffff';
+    $border = '#18181b';
+} elseif ($variant === 'secondary') {
+    $bg = '#f4f4f5';
+    $text = '#18181b';
+    $border = '#e4e4e7';
+} elseif ($variant === 'outline') {
+    $bg = '#ffffff';
+    $text = '#18181b';
+    $border = '#e4e4e7';
+} elseif ($variant === 'ghost') {
+    $bg = 'transparent';
+    $text = '#18181b';
+    $border = 'transparent';
+} else {
+    $bg = '#18181b';
+    $text = '#ffffff';
+    $border = '#18181b';
+}
 
-$styles = match($variant) {
-    'secondary' => 'background-color: #aad1b6; color: #002a18;',
-    'outline' => 'background-color: transparent; border: 2px solid #006039; color: #006039;',
-    'ghost' => 'background-color: #eef5f0; color: #006039;',
-    'gold', 'default' => $goldGradient . $goldBorder . $goldText . $goldShadow,
-};
-
-$sizes = match($size) {
-    'sm' => 'padding: 10px 20px; font-size: 14px;',
-    'lg' => 'padding: 16px 32px; font-size: 16px;',
-    'default' => 'padding: 14px 28px; font-size: 15px;',
-};
+if ($size === 'sm') {
+    $padding = '8px 14px';
+    $paddingMso = '8px 14px';
+    $fontSize = '13px';
+} elseif ($size === 'lg') {
+    $padding = '12px 20px';
+    $paddingMso = '12px 20px';
+    $fontSize = '15px';
+} else {
+    $padding = '10px 16px';
+    $paddingMso = '10px 16px';
+    $fontSize = '14px';
+}
 @endphp
 
-<a href="{{ $href }}" style="display: inline-block; {{ $styles }} {{ $sizes }} border-radius: 12px; text-decoration: none; font-weight: 700; text-align: center; transition: all 0.2s;">
-    {{ $slot }}
-</a>
+@if($variant === 'link')
+    <a href="{{ $href }}" class="button-link" style="color: #09090b; text-decoration: underline; font-weight: 500; font-size: {{ $fontSize }};">
+        {{ $slot }}
+    </a>
+@else
+    <!--[if mso]>
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="display: inline-block; margin: 0 4px 8px 0;">
+        <tr>
+            <td style="background-color: {{ $bg }}; border: 1px solid {{ $border }}; border-radius: 6px; padding: {{ $paddingMso }};">
+                <a href="{{ $href }}" class="button-link" style="color: {{ $text }}; text-decoration: none; font-weight: 500; font-size: {{ $fontSize }}; font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Helvetica, Arial, sans-serif; mso-line-height-rule: exactly; line-height: normal;">
+                    {{ $slot }}
+                </a>
+            </td>
+        </tr>
+    </table>
+    <![endif]-->
+    <!--[if !mso]><!-->
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="display: inline-block; margin: 0 4px 8px 0;">
+        <tr>
+            <td style="background-color: {{ $bg }}; border: 1px solid {{ $border }}; border-radius: 6px;">
+                <a href="{{ $href }}" class="button-link" style="display: inline-block; padding: {{ $padding }}; color: {{ $text }}; text-decoration: none; font-weight: 500; font-size: {{ $fontSize }}; font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Helvetica, Arial, sans-serif;">
+                    {{ $slot }}
+                </a>
+            </td>
+        </tr>
+    </table>
+    <!--<![endif]-->
+@endif

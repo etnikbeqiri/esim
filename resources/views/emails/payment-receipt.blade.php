@@ -7,7 +7,7 @@
 
     <x-email.table title="Payment Details">
         <x-email.table-row label="Order Number" :value="'#' . $order->order_number" />
-        <x-email.table-row label="Date" :value="$order->paid_at?->format('F j, Y \a\t g:i A') ?? now()->format('F j, Y \a\t g:i A')" />
+        <x-email.table-row label="Date" :value="$order->paid_at?->format('F j, Y') ?? now()->format('F j, Y')" />
         <x-email.table-row label="Payment Method" :value="ucfirst($payment->provider?->value ?? 'Card')" />
         @if($payment->transaction_id ?? false)
             <x-email.table-row label="Transaction ID" :value="$payment->transaction_id" />
@@ -27,7 +27,7 @@
         This receipt confirms your payment has been processed successfully. Keep this email for your records.
     </x-email.text>
 
-    <div style="text-align: center; margin-top: 24px;">
+    <div style="text-align: center; margin-top: 16px;">
         <x-email.button :href="config('app.url') . '/client/orders/' . $order->uuid">View Order Details</x-email.button>
     </div>
 </x-email.layout>

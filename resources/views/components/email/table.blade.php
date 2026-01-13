@@ -1,9 +1,9 @@
 @props(['title' => null])
 
-<table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 16px 0; border-collapse: separate;">
     @if($title)
         <tr>
-            <th colspan="2" style="padding: 14px 16px; text-align: left; background: linear-gradient(135deg, #eef5f0 0%, #d5e8da 100%); font-weight: 600; color: #003720; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #aad1b6;">
+            <th colspan="2" style="padding: 10px 14px; text-align: left; background-color: #fafafa; border: 1px solid #e4e4e7; border-bottom: none; border-radius: 6px 6px 0 0; font-weight: 600; color: #18181b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; mso-line-height-rule: exactly;">
                 {{ $title }}
             </th>
         </tr>

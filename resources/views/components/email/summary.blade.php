@@ -1,3 +1,7 @@
-<div style="background: linear-gradient(135deg, #eef5f0 0%, #fefce8 30%, #eef5f0 100%); border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #d5e8da;">
-    {{ $slot }}
-</div>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 16px 0;">
+    <tr>
+        <td style="background-color: #fafafa; border: 1px solid #e4e4e7; border-radius: 6px; padding: 4px 14px;">
+            {{ $slot }}
+        </td>
+    </tr>
+</table>

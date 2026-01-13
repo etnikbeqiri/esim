@@ -1,14 +1,40 @@
-@props(['type' => 'info'])
+@props(['type' => 'default', 'title' => null])
 
 @php
-$styles = match($type) {
-    'success' => 'background: linear-gradient(135deg, #d5e8da 0%, #eef5f0 100%); border: 1px solid #7ab68d; color: #003720;',
-    'error' => 'background: linear-gradient(135deg, #fde8e8 0%, #ffffff 100%); border: 1px solid #dc2626; color: #991b1b;',
-    'warning' => 'background: linear-gradient(135deg, #fef9c3 0%, #fefce8 100%); border: 1px solid #daa520; color: #8b6914;',
-    default => 'background: linear-gradient(135deg, #eef5f0 0%, #f0f9f4 100%); border: 1px solid #7ab68d; color: #003720;',
-};
+if ($type === 'destructive') {
+    $bg = '#fef2f2';
+    $border = '#fecaca';
+    $text = '#7f1d1d';
+} elseif ($type === 'warning') {
+    $bg = '#fefce8';
+    $border = '#fde047';
+    $text = '#854d0e';
+} elseif ($type === 'success') {
+    $bg = '#f0fdf4';
+    $border = '#bbf7d0';
+    $text = '#14532d';
+} elseif ($type === 'info') {
+    $bg = '#eff6ff';
+    $border = '#bfdbfe';
+    $text = '#1e3a8a';
+} else {
+    $bg = '#fafafa';
+    $border = '#e4e4e7';
+    $text = '#52525b';
+}
 @endphp
 
-<div style="padding: 18px 22px; border-radius: 12px; margin: 20px 0; {{ $styles }}">
-    {{ $slot }}
-</div>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 16px 0;">
+    <tr>
+        <td style="background-color: {{ $bg }}; border: 1px solid {{ $border }}; border-radius: 6px; padding: 14px; color: {{ $text }}; font-size: 14px; line-height: 1.5;">
+            @if($title)
+                <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">
+                    {{ $title }}
+                </div>
+            @endif
+            <div style="mso-line-height-rule: exactly; line-height: 1.5;">
+                {{ $slot }}
+            </div>
+        </td>
+    </tr>
+</table>
