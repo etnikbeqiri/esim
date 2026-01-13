@@ -2,8 +2,8 @@ import { EsimQrCard } from '@/components/esim-qr-card';
 import { OrderSummaryCard } from '@/components/order-summary-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { GoldButton } from '@/components/ui/gold-button';
 import { Card, CardContent } from '@/components/ui/card';
+import { GoldButton } from '@/components/ui/gold-button';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link, router } from '@inertiajs/react';
 import {
@@ -42,9 +42,13 @@ interface Props {
 }
 
 export default function CheckoutSuccess({ order }: Props) {
-    const isProcessing = ['processing', 'pending', 'pending_retry'].includes(
-        order.status,
-    );
+    const isProcessing = [
+        'processing',
+        'pending',
+        'pending_retry',
+        'awaiting_payment',
+    ].includes(order.status);
+    const isAwaitingPayment = order.status === 'awaiting_payment';
     const isCompleted = order.status === 'completed';
     const isFailed = order.status === 'failed';
 
@@ -52,12 +56,20 @@ export default function CheckoutSuccess({ order }: Props) {
     useEffect(() => {
         if (!isProcessing) return;
 
+        // Immediate check (1s) in case webhook fired during page load
+        const quickCheck = setTimeout(() => {
+            router.reload({ only: ['order'] });
+        }, 1000);
+
         const interval = setInterval(() => {
             router.reload({ only: ['order'] });
         }, 3000);
 
-        return () => clearInterval(interval);
-    }, [isProcessing, order.status]);
+        return () => {
+            clearTimeout(quickCheck);
+            clearInterval(interval);
+        };
+    }, [isProcessing]); // removed order.status dependency to prevent re-creating interval excessively
 
     return (
         <GuestLayout>
@@ -90,14 +102,19 @@ export default function CheckoutSuccess({ order }: Props) {
                                         className="mb-4 bg-primary-100 text-primary-700"
                                     >
                                         <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                                        Processing
+                                        {isAwaitingPayment
+                                            ? 'Verifying Payment'
+                                            : 'Processing'}
                                     </Badge>
                                     <h1 className="text-3xl font-bold tracking-tight text-primary-900 md:text-4xl">
-                                        Preparing Your eSIM
+                                        {isAwaitingPayment
+                                            ? 'Confirming Payment...'
+                                            : 'Preparing Your eSIM'}
                                     </h1>
                                     <p className="mt-3 text-lg text-primary-600">
-                                        This usually takes less than a minute.
-                                        Please don't close this page.
+                                        {isAwaitingPayment
+                                            ? "We're verifying your payment status. This should only take a moment."
+                                            : "This usually takes less than a minute. Please don't close this page."}
                                     </p>
                                 </>
                             )}
@@ -256,10 +273,7 @@ export default function CheckoutSuccess({ order }: Props) {
                                 </Link>
                             </Button>
                             {isCompleted && (
-                                <GoldButton
-                                    asChild
-                                    size="lg"
-                                >
+                                <GoldButton asChild size="lg">
                                     <Link href={`/order/${order.uuid}/status`}>
                                         View Order Details
                                         <ChevronRight className="ml-1 h-4 w-4" />
