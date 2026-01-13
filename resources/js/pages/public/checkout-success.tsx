@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
+import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link, router } from '@inertiajs/react';
 import {
@@ -42,6 +43,8 @@ interface Props {
 }
 
 export default function CheckoutSuccess({ order }: Props) {
+    const { trans } = useTrans();
+
     const isProcessing = [
         'processing',
         'pending',
@@ -76,10 +79,10 @@ export default function CheckoutSuccess({ order }: Props) {
             <Head
                 title={
                     isCompleted
-                        ? 'Order Complete'
+                        ? trans('checkout_success_page.meta_title.complete')
                         : isProcessing
-                          ? 'Processing Order'
-                          : 'Order Status'
+                          ? trans('checkout_success_page.meta_title.processing')
+                          : trans('checkout_success_page.meta_title.status')
                 }
             />
 
@@ -103,18 +106,30 @@ export default function CheckoutSuccess({ order }: Props) {
                                     >
                                         <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                                         {isAwaitingPayment
-                                            ? 'Verifying Payment'
-                                            : 'Processing'}
+                                            ? trans(
+                                                  'checkout_success_page.status.verifying',
+                                              )
+                                            : trans(
+                                                  'checkout_success_page.status.processing',
+                                              )}
                                     </Badge>
                                     <h1 className="text-3xl font-bold tracking-tight text-primary-900 md:text-4xl">
                                         {isAwaitingPayment
-                                            ? 'Confirming Payment...'
-                                            : 'Preparing Your eSIM'}
+                                            ? trans(
+                                                  'checkout_success_page.status.confirming',
+                                              )
+                                            : trans(
+                                                  'checkout_success_page.status.preparing',
+                                              )}
                                     </h1>
                                     <p className="mt-3 text-lg text-primary-600">
                                         {isAwaitingPayment
-                                            ? "We're verifying your payment status. This should only take a moment."
-                                            : "This usually takes less than a minute. Please don't close this page."}
+                                            ? trans(
+                                                  'checkout_success_page.status.verifying_desc',
+                                              )
+                                            : trans(
+                                                  'checkout_success_page.status.preparing_desc',
+                                              )}
                                     </p>
                                 </>
                             )}
@@ -125,14 +140,19 @@ export default function CheckoutSuccess({ order }: Props) {
                                     </div>
                                     <Badge className="mb-4 bg-accent-500 text-accent-950">
                                         <CheckCircle2 className="mr-1 h-3 w-3" />
-                                        Complete
+                                        {trans(
+                                            'checkout_success_page.status.complete',
+                                        )}
                                     </Badge>
                                     <h1 className="text-3xl font-bold tracking-tight text-primary-900 md:text-4xl">
-                                        Your eSIM is Ready!
+                                        {trans(
+                                            'checkout_success_page.status.ready',
+                                        )}
                                     </h1>
                                     <p className="mt-3 text-lg text-primary-600">
-                                        Scan the QR code below to install your
-                                        eSIM on your device.
+                                        {trans(
+                                            'checkout_success_page.status.scan_qr',
+                                        )}
                                     </p>
                                 </>
                             )}
@@ -146,14 +166,19 @@ export default function CheckoutSuccess({ order }: Props) {
                                         className="mb-4"
                                     >
                                         <XCircle className="mr-1 h-3 w-3" />
-                                        Failed
+                                        {trans(
+                                            'checkout_success_page.status.failed',
+                                        )}
                                     </Badge>
                                     <h1 className="text-3xl font-bold tracking-tight text-primary-900 md:text-4xl">
-                                        Order Could Not Be Completed
+                                        {trans(
+                                            'checkout_success_page.status.failed_title',
+                                        )}
                                     </h1>
                                     <p className="mt-3 text-lg text-primary-600">
-                                        We were unable to process your order.
-                                        Any payment has been refunded.
+                                        {trans(
+                                            'checkout_success_page.status.failed_desc',
+                                        )}
                                     </p>
                                 </>
                             )}
@@ -172,15 +197,21 @@ export default function CheckoutSuccess({ order }: Props) {
                             <div className="mb-6">
                                 <EsimQrCard
                                     esim={order.esim}
-                                    title="Your eSIM"
-                                    description="Scan the QR code with your phone to install the eSIM"
+                                    title={trans(
+                                        'checkout_success_page.esim.title',
+                                    )}
+                                    description={trans(
+                                        'checkout_success_page.esim.description',
+                                    )}
                                 />
 
                                 {/* Installation Instructions */}
                                 <Card className="mt-4 border-primary-100 bg-white shadow-sm">
                                     <CardContent className="p-6">
                                         <h3 className="mb-4 font-semibold text-primary-900">
-                                            How to Install
+                                            {trans(
+                                                'checkout_success_page.installation.title',
+                                            )}
                                         </h3>
                                         <div className="space-y-3">
                                             <div className="flex items-start gap-3">
@@ -188,10 +219,25 @@ export default function CheckoutSuccess({ order }: Props) {
                                                     1
                                                 </div>
                                                 <p className="text-sm text-primary-600">
-                                                    Go to{' '}
+                                                    {
+                                                        trans(
+                                                            'checkout_success_page.installation.step_1',
+                                                            {
+                                                                setting_path:
+                                                                    // Manually bolding inside trans is tricky,
+                                                                    // so we might just pass the string or handle it differently.
+                                                                    // For now, let's just pass the string.
+                                                                    // Or we can reconstruct the structure:
+                                                                    '',
+                                                            },
+                                                        ).split(
+                                                            ':setting_path',
+                                                        )[0]
+                                                    }
                                                     <strong className="text-primary-800">
-                                                        Settings →
-                                                        Cellular/Mobile Data
+                                                        {trans(
+                                                            'checkout_success_page.installation.step_1_path',
+                                                        )}
                                                     </strong>
                                                 </p>
                                             </div>
@@ -200,13 +246,44 @@ export default function CheckoutSuccess({ order }: Props) {
                                                     2
                                                 </div>
                                                 <p className="text-sm text-primary-600">
-                                                    Tap{' '}
+                                                    {trans(
+                                                        'checkout_success_page.installation.step_2',
+                                                        {
+                                                            option_1:
+                                                                '__OPTION_1__',
+                                                            option_2:
+                                                                '__OPTION_2__',
+                                                        },
+                                                    )
+                                                        .split(
+                                                            '__OPTION_1__',
+                                                        )[0]
+                                                        .trim()}{' '}
                                                     <strong className="text-primary-800">
-                                                        Add eSIM
+                                                        {trans(
+                                                            'checkout_success_page.installation.step_2_opt_1',
+                                                        )}
                                                     </strong>{' '}
-                                                    or{' '}
+                                                    {trans(
+                                                        'checkout_success_page.installation.step_2',
+                                                        {
+                                                            option_1:
+                                                                '__OPTION_1__',
+                                                            option_2:
+                                                                '__OPTION_2__',
+                                                        },
+                                                    )
+                                                        .split(
+                                                            '__OPTION_1__',
+                                                        )[1]
+                                                        .split(
+                                                            '__OPTION_2__',
+                                                        )[0]
+                                                        .trim()}{' '}
                                                     <strong className="text-primary-800">
-                                                        Add Cellular Plan
+                                                        {trans(
+                                                            'checkout_success_page.installation.step_2_opt_2',
+                                                        )}
                                                     </strong>
                                                 </p>
                                             </div>
@@ -215,8 +292,9 @@ export default function CheckoutSuccess({ order }: Props) {
                                                     3
                                                 </div>
                                                 <p className="text-sm text-primary-600">
-                                                    Scan the QR code above with
-                                                    your phone camera
+                                                    {trans(
+                                                        'checkout_success_page.installation.step_3',
+                                                    )}
                                                 </p>
                                             </div>
                                             <div className="flex items-start gap-3">
@@ -224,10 +302,21 @@ export default function CheckoutSuccess({ order }: Props) {
                                                     4
                                                 </div>
                                                 <p className="text-sm text-primary-600">
-                                                    Follow the prompts and
-                                                    enable{' '}
+                                                    {
+                                                        trans(
+                                                            'checkout_success_page.installation.step_4',
+                                                            {
+                                                                feature:
+                                                                    '__FEATURE__',
+                                                            },
+                                                        ).split(
+                                                            '__FEATURE__',
+                                                        )[0]
+                                                    }
                                                     <strong className="text-primary-800">
-                                                        Data Roaming
+                                                        {trans(
+                                                            'checkout_success_page.installation.step_4_feature',
+                                                        )}
                                                     </strong>
                                                 </p>
                                             </div>
@@ -247,12 +336,14 @@ export default function CheckoutSuccess({ order }: Props) {
                                         </div>
                                         <div>
                                             <h3 className="font-semibold text-primary-900">
-                                                Setting up your eSIM...
+                                                {trans(
+                                                    'checkout_success_page.processing_card.title',
+                                                )}
                                             </h3>
                                             <p className="text-sm text-primary-600">
-                                                We're provisioning your eSIM
-                                                profile. This page will update
-                                                automatically.
+                                                {trans(
+                                                    'checkout_success_page.processing_card.description',
+                                                )}
                                             </p>
                                         </div>
                                     </div>
@@ -269,13 +360,17 @@ export default function CheckoutSuccess({ order }: Props) {
                                 className="rounded-full border-primary-200 text-primary-700 hover:bg-white"
                             >
                                 <Link href="/destinations">
-                                    Browse More Plans
+                                    {trans(
+                                        'checkout_success_page.actions.browse',
+                                    )}
                                 </Link>
                             </Button>
                             {isCompleted && (
                                 <GoldButton asChild size="lg">
                                     <Link href={`/order/${order.uuid}/status`}>
-                                        View Order Details
+                                        {trans(
+                                            'checkout_success_page.actions.view_order',
+                                        )}
                                         <ChevronRight className="ml-1 h-4 w-4" />
                                     </Link>
                                 </GoldButton>
@@ -286,11 +381,12 @@ export default function CheckoutSuccess({ order }: Props) {
                         <div className="mt-8 rounded-2xl border border-primary-100 bg-white p-6 text-center shadow-sm">
                             <HelpCircle className="mx-auto mb-3 h-8 w-8 text-primary-400" />
                             <h3 className="font-semibold text-primary-900">
-                                Need Help?
+                                {trans('checkout_success_page.help.title')}
                             </h3>
                             <p className="mt-1 text-sm text-primary-600">
-                                Having trouble installing your eSIM? Check our
-                                installation guide or contact support.
+                                {trans(
+                                    'checkout_success_page.help.description',
+                                )}
                             </p>
                             <div className="mt-4 flex justify-center gap-3">
                                 <Button
@@ -300,7 +396,9 @@ export default function CheckoutSuccess({ order }: Props) {
                                     className="rounded-full border-primary-200 text-primary-700 hover:bg-primary-50"
                                 >
                                     <Link href="/how-it-works">
-                                        Installation Guide
+                                        {trans(
+                                            'checkout_success_page.help.guide',
+                                        )}
                                     </Link>
                                 </Button>
                                 <Button
@@ -309,7 +407,11 @@ export default function CheckoutSuccess({ order }: Props) {
                                     asChild
                                     className="rounded-full border-primary-200 text-primary-700 hover:bg-primary-50"
                                 >
-                                    <Link href="/help">Contact Support</Link>
+                                    <Link href="/help">
+                                        {trans(
+                                            'checkout_success_page.help.contact',
+                                        )}
+                                    </Link>
                                 </Button>
                             </div>
                         </div>

@@ -8,15 +8,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { useTrans } from '@/hooks/use-trans';
 import AuthLayout from '@/layouts/auth-layout';
 
 export default function Register() {
+    const { trans } = useTrans();
+
     return (
         <AuthLayout
-            title="Create an account"
-            description="Enter your details below to create your account"
+            title={trans('auth.register.title')}
+            description={trans('auth.register.description')}
         >
-            <Head title="Register" />
+            <Head title={trans('auth.register.head_title')} />
             <Form
                 {...store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}
@@ -27,7 +30,9 @@ export default function Register() {
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="name">Name</Label>
+                                <Label htmlFor="name">
+                                    {trans('auth.register.name_label')}
+                                </Label>
                                 <Input
                                     id="name"
                                     type="text"
@@ -36,7 +41,9 @@ export default function Register() {
                                     tabIndex={1}
                                     autoComplete="name"
                                     name="name"
-                                    placeholder="Full name"
+                                    placeholder={trans(
+                                        'auth.register.name_placeholder',
+                                    )}
                                 />
                                 <InputError
                                     message={errors.name}
@@ -45,7 +52,9 @@ export default function Register() {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">
+                                    {trans('auth.register.email_label')}
+                                </Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -53,13 +62,17 @@ export default function Register() {
                                     tabIndex={2}
                                     autoComplete="email"
                                     name="email"
-                                    placeholder="email@example.com"
+                                    placeholder={trans(
+                                        'auth.register.email_placeholder',
+                                    )}
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">Password</Label>
+                                <Label htmlFor="password">
+                                    {trans('auth.register.password_label')}
+                                </Label>
                                 <Input
                                     id="password"
                                     type="password"
@@ -67,14 +80,18 @@ export default function Register() {
                                     tabIndex={3}
                                     autoComplete="new-password"
                                     name="password"
-                                    placeholder="Password"
+                                    placeholder={trans(
+                                        'auth.register.password_placeholder',
+                                    )}
                                 />
                                 <InputError message={errors.password} />
                             </div>
 
                             <div className="grid gap-2">
                                 <Label htmlFor="password_confirmation">
-                                    Confirm password
+                                    {trans(
+                                        'auth.register.confirm_password_label',
+                                    )}
                                 </Label>
                                 <Input
                                     id="password_confirmation"
@@ -83,7 +100,9 @@ export default function Register() {
                                     tabIndex={4}
                                     autoComplete="new-password"
                                     name="password_confirmation"
-                                    placeholder="Confirm password"
+                                    placeholder={trans(
+                                        'auth.register.confirm_password_placeholder',
+                                    )}
                                 />
                                 <InputError
                                     message={errors.password_confirmation}
@@ -97,14 +116,14 @@ export default function Register() {
                                 data-test="register-user-button"
                             >
                                 {processing && <Spinner />}
-                                Create account
+                                {trans('auth.register.submit')}
                             </Button>
                         </div>
 
                         <div className="text-center text-sm text-muted-foreground">
-                            Already have an account?{' '}
+                            {trans('auth.register.already_registered')}{' '}
                             <TextLink href={login()} tabIndex={6}>
-                                Log in
+                                {trans('auth.register.log_in')}
                             </TextLink>
                         </div>
                     </>

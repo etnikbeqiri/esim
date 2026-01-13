@@ -1,7 +1,7 @@
 import { DestinationCard } from '@/components/destination-card';
 import { HeroSection } from '@/components/hero-section';
-import { Button } from '@/components/ui/button';
 import { GoldButton } from '@/components/ui/gold-button';
+import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -28,6 +28,7 @@ interface Props {
 
 export default function Destinations({ countries, regions, filters }: Props) {
     const { name } = usePage<SharedData>().props;
+    const { trans } = useTrans();
     const [searchQuery, setSearchQuery] = useState(filters.search || '');
     const [activeRegion, setActiveRegion] = useState<string>('all');
 
@@ -60,24 +61,30 @@ export default function Destinations({ countries, regions, filters }: Props) {
 
     return (
         <GuestLayout>
-            <Head title={`Destinations - ${name}`}>
+            <Head title={`${trans('nav.destinations')} - ${name}`}>
                 <meta
                     name="description"
-                    content={`Browse eSIM data plans for ${countries.length}+ countries. Instant delivery, no roaming fees.`}
+                    content={trans('destinations.meta_description', {
+                        count: String(countries.length),
+                    })}
                 />
             </Head>
 
             <HeroSection
-                badge={`${countries.length}+ Countries`}
-                title="Find Your"
-                titleHighlight="Destination"
-                description="Select a country to browse available eSIM data plans"
+                badge={trans('destinations.hero.badge', {
+                    count: String(countries.length),
+                })}
+                title={trans('destinations.hero.title')}
+                titleHighlight={trans('destinations.hero.title_highlight')}
+                description={trans('destinations.hero.description')}
                 showSearch={true}
                 showStats={false}
                 totalCountries={countries.length}
                 searchValue={searchQuery}
                 onSearchChange={setSearchQuery}
-                searchPlaceholder="Search countries..."
+                searchPlaceholder={trans(
+                    'destinations.hero.search_placeholder',
+                )}
             />
 
             {/* Region Tabs */}
@@ -85,21 +92,30 @@ export default function Destinations({ countries, regions, filters }: Props) {
                 <div className="container mx-auto px-4">
                     <div className="no-scrollbar -mb-px flex gap-2 overflow-x-auto py-3">
                         {activeRegion === 'all' ? (
-                            <GoldButton size="sm" onClick={() => setActiveRegion('all')}>
-                                All Regions
+                            <GoldButton
+                                size="sm"
+                                onClick={() => setActiveRegion('all')}
+                            >
+                                {trans('destinations.tabs.all_regions')}
                             </GoldButton>
                         ) : (
                             <button
                                 onClick={() => setActiveRegion('all')}
                                 className="shrink-0 rounded-full border border-transparent bg-primary-50 px-4 py-2 text-xs font-bold text-primary-600 transition-colors duration-200 hover:bg-primary-100"
                             >
-                                All Regions
+                                {trans('destinations.tabs.all_regions')}
                             </button>
                         )}
                         {regions.map((region) =>
                             activeRegion === region ? (
-                                <GoldButton key={region} size="sm" onClick={() => setActiveRegion(region)}>
-                                    {region}
+                                <GoldButton
+                                    key={region}
+                                    size="sm"
+                                    onClick={() => setActiveRegion(region)}
+                                >
+                                    {trans(
+                                        `destinations.tabs.${region.toLowerCase().replace(' ', '_')}`,
+                                    )}
                                 </GoldButton>
                             ) : (
                                 <button
@@ -107,7 +123,9 @@ export default function Destinations({ countries, regions, filters }: Props) {
                                     onClick={() => setActiveRegion(region)}
                                     className="shrink-0 rounded-full border border-transparent bg-primary-50 px-4 py-2 text-xs font-bold text-primary-600 transition-colors duration-200 hover:bg-primary-100"
                                 >
-                                    {region}
+                                    {trans(
+                                        `destinations.tabs.${region.toLowerCase().replace(' ', '_')}`,
+                                    )}
                                 </button>
                             ),
                         )}
@@ -127,27 +145,27 @@ export default function Destinations({ countries, regions, filters }: Props) {
                                 <MapPin className="h-7 w-7 text-primary-500" />
                             </div>
                             <h3 className="text-xl font-bold text-primary-900">
-                                No destinations found
+                                {trans('destinations.empty.title')}
                             </h3>
                             <p className="mt-2 text-primary-600">
-                                Try a different search term or region
+                                {trans('destinations.empty.description')}
                             </p>
-                            <GoldButton
-                                className="mt-5"
-                                onClick={clearFilters}
-                            >
-                                Clear Filters
+                            <GoldButton className="mt-5" onClick={clearFilters}>
+                                {trans('destinations.empty.clear_filters')}
                             </GoldButton>
                         </div>
                     ) : (
                         <>
                             <div className="mb-6">
                                 <p className="text-sm font-medium text-primary-600">
-                                    Showing {filteredCountries.length}{' '}
-                                    destination
-                                    {filteredCountries.length !== 1 ? 's' : ''}{' '}
+                                    {trans('destinations.results.showing', {
+                                        count: String(filteredCountries.length),
+                                    })}{' '}
                                     {activeRegion !== 'all' &&
-                                        `in ${activeRegion}`}
+                                        trans(
+                                            'destinations.results.in_region',
+                                            { region: activeRegion },
+                                        )}
                                 </p>
                             </div>
 
@@ -174,24 +192,23 @@ export default function Destinations({ countries, regions, filters }: Props) {
                 <div className="relative z-10 container mx-auto px-4">
                     <div className="mx-auto max-w-xl text-center">
                         <h2 className="mb-2 text-lg font-bold text-primary-900">
-                            Need Help Choosing?
+                            {trans('destinations.help.title')}
                         </h2>
                         <p className="mb-5 text-sm text-primary-600">
-                            Not sure which plan is right for you? Check our
-                            guide or contact our support team.
+                            {trans('destinations.help.description')}
                         </p>
                         <div className="flex justify-center gap-3">
                             <Link
                                 href="/how-it-works"
                                 className="inline-flex h-8 items-center justify-center rounded-full border border-primary-200 bg-white px-4 text-sm font-medium text-primary-700 shadow-sm transition-colors hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700"
                             >
-                                How It Works
+                                {trans('nav.how_it_works')}
                             </Link>
                             <Link
                                 href="/help"
                                 className="inline-flex h-8 items-center justify-center rounded-full border border-primary-200 bg-white px-4 text-sm font-medium text-primary-700 shadow-sm transition-colors hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700"
                             >
-                                Get Help
+                                {trans('destinations.help.get_help')}
                             </Link>
                         </div>
                     </div>

@@ -1,8 +1,8 @@
-import AppLogoIcon from '@/components/app-logo-icon';
 import LanguageSwitcher from '@/components/language-switcher';
 import { PayseraTrustBadge } from '@/components/paysera-trust-badge';
 import { Button } from '@/components/ui/button';
 import { GoldButton } from '@/components/ui/gold-button';
+import { useTrans } from '@/hooks/use-trans';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { Menu, User, X } from 'lucide-react';
@@ -14,6 +14,7 @@ interface GuestLayoutProps {
 
 export default function GuestLayout({ children }: GuestLayoutProps) {
     const { auth, name } = usePage<SharedData>().props;
+    const { trans } = useTrans();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
@@ -23,7 +24,11 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                 <div className="container mx-auto flex h-20 items-center justify-between px-4">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-3">
-                        <img alt="Logo" className="h-12 w-12 object-contain" src="/logo.png" />
+                        <img
+                            alt="Logo"
+                            className="h-12 w-12 object-contain"
+                            src="/logo.png"
+                        />
                         <span className="text-xl font-bold tracking-tight text-primary-900">
                             {name}
                         </span>
@@ -35,25 +40,25 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                             href="/"
                             className="rounded-full px-5 py-2.5 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-50 hover:text-primary-900"
                         >
-                            Home
+                            {trans('nav.home')}
                         </Link>
                         <Link
                             href="/destinations"
                             className="rounded-full px-5 py-2.5 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-50 hover:text-primary-900"
                         >
-                            Destinations
+                            {trans('nav.destinations')}
                         </Link>
                         <Link
                             href="/how-it-works"
                             className="rounded-full px-5 py-2.5 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-50 hover:text-primary-900"
                         >
-                            How it Works
+                            {trans('nav.how_it_works')}
                         </Link>
                         <Link
                             href="/blog"
                             className="rounded-full px-5 py-2.5 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-50 hover:text-primary-900"
                         >
-                            Blog
+                            {trans('nav.blog')}
                         </Link>
                     </nav>
 
@@ -68,7 +73,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                             >
                                 <Link href="/client">
                                     <User className="mr-2 h-4 w-4" />
-                                    My Account
+                                    {trans('nav.my_account')}
                                 </Link>
                             </GoldButton>
                         ) : (
@@ -79,14 +84,18 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                     size="sm"
                                     className="rounded-full px-5 font-semibold text-primary-700 hover:bg-primary-50 hover:text-primary-900"
                                 >
-                                    <Link href="/login">Log in</Link>
+                                    <Link href="/login">
+                                        {trans('nav.login')}
+                                    </Link>
                                 </Button>
                                 <GoldButton
                                     asChild
                                     size="sm"
                                     className="rounded-full px-6"
                                 >
-                                    <Link href="/register">Get Started</Link>
+                                    <Link href="/register">
+                                        {trans('nav.get_started')}
+                                    </Link>
                                 </GoldButton>
                             </>
                         )}
@@ -117,28 +126,28 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                 className="rounded-xl px-4 py-3 text-sm font-medium text-primary-900 hover:bg-primary-50"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                Home
+                                {trans('nav.home')}
                             </Link>
                             <Link
                                 href="/destinations"
                                 className="rounded-xl px-4 py-3 text-sm font-medium text-primary-900 hover:bg-primary-50"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                Destinations
+                                {trans('nav.destinations')}
                             </Link>
                             <Link
                                 href="/how-it-works"
                                 className="rounded-xl px-4 py-3 text-sm font-medium text-primary-900 hover:bg-primary-50"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                How it Works
+                                {trans('nav.how_it_works')}
                             </Link>
                             <Link
                                 href="/blog"
                                 className="rounded-xl px-4 py-3 text-sm font-medium text-primary-900 hover:bg-primary-50"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                Blog
+                                {trans('nav.blog')}
                             </Link>
                             <div className="mt-3 flex items-center justify-between border-t border-primary-100 pt-4">
                                 <LanguageSwitcher showLabel />
@@ -150,7 +159,9 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                         size="sm"
                                         className="w-full"
                                     >
-                                        <Link href="/client">My Account</Link>
+                                        <Link href="/client">
+                                            {trans('nav.my_account')}
+                                        </Link>
                                     </GoldButton>
                                 ) : (
                                     <>
@@ -160,7 +171,9 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                             size="sm"
                                             className="w-full rounded-xl border-primary-200 text-primary-700 hover:bg-primary-50 hover:text-primary-900"
                                         >
-                                            <Link href="/login">Log in</Link>
+                                            <Link href="/login">
+                                                {trans('nav.login')}
+                                            </Link>
                                         </Button>
                                         <GoldButton
                                             asChild
@@ -168,7 +181,9 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                             className="w-full"
                                         >
                                             <Link href="/register">
-                                                Get Started
+                                                {trans(
+                                                    'nav.get_started',
+                                                )}
                                             </Link>
                                         </GoldButton>
                                     </>
@@ -195,26 +210,25 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                     <div className="grid gap-12 md:grid-cols-4">
                         {/* Brand */}
                         <div className="md:col-span-1">
-                            <Link
-                                href="/"
-                                className="flex items-center gap-3"
-                            >
-                                <img alt="Logo" className="h-12 w-12 object-contain" src="/logo.png" />
+                            <Link href="/" className="flex items-center gap-3">
+                                <img
+                                    alt="Logo"
+                                    className="h-12 w-12 object-contain"
+                                    src="/logo.png"
+                                />
                                 <span className="text-xl font-bold text-primary-900">
                                     {name}
                                 </span>
                             </Link>
                             <p className="mt-6 text-sm leading-relaxed text-primary-600">
-                                Stay connected anywhere in the world with
-                                instant eSIM activation. No roaming fees, just
-                                freedom.
+                                {trans('footer.brand_description')}
                             </p>
                         </div>
 
                         {/* Quick Links */}
                         <div>
                             <h3 className="mb-6 text-sm font-bold tracking-wider text-primary-900 uppercase">
-                                Quick Links
+                                {trans('footer.headers.quick_links')}
                             </h3>
                             <ul className="space-y-4 text-sm text-primary-600">
                                 <li>
@@ -222,7 +236,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                         href="/destinations"
                                         className="transition-colors hover:text-primary-900"
                                     >
-                                        Destinations
+                                        {trans('nav.destinations')}
                                     </Link>
                                 </li>
                                 <li>
@@ -230,7 +244,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                         href="/how-it-works"
                                         className="transition-colors hover:text-primary-900"
                                     >
-                                        How it Works
+                                        {trans('nav.how_it_works')}
                                     </Link>
                                 </li>
                                 <li>
@@ -238,7 +252,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                         href="/faq"
                                         className="transition-colors hover:text-primary-900"
                                     >
-                                        FAQ
+                                        {trans('footer.links.faq')}
                                     </Link>
                                 </li>
                                 <li>
@@ -246,7 +260,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                         href="/blog"
                                         className="transition-colors hover:text-primary-900"
                                     >
-                                        Blog
+                                        {trans('nav.blog')}
                                     </Link>
                                 </li>
                             </ul>
@@ -255,7 +269,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                         {/* Support */}
                         <div>
                             <h3 className="mb-6 text-sm font-bold tracking-wider text-primary-900 uppercase">
-                                Support
+                                {trans('footer.headers.support')}
                             </h3>
                             <ul className="space-y-4 text-sm text-primary-600">
                                 <li>
@@ -263,7 +277,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                         href="/contact"
                                         className="transition-colors hover:text-primary-900"
                                     >
-                                        Contact Us
+                                        {trans('footer.links.contact')}
                                     </Link>
                                 </li>
                                 <li>
@@ -271,7 +285,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                         href="/help"
                                         className="transition-colors hover:text-primary-900"
                                     >
-                                        Help Center
+                                        {trans('footer.links.help')}
                                     </Link>
                                 </li>
                             </ul>
@@ -280,7 +294,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                         {/* Legal */}
                         <div>
                             <h3 className="mb-6 text-sm font-bold tracking-wider text-primary-900 uppercase">
-                                Legal
+                                {trans('footer.headers.legal')}
                             </h3>
                             <ul className="space-y-4 text-sm text-primary-600">
                                 <li>
@@ -288,7 +302,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                         href="/privacy"
                                         className="transition-colors hover:text-primary-900"
                                     >
-                                        Privacy Policy
+                                        {trans('footer.links.privacy')}
                                     </Link>
                                 </li>
                                 <li>
@@ -296,7 +310,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                         href="/terms"
                                         className="transition-colors hover:text-primary-900"
                                     >
-                                        Terms of Service
+                                        {trans('footer.links.terms')}
                                     </Link>
                                 </li>
                             </ul>
@@ -305,8 +319,8 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
 
                     <div className="mt-16 border-t border-primary-200 pt-8 text-center text-sm text-primary-500">
                         <p>
-                            &copy; {new Date().getFullYear()} {name}. All rights
-                            reserved.
+                            &copy; {new Date().getFullYear()} {name}.{' '}
+                            {trans('footer.rights')}
                         </p>
                     </div>
 

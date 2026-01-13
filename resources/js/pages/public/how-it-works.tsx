@@ -2,16 +2,11 @@ import { CTASection } from '@/components/cta-section';
 import { FAQSection } from '@/components/faq-section';
 import { HeroSection } from '@/components/hero-section';
 import { StepsSection } from '@/components/steps-section';
+import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
-import {
-    CreditCard,
-    QrCode,
-    Search,
-    Settings,
-    Wifi,
-} from 'lucide-react';
+import { Head, usePage } from '@inertiajs/react';
+import { CreditCard, QrCode, Search, Settings, Wifi } from 'lucide-react';
 
 interface Props {
     totalCountries: number;
@@ -22,92 +17,116 @@ interface FAQItem {
     answer: string;
 }
 
-const faqs: FAQItem[] = [
-    {
-        question: 'What is an eSIM?',
-        answer: 'An eSIM (embedded SIM) is a digital SIM that allows you to activate a cellular plan without having to use a physical SIM card. It\'s built into your device and can be programmed with the mobile plan of your choice.',
-    },
-    {
-        question: 'How do I know if my phone supports eSIM?',
-        answer: 'Most modern smartphones support eSIM, including iPhone XS and newer, Google Pixel 3 and newer, Samsung Galaxy S20 and newer. You can check in your phone settings under "Cellular" or "Mobile Network" to see if there\'s an option to add an eSIM.',
-    },
-    {
-        question: 'Can I use my regular SIM and eSIM at the same time?',
-        answer: 'Yes! Your phone can use both your regular SIM card and an eSIM simultaneously. This means you can keep your home number active while using the eSIM for data in your travel destination.',
-    },
-    {
-        question: 'When should I install my eSIM?',
-        answer: 'You can install your eSIM as soon as you receive it. We recommend installing it before you travel while you still have WiFi access. You can then activate it when you arrive at your destination.',
-    },
-    {
-        question: 'What happens when my data runs out?',
-        answer: 'When your data is depleted, you can simply purchase a new eSIM plan. Your old eSIM can be deleted from your device, and you can install the new one.',
-    },
-    {
-        question: 'Do eSIMs work for phone calls and texts?',
-        answer: 'Most of our eSIM plans are data-only, which means they don\'t include traditional voice calls or SMS. However, you can use apps like WhatsApp, Telegram, or Skype to make calls and send messages using your data.',
-    },
-];
-
 export default function HowItWorks({ totalCountries }: Props) {
     const { name } = usePage<SharedData>().props;
+    const { trans } = useTrans();
+
+    const faqs: FAQItem[] = [
+        {
+            question: trans('how_it_works.faq.items.what_is_esim.question'),
+            answer: trans('how_it_works.faq.items.what_is_esim.answer'),
+        },
+        {
+            question: trans('how_it_works.faq.items.support_esim.question'),
+            answer: trans('how_it_works.faq.items.support_esim.answer'),
+        },
+        {
+            question: trans('how_it_works.faq.items.dual_sim.question'),
+            answer: trans('how_it_works.faq.items.dual_sim.answer'),
+        },
+        {
+            question: trans('how_it_works.faq.items.install_time.question'),
+            answer: trans('how_it_works.faq.items.install_time.answer'),
+        },
+        {
+            question: trans('how_it_works.faq.items.data_run_out.question'),
+            answer: trans('how_it_works.faq.items.data_run_out.answer'),
+        },
+        {
+            question: trans('how_it_works.faq.items.calls_texts.question'),
+            answer: trans('how_it_works.faq.items.calls_texts.answer'),
+        },
+    ];
 
     return (
         <GuestLayout>
-            <Head title={`How It Works - ${name}`}>
+            <Head title={`${trans('nav.how_it_works')} - ${name}`}>
                 <meta
                     name="description"
-                    content={`Learn how to get connected with ${name} eSIM in 3 simple steps. Choose your plan, scan the QR code, and stay connected anywhere.`}
+                    content={trans('how_it_works.meta_description', {
+                        app_name: name,
+                    })}
                 />
             </Head>
 
             <HeroSection
-                badge="Simple & Fast"
-                title="Get Connected in"
-                titleHighlight="3 Simple Steps"
-                description={`No physical SIM card needed. No waiting for delivery. Get instant mobile data in ${totalCountries}+ countries with our eSIM technology.`}
+                badge={trans('how_it_works.hero.badge')}
+                title={trans('how_it_works.hero.title')}
+                titleHighlight={trans('how_it_works.hero.title_highlight')}
+                description={trans('how_it_works.hero.description', {
+                    count: String(totalCountries),
+                })}
                 totalCountries={totalCountries}
             />
 
             <StepsSection
                 steps={[
                     {
-                        title: 'Pick Your Perfect Plan',
-                        description: `Explore ${totalCountries}+ destinations worldwide and select a data plan tailored to your journey. Whether it's a quick business trip or a month-long adventure, we have the right package for you.`,
+                        title: trans('how_it_works.steps.step_1.title'),
+                        description: trans(
+                            'how_it_works.steps.step_1.description',
+                            { count: String(totalCountries) },
+                        ),
                         features: [
-                            'Filter by data size, duration & budget',
-                            'Multi-country regional plans available',
-                            'No hidden fees - pay what you see',
+                            trans('how_it_works.steps.step_1.features.filter'),
+                            trans(
+                                'how_it_works.steps.step_1.features.regional',
+                            ),
+                            trans(
+                                'how_it_works.steps.step_1.features.no_hidden',
+                            ),
                         ],
                         icon: Search,
                     },
                     {
-                        title: 'Instant Checkout & Delivery',
-                        description: 'Complete your order in under 60 seconds with our secure checkout. Your eSIM QR code is delivered instantly to your inbox - no waiting, no shipping delays.',
+                        title: trans('how_it_works.steps.step_2.title'),
+                        description: trans(
+                            'how_it_works.steps.step_2.description',
+                        ),
                         features: [
-                            'Multiple secure payment methods',
-                            'QR code delivered in seconds',
-                            'Access anytime from your dashboard',
+                            trans('how_it_works.steps.step_2.features.payment'),
+                            trans(
+                                'how_it_works.steps.step_2.features.delivery',
+                            ),
+                            trans('how_it_works.steps.step_2.features.access'),
                         ],
                         icon: CreditCard,
                     },
                     {
-                        title: 'Scan QR & Install in 1 Minute',
-                        description: 'Simply open your camera, scan the QR code, and follow the prompts. Your eSIM installs automatically - no tech skills needed. We recommend doing this before your trip.',
+                        title: trans('how_it_works.steps.step_3.title'),
+                        description: trans(
+                            'how_it_works.steps.step_3.description',
+                        ),
                         features: [
-                            'Works with iPhone & Android cameras',
-                            'Step-by-step guided installation',
-                            'Install at home before traveling',
+                            trans('how_it_works.steps.step_3.features.camera'),
+                            trans('how_it_works.steps.step_3.features.guide'),
+                            trans('how_it_works.steps.step_3.features.home'),
                         ],
                         icon: QrCode,
                     },
                     {
-                        title: 'Land & Connect Instantly',
-                        description: 'Touch down at your destination, enable your eSIM, and you\'re online. Enjoy blazing-fast local network speeds while keeping your home SIM active for calls and texts.',
+                        title: trans('how_it_works.steps.step_4.title'),
+                        description: trans(
+                            'how_it_works.steps.step_4.description',
+                        ),
                         features: [
-                            'One tap activation on arrival',
-                            'Premium 4G/5G network speeds',
-                            'Dual SIM - keep your home number',
+                            trans(
+                                'how_it_works.steps.step_4.features.activation',
+                            ),
+                            trans('how_it_works.steps.step_4.features.speed'),
+                            trans(
+                                'how_it_works.steps.step_4.features.dual_sim',
+                            ),
                         ],
                         icon: Wifi,
                     },
@@ -121,10 +140,10 @@ export default function HowItWorks({ totalCountries }: Props) {
                 <div className="relative z-10 container mx-auto px-4">
                     <div className="mb-12 text-center">
                         <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-primary-900 md:text-4xl">
-                            Quick Setup Guide
+                            {trans('how_it_works.setup.title')}
                         </h2>
                         <p className="mx-auto max-w-2xl text-lg text-primary-600">
-                            Follow these steps to install your eSIM on iPhone or Android
+                            {trans('how_it_works.setup.subtitle')}
                         </p>
                     </div>
 
@@ -135,21 +154,26 @@ export default function HowItWorks({ totalCountries }: Props) {
                                     <Settings className="h-5 w-5 text-accent-950" />
                                 </div>
                                 <h3 className="text-xl font-bold text-primary-900">
-                                    iPhone Setup
+                                    {trans('how_it_works.setup.iphone.title')}
                                 </h3>
                             </div>
                             <ol className="space-y-4">
                                 {[
-                                    'Go to Settings → Cellular → Add Cellular Plan',
-                                    'Scan the QR code from your email',
-                                    'Label your eSIM (e.g., "Travel Data")',
-                                    'Enable Data Roaming in Cellular settings',
+                                    trans('how_it_works.setup.iphone.steps.0'),
+                                    trans('how_it_works.setup.iphone.steps.1'),
+                                    trans('how_it_works.setup.iphone.steps.2'),
+                                    trans('how_it_works.setup.iphone.steps.3'),
                                 ].map((step, i) => (
-                                    <li key={i} className="flex items-start gap-3">
+                                    <li
+                                        key={i}
+                                        className="flex items-start gap-3"
+                                    >
                                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-600 text-xs font-bold text-white">
                                             {i + 1}
                                         </span>
-                                        <span className="text-sm text-primary-700">{step}</span>
+                                        <span className="text-sm text-primary-700">
+                                            {step}
+                                        </span>
                                     </li>
                                 ))}
                             </ol>
@@ -161,21 +185,26 @@ export default function HowItWorks({ totalCountries }: Props) {
                                     <Settings className="h-5 w-5 text-accent-950" />
                                 </div>
                                 <h3 className="text-xl font-bold text-primary-900">
-                                    Android Setup
+                                    {trans('how_it_works.setup.android.title')}
                                 </h3>
                             </div>
                             <ol className="space-y-4">
                                 {[
-                                    'Go to Settings → Network → SIM cards → Add eSIM',
-                                    'Scan the QR code from your email',
-                                    'Confirm and download the eSIM profile',
-                                    'Enable the eSIM and turn on Data Roaming',
+                                    trans('how_it_works.setup.android.steps.0'),
+                                    trans('how_it_works.setup.android.steps.1'),
+                                    trans('how_it_works.setup.android.steps.2'),
+                                    trans('how_it_works.setup.android.steps.3'),
                                 ].map((step, i) => (
-                                    <li key={i} className="flex items-start gap-3">
+                                    <li
+                                        key={i}
+                                        className="flex items-start gap-3"
+                                    >
                                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-600 text-xs font-bold text-white">
                                             {i + 1}
                                         </span>
-                                        <span className="text-sm text-primary-700">{step}</span>
+                                        <span className="text-sm text-primary-700">
+                                            {step}
+                                        </span>
                                     </li>
                                 ))}
                             </ol>
@@ -185,10 +214,11 @@ export default function HowItWorks({ totalCountries }: Props) {
             </section>
 
             <FAQSection
-                title="Frequently Asked Questions"
-                subtitle="Got questions? We've got answers."
+                title={trans('how_it_works.faq.title')}
+                subtitle={trans('how_it_works.faq.subtitle')}
                 items={faqs}
                 viewAllLink="/faq"
+                viewAllText={trans('faq.view_all')}
             />
 
             <CTASection />

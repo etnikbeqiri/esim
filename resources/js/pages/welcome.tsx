@@ -2,6 +2,7 @@ import { CTASection } from '@/components/cta-section';
 import { HeroSection } from '@/components/hero-section';
 import { StepsSection } from '@/components/steps-section';
 import { TrustSection } from '@/components/trust-section';
+import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
@@ -27,10 +28,13 @@ export default function Welcome({
     totalPackages = 0,
 }: Props) {
     const { name } = usePage<SharedData>().props;
+    const { trans } = useTrans();
 
     return (
         <GuestLayout>
-            <Head title={`${name} - Stay Connected Worldwide`}>
+            <Head
+                title={`${name} - ${trans('hero.title')} ${trans('hero.title_highlight')}`}
+            >
                 <link rel="preconnect" href="https://fonts.bunny.net" />
                 <link
                     href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700"
@@ -39,50 +43,47 @@ export default function Welcome({
             </Head>
 
             <HeroSection
-                title="Stay Connected"
-                titleHighlight="Worldwide"
-                description="Get instant mobile data in 200+ countries with our eSIM. No physical SIM needed, no roaming fees."
+                title={trans('hero.title')}
+                titleHighlight={trans('hero.title_highlight')}
+                description={trans('hero.description')}
                 showSearch
                 showStats
                 totalCountries={totalCountries}
             />
 
             <StepsSection
-                title="How It Works"
-                subtitle="Get connected in 3 simple steps"
+                title={trans('steps.title')}
+                subtitle={trans('steps.subtitle')}
                 steps={[
                     {
-                        title: 'Choose Your Plan',
-                        description:
-                            'Select your destination and pick a data plan that fits your needs and budget.',
+                        title: trans('steps.step_1.title'),
+                        description: trans('steps.step_1.description'),
                         features: [
-                            'Browse plans by country or region',
-                            'Compare data, validity, and price',
-                            'Transparent pricing with no hidden fees',
+                            trans('steps.step_1.features.browse'),
+                            trans('steps.step_1.features.compare'),
+                            trans('steps.step_1.features.transparent'),
                         ],
                         icon: Search,
                         image: '/img/hero/hero-1.webp',
                     },
                     {
-                        title: 'Save on Roaming',
-                        description:
-                            'Skip expensive roaming fees. Pay once and stay connected without surprises.',
+                        title: trans('steps.step_2.title'),
+                        description: trans('steps.step_2.description'),
                         features: [
-                            'Up to 90% cheaper than roaming',
-                            'No surprise charges',
-                            'Fixed price for your trip',
+                            trans('steps.step_2.features.cheaper'),
+                            trans('steps.step_2.features.no_surprise'),
+                            trans('steps.step_2.features.fixed'),
                         ],
                         icon: QrCode,
                         image: '/img/hero/hero-2.webp',
                     },
                     {
-                        title: 'Stay Connected',
-                        description:
-                            'Activate when you arrive and enjoy seamless high-speed connectivity.',
+                        title: trans('steps.step_3.title'),
+                        description: trans('steps.step_3.description'),
                         features: [
-                            'High-speed 4G/5G connectivity',
-                            'Activate when you land',
-                            'Use apps like normal',
+                            trans('steps.step_3.features.speed'),
+                            trans('steps.step_3.features.activate'),
+                            trans('steps.step_3.features.apps'),
                         ],
                         icon: Smartphone,
                         image: '/img/hero/hero-3.webp',
@@ -93,9 +94,12 @@ export default function Welcome({
             <TrustSection />
 
             <CTASection
-                title="Ready to Travel Connected?"
-                description={`Browse our ${totalPackages}+ data plans across ${totalCountries}+ countries and get instant connectivity for your next trip.`}
-                buttonText="Browse Destinations"
+                title={trans('cta.title')}
+                description={trans('cta.description', {
+                    packages: totalPackages.toString(),
+                    countries: totalCountries.toString(),
+                })}
+                buttonText={trans('cta.button')}
             />
         </GuestLayout>
     );

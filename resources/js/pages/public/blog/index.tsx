@@ -1,5 +1,6 @@
 import { HeroSection } from '@/components/hero-section';
 import { Button } from '@/components/ui/button';
+import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { type SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
@@ -8,6 +9,7 @@ import {
     ArrowRight,
     BookOpen,
     Clock,
+    Search,
     Sparkles,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -45,7 +47,8 @@ interface Props {
 
 export default function BlogIndex({ articles, meta }: Props) {
     const { name } = usePage<SharedData>().props;
-    const pageTitle = meta?.title || 'Blog';
+    const { trans } = useTrans();
+    const pageTitle = meta?.title || trans('nav.blog');
     const pageDescription = meta?.description || '';
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -115,15 +118,17 @@ export default function BlogIndex({ articles, meta }: Props) {
             </Head>
 
             <HeroSection
-                badge={`${articles.total} Article${articles.total !== 1 ? 's' : ''} Available`}
-                title="Travel Tips &"
-                titleHighlight="eSIM Guides"
-                description="Expert insights, detailed guides, and latest news about eSIM technology and staying connected while traveling"
+                badge={trans('blog.hero.badge', {
+                    count: String(articles.total),
+                })}
+                title={trans('blog.hero.title')}
+                titleHighlight={trans('blog.hero.title_highlight')}
+                description={trans('blog.hero.description')}
                 showSearch={true}
                 showStats={false}
                 searchValue={searchQuery}
                 onSearchChange={setSearchQuery}
-                searchPlaceholder="Search articles..."
+                searchPlaceholder={trans('blog.hero.search_placeholder')}
             />
 
             {/* Articles Grid */}
@@ -137,17 +142,17 @@ export default function BlogIndex({ articles, meta }: Props) {
                                         <Search className="h-8 w-8 text-primary-500" />
                                     </div>
                                     <h3 className="mb-2 text-xl font-semibold text-primary-900">
-                                        No articles found
+                                        {trans('blog.empty.no_results_title')}
                                     </h3>
                                     <p className="mb-4 text-primary-600">
-                                        Try a different search term
+                                        {trans('blog.empty.no_results_desc')}
                                     </p>
                                     <Button
                                         variant="outline"
                                         onClick={() => setSearchQuery('')}
                                         className="border-primary-300 text-primary-700 hover:bg-primary-50"
                                     >
-                                        Clear Search
+                                        {trans('blog.empty.clear_search')}
                                     </Button>
                                 </div>
                             ) : (
@@ -156,11 +161,10 @@ export default function BlogIndex({ articles, meta }: Props) {
                                         <BookOpen className="h-8 w-8 text-primary-500" />
                                     </div>
                                     <h3 className="mb-2 text-xl font-semibold text-primary-900">
-                                        No articles yet
+                                        {trans('blog.empty.no_articles_title')}
                                     </h3>
                                     <p className="text-primary-600">
-                                        Check back soon for helpful guides and
-                                        tips
+                                        {trans('blog.empty.no_articles_desc')}
                                     </p>
                                 </div>
                             )}
@@ -169,15 +173,10 @@ export default function BlogIndex({ articles, meta }: Props) {
                         <>
                             {searchQuery && (
                                 <p className="mb-6 text-sm text-primary-600">
-                                    Found {filteredArticles.length} article
-                                    {filteredArticles.length !== 1
-                                        ? 's'
-                                        : ''}{' '}
-                                    matching "
-                                    <span className="font-medium text-primary-900">
-                                        {searchQuery}
-                                    </span>
-                                    "
+                                    {trans('blog.results.found', {
+                                        count: String(filteredArticles.length),
+                                        query: searchQuery,
+                                    })}
                                 </p>
                             )}
 
@@ -222,8 +221,14 @@ export default function BlogIndex({ articles, meta }: Props) {
                                                 <div className="absolute bottom-3 left-3 z-10">
                                                     <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-400 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 px-3 py-1 text-xs font-bold text-accent-950 shadow-sm">
                                                         <Clock className="h-3 w-3" />
-                                                        {article.reading_time}{' '}
-                                                        min read
+                                                        {trans(
+                                                            'blog.article.read_time',
+                                                            {
+                                                                min: String(
+                                                                    article.reading_time,
+                                                                ),
+                                                            },
+                                                        )}
                                                     </span>
                                                 </div>
                                             </div>
@@ -266,7 +271,9 @@ export default function BlogIndex({ articles, meta }: Props) {
                                                     </div>
 
                                                     <span className="inline-flex items-center gap-1.5 text-xs font-bold tracking-wide text-primary-600 uppercase transition-colors group-hover:text-accent-600">
-                                                        Read Article
+                                                        {trans(
+                                                            'blog.article.read_article',
+                                                        )}
                                                         <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                                                     </span>
                                                 </div>
@@ -289,14 +296,14 @@ export default function BlogIndex({ articles, meta }: Props) {
                                         className="border-primary-300 bg-white text-primary-700 transition-all hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700 disabled:opacity-50"
                                     >
                                         <ArrowLeft className="mr-2 h-4 w-4" />
-                                        Previous
+                                        {trans('blog.pagination.previous')}
                                     </Button>
                                     <span className="text-sm font-medium text-primary-600">
-                                        Page{' '}
+                                        {trans('blog.pagination.page')}{' '}
                                         <span className="font-bold text-primary-900">
                                             {articles.current_page}
                                         </span>{' '}
-                                        of{' '}
+                                        {trans('blog.pagination.of')}{' '}
                                         <span className="font-bold text-primary-900">
                                             {articles.last_page}
                                         </span>
@@ -310,7 +317,7 @@ export default function BlogIndex({ articles, meta }: Props) {
                                         }
                                         className="border-primary-300 bg-white text-primary-700 transition-all hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700 disabled:opacity-50"
                                     >
-                                        Next
+                                        {trans('blog.pagination.next')}
                                         <ArrowRight className="ml-2 h-4 w-4" />
                                     </Button>
                                 </div>
@@ -328,18 +335,17 @@ export default function BlogIndex({ articles, meta }: Props) {
                     <div className="mx-auto max-w-2xl text-center">
                         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent-500 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 px-4 py-2 text-sm font-bold text-accent-950 shadow-lg shadow-accent-500/25">
                             <Sparkles className="h-4 w-4" />
-                            Start Your Journey
+                            {trans('cta_blog.badge')}
                         </div>
                         <h2 className="mb-4 text-2xl font-extrabold text-primary-900 md:text-3xl lg:text-4xl">
-                            Ready to{' '}
+                            {trans('cta_blog.title')}{' '}
                             <span className="bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
-                                Stay Connected
+                                {trans('cta_blog.title_highlight')}
                             </span>
-                            ?
+                            {trans('cta_blog.title_suffix')}
                         </h2>
                         <p className="mb-8 text-lg text-primary-600">
-                            Get your eSIM today and enjoy seamless connectivity
-                            wherever you travel.
+                            {trans('cta_blog.description')}
                         </p>
                         <div className="flex flex-col justify-center gap-4 sm:flex-row sm:gap-3">
                             <Button
@@ -349,7 +355,7 @@ export default function BlogIndex({ articles, meta }: Props) {
                             >
                                 <Link href="/destinations">
                                     <Sparkles className="mr-2 h-4 w-4" />
-                                    Browse Plans
+                                    {trans('cta_blog.browse_plans')}
                                 </Link>
                             </Button>
                             <Button
@@ -359,7 +365,7 @@ export default function BlogIndex({ articles, meta }: Props) {
                                 asChild
                             >
                                 <Link href="/how-it-works">
-                                    Learn How It Works
+                                    {trans('cta_blog.learn_how')}
                                 </Link>
                             </Button>
                         </div>

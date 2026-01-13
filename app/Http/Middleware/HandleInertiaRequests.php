@@ -106,6 +106,14 @@ class HandleInertiaRequests extends Middleware
             'payment' => [
                 'providers' => PaymentProvider::activePublicProvidersArray(),
             ],
+            'translations' => function () {
+                $locale = app()->getLocale();
+                // Load only the necessary files or all of them. 
+                // For a small app, all might be fine. For larger, split it.
+                // We return 'messages' file content merged at the root level so the frontend hook works as expected.
+                // If you need more files, use array_merge(trans('messages'), trans('auth'), ...);
+                return trans('messages');
+            },
         ];
     }
 }

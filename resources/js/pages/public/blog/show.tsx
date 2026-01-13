@@ -1,5 +1,6 @@
 import { BackButton } from '@/components/back-button';
 import { Button } from '@/components/ui/button';
+import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -50,6 +51,7 @@ interface Props {
 
 export default function BlogShow({ article, relatedArticles, meta }: Props) {
     const { name } = usePage<SharedData>().props;
+    const { trans } = useTrans();
     const [copied, setCopied] = useState(false);
     const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
     const canonicalUrl = `${siteUrl}/blog/${article.slug}`;
@@ -177,7 +179,11 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
 
                     <div className="relative z-10 container mx-auto px-4">
                         {/* Back link */}
-                        <BackButton href="/blog" label="Back to Blog" className="mb-8" />
+                        <BackButton
+                            href="/blog"
+                            label={trans('blog.article.back')}
+                            className="mb-8"
+                        />
 
                         <div className="mx-auto max-w-3xl">
                             {/* Meta badges */}
@@ -188,7 +194,9 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                 </span>
                                 <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white px-3 py-1.5 text-xs font-medium text-primary-700 shadow-sm">
                                     <Clock className="h-3.5 w-3.5 text-accent-500" />
-                                    {article.reading_time} min read
+                                    {trans('blog.article.read_time', {
+                                        min: String(article.reading_time),
+                                    })}
                                 </span>
                                 {article.formatted_date && (
                                     <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white px-3 py-1.5 text-xs font-medium text-primary-700 shadow-sm">
@@ -222,14 +230,14 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                                 {article.author.name}
                                             </p>
                                             <p className="text-xs font-bold tracking-wider text-accent-600 uppercase">
-                                                Author
+                                                {trans('blog.article.author')}
                                             </p>
                                         </div>
                                     </div>
                                 )}
                                 <div className="flex items-center gap-2">
                                     <span className="mr-2 text-sm font-medium text-primary-500">
-                                        Share:
+                                        {trans('blog.article.share')}
                                     </span>
                                     <button
                                         onClick={shareOnTwitter}
@@ -257,7 +265,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                     </button>
                                     {copied && (
                                         <span className="ml-1 rounded-full bg-accent-100 px-2 py-0.5 text-xs font-bold text-accent-700">
-                                            Copied!
+                                            {trans('blog.article.copied')}
                                         </span>
                                     )}
                                 </div>
@@ -292,7 +300,14 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                             <span className="mx-1">•</span>
                                             <Clock className="h-4 w-4" />
                                             <span>
-                                                {article.reading_time} min read
+                                                {trans(
+                                                    'blog.article.read_time',
+                                                    {
+                                                        min: String(
+                                                            article.reading_time,
+                                                        ),
+                                                    },
+                                                )}
                                             </span>
                                         </div>
                                     </div>
@@ -323,11 +338,10 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                             <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:justify-between sm:text-left">
                                 <div>
                                     <p className="font-bold text-primary-900">
-                                        Enjoyed this article?
+                                        {trans('blog.article.enjoyed')}
                                     </p>
                                     <p className="text-sm text-primary-600">
-                                        Share it with your friends and
-                                        colleagues
+                                        {trans('blog.article.share_desc')}
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -372,17 +386,18 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                         <div className="mb-12 text-center">
                             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent-500 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 px-4 py-2 text-sm font-bold text-accent-950 shadow-lg shadow-accent-500/25">
                                 <BookOpen className="h-4 w-4" />
-                                Continue Reading
+                                {trans('blog.article.continue_reading')}
                             </div>
                             <h2 className="text-2xl font-extrabold text-primary-900 md:text-3xl lg:text-4xl">
-                                More{' '}
+                                {trans('blog.article.more_articles')}{' '}
                                 <span className="bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
-                                    Articles
+                                    {trans(
+                                        'blog.article.more_articles_highlight',
+                                    )}
                                 </span>
                             </h2>
                             <p className="mt-3 text-primary-600">
-                                Discover more insights and guides about eSIM
-                                technology
+                                {trans('blog.article.more_articles_desc')}
                             </p>
                         </div>
                         <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -421,7 +436,14 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                             <div className="absolute bottom-3 left-3 z-10">
                                                 <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-400 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 px-2.5 py-1 text-xs font-bold text-accent-950 shadow-sm">
                                                     <Clock className="h-3 w-3" />
-                                                    {related.reading_time} min
+                                                    {trans(
+                                                        'blog.article.read_time',
+                                                        {
+                                                            min: String(
+                                                                related.reading_time,
+                                                            ),
+                                                        },
+                                                    )}
                                                 </span>
                                             </div>
                                         </div>
@@ -448,7 +470,9 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                                     </span>
                                                 </div>
                                                 <span className="inline-flex items-center gap-1.5 text-xs font-bold tracking-wide text-primary-600 uppercase transition-colors group-hover:text-accent-600">
-                                                    Read
+                                                    {trans(
+                                                        'blog.article.read_article',
+                                                    )}
                                                     <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
                                                 </span>
                                             </div>
@@ -466,7 +490,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                             >
                                 <Link href="/blog">
                                     <BookOpen className="mr-2 h-4 w-4" />
-                                    View All Articles
+                                    {trans('blog.article.view_all')}
                                     <ArrowRight className="ml-2 h-4 w-4" />
                                 </Link>
                             </Button>
@@ -483,18 +507,17 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                     <div className="mx-auto max-w-2xl text-center">
                         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent-500 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 px-4 py-2 text-sm font-bold text-accent-950 shadow-lg shadow-accent-500/25">
                             <Sparkles className="h-4 w-4" />
-                            Start Your Journey
+                            {trans('cta_blog.badge')}
                         </div>
                         <h2 className="mb-4 text-2xl font-extrabold text-primary-900 md:text-3xl lg:text-4xl">
-                            Ready to{' '}
+                            {trans('cta_blog.title')}{' '}
                             <span className="bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
-                                Stay Connected
+                                {trans('cta_blog.title_highlight')}
                             </span>
-                            ?
+                            {trans('cta_blog.title_suffix')}
                         </h2>
                         <p className="mb-8 text-lg text-primary-600">
-                            Get your eSIM today and enjoy seamless connectivity
-                            wherever you travel.
+                            {trans('cta_blog.description')}
                         </p>
                         <div className="flex flex-col justify-center gap-4 sm:flex-row sm:gap-3">
                             <Button
@@ -504,7 +527,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                             >
                                 <Link href="/destinations">
                                     <Sparkles className="mr-2 h-4 w-4" />
-                                    Browse Plans
+                                    {trans('cta_blog.browse_plans')}
                                 </Link>
                             </Button>
                             <Button
@@ -514,7 +537,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                 asChild
                             >
                                 <Link href="/how-it-works">
-                                    Learn How It Works
+                                    {trans('cta_blog.learn_how')}
                                 </Link>
                             </Button>
                         </div>

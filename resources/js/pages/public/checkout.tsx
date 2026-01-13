@@ -3,10 +3,11 @@ import { CountryFlag } from '@/components/country-flag';
 import { PaymentProviderSelect } from '@/components/payment-provider-select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { GoldButton } from '@/components/ui/gold-button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { GoldButton } from '@/components/ui/gold-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -71,6 +72,7 @@ export default function Checkout({
     defaultProvider,
     prefill,
 }: Props) {
+    const { trans } = useTrans();
     const { data, setData, post, processing, errors } = useForm({
         email: prefill?.email || '',
         name: prefill?.name || '',
@@ -96,7 +98,7 @@ export default function Checkout({
 
     return (
         <GuestLayout>
-            <Head title="Checkout" />
+            <Head title={trans('checkout_page.meta_title')} />
 
             <section className="bg-mesh relative min-h-screen py-6 md:py-16">
                 {/* Abstract Background Shapes - same as hero */}
@@ -111,7 +113,7 @@ export default function Checkout({
                                 ? `/destinations/${pkg.country.iso_code.toLowerCase()}`
                                 : '/destinations'
                         }
-                        label="Back"
+                        label={trans('checkout_page.back')}
                         className="mb-4 md:mb-8"
                     />
 
@@ -123,21 +125,24 @@ export default function Checkout({
                         >
                             <Sparkles className="mr-1.5 h-3.5 w-3.5 text-accent-500 md:mr-2 md:h-4 md:w-4" />
                             <span className="bg-gradient-to-r from-primary-800 to-primary-600 bg-clip-text text-transparent">
-                                Secure Checkout
+                                {trans('checkout_page.secure_checkout')}
                             </span>
                         </Badge>
                         <h1 className="mb-2 text-xl font-extrabold tracking-tight text-primary-900 md:mb-4 md:text-4xl lg:text-5xl">
-                            Complete Your Order
+                            {trans('checkout_page.title')}
                         </h1>
                         <p className="mx-auto max-w-xl text-sm text-primary-600 md:text-lg">
-                            You're just a few steps away from staying connected.
+                            {trans('checkout_page.subtitle')}
                         </p>
                     </div>
 
                     <div className="flex flex-col-reverse gap-4 md:flex-row md:items-start md:gap-8">
                         {/* Left Column - Form */}
                         <div className="w-full md:flex-1">
-                            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+                            <form
+                                onSubmit={handleSubmit}
+                                className="space-y-4 md:space-y-6"
+                            >
                                 {/* General Error */}
                                 {/* @ts-ignore */}
                                 {errors.error && (
@@ -162,13 +167,19 @@ export default function Checkout({
                                             </div>
                                             <div>
                                                 <h2 className="text-sm font-bold text-primary-900 md:text-base">
-                                                    Your Details
+                                                    {trans(
+                                                        'checkout_page.form.your_details',
+                                                    )}
                                                 </h2>
                                                 <p className="text-xs text-primary-600 md:text-sm">
-                                                    Where should we send your eSIM?
+                                                    {trans(
+                                                        'checkout_page.form.where_to_send',
+                                                    )}
                                                     {auth?.user && (
                                                         <span className="ml-1 text-primary-400">
-                                                            (auto-filled)
+                                                            {trans(
+                                                                'checkout_page.form.auto_filled',
+                                                            )}
                                                         </span>
                                                     )}
                                                 </p>
@@ -183,19 +194,28 @@ export default function Checkout({
                                                 htmlFor="email"
                                                 className="text-xs font-semibold text-primary-800 md:text-sm"
                                             >
-                                                Email Address
-                                                <span className="ml-1 text-red-500">*</span>
+                                                {trans(
+                                                    'checkout_page.form.email.label',
+                                                )}
+                                                <span className="ml-1 text-red-500">
+                                                    *
+                                                </span>
                                             </Label>
                                             <div className="group relative">
                                                 <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-primary-400 transition-colors group-focus-within:text-primary-600" />
                                                 <Input
                                                     id="email"
                                                     type="email"
-                                                    placeholder="you@example.com"
+                                                    placeholder={trans(
+                                                        'checkout_page.form.email.placeholder',
+                                                    )}
                                                     className="h-10 rounded-lg border-primary-200 bg-white pl-10 text-base text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 md:h-12 md:rounded-xl md:pl-11"
                                                     value={data.email}
                                                     onChange={(e) =>
-                                                        setData('email', e.target.value)
+                                                        setData(
+                                                            'email',
+                                                            e.target.value,
+                                                        )
                                                     }
                                                     required
                                                 />
@@ -206,7 +226,9 @@ export default function Checkout({
                                                 </p>
                                             )}
                                             <p className="text-[10px] text-primary-400 md:text-xs">
-                                                Your eSIM QR code will be sent here
+                                                {trans(
+                                                    'checkout_page.form.email.hint',
+                                                )}
                                             </p>
                                         </div>
 
@@ -216,19 +238,28 @@ export default function Checkout({
                                                 htmlFor="name"
                                                 className="text-xs font-semibold text-primary-800 md:text-sm"
                                             >
-                                                Full Name
-                                                <span className="ml-1 text-red-500">*</span>
+                                                {trans(
+                                                    'checkout_page.form.name.label',
+                                                )}
+                                                <span className="ml-1 text-red-500">
+                                                    *
+                                                </span>
                                             </Label>
                                             <div className="group relative">
                                                 <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-primary-400 transition-colors group-focus-within:text-primary-600" />
                                                 <Input
                                                     id="name"
                                                     type="text"
-                                                    placeholder="John Doe"
+                                                    placeholder={trans(
+                                                        'checkout_page.form.name.placeholder',
+                                                    )}
                                                     className="h-10 rounded-lg border-primary-200 bg-white pl-10 text-base text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 md:h-12 md:rounded-xl md:pl-11"
                                                     value={data.name}
                                                     onChange={(e) =>
-                                                        setData('name', e.target.value)
+                                                        setData(
+                                                            'name',
+                                                            e.target.value,
+                                                        )
                                                     }
                                                     required
                                                 />
@@ -246,9 +277,13 @@ export default function Checkout({
                                                 htmlFor="phone"
                                                 className="text-xs font-semibold text-primary-800 md:text-sm"
                                             >
-                                                Phone
+                                                {trans(
+                                                    'checkout_page.form.phone.label',
+                                                )}
                                                 <span className="ml-1.5 text-[10px] font-normal text-primary-400 md:text-xs">
-                                                    (Optional)
+                                                    {trans(
+                                                        'checkout_page.form.phone.optional',
+                                                    )}
                                                 </span>
                                             </Label>
                                             <div className="group relative">
@@ -256,11 +291,16 @@ export default function Checkout({
                                                 <Input
                                                     id="phone"
                                                     type="tel"
-                                                    placeholder="+1 234 567 8900"
+                                                    placeholder={trans(
+                                                        'checkout_page.form.phone.placeholder',
+                                                    )}
                                                     className="h-10 rounded-lg border-primary-200 bg-white pl-10 text-base text-gray-950 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 md:h-12 md:rounded-xl md:pl-11"
                                                     value={data.phone}
                                                     onChange={(e) =>
-                                                        setData('phone', e.target.value)
+                                                        setData(
+                                                            'phone',
+                                                            e.target.value,
+                                                        )
                                                     }
                                                 />
                                             </div>
@@ -282,10 +322,14 @@ export default function Checkout({
                                             </div>
                                             <div>
                                                 <h2 className="text-sm font-bold text-primary-900 md:text-base">
-                                                    Payment Method
+                                                    {trans(
+                                                        'checkout_page.form.payment_method.title',
+                                                    )}
                                                 </h2>
                                                 <p className="text-xs text-primary-600 md:text-sm">
-                                                    Choose how you'd like to pay
+                                                    {trans(
+                                                        'checkout_page.form.payment_method.subtitle',
+                                                    )}
                                                 </p>
                                             </div>
                                         </div>
@@ -296,7 +340,10 @@ export default function Checkout({
                                             providers={paymentProviders}
                                             value={data.payment_provider}
                                             onChange={(value) =>
-                                                setData('payment_provider', value)
+                                                setData(
+                                                    'payment_provider',
+                                                    value,
+                                                )
                                             }
                                         />
                                     </div>
@@ -309,7 +356,10 @@ export default function Checkout({
                                             id="accept_terms_mobile"
                                             checked={data.accept_terms}
                                             onCheckedChange={(checked) =>
-                                                setData('accept_terms', checked === true)
+                                                setData(
+                                                    'accept_terms',
+                                                    checked === true,
+                                                )
                                             }
                                             required
                                             className="mt-0.5 h-4 w-4 border-accent-400 data-[state=checked]:border-accent-500 data-[state=checked]:bg-accent-400 data-[state=checked]:text-accent-950"
@@ -318,19 +368,27 @@ export default function Checkout({
                                             htmlFor="accept_terms_mobile"
                                             className="text-xs leading-relaxed text-primary-700"
                                         >
-                                            I agree to the{' '}
+                                            {trans(
+                                                'checkout_page.form.terms.agree',
+                                            )}{' '}
                                             <Link
                                                 href="/terms"
                                                 className="font-medium text-primary-600 underline underline-offset-2"
                                             >
-                                                Terms
+                                                {trans(
+                                                    'checkout_page.form.terms.terms_link',
+                                                )}
                                             </Link>{' '}
-                                            and{' '}
+                                            {trans(
+                                                'checkout_page.form.terms.and',
+                                            )}{' '}
                                             <Link
                                                 href="/privacy"
                                                 className="font-medium text-primary-600 underline underline-offset-2"
                                             >
-                                                Privacy Policy
+                                                {trans(
+                                                    'checkout_page.form.terms.privacy_link',
+                                                )}
                                             </Link>
                                         </Label>
                                     </div>
@@ -343,17 +401,26 @@ export default function Checkout({
                                     <GoldButton
                                         type="submit"
                                         className="h-11 w-full rounded-lg text-sm font-semibold"
-                                        disabled={processing || !data.accept_terms}
+                                        disabled={
+                                            processing || !data.accept_terms
+                                        }
                                     >
                                         {processing ? (
                                             <>
                                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Processing...
+                                                {trans(
+                                                    'checkout_page.form.submit.processing',
+                                                )}
                                             </>
                                         ) : (
                                             <>
                                                 <Lock className="mr-1.5 h-3.5 w-3.5" />
-                                                Pay €{Number(pkg.retail_price).toFixed(2)}
+                                                {trans(
+                                                    'checkout_page.form.submit.pay',
+                                                    {
+                                                        amount: `€${Number(pkg.retail_price).toFixed(2)}`,
+                                                    },
+                                                )}
                                             </>
                                         )}
                                     </GoldButton>
@@ -361,11 +428,19 @@ export default function Checkout({
                                     <div className="flex items-center justify-center gap-3 text-[10px] text-primary-400">
                                         <div className="flex items-center gap-1">
                                             <Shield className="h-3 w-3" />
-                                            <span>SSL Encrypted</span>
+                                            <span>
+                                                {trans(
+                                                    'checkout_page.form.security.ssl',
+                                                )}
+                                            </span>
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <Lock className="h-3 w-3" />
-                                            <span>Secure</span>
+                                            <span>
+                                                {trans(
+                                                    'checkout_page.form.security.secure',
+                                                )}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -378,7 +453,7 @@ export default function Checkout({
                                 {/* Header */}
                                 <div className="border-b border-primary-100 bg-primary-50/50 px-4 py-3 md:px-6 md:py-4">
                                     <h2 className="text-sm font-bold text-primary-900 md:text-lg">
-                                        Order Summary
+                                        {trans('checkout_page.summary.title')}
                                     </h2>
                                 </div>
 
@@ -388,13 +463,15 @@ export default function Checkout({
                                         {pkg.country && (
                                             <div className="overflow-hidden rounded-md shadow-md ring-2 ring-white md:rounded-lg">
                                                 <CountryFlag
-                                                    countryCode={pkg.country.iso_code}
+                                                    countryCode={
+                                                        pkg.country.iso_code
+                                                    }
                                                     size="md"
                                                     className="md:h-10 md:w-14"
                                                 />
                                             </div>
                                         )}
-                                        <div className="flex-1 min-w-0">
+                                        <div className="min-w-0 flex-1">
                                             <h3 className="truncate text-sm font-bold text-primary-900 md:text-base">
                                                 {pkg.name}
                                             </h3>
@@ -411,7 +488,11 @@ export default function Checkout({
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2 text-primary-600">
                                                 <HardDrive className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                                                <span className="text-xs md:text-sm">Data</span>
+                                                <span className="text-xs md:text-sm">
+                                                    {trans(
+                                                        'checkout_page.summary.data',
+                                                    )}
+                                                </span>
                                             </div>
                                             <span className="text-xs font-bold text-primary-900 md:text-sm">
                                                 {pkg.data_label}
@@ -420,7 +501,11 @@ export default function Checkout({
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2 text-primary-600">
                                                 <Timer className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                                                <span className="text-xs md:text-sm">Validity</span>
+                                                <span className="text-xs md:text-sm">
+                                                    {trans(
+                                                        'checkout_page.summary.validity',
+                                                    )}
+                                                </span>
                                             </div>
                                             <span className="text-xs font-bold text-primary-900 md:text-sm">
                                                 {pkg.validity_label}
@@ -433,9 +518,16 @@ export default function Checkout({
 
                                     {/* Total */}
                                     <div className="mb-4 flex items-baseline justify-between md:mb-6">
-                                        <span className="text-xs text-primary-600 md:text-sm">Total</span>
+                                        <span className="text-xs text-primary-600 md:text-sm">
+                                            {trans(
+                                                'checkout_page.summary.total',
+                                            )}
+                                        </span>
                                         <span className="text-xl font-extrabold text-primary-900 md:text-3xl">
-                                            €{Number(pkg.retail_price).toFixed(2)}
+                                            €
+                                            {Number(pkg.retail_price).toFixed(
+                                                2,
+                                            )}
                                         </span>
                                     </div>
 
@@ -446,7 +538,10 @@ export default function Checkout({
                                                 id="accept_terms_desktop"
                                                 checked={data.accept_terms}
                                                 onCheckedChange={(checked) =>
-                                                    setData('accept_terms', checked === true)
+                                                    setData(
+                                                        'accept_terms',
+                                                        checked === true,
+                                                    )
                                                 }
                                                 required
                                                 className="mt-0.5 border-accent-400 data-[state=checked]:border-accent-500 data-[state=checked]:bg-accent-400 data-[state=checked]:text-accent-950"
@@ -455,19 +550,27 @@ export default function Checkout({
                                                 htmlFor="accept_terms_desktop"
                                                 className="text-sm leading-relaxed text-primary-700"
                                             >
-                                                I agree to the{' '}
+                                                {trans(
+                                                    'checkout_page.form.terms.agree',
+                                                )}{' '}
                                                 <Link
                                                     href="/terms"
                                                     className="font-medium text-primary-600 underline underline-offset-2 hover:text-primary-800"
                                                 >
-                                                    Terms
+                                                    {trans(
+                                                        'checkout_page.form.terms.terms_link',
+                                                    )}
                                                 </Link>{' '}
-                                                and{' '}
+                                                {trans(
+                                                    'checkout_page.form.terms.and',
+                                                )}{' '}
                                                 <Link
                                                     href="/privacy"
                                                     className="font-medium text-primary-600 underline underline-offset-2 hover:text-primary-800"
                                                 >
-                                                    Privacy Policy
+                                                    {trans(
+                                                        'checkout_page.form.terms.privacy_link',
+                                                    )}
                                                 </Link>
                                             </Label>
                                         </div>
@@ -481,18 +584,27 @@ export default function Checkout({
                                             type="submit"
                                             form="checkout-form"
                                             className="h-14 w-full rounded-xl text-base font-semibold"
-                                            disabled={processing || !data.accept_terms}
+                                            disabled={
+                                                processing || !data.accept_terms
+                                            }
                                             onClick={handleSubmit}
                                         >
                                             {processing ? (
                                                 <>
                                                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                                    Processing...
+                                                    {trans(
+                                                        'checkout_page.form.submit.processing',
+                                                    )}
                                                 </>
                                             ) : (
                                                 <>
                                                     <Lock className="mr-2 h-4 w-4" />
-                                                    Pay €{Number(pkg.retail_price).toFixed(2)}
+                                                    {trans(
+                                                        'checkout_page.form.submit.pay',
+                                                        {
+                                                            amount: `€${Number(pkg.retail_price).toFixed(2)}`,
+                                                        },
+                                                    )}
                                                 </>
                                             )}
                                         </GoldButton>
@@ -500,11 +612,19 @@ export default function Checkout({
                                         <div className="flex items-center justify-center gap-4 text-xs text-primary-400">
                                             <div className="flex items-center gap-1.5">
                                                 <Shield className="h-3.5 w-3.5" />
-                                                <span>SSL Encrypted</span>
+                                                <span>
+                                                    {trans(
+                                                        'checkout_page.form.security.ssl',
+                                                    )}
+                                                </span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
                                                 <Lock className="h-3.5 w-3.5" />
-                                                <span>Secure</span>
+                                                <span>
+                                                    {trans(
+                                                        'checkout_page.form.security.secure',
+                                                    )}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -512,11 +632,29 @@ export default function Checkout({
                                     {/* Benefits - styled like trust section */}
                                     <div className="hidden space-y-2 border-t border-primary-100 pt-4 md:mt-6 md:block md:space-y-3 md:pt-6">
                                         {[
-                                            { icon: Zap, text: 'Instant delivery via email' },
-                                            { icon: CheckCircle2, text: 'Easy QR code installation' },
-                                            { icon: Shield, text: '24/7 customer support' },
+                                            {
+                                                icon: Zap,
+                                                text: trans(
+                                                    'checkout_page.benefits.instant',
+                                                ),
+                                            },
+                                            {
+                                                icon: CheckCircle2,
+                                                text: trans(
+                                                    'checkout_page.benefits.qr',
+                                                ),
+                                            },
+                                            {
+                                                icon: Shield,
+                                                text: trans(
+                                                    'checkout_page.benefits.support',
+                                                ),
+                                            },
                                         ].map((item, i) => (
-                                            <div key={i} className="flex items-center gap-3">
+                                            <div
+                                                key={i}
+                                                className="flex items-center gap-3"
+                                            >
                                                 <span className="flex h-6 w-6 items-center justify-center rounded bg-accent-300">
                                                     <item.icon className="h-3.5 w-3.5 text-accent-950" />
                                                 </span>

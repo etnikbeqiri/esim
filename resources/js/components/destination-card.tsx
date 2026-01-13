@@ -1,4 +1,5 @@
 import { CountryFlag } from '@/components/country-flag';
+import { useTrans } from '@/hooks/use-trans';
 import { Link } from '@inertiajs/react';
 import { ArrowRight } from 'lucide-react';
 
@@ -16,9 +17,11 @@ export function DestinationCard({
     package_count,
     min_price,
 }: DestinationCardProps) {
+    const { trans } = useTrans();
+
     return (
         <Link href={`/destinations/${iso_code.toLowerCase()}`}>
-            <div className="group relative h-full cursor-pointer overflow-hidden rounded-2xl border border-primary-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-accent-400 hover:shadow-[0px_4px_20px_rgba(212,175,55,0.35)] before:absolute before:inset-0 before:bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.4)_50%,transparent_100%)] before:left-[-100%] before:transition-none hover:before:animate-[btn-shimmer_1.5s_ease-in-out_infinite]">
+            <div className="group relative h-full cursor-pointer overflow-hidden rounded-2xl border border-primary-100 bg-white p-5 shadow-sm transition-all duration-300 before:absolute before:inset-0 before:left-[-100%] before:bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.4)_50%,transparent_100%)] before:transition-none hover:-translate-y-1 hover:border-accent-400 hover:shadow-[0px_4px_20px_rgba(212,175,55,0.35)] hover:before:animate-[btn-shimmer_1.5s_ease-in-out_infinite]">
                 {/* Flag & Country Name */}
                 <div className="relative z-10 mb-4 flex items-center gap-3">
                     <div className="overflow-hidden rounded-lg">
@@ -45,16 +48,25 @@ export function DestinationCard({
                             {package_count}
                         </span>
                         <span className="text-sm font-medium text-primary-600">
-                            plans
+                            {trans('destinations.card.plans')}
                         </span>
                     </div>
 
                     {/* Price */}
                     {min_price !== null && (
                         <div className="text-right">
-                            <span className="text-xs text-primary-500">From</span>
+                            <span className="text-xs text-primary-500">
+                                {trans('destinations.card.from')}
+                            </span>
                             <p className="text-lg font-bold text-accent-500">
-                                €{Number(min_price).toFixed(2)}
+                                €
+                                {new Intl.NumberFormat(
+                                    document.documentElement.lang || 'en-US',
+                                    {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    },
+                                ).format(Number(min_price))}
                             </p>
                         </div>
                     )}

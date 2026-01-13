@@ -18,6 +18,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link } from '@inertiajs/react';
 import {
@@ -32,7 +33,7 @@ import {
     Wifi,
     Zap,
 } from 'lucide-react';
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 
 interface NetworkOperator {
     name: string;
@@ -81,7 +82,14 @@ interface Props {
 type SortOption = 'data' | 'price-asc' | 'price-desc' | 'validity';
 
 // Network Coverage Dialog Component with search
-function NetworkCoverageDialog({ networks, isFeatured }: { networks: NetworkData; isFeatured: boolean }) {
+function NetworkCoverageDialog({
+    networks,
+    isFeatured,
+}: {
+    networks: NetworkData;
+    isFeatured: boolean;
+}) {
+    const { trans } = useTrans();
     const [searchQuery, setSearchQuery] = useState('');
 
     const isGrouped = networks.length > 0 && 'country' in networks[0];
@@ -95,11 +103,13 @@ function NetworkCoverageDialog({ networks, isFeatured }: { networks: NetworkData
             return (networks as CountryNetwork[]).filter(
                 (cn) =>
                     cn.country.toLowerCase().includes(query) ||
-                    cn.operators.some((op) => op.name.toLowerCase().includes(query))
+                    cn.operators.some((op) =>
+                        op.name.toLowerCase().includes(query),
+                    ),
             );
         } else {
             return (networks as NetworkOperator[]).filter((op) =>
-                op.name.toLowerCase().includes(query)
+                op.name.toLowerCase().includes(query),
             );
         }
     }, [networks, searchQuery, isGrouped]);
@@ -115,27 +125,29 @@ function NetworkCoverageDialog({ networks, isFeatured }: { networks: NetworkData
                     }`}
                 >
                     <Info className="h-3 w-3 md:h-3.5 md:w-3.5" />
-                    View Coverage
+                    {trans('country_page.coverage.view')}
                 </button>
             </DialogTrigger>
             <DialogContent className="max-h-[85vh] w-[calc(100vw-2rem)] max-w-md overflow-hidden rounded-xl border-primary-200 bg-white p-4 md:rounded-lg md:p-6">
                 <DialogHeader className="pb-2 md:pb-4">
                     <DialogTitle className="flex items-center gap-2 text-sm text-primary-900 md:text-base">
                         <Wifi className="h-4 w-4 text-primary-600 md:h-5 md:w-5" />
-                        Network Coverage
+                        {trans('country_page.coverage.title')}
                     </DialogTitle>
                 </DialogHeader>
 
                 {/* Search Input */}
                 {isGrouped && (networks as CountryNetwork[]).length > 5 && (
                     <div className="relative mb-2 md:mb-0">
-                        <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-primary-400 md:left-3 md:h-4 md:w-4" />
+                        <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-primary-400 md:left-3 md:h-4 md:w-4" />
                         <input
                             type="text"
-                            placeholder="Search..."
+                            placeholder={trans(
+                                'country_page.coverage.search_placeholder',
+                            )}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full rounded-md border border-primary-200 bg-primary-50 py-1.5 pl-8 pr-3 text-base text-gray-950 placeholder:text-primary-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-400/20 md:rounded-lg md:py-2 md:pl-10 md:pr-4 md:text-sm"
+                            className="w-full rounded-md border border-primary-200 bg-primary-50 py-1.5 pr-3 pl-8 text-base text-gray-950 placeholder:text-primary-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-400/20 focus:outline-none md:rounded-lg md:py-2 md:pr-4 md:pl-10 md:text-sm"
                         />
                     </div>
                 )}
@@ -143,61 +155,80 @@ function NetworkCoverageDialog({ networks, isFeatured }: { networks: NetworkData
                 <div className="max-h-[55vh] overflow-y-auto pr-1 md:pr-2">
                     <p className="mb-2 text-xs text-primary-600 md:mb-4 md:text-sm">
                         {isGrouped
-                            ? `${filteredNetworks.length} ${filteredNetworks.length === 1 ? 'country' : 'countries'}`
-                            : 'Available networks:'}
+                            ? filteredNetworks.length === 1
+                                ? trans('country_page.coverage.country_count', {
+                                      count: filteredNetworks.length.toString(),
+                                  })
+                                : trans(
+                                      'country_page.coverage.countries_count',
+                                      {
+                                          count: filteredNetworks.length.toString(),
+                                      },
+                                  )
+                            : trans('country_page.coverage.available_networks')}
                     </p>
 
                     {filteredNetworks.length === 0 ? (
                         <p className="py-3 text-center text-xs text-primary-500 md:py-4 md:text-sm">
-                            No results for "{searchQuery}"
+                            {trans('country_page.coverage.no_results', {
+                                query: searchQuery,
+                            })}
                         </p>
                     ) : isGrouped ? (
                         // Regional packages - grouped by country
                         <div className="space-y-3 md:space-y-4">
-                            {(filteredNetworks as CountryNetwork[]).map((countryNet, idx) => (
-                                <div key={idx}>
-                                    <h4 className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-primary-900 md:mb-2 md:gap-2 md:text-sm">
-                                        <CountryFlag
-                                            countryCode={countryNet.iso_code || 'XX'}
-                                            size="sm"
-                                            className="h-4 w-5 rounded md:h-5 md:w-6"
-                                        />
-                                        {countryNet.country}
-                                    </h4>
-                                    <div className="space-y-1 pl-6 md:space-y-1.5 md:pl-8">
-                                        {countryNet.operators.map((op, opIdx) => (
-                                            <div
-                                                key={opIdx}
-                                                className="flex items-center justify-between rounded-md border border-primary-100 bg-primary-50 px-2 py-1.5 md:rounded-lg md:px-3 md:py-2"
-                                            >
-                                                <span className="text-xs font-medium text-primary-900 md:text-sm">
-                                                    {op.name}
-                                                </span>
-                                                <span className="rounded bg-accent-300 px-1.5 py-0.5 text-[10px] font-bold text-accent-950 md:rounded-md md:px-2 md:text-xs">
-                                                    {op.type}
-                                                </span>
-                                            </div>
-                                        ))}
+                            {(filteredNetworks as CountryNetwork[]).map(
+                                (countryNet, idx) => (
+                                    <div key={idx}>
+                                        <h4 className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-primary-900 md:mb-2 md:gap-2 md:text-sm">
+                                            <CountryFlag
+                                                countryCode={
+                                                    countryNet.iso_code || 'XX'
+                                                }
+                                                size="sm"
+                                                className="h-4 w-5 rounded md:h-5 md:w-6"
+                                            />
+                                            {countryNet.country}
+                                        </h4>
+                                        <div className="space-y-1 pl-6 md:space-y-1.5 md:pl-8">
+                                            {countryNet.operators.map(
+                                                (op, opIdx) => (
+                                                    <div
+                                                        key={opIdx}
+                                                        className="flex items-center justify-between rounded-md border border-primary-100 bg-primary-50 px-2 py-1.5 md:rounded-lg md:px-3 md:py-2"
+                                                    >
+                                                        <span className="text-xs font-medium text-primary-900 md:text-sm">
+                                                            {op.name}
+                                                        </span>
+                                                        <span className="rounded bg-accent-300 px-1.5 py-0.5 text-[10px] font-bold text-accent-950 md:rounded-md md:px-2 md:text-xs">
+                                                            {op.type}
+                                                        </span>
+                                                    </div>
+                                                ),
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ),
+                            )}
                         </div>
                     ) : (
                         // Single country packages - flat list
                         <div className="space-y-1.5 md:space-y-2">
-                            {(filteredNetworks as NetworkOperator[]).map((network, idx) => (
-                                <div
-                                    key={idx}
-                                    className="flex items-center justify-between rounded-md border border-primary-100 bg-primary-50 px-2.5 py-2 md:rounded-lg md:px-4 md:py-3"
-                                >
-                                    <span className="text-xs font-semibold text-primary-900 md:text-base">
-                                        {network.name}
-                                    </span>
-                                    <span className="rounded bg-accent-300 px-1.5 py-0.5 text-[10px] font-bold text-accent-950 md:rounded-md md:px-2 md:py-1 md:text-xs">
-                                        {network.type}
-                                    </span>
-                                </div>
-                            ))}
+                            {(filteredNetworks as NetworkOperator[]).map(
+                                (network, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="flex items-center justify-between rounded-md border border-primary-100 bg-primary-50 px-2.5 py-2 md:rounded-lg md:px-4 md:py-3"
+                                    >
+                                        <span className="text-xs font-semibold text-primary-900 md:text-base">
+                                            {network.name}
+                                        </span>
+                                        <span className="rounded bg-accent-300 px-1.5 py-0.5 text-[10px] font-bold text-accent-950 md:rounded-md md:px-2 md:py-1 md:text-xs">
+                                            {network.type}
+                                        </span>
+                                    </div>
+                                ),
+                            )}
                         </div>
                     )}
                 </div>
@@ -207,6 +238,7 @@ function NetworkCoverageDialog({ networks, isFeatured }: { networks: NetworkData
 }
 
 export default function CountryPage({ country, packages }: Props) {
+    const { trans } = useTrans();
     const [sortBy, setSortBy] = useState<SortOption>('data');
 
     const sortedPackages = useMemo(() => {
@@ -236,10 +268,15 @@ export default function CountryPage({ country, packages }: Props) {
 
     return (
         <GuestLayout>
-            <Head title={`${country.name} eSIM Data Plans`}>
+            <Head
+                title={`${country.name} ${trans('country_page.meta_title_suffix')}`}
+            >
                 <meta
                     name="description"
-                    content={`Buy eSIM data plans for ${country.name}. ${packages.length} plans available with instant delivery. No roaming fees.`}
+                    content={trans('country_page.meta_description', {
+                        country: country.name,
+                        count: packages.length.toString(),
+                    })}
                 />
             </Head>
 
@@ -251,7 +288,11 @@ export default function CountryPage({ country, packages }: Props) {
 
                 <div className="relative z-10 container mx-auto px-4">
                     {/* Back Link */}
-                    <BackButton href="/destinations" label="All Destinations" className="mb-4 md:mb-8" />
+                    <BackButton
+                        href="/destinations"
+                        label={trans('country_page.back_to_destinations')}
+                        className="mb-4 md:mb-8"
+                    />
 
                     {/* Country Info */}
                     <div className="flex flex-col items-center text-center md:flex-row md:items-center md:gap-10 md:text-left">
@@ -266,7 +307,7 @@ export default function CountryPage({ country, packages }: Props) {
 
                         {/* Details */}
                         <div className="flex-1">
-                            <div className="mb-2 flex flex-wrap items-center justify-center gap-1.5 md:mb-4 md:gap-2 md:justify-start">
+                            <div className="mb-2 flex flex-wrap items-center justify-center gap-1.5 md:mb-4 md:justify-start md:gap-2">
                                 {country.region && (
                                     <Badge
                                         variant="secondary"
@@ -280,8 +321,10 @@ export default function CountryPage({ country, packages }: Props) {
                                     variant="outline"
                                     className="border-primary-300 bg-white/50 px-2 py-0.5 text-xs text-primary-700 backdrop-blur-sm md:px-3 md:py-1 md:text-sm"
                                 >
-                                    {packages.length} Plan
-                                    {packages.length !== 1 ? 's' : ''}
+                                    {packages.length}{' '}
+                                    {packages.length !== 1
+                                        ? trans('country_page.plans_unit')
+                                        : trans('country_page.plan_unit')}
                                 </Badge>
                             </div>
 
@@ -290,18 +333,19 @@ export default function CountryPage({ country, packages }: Props) {
                             </h1>
 
                             <p className="mb-4 max-w-2xl text-sm font-medium text-balance text-primary-700 md:mb-6 md:text-xl">
-                                Get instant mobile data with our premium eSIM
-                                plans. No physical SIM needed, just scan and go.
+                                {trans('country_page.hero_description')}
                             </p>
 
                             {packages.length > 0 && (
-                                <div className="inline-flex flex-wrap items-center justify-center gap-2 rounded-xl border border-white/60 bg-white/60 px-3 py-2 shadow-sm backdrop-blur-sm md:gap-4 md:rounded-2xl md:px-5 md:py-3 md:justify-start">
+                                <div className="inline-flex flex-wrap items-center justify-center gap-2 rounded-xl border border-white/60 bg-white/60 px-3 py-2 shadow-sm backdrop-blur-sm md:justify-start md:gap-4 md:rounded-2xl md:px-5 md:py-3">
                                     <div className="flex items-center gap-1.5 text-primary-800 md:gap-2">
                                         <div className="rounded-full bg-accent-100 p-1 md:p-1.5">
                                             <Zap className="h-3 w-3 text-accent-600 md:h-4 md:w-4" />
                                         </div>
                                         <span className="text-xs font-medium md:text-sm">
-                                            Instant
+                                            {trans(
+                                                'country_page.badges.instant',
+                                            )}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-1.5 text-primary-800 md:gap-2">
@@ -309,11 +353,15 @@ export default function CountryPage({ country, packages }: Props) {
                                             <Shield className="h-3 w-3 text-primary-600 md:h-4 md:w-4" />
                                         </div>
                                         <span className="text-xs font-medium md:text-sm">
-                                            Secure
+                                            {trans(
+                                                'country_page.badges.secure',
+                                            )}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-1.5 border-l border-primary-200 pl-2 md:gap-2 md:pl-4">
-                                        <span className="text-xs font-medium text-primary-600 md:text-sm">From</span>
+                                        <span className="text-xs font-medium text-primary-600 md:text-sm">
+                                            {trans('country_page.from')}
+                                        </span>
                                         <span className="text-base font-bold text-accent-500 md:text-xl">
                                             €{lowestPrice.toFixed(2)}
                                         </span>
@@ -337,15 +385,18 @@ export default function CountryPage({ country, packages }: Props) {
                                 <Smartphone className="h-6 w-6 text-primary-500 md:h-8 md:w-8" />
                             </div>
                             <h3 className="text-lg font-bold text-primary-900 md:text-xl">
-                                No plans available
+                                {trans('country_page.no_plans.title')}
                             </h3>
                             <p className="mt-2 text-sm text-primary-600 md:text-base">
-                                Check back later for available data plans for{' '}
-                                {country.name}
+                                {trans('country_page.no_plans.description', {
+                                    country: country.name,
+                                })}
                             </p>
                             <GoldButton className="mt-5 md:mt-6" asChild>
                                 <Link href="/destinations">
-                                    Browse Other Destinations
+                                    {trans(
+                                        'country_page.no_plans.browse_other',
+                                    )}
                                 </Link>
                             </GoldButton>
                         </div>
@@ -357,11 +408,11 @@ export default function CountryPage({ country, packages }: Props) {
                                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-100 text-xs font-extrabold text-accent-700 md:h-8 md:w-8 md:text-sm">
                                         {packages.length}
                                     </span>
-                                    Available Packages
+                                    {trans('country_page.available_packages')}
                                 </h2>
                                 <div className="flex items-center gap-2 md:gap-3">
                                     <span className="text-xs font-medium text-primary-900 md:text-sm">
-                                        Sort:
+                                        {trans('country_page.sort.label')}
                                     </span>
                                     <Select
                                         value={sortBy}
@@ -373,17 +424,37 @@ export default function CountryPage({ country, packages }: Props) {
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="border-primary-200 bg-white">
-                                            <SelectItem value="data" className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm">
-                                                Data
+                                            <SelectItem
+                                                value="data"
+                                                className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm"
+                                            >
+                                                {trans(
+                                                    'country_page.sort.data',
+                                                )}
                                             </SelectItem>
-                                            <SelectItem value="price-asc" className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm">
-                                                Price: Low-High
+                                            <SelectItem
+                                                value="price-asc"
+                                                className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm"
+                                            >
+                                                {trans(
+                                                    'country_page.sort.price_asc',
+                                                )}
                                             </SelectItem>
-                                            <SelectItem value="price-desc" className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm">
-                                                Price: High-Low
+                                            <SelectItem
+                                                value="price-desc"
+                                                className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm"
+                                            >
+                                                {trans(
+                                                    'country_page.sort.price_desc',
+                                                )}
                                             </SelectItem>
-                                            <SelectItem value="validity" className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm">
-                                                Validity
+                                            <SelectItem
+                                                value="validity"
+                                                className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm"
+                                            >
+                                                {trans(
+                                                    'country_page.sort.validity',
+                                                )}
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -405,7 +476,9 @@ export default function CountryPage({ country, packages }: Props) {
                                         {pkg.is_featured && (
                                             <div className="absolute top-0 right-0 z-20">
                                                 <div className="rounded-bl-lg bg-gradient-to-l from-accent-500 via-accent-400 to-accent-300 px-2.5 py-1 text-[10px] font-bold text-accent-950 shadow-md shadow-accent-500/30 md:rounded-bl-xl md:px-4 md:py-1.5 md:text-xs">
-                                                    BEST VALUE
+                                                    {trans(
+                                                        'country_page.best_value',
+                                                    )}
                                                 </div>
                                             </div>
                                         )}
@@ -416,20 +489,27 @@ export default function CountryPage({ country, packages }: Props) {
                                             {/* Plan Name & Price Row - Mobile Optimized */}
                                             <div className="mb-3 flex items-start justify-between gap-2 md:mb-4 md:block">
                                                 <div>
-                                                    <h3 className="text-sm font-bold text-primary-900 md:text-lg md:mb-4">
+                                                    <h3 className="text-sm font-bold text-primary-900 md:mb-4 md:text-lg">
                                                         {pkg.name}
                                                     </h3>
                                                     {pkg.network_type && (
-                                                        <p className={`text-[10px] font-bold uppercase tracking-wide md:text-xs ${
-                                                            pkg.is_featured ? 'text-accent-500' : 'text-primary-400'
-                                                        }`}>
+                                                        <p
+                                                            className={`text-[10px] font-bold tracking-wide uppercase md:text-xs ${
+                                                                pkg.is_featured
+                                                                    ? 'text-accent-500'
+                                                                    : 'text-primary-400'
+                                                            }`}
+                                                        >
                                                             {pkg.network_type}
                                                         </p>
                                                     )}
                                                 </div>
-                                                <div className="text-right md:text-left md:mb-4">
+                                                <div className="text-right md:mb-4 md:text-left">
                                                     <span className="text-xl font-extrabold tracking-tight text-primary-900 md:text-3xl">
-                                                        €{Number(pkg.retail_price).toFixed(2)}
+                                                        €
+                                                        {Number(
+                                                            pkg.retail_price,
+                                                        ).toFixed(2)}
                                                     </span>
                                                 </div>
                                             </div>
@@ -439,36 +519,44 @@ export default function CountryPage({ country, packages }: Props) {
                                             {/* Data & Validity - Compact on Mobile */}
                                             <div className="mb-3 flex gap-2 md:mb-5 md:block md:space-y-3">
                                                 <div className="flex flex-1 items-center gap-2 rounded-lg bg-primary-50/50 p-2 md:gap-3 md:bg-transparent md:p-0">
-                                                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md shadow-sm md:h-9 md:w-9 md:rounded-lg ${
-                                                        pkg.is_featured
-                                                            ? 'bg-accent-300 text-accent-950'
-                                                            : 'bg-primary-100 text-primary-600'
-                                                    }`}>
+                                                    <div
+                                                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md shadow-sm md:h-9 md:w-9 md:rounded-lg ${
+                                                            pkg.is_featured
+                                                                ? 'bg-accent-300 text-accent-950'
+                                                                : 'bg-primary-100 text-primary-600'
+                                                        }`}
+                                                    >
                                                         <Database className="h-3.5 w-3.5 md:h-4 md:w-4" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-bold leading-tight text-primary-900 md:text-base">
+                                                        <p className="text-xs leading-tight font-bold text-primary-900 md:text-base">
                                                             {pkg.data_label}
                                                         </p>
                                                         <p className="hidden text-xs text-primary-500 md:block">
-                                                            Data included
+                                                            {trans(
+                                                                'country_page.data_included',
+                                                            )}
                                                         </p>
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-1 items-center gap-2 rounded-lg bg-primary-50/50 p-2 md:gap-3 md:bg-transparent md:p-0">
-                                                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md shadow-sm md:h-9 md:w-9 md:rounded-lg ${
-                                                        pkg.is_featured
-                                                            ? 'bg-accent-300 text-accent-950'
-                                                            : 'bg-primary-100 text-primary-600'
-                                                    }`}>
+                                                    <div
+                                                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md shadow-sm md:h-9 md:w-9 md:rounded-lg ${
+                                                            pkg.is_featured
+                                                                ? 'bg-accent-300 text-accent-950'
+                                                                : 'bg-primary-100 text-primary-600'
+                                                        }`}
+                                                    >
                                                         <Calendar className="h-3.5 w-3.5 md:h-4 md:w-4" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-bold leading-tight text-primary-900 md:text-base">
+                                                        <p className="text-xs leading-tight font-bold text-primary-900 md:text-base">
                                                             {pkg.validity_label}
                                                         </p>
                                                         <p className="hidden text-xs text-primary-500 md:block">
-                                                            Validity period
+                                                            {trans(
+                                                                'country_page.validity_period',
+                                                            )}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -476,26 +564,53 @@ export default function CountryPage({ country, packages }: Props) {
 
                                             {/* Features - Hidden on Mobile, Visible on Desktop */}
                                             <div className="hidden space-y-2 text-sm md:block">
-                                                <FeatureItem variant={pkg.is_featured ? 'gold' : 'default'}>
-                                                    Instant QR delivery
+                                                <FeatureItem
+                                                    variant={
+                                                        pkg.is_featured
+                                                            ? 'gold'
+                                                            : 'default'
+                                                    }
+                                                >
+                                                    {trans(
+                                                        'country_page.features.instant_delivery',
+                                                    )}
                                                 </FeatureItem>
                                                 {pkg.hotspot_allowed && (
-                                                    <FeatureItem variant={pkg.is_featured ? 'gold' : 'default'}>
-                                                        Hotspot / Tethering
+                                                    <FeatureItem
+                                                        variant={
+                                                            pkg.is_featured
+                                                                ? 'gold'
+                                                                : 'default'
+                                                        }
+                                                    >
+                                                        {trans(
+                                                            'country_page.features.hotspot',
+                                                        )}
                                                     </FeatureItem>
                                                 )}
-                                                <FeatureItem variant={pkg.is_featured ? 'gold' : 'default'}>
-                                                    24/7 Support included
+                                                <FeatureItem
+                                                    variant={
+                                                        pkg.is_featured
+                                                            ? 'gold'
+                                                            : 'default'
+                                                    }
+                                                >
+                                                    {trans(
+                                                        'country_page.features.support',
+                                                    )}
                                                 </FeatureItem>
                                             </div>
 
                                             {/* Network Info Button */}
-                                            {pkg.networks && pkg.networks.length > 0 && (
-                                                <NetworkCoverageDialog
-                                                    networks={pkg.networks}
-                                                    isFeatured={pkg.is_featured}
-                                                />
-                                            )}
+                                            {pkg.networks &&
+                                                pkg.networks.length > 0 && (
+                                                    <NetworkCoverageDialog
+                                                        networks={pkg.networks}
+                                                        isFeatured={
+                                                            pkg.is_featured
+                                                        }
+                                                    />
+                                                )}
                                         </div>
 
                                         <div className="relative z-10 p-3 pt-0 md:p-5 md:pt-0">
@@ -504,8 +619,12 @@ export default function CountryPage({ country, packages }: Props) {
                                                     className="h-9 w-full text-xs md:h-11 md:text-sm"
                                                     asChild
                                                 >
-                                                    <Link href={`/checkout/${pkg.id}`}>
-                                                        Select Plan
+                                                    <Link
+                                                        href={`/checkout/${pkg.id}`}
+                                                    >
+                                                        {trans(
+                                                            'country_page.select_plan',
+                                                        )}
                                                         <ArrowRight className="ml-1.5 h-3.5 w-3.5 md:ml-2 md:h-4 md:w-4" />
                                                     </Link>
                                                 </GoldButton>
@@ -514,8 +633,12 @@ export default function CountryPage({ country, packages }: Props) {
                                                     className="h-9 w-full bg-primary-600 text-xs font-semibold text-white hover:bg-primary-700 md:h-11 md:text-sm"
                                                     asChild
                                                 >
-                                                    <Link href={`/checkout/${pkg.id}`}>
-                                                        Select Plan
+                                                    <Link
+                                                        href={`/checkout/${pkg.id}`}
+                                                    >
+                                                        {trans(
+                                                            'country_page.select_plan',
+                                                        )}
                                                         <ArrowRight className="ml-1.5 h-3.5 w-3.5 md:ml-2 md:h-4 md:w-4" />
                                                     </Link>
                                                 </Button>
@@ -538,27 +661,36 @@ export default function CountryPage({ country, packages }: Props) {
 
                 <div className="relative z-10 container mx-auto px-4">
                     <h2 className="mb-5 text-center text-lg font-bold text-primary-900 md:mb-8 md:text-2xl">
-                        Why Choose Our eSIM?
+                        {trans('country_page.why_choose.title')}
                     </h2>
-                    <div className="mx-auto grid max-w-4xl gap-3 md:gap-5 md:grid-cols-3">
+                    <div className="mx-auto grid max-w-4xl gap-3 md:grid-cols-3 md:gap-5">
                         {[
                             {
                                 icon: Zap,
-                                title: 'Instant Activation',
-                                description:
-                                    'Get your eSIM QR code instantly after purchase.',
+                                title: trans(
+                                    'country_page.why_choose.instant.title',
+                                ),
+                                description: trans(
+                                    'country_page.why_choose.instant.desc',
+                                ),
                             },
                             {
                                 icon: Wifi,
-                                title: 'Stay Connected',
-                                description:
-                                    'High-speed data on local networks.',
+                                title: trans(
+                                    'country_page.why_choose.connected.title',
+                                ),
+                                description: trans(
+                                    'country_page.why_choose.connected.desc',
+                                ),
                             },
                             {
                                 icon: Shield,
-                                title: 'No Hidden Fees',
-                                description:
-                                    'Transparent pricing. No surprises.',
+                                title: trans(
+                                    'country_page.why_choose.no_fees.title',
+                                ),
+                                description: trans(
+                                    'country_page.why_choose.no_fees.desc',
+                                ),
                             },
                         ].map((feature, i) => (
                             <div
@@ -585,17 +717,21 @@ export default function CountryPage({ country, packages }: Props) {
                             variant="outline"
                             size="sm"
                             asChild
-                            className="h-8 rounded-full border-primary-300 bg-white px-3 text-xs text-primary-900 shadow-sm hover:bg-primary-50 hover:border-primary-400 md:h-9 md:px-4 md:text-sm"
+                            className="h-8 rounded-full border-primary-300 bg-white px-3 text-xs text-primary-900 shadow-sm hover:border-primary-400 hover:bg-primary-50 md:h-9 md:px-4 md:text-sm"
                         >
-                            <Link href="/how-it-works">How It Works</Link>
+                            <Link href="/how-it-works">
+                                {trans('country_page.buttons.how_it_works')}
+                            </Link>
                         </Button>
                         <Button
                             variant="outline"
                             size="sm"
                             asChild
-                            className="h-8 rounded-full border-primary-300 bg-white px-3 text-xs text-primary-900 shadow-sm hover:bg-primary-50 hover:border-primary-400 md:h-9 md:px-4 md:text-sm"
+                            className="h-8 rounded-full border-primary-300 bg-white px-3 text-xs text-primary-900 shadow-sm hover:border-primary-400 hover:bg-primary-50 md:h-9 md:px-4 md:text-sm"
                         >
-                            <Link href="/help">Need Help?</Link>
+                            <Link href="/help">
+                                {trans('country_page.buttons.help')}
+                            </Link>
                         </Button>
                     </div>
                 </div>
