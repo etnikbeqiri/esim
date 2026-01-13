@@ -1,4 +1,5 @@
 import { CountryFlag } from '@/components/country-flag';
+import { useTrans } from '@/hooks/use-trans';
 import { Calendar, HardDrive, Mail, Receipt } from 'lucide-react';
 
 interface Package {
@@ -22,6 +23,8 @@ export function OrderSummaryCard({
     package: pkg,
     className = '',
 }: OrderSummaryCardProps) {
+    const { trans } = useTrans();
+
     return (
         <div
             className={`overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm ${className}`}
@@ -35,7 +38,7 @@ export function OrderSummaryCard({
                         </div>
                         <div>
                             <p className="text-xs font-medium tracking-wider text-primary-500 uppercase">
-                                Order Number
+                                {trans('order_summary.order_number')}
                             </p>
                             <p className="font-mono font-semibold text-primary-900">
                                 {orderNumber}
@@ -48,7 +51,7 @@ export function OrderSummaryCard({
                         </div>
                         <div className="sm:order-1">
                             <p className="text-xs font-medium tracking-wider text-primary-500 uppercase">
-                                Confirmation sent to
+                                {trans('order_summary.confirmation_sent_to')}
                             </p>
                             <p className="max-w-[200px] truncate text-sm font-medium text-primary-800 sm:max-w-[250px]">
                                 {customerEmail}
@@ -91,7 +94,7 @@ export function OrderSummaryCard({
                                 </div>
                                 <div>
                                     <p className="text-xs font-medium tracking-wider text-primary-500 uppercase">
-                                        Data
+                                        {trans('order_summary.data')}
                                     </p>
                                     <p className="text-lg font-bold text-primary-900">
                                         {pkg.data_label}
@@ -106,7 +109,7 @@ export function OrderSummaryCard({
                                 </div>
                                 <div>
                                     <p className="text-xs font-medium tracking-wider text-primary-500 uppercase">
-                                        Validity
+                                        {trans('order_summary.validity')}
                                     </p>
                                     <p className="text-lg font-bold text-primary-900">
                                         {pkg.validity_label}

@@ -25,7 +25,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-3">
                         <img
-                            alt="Logo"
+                            alt={trans('common.logo')}
                             className="h-12 w-12 object-contain"
                             src="/logo.png"
                         />
@@ -181,9 +181,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                             className="w-full"
                                         >
                                             <Link href="/register">
-                                                {trans(
-                                                    'nav.get_started',
-                                                )}
+                                                {trans('nav.get_started')}
                                             </Link>
                                         </GoldButton>
                                     </>
@@ -212,7 +210,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                         <div className="md:col-span-1">
                             <Link href="/" className="flex items-center gap-3">
                                 <img
-                                    alt="Logo"
+                                    alt={trans('common.logo')}
                                     className="h-12 w-12 object-contain"
                                     src="/logo.png"
                                 />

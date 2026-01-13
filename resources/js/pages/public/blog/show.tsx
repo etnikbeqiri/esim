@@ -190,7 +190,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                             <div className="mb-6 flex flex-wrap items-center gap-3">
                                 <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-500 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 px-3 py-1.5 text-xs font-bold text-accent-950 shadow-sm">
                                     <BookOpen className="h-3.5 w-3.5" />
-                                    Article
+                                    {trans('blog.article.type')}
                                 </span>
                                 <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white px-3 py-1.5 text-xs font-medium text-primary-700 shadow-sm">
                                     <Clock className="h-3.5 w-3.5 text-accent-500" />
@@ -296,7 +296,9 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                         </div>
                                         <div className="flex items-center justify-center gap-2 text-sm text-primary-500">
                                             <BookOpen className="h-4 w-4" />
-                                            <span>Article</span>
+                                            <span>
+                                                {trans('blog.article.type')}
+                                            </span>
                                             <span className="mx-1">•</span>
                                             <Clock className="h-4 w-4" />
                                             <span>

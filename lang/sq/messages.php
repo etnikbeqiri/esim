@@ -157,6 +157,7 @@ return [
         'article' => [
             'read_time' => ':min min lexim',
             'read_article' => 'Lexo Artikullin',
+            'type' => 'Artikull',
             'written_by' => 'Shkruar nga',
             'author' => 'Autori',
             'published_on' => 'Publikuar më',
@@ -776,6 +777,12 @@ return [
             'validity' => 'Vlefshmëria',
             'total' => 'Totali',
         ],
+        'redirect' => [
+            'title' => 'Duke ju ridrejtuar te Pagesa',
+            'message' => 'Ju lutemi prisni ndërsa ju ridrejtojmë në faqen e sigurt të pagesës...',
+            'manual_desc' => 'Nëse nuk ridrejtoheni automatikisht,',
+            'click_here' => 'klikoni këtu',
+        ],
         'benefits' => [
             'instant' => 'Dorëzim i menjëhershëm përmes emailit',
             'qr' => 'Instalim i lehtë me kod QR',
@@ -903,8 +910,35 @@ return [
         'title' => 'Paneli',
         'nav_title' => 'Paneli',
     ],
-    'common' => [
-        'loading' => 'Duke ngarkuar',
-        'loading_recovery_codes' => 'Duke ngarkuar kodet e rikuperimit',
+    'order_summary' => [
+        'order_number' => 'Numri i Porosisë',
+        'confirmation_sent_to' => 'Konfirmimi u dërgua në',
+        'data' => 'Të Dhëna',
+        'validity' => 'Vlefshmëria',
+    ],
+    'esim_qr' => [
+        'title' => 'eSIM-i Juaj',
+        'description' => 'Skanoni kodin QR me telefonin tuaj për të instaluar eSIM-in',
+        'activation_code' => 'Kodi i Aktivizimit',
+        'copy' => 'Kopjo',
+        'copied' => 'U kopjua!',
+        'iccid' => 'ICCID',
+        'smdp_address' => 'Adresa SM-DP+',
+        'pin' => 'PIN',
+        'puk' => 'PUK',
+        'apn' => 'APN',
+    ],
+    'statuses' => [
+        'pending' => 'Në Pritje',
+        'awaiting_payment' => 'Në Pritje të Pagesës',
+        'processing' => 'Duke Procesuar',
+        'completed' => 'E Përfunduar',
+        'failed' => 'Dështoi',
+        'refunded' => 'U Rimbursua',
+        'cancelled' => 'U Anulua',
+        'pending_retry' => 'Duke Riprovojë',
+    ],
+    'payment_provider_card' => [
+        'accepted_payment_methods' => 'Metodat e pranuara të pagesës:',
     ],
 ];

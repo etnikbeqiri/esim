@@ -157,6 +157,7 @@ return [
         'article' => [
             'read_time' => ':min min read',
             'read_article' => 'Read Article',
+            'type' => 'Article',
             'written_by' => 'Written by',
             'author' => 'Author',
             'published_on' => 'Published on',
@@ -776,6 +777,12 @@ return [
             'validity' => 'Validity',
             'total' => 'Total',
         ],
+        'redirect' => [
+            'title' => 'Redirecting to Payment',
+            'message' => 'Please wait while we redirect you to the secure payment page...',
+            'manual_desc' => 'If you are not redirected automatically,',
+            'click_here' => 'click here',
+        ],
         'benefits' => [
             'instant' => 'Instant delivery via email',
             'qr' => 'Easy QR code installation',
@@ -904,7 +911,39 @@ return [
         'nav_title' => 'Dashboard',
     ],
     'common' => [
+        'logo' => 'Logo',
         'loading' => 'Loading',
         'loading_recovery_codes' => 'Loading recovery codes',
+    ],
+    'order_summary' => [
+        'order_number' => 'Order Number',
+        'confirmation_sent_to' => 'Confirmation sent to',
+        'data' => 'Data',
+        'validity' => 'Validity',
+    ],
+    'esim_qr' => [
+        'title' => 'Your eSIM',
+        'description' => 'Scan the QR code with your phone to install the eSIM',
+        'activation_code' => 'Activation Code',
+        'copy' => 'Copy',
+        'copied' => 'Copied!',
+        'iccid' => 'ICCID',
+        'smdp_address' => 'SM-DP+ Address',
+        'pin' => 'PIN',
+        'puk' => 'PUK',
+        'apn' => 'APN',
+    ],
+    'statuses' => [
+        'pending' => 'Pending',
+        'awaiting_payment' => 'Awaiting Payment',
+        'processing' => 'Processing',
+        'completed' => 'Completed',
+        'failed' => 'Failed',
+        'refunded' => 'Refunded',
+        'cancelled' => 'Cancelled',
+        'pending_retry' => 'Retrying',
+    ],
+    'payment_provider_card' => [
+        'accepted_payment_methods' => 'Accepted payment methods:',
     ],
 ];

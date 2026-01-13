@@ -28,16 +28,7 @@ enum OrderStatus: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Pending => 'Pending',
-            self::AwaitingPayment => 'Awaiting Payment',
-            self::Processing => 'Processing',
-            self::Completed => 'Completed',
-            self::Failed => 'Failed',
-            self::Refunded => 'Refunded',
-            self::Cancelled => 'Cancelled',
-            self::PendingRetry => 'Pending Retry',
-        };
+        return trans('messages.statuses.' . $this->value);
     }
 
     public function color(): string

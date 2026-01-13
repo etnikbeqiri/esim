@@ -224,10 +224,6 @@ export default function CheckoutSuccess({ order }: Props) {
                                                             'checkout_success_page.installation.step_1',
                                                             {
                                                                 setting_path:
-                                                                    // Manually bolding inside trans is tricky,
-                                                                    // so we might just pass the string or handle it differently.
-                                                                    // For now, let's just pass the string.
-                                                                    // Or we can reconstruct the structure:
                                                                     '',
                                                             },
                                                         ).split(

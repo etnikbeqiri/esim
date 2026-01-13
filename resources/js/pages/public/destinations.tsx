@@ -114,7 +114,7 @@ export default function Destinations({ countries, regions, filters }: Props) {
                                     onClick={() => setActiveRegion(region)}
                                 >
                                     {trans(
-                                        `destinations.tabs.${region.toLowerCase().replace(' ', '_')}`,
+                                        `destinations.tabs.${region.toLowerCase().replace(' ', '_')}` as any,
                                     )}
                                 </GoldButton>
                             ) : (
@@ -124,7 +124,7 @@ export default function Destinations({ countries, regions, filters }: Props) {
                                     className="shrink-0 rounded-full border border-transparent bg-primary-50 px-4 py-2 text-xs font-bold text-primary-600 transition-colors duration-200 hover:bg-primary-100"
                                 >
                                     {trans(
-                                        `destinations.tabs.${region.toLowerCase().replace(' ', '_')}`,
+                                        `destinations.tabs.${region.toLowerCase().replace(' ', '_')}` as any,
                                     )}
                                 </button>
                             ),

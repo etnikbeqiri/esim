@@ -157,6 +157,7 @@ return [
         'article' => [
             'read_time' => ':min Min. Lesezeit',
             'read_article' => 'Artikel lesen',
+            'type' => 'Artikel',
             'written_by' => 'Geschrieben von',
             'author' => 'Autor',
             'published_on' => 'Veröffentlicht am',
@@ -773,6 +774,12 @@ return [
             'validity' => 'Gültigkeit',
             'total' => 'Gesamt',
         ],
+        'redirect' => [
+            'title' => 'Weiterleitung zur Zahlung',
+            'message' => 'Bitte warten Sie, während wir Sie zur sicheren Zahlungsseite weiterleiten...',
+            'manual_desc' => 'Wenn Sie nicht automatisch weitergeleitet werden,',
+            'click_here' => 'klicken Sie hier',
+        ],
         'benefits' => [
             'instant' => 'Sofortige Lieferung per E-Mail',
             'qr' => 'Einfache QR-Code Installation',
@@ -901,10 +908,42 @@ return [
         'nav_title' => 'Dashboard',
     ],
     'common' => [
+        'logo' => 'Logo',
         'loading' => 'Laden',
         'loading_recovery_codes' => 'Wiederherstellungscodes laden',
     ],
     'faq' => [
         'view_all' => 'Alle FAQs anzeigen',
+    ],
+    'order_summary' => [
+        'order_number' => 'Bestellnummer',
+        'confirmation_sent_to' => 'Bestätigung gesendet an',
+        'data' => 'Daten',
+        'validity' => 'Gültigkeit',
+    ],
+    'esim_qr' => [
+        'title' => 'Ihre eSIM',
+        'description' => 'Scannen Sie den QR-Code mit Ihrem Telefon, um die eSIM zu installieren',
+        'activation_code' => 'Aktivierungscode',
+        'copy' => 'Kopieren',
+        'copied' => 'Kopiert!',
+        'iccid' => 'ICCID',
+        'smdp_address' => 'SM-DP+ Adresse',
+        'pin' => 'PIN',
+        'puk' => 'PUK',
+        'apn' => 'APN',
+    ],
+    'statuses' => [
+        'pending' => 'Ausstehend',
+        'awaiting_payment' => 'Warte auf Zahlung',
+        'processing' => 'Verarbeitung',
+        'completed' => 'Abgeschlossen',
+        'failed' => 'Fehlgeschlagen',
+        'refunded' => 'Erstattet',
+        'cancelled' => 'Storniert',
+        'pending_retry' => 'Wiederholen',
+    ],
+    'payment_provider_card' => [
+        'accepted_payment_methods' => 'Akzeptierte Zahlungsmethoden:',
     ],
 ];
