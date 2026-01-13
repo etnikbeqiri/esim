@@ -97,9 +97,9 @@ class CheckoutController extends Controller
         }
 
         // Use callback URLs - payment gateway will append payment_id and status
-        $successUrl = route('client.checkout.callback');
-        $cancelUrl = route('client.checkout.callback') . '?status=cancelled';
-        $failUrl = route('client.checkout.callback') . '?status=failed';
+        $successUrl = route('checkout.callback');
+        $cancelUrl = route('checkout.cancel');
+        $failUrl = route('checkout.cancel') . '?status=failed';
 
         $result = $this->checkoutService->createCheckout(
             customer: $customer,
@@ -187,22 +187,28 @@ class CheckoutController extends Controller
     /**
      * Handle payment gateway callback.
      */
-    public function callback(Request $request): RedirectResponse
+    public function callback(Request $request, \App\Services\Payment\PaymentCallbackHandler $callbackHandler): RedirectResponse
     {
-        $paymentId = $request->query('payment_id');
-        $status = $request->query('status');
+        $result = $callbackHandler->handle($request);
 
-        Log::info('Client payment callback', compact('paymentId', 'status'));
+        if (!$result) {
+            Log::warning('Client payment callback could not be handled', [
+                'query' => $request->query()->all(),
+            ]);
 
-        if (!$paymentId) {
-            return redirect()->route('client.orders.index')
+            return redirect()->route('orders.index')
                 ->withErrors(['error' => 'Invalid payment callback']);
         }
+
+        $paymentId = $result['order_id'];
+        $status = $result['status'];
+
+        Log::info('Client payment callback handled', compact('paymentId', 'status'));
 
         $order = Order::where('uuid', $paymentId)->first();
 
         if (!$order) {
-            return redirect()->route('client.orders.index')
+            return redirect()->route('orders.index')
                 ->withErrors(['error' => 'Order not found']);
         }
 
@@ -210,7 +216,7 @@ class CheckoutController extends Controller
         $user = $request->user();
         $customer = $user?->customer;
         if ($customer && $order->customer_id !== $customer->id) {
-            return redirect()->route('client.orders.index')
+            return redirect()->route('orders.index')
                 ->withErrors(['error' => 'Order not found']);
         }
 
@@ -220,12 +226,12 @@ class CheckoutController extends Controller
         // Route based on status
         return match ($status) {
             'cancelled' => $order->package_id
-                ? redirect()->route('client.checkout.show', $order->package_id)
+                ? redirect()->route('checkout.show', $order->package_id)
                     ->with('message', 'Payment cancelled.')
-                : redirect()->route('client.packages.index'),
-            'failed' => redirect()->route('client.orders.show', $order->uuid)
+                : redirect()->route('packages.index'),
+            'failed' => redirect()->route('orders.show', $order->uuid)
                 ->withErrors(['error' => 'Payment failed.']),
-            default => redirect()->route('client.checkout.success', $order->uuid),
+            default => redirect()->route('checkout.success', $order->uuid),
         };
     }
 

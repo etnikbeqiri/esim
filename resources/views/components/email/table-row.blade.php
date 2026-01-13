@@ -1,6 +1,6 @@
 @props(['label', 'value' => null])
 
 <tr>
-    <td style="padding: 12px 16px; text-align: left; border-bottom: 1px solid #e2e8f0; color: #64748b;">{{ $label }}</td>
-    <td style="padding: 12px 16px; text-align: left; border-bottom: 1px solid #e2e8f0; color: #1a1a1a;">{{ $value ?? $slot }}</td>
+    <td style="padding: 14px 16px; text-align: left; border-bottom: 1px solid #d5e8da; color: #475569; font-size: 14px;">{{ $label }}</td>
+    <td style="padding: 14px 16px; text-align: left; border-bottom: 1px solid #d5e8da; color: #002a18; font-weight: 500;">{{ $value ?? $slot }}</td>
 </tr>

@@ -7,9 +7,12 @@ use App\DTOs\Payment\CheckoutResult;
 use App\DTOs\Payment\PaymentValidationResult;
 use App\Enums\PaymentProvider;
 use App\Enums\PaymentStatus;
+use App\Events\Payment\WebhookReceived;
+use App\Events\Payment\PaymentSucceeded;
 use App\Models\Currency;
 use App\Models\Order;
 use App\Models\Payment;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -375,5 +378,160 @@ class PayseraGateway implements PaymentGatewayContract
     {
         $separator = str_contains($url, '?') ? '&' : '?';
         return "{$url}{$separator}payment_id={$uuid}&status={$status}";
+    }
+
+    /**
+     * Decode Paysera callback data and verify signature.
+     *
+     * @param string $data Base64-encoded data from Paysera
+     * @param string $ss1 MD5 signature (md5(data + password))
+     * @return array|null Decoded parameters or null if verification fails
+     */
+    public function decodeCallback(string $data, string $ss1): ?array
+    {
+        // Verify ss1 signature first
+        $expectedSign = md5($data . $this->password);
+
+        if (!hash_equals($expectedSign, $ss1)) {
+            Log::warning('Paysera callback signature verification failed', [
+                'expected' => $expectedSign,
+                'provided' => $ss1,
+            ]);
+            return null;
+        }
+
+        // Decode: change - to + and _ to /, then base64 decode
+        $decoded = base64_decode(strtr($data, '-_', '+/'), true);
+
+        if ($decoded === false) {
+            Log::error('Paysera callback base64 decode failed');
+            return null;
+        }
+
+        // Parse query string
+        parse_str($decoded, $params);
+
+        Log::info('Paysera callback decoded', [
+            'orderid' => $params['orderid'] ?? null,
+            'status' => $params['status'] ?? null,
+            'amount' => $params['amount'] ?? null,
+        ]);
+
+        return $params;
+    }
+
+    /**
+     * Check if the request contains Paysera callback parameters.
+     */
+    public function canHandleCallback(Request $request): bool
+    {
+        return !empty($request->query('data')) && !empty($request->query('ss1'));
+    }
+
+    /**
+     * Map Paysera status to internal status.
+     * 0 = failed, 1 = success, 2 = pending, 3 = additional info
+     */
+    public function mapStatus(string $payseraStatus): string
+    {
+        return match ($payseraStatus) {
+            '1' => 'success',
+            '0' => 'failed',
+            '2' => 'pending',
+            '3' => 'success', // Additional info - treat as success
+            default => 'pending',
+        };
+    }
+
+    /**
+     * Handle Paysera callback and return standardized result.
+     *
+     * @return array{order_id: string, status: string, raw_status: string}|null
+     */
+    public function handleCallback(Request $request): ?array
+    {
+        $data = $request->query('data');
+        $ss1 = $request->query('ss1');
+
+        if (!$data || !$ss1) {
+            return null;
+        }
+
+        $decoded = $this->decodeCallback($data, $ss1);
+
+        if (!$decoded) {
+            return null;
+        }
+
+        $orderId = $decoded['orderid'] ?? null;
+        $payseraStatus = $decoded['status'] ?? null;
+
+        if (!$orderId) {
+            return null;
+        }
+
+        // If payment is successful, confirm it immediately
+        if ($payseraStatus === '1') {
+            $this->confirmPayment($orderId, $decoded);
+        }
+
+        return [
+            'order_id' => $orderId,
+            'status' => $this->mapStatus($payseraStatus ?? ''),
+            'raw_status' => $payseraStatus,
+        ];
+    }
+
+    /**
+     * Confirm payment based on Paysera callback data.
+     */
+    private function confirmPayment(string $orderUuid, array $data): void
+    {
+        $order = Order::where('uuid', $orderUuid)->first();
+
+        if (!$order) {
+            Log::warning('Paysera callback: order not found', ['order_uuid' => $orderUuid]);
+            return;
+        }
+
+        $payment = $order->payments()->latest()->first();
+
+        if (!$payment) {
+            Log::warning('Paysera callback: payment not found', ['order_uuid' => $orderUuid]);
+            return;
+        }
+
+        // Skip if already successful
+        if ($payment->isSuccessful()) {
+            Log::info('Paysera callback: payment already successful, skipping', ['payment_uuid' => $payment->uuid]);
+            return;
+        }
+
+        // Record webhook/callback received
+        WebhookReceived::fire(
+            payment_id: $payment->id,
+            event_type: 'payment.success',
+            gateway_status: '1',
+            payload: $data,
+        );
+
+        // Fire payment success event
+        PaymentSucceeded::fire(
+            payment_id: $payment->id,
+            transaction_id: $data['requestid'] ?? $orderUuid,
+            confirmed_amount: ($data['payamount'] ?? $data['amount'] ?? 0) / 100,
+            gateway_status: '1',
+            metadata: [
+                'paysera_status' => '1',
+                'test' => $data['test'] ?? '0',
+                'payment_method' => $data['payment'] ?? null,
+                'payamount' => $data['payamount'] ?? null,
+            ],
+        );
+
+        Log::info('Paysera payment confirmed via callback', [
+            'order_uuid' => $orderUuid,
+            'payment_uuid' => $payment->uuid,
+        ]);
     }
 }

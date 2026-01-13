@@ -2,7 +2,7 @@
 
 @php
 $styles = 'margin: 0 0 16px 0;';
-$styles .= $muted ? ' color: #64748b;' : ' color: #4a4a4a;';
+$styles .= $muted ? ' color: #475569;' : ' color: #004528;';
 $styles .= $small ? ' font-size: 14px;' : '';
 $styles .= $center ? ' text-align: center;' : '';
 @endphp

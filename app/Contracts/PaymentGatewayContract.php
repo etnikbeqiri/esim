@@ -7,6 +7,7 @@ use App\DTOs\Payment\PaymentValidationResult;
 use App\Enums\PaymentProvider;
 use App\Models\Order;
 use App\Models\Payment;
+use Illuminate\Http\Request;
 
 interface PaymentGatewayContract
 {
@@ -42,4 +43,16 @@ interface PaymentGatewayContract
      * @return array{event: string, payment_id: ?string, status: ?string, data: array}
      */
     public function handleWebhook(array $payload, ?string $signature = null): array;
+
+    /**
+     * Check if this gateway can handle the callback request.
+     */
+    public function canHandleCallback(Request $request): bool;
+
+    /**
+     * Handle user redirect callback (accepturl/cancelurl).
+     *
+     * @return array{order_id: string, status: string}|null
+     */
+    public function handleCallback(Request $request): ?array;
 }

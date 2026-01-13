@@ -264,4 +264,16 @@ class BalanceGateway implements PaymentGatewayContract
     {
         return $customer->balance?->available_balance ?? 0.00;
     }
+
+    public function canHandleCallback(\Illuminate\Http\Request $request): bool
+    {
+        // Balance payments don't use callbacks
+        return false;
+    }
+
+    public function handleCallback(\Illuminate\Http\Request $request): ?array
+    {
+        // Balance payments don't use callbacks
+        return null;
+    }
 }

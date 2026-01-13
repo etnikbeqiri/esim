@@ -1,6 +1,12 @@
 @props(['label', 'value', 'bold' => false])
 
-<div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0; {{ $bold ? 'font-weight: 600; font-size: 18px; padding-top: 16px; border-bottom: none;' : '' }}">
-    <span>{{ $label }}</span>
-    <span>{{ $value }}</span>
+@php
+$borderStyle = $bold ? 'border-bottom: none;' : 'border-bottom: 1px solid #aad1b6;';
+$fontWeight = $bold ? 'font-weight: 700; font-size: 18px;' : 'font-weight: 500;';
+$padding = $bold ? 'padding-top: 16px;' : '';
+@endphp
+
+<div style="display: flex; justify-content: space-between; padding: 10px 0; {{ $borderStyle }} {{ $fontWeight }} {{ $padding }}">
+    <span style="color: #004528;">{{ $label }}</span>
+    <span style="color: #002a18;">{{ $value }}</span>
 </div>
