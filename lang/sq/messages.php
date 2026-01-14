@@ -1207,6 +1207,11 @@ return [
         'history_desc' => ':count faturë|:count fatura',
         'no_invoices' => 'Ende asnjë faturë',
         'no_invoices_desc' => 'Faturat do të shfaqen këtu pasi të bëni blerje ose mbushje.',
+        'number' => 'Fatura #',
+        'date' => 'Data',
+        'amount' => 'Shuma',
+        'status' => 'Statusi',
+        'download' => 'Shkarko',
         'table' => [
             'invoice' => 'Fatura',
             'type' => 'Lloji',
@@ -1338,16 +1343,6 @@ return [
         'puk' => 'PUK',
         'apn' => 'APN',
     ],
-    'statuses' => [
-        'pending' => 'Në Pritje',
-        'awaiting_payment' => 'Në Pritje të Pagesës',
-        'processing' => 'Duke Procesuar',
-        'completed' => 'E Përfunduar',
-        'failed' => 'Dështoi',
-        'refunded' => 'U Rimbursua',
-        'cancelled' => 'U Anulua',
-        'pending_retry' => 'Duke Riprovojë',
-    ],
     'payment_provider_card' => [
         'accepted_payment_methods' => 'Metodat e pranuara të pagesës:',
     ],
@@ -1429,11 +1424,14 @@ return [
         'terms_link' => 'Kushtet e Shërbimit',
     ],
     'statuses' => [
-        'failed' => 'Dështuar',
         'pending' => 'Në Pritje',
-        'completed' => 'Përfunduar',
+        'awaiting_payment' => 'Në Pritje të Pagesës',
         'processing' => 'Duke Procesuar',
-        'cancelled' => 'Anuluar',
+        'completed' => 'E Përfunduar',
+        'failed' => 'Dështoi',
+        'refunded' => 'U Rimbursua',
+        'cancelled' => 'U Anulua',
+        'pending_retry' => 'Duke Riprovojë',
     ],
     'admin' => [
         'dashboard' => [
