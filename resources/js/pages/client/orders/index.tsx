@@ -1,7 +1,13 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -10,6 +16,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useTrans } from '@/hooks/use-trans';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
@@ -68,17 +75,12 @@ interface Props {
     customer: Customer | null;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Shop', href: '/client/packages' },
-    { title: 'My Orders', href: '/client/orders' },
-];
-
 function getStatusIcon(status: string) {
     switch (status) {
         case 'completed':
             return <CheckCircle2 className="h-4 w-4 text-green-500" />;
         case 'processing':
-            return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />;
+            return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
         case 'pending_retry':
             return <RefreshCw className="h-4 w-4 text-orange-500" />;
         case 'failed':
@@ -104,40 +106,61 @@ function getStatusBadgeClass(color: string): string {
 }
 
 export default function OrdersIndex({ orders, filters }: Props) {
+    const { trans } = useTrans();
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: trans('nav.destinations'), href: '/client/packages' }, // Using destinations as closest match for Shop/Marketplace
+        { title: trans('client_orders.title'), href: '/client/orders' },
+    ];
+
     // Poll for updates when there are orders in processing/pending states
-    const hasActiveOrders = orders.data.some(
-        (order) => ['processing', 'pending_retry', 'pending', 'awaiting_payment'].includes(order.status)
+    const hasActiveOrders = orders.data.some((order) =>
+        ['processing', 'pending_retry', 'pending', 'awaiting_payment'].includes(
+            order.status,
+        ),
     );
 
     useEffect(() => {
         if (!hasActiveOrders) return;
 
         const interval = setInterval(() => {
-            router.reload({ only: ['orders'], preserveState: true, preserveScroll: true });
+            router.reload({
+                only: ['orders'],
+                preserveState: true,
+                preserveScroll: true,
+            });
         }, 3000);
 
         return () => clearInterval(interval);
     }, [hasActiveOrders]);
 
     function handleFilterChange(key: string, value: string) {
-        const newFilters = { ...filters, [key]: value === 'all' ? undefined : value };
+        const newFilters = {
+            ...filters,
+            [key]: value === 'all' ? undefined : value,
+        };
         router.get('/client/orders', newFilters, { preserveState: true });
     }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="My Orders" />
+            <Head title={trans('client_orders.title')} />
             <div className="flex flex-col gap-4 p-4">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-semibold">My Orders</h1>
-                        <p className="text-sm text-muted-foreground">{orders.total} orders</p>
+                        <h1 className="text-2xl font-semibold">
+                            {trans('client_orders.title')}
+                        </h1>
+                        <p className="text-sm text-muted-foreground">
+                            {orders.total}{' '}
+                            {trans('client_orders.order').toLowerCase()}s
+                        </p>
                     </div>
                     <Button asChild>
                         <Link href="/client/packages">
                             <ShoppingCart className="mr-2 h-4 w-4" />
-                            New Order
+                            {trans('client_orders.new_order')}
                         </Link>
                     </Button>
                 </div>
@@ -149,16 +172,36 @@ export default function OrdersIndex({ orders, filters }: Props) {
                         onValueChange={(v) => handleFilterChange('status', v)}
                     >
                         <SelectTrigger className="w-[160px]">
-                            <SelectValue placeholder="All statuses" />
+                            <SelectValue
+                                placeholder={trans(
+                                    'client_orders.all_statuses',
+                                )}
+                            />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Statuses</SelectItem>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="awaiting_payment">Awaiting Payment</SelectItem>
-                            <SelectItem value="processing">Processing</SelectItem>
-                            <SelectItem value="pending_retry">Pending Retry</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                            <SelectItem value="failed">Failed</SelectItem>
+                            <SelectItem value="all">
+                                {trans('client_orders.all_statuses')}
+                            </SelectItem>
+                            <SelectItem value="pending">
+                                {trans('client_orders.statuses.pending')}
+                            </SelectItem>
+                            <SelectItem value="awaiting_payment">
+                                {trans(
+                                    'client_orders.statuses.awaiting_payment',
+                                )}
+                            </SelectItem>
+                            <SelectItem value="processing">
+                                {trans('client_orders.statuses.processing')}
+                            </SelectItem>
+                            <SelectItem value="pending_retry">
+                                {trans('client_orders.statuses.pending_retry')}
+                            </SelectItem>
+                            <SelectItem value="completed">
+                                {trans('client_orders.statuses.completed')}
+                            </SelectItem>
+                            <SelectItem value="failed">
+                                {trans('client_orders.statuses.failed')}
+                            </SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -167,15 +210,19 @@ export default function OrdersIndex({ orders, filters }: Props) {
                 {orders.data.length === 0 ? (
                     <Card className="border-dashed">
                         <CardContent className="flex flex-col items-center justify-center py-12">
-                            <div className="rounded-full bg-muted p-3 mb-3">
+                            <div className="mb-3 rounded-full bg-muted p-3">
                                 <Package className="h-6 w-6 text-muted-foreground" />
                             </div>
-                            <h3 className="font-semibold">No orders yet</h3>
-                            <p className="text-sm text-muted-foreground mt-1 mb-3">
-                                Get started by browsing our eSIM packages
+                            <h3 className="font-semibold">
+                                {trans('client_orders.no_orders')}
+                            </h3>
+                            <p className="mt-1 mb-3 text-sm text-muted-foreground">
+                                {trans('client_orders.no_orders_desc')}
                             </p>
                             <Button asChild size="sm">
-                                <Link href="/client/packages">Browse Packages</Link>
+                                <Link href="/client/packages">
+                                    {trans('client_orders.browse_packages')}
+                                </Link>
                             </Button>
                         </CardContent>
                     </Card>
@@ -184,10 +231,18 @@ export default function OrdersIndex({ orders, filters }: Props) {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Order</TableHead>
-                                    <TableHead className="hidden sm:table-cell">Package</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Amount</TableHead>
+                                    <TableHead>
+                                        {trans('client_orders.order')}
+                                    </TableHead>
+                                    <TableHead className="hidden sm:table-cell">
+                                        {trans('client_orders.package')}
+                                    </TableHead>
+                                    <TableHead>
+                                        {trans('client_orders.status')}
+                                    </TableHead>
+                                    <TableHead className="text-right">
+                                        {trans('client_orders.amount')}
+                                    </TableHead>
                                     <TableHead className="w-[50px]"></TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -196,20 +251,36 @@ export default function OrdersIndex({ orders, filters }: Props) {
                                     <TableRow
                                         key={order.uuid}
                                         className="cursor-pointer hover:bg-muted/50"
-                                        onClick={() => router.visit(`/client/orders/${order.uuid}`)}
+                                        onClick={() =>
+                                            router.visit(
+                                                `/client/orders/${order.uuid}`,
+                                            )
+                                        }
                                     >
                                         <TableCell>
-                                            <div className="font-mono text-sm">{order.order_number}</div>
-                                            <div className="text-xs text-muted-foreground">{order.created_at}</div>
+                                            <div className="font-mono text-sm">
+                                                {order.order_number}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {order.created_at}
+                                            </div>
                                         </TableCell>
                                         <TableCell className="hidden sm:table-cell">
                                             {order.package ? (
                                                 <div>
-                                                    <div className="font-medium text-sm truncate max-w-[200px]">
+                                                    <div className="max-w-[200px] truncate text-sm font-medium">
                                                         {order.package.name}
                                                     </div>
                                                     <div className="text-xs text-muted-foreground">
-                                                        {order.package.data_label} • {order.package.validity_label}
+                                                        {
+                                                            order.package
+                                                                .data_label
+                                                        }{' '}
+                                                        •{' '}
+                                                        {
+                                                            order.package
+                                                                .validity_label
+                                                        }
                                                     </div>
                                                 </div>
                                             ) : (
@@ -219,10 +290,12 @@ export default function OrdersIndex({ orders, filters }: Props) {
                                         <TableCell>
                                             <Badge
                                                 variant="outline"
-                                                className={`${getStatusBadgeClass(order.status_color)} flex items-center gap-1 w-fit`}
+                                                className={`${getStatusBadgeClass(order.status_color)} flex w-fit items-center gap-1`}
                                             >
                                                 {getStatusIcon(order.status)}
-                                                <span className="hidden sm:inline">{order.status_label}</span>
+                                                <span className="hidden sm:inline">
+                                                    {order.status_label}
+                                                </span>
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right font-medium">
@@ -241,12 +314,24 @@ export default function OrdersIndex({ orders, filters }: Props) {
                 {/* Pagination */}
                 {orders.last_page > 1 && (
                     <div className="flex justify-center gap-2">
-                        {Array.from({ length: Math.min(orders.last_page, 10) }, (_, i) => i + 1).map((page) => (
+                        {Array.from(
+                            { length: Math.min(orders.last_page, 10) },
+                            (_, i) => i + 1,
+                        ).map((page) => (
                             <Button
                                 key={page}
-                                variant={page === orders.current_page ? 'default' : 'outline'}
+                                variant={
+                                    page === orders.current_page
+                                        ? 'default'
+                                        : 'outline'
+                                }
                                 size="sm"
-                                onClick={() => router.get('/client/orders', { ...filters, page })}
+                                onClick={() =>
+                                    router.get('/client/orders', {
+                                        ...filters,
+                                        page,
+                                    })
+                                }
                             >
                                 {page}
                             </Button>

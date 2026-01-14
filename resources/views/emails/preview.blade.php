@@ -56,6 +56,7 @@
                         elseif ($template === EmailTemplate::PaymentFailed || $template === EmailTemplate::OrderFailed) $icon = '⚠️';
                         elseif ($template === EmailTemplate::RefundNotification) $icon = '💰';
                         elseif ($template === EmailTemplate::BalanceTopUp || $template === EmailTemplate::LowBalance) $icon = '💳';
+                        elseif ($template === EmailTemplate::TicketCreated || $template === EmailTemplate::TicketReply) $icon = '🎫';
                     @endphp
                     <a href="?template={{ $template->value }}"
                        class="template-btn {{ $selectedTemplate === $template->value ? 'active' : '' }} block mb-1">
@@ -71,10 +72,14 @@
 
                 <div class="category-title">Admin Emails</div>
                 @foreach($adminTemplates as $template)
+                    @php
+                        $adminIcon = '👨‍💼';
+                        if ($template === EmailTemplate::AdminTicketCreated || $template === EmailTemplate::AdminTicketReply) $adminIcon = '🎫';
+                    @endphp
                     <a href="?template={{ $template->value }}"
                        class="template-btn {{ $selectedTemplate === $template->value ? 'active' : '' }} block mb-1">
                         <div class="flex items-center gap-2">
-                            <span class="text-lg">👨‍💼</span>
+                            <span class="text-lg">{{ $adminIcon }}</span>
                             <div>
                                 <div class="text-sm">{{ $template->label() }}</div>
                                 <div class="text-xs text-primary-400">{{ $template->value }}</div>

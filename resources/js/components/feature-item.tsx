@@ -1,5 +1,5 @@
-import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Check } from 'lucide-react';
 
 interface FeatureItemProps {
     children: React.ReactNode;
@@ -42,17 +42,21 @@ export function FeatureItem({
                     iconSizes[size],
                     variant === 'gold'
                         ? 'bg-accent-300 text-accent-950'
-                        : 'bg-primary-100 text-primary-600'
+                        : 'bg-primary-100 text-primary-600',
                 )}
             >
                 <Check className={checkSizes[size]} strokeWidth={3} />
             </span>
-            <div className={description ? 'flex flex-col' : 'flex items-center'}>
+            <div
+                className={description ? 'flex flex-col' : 'flex items-center'}
+            >
                 <span
                     className={cn(
                         'font-medium',
                         titleSizes[size],
-                        variant === 'gold' ? 'text-primary-900' : 'text-primary-700'
+                        variant === 'gold'
+                            ? 'text-primary-900'
+                            : 'text-primary-700',
                     )}
                 >
                     {children}

@@ -4,7 +4,11 @@ interface AppLogoIconProps extends ImgHTMLAttributes<HTMLImageElement> {
     size?: 'sm' | 'md' | 'lg';
 }
 
-export default function AppLogoIcon({ size = 'md', className = '', ...props }: AppLogoIconProps) {
+export default function AppLogoIcon({
+    size = 'md',
+    className = '',
+    ...props
+}: AppLogoIconProps) {
     const sizeClasses = {
         sm: 'h-8 w-8',
         md: 'h-12 w-12',

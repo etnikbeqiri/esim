@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 
@@ -75,8 +75,8 @@ export default function ProvidersIndex({ providers, filters }: Props) {
                 </div>
 
                 <form onSubmit={handleSearch} className="flex gap-2">
-                    <div className="relative flex-1 max-w-sm">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <div className="relative max-w-sm flex-1">
+                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             type="search"
                             placeholder="Search providers..."
@@ -85,7 +85,9 @@ export default function ProvidersIndex({ providers, filters }: Props) {
                             className="pl-9"
                         />
                     </div>
-                    <Button type="submit" variant="secondary">Search</Button>
+                    <Button type="submit" variant="secondary">
+                        Search
+                    </Button>
                 </form>
 
                 <div className="rounded-lg border">
@@ -98,40 +100,71 @@ export default function ProvidersIndex({ providers, filters }: Props) {
                                 <TableHead>Markup</TableHead>
                                 <TableHead>Rate Limit</TableHead>
                                 <TableHead>Packages</TableHead>
-                                <TableHead className="w-[100px]">Actions</TableHead>
+                                <TableHead className="w-[100px]">
+                                    Actions
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {providers.data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                                    <TableCell
+                                        colSpan={7}
+                                        className="py-8 text-center text-muted-foreground"
+                                    >
                                         No providers found
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 providers.data.map((provider) => (
                                     <TableRow key={provider.id}>
-                                        <TableCell className="font-medium">{provider.name}</TableCell>
-                                        <TableCell className="font-mono text-sm">{provider.slug}</TableCell>
+                                        <TableCell className="font-medium">
+                                            {provider.name}
+                                        </TableCell>
+                                        <TableCell className="font-mono text-sm">
+                                            {provider.slug}
+                                        </TableCell>
                                         <TableCell>
-                                            <Badge variant={provider.is_active ? 'default' : 'secondary'}>
-                                                {provider.is_active ? 'Active' : 'Inactive'}
+                                            <Badge
+                                                variant={
+                                                    provider.is_active
+                                                        ? 'default'
+                                                        : 'secondary'
+                                                }
+                                            >
+                                                {provider.is_active
+                                                    ? 'Active'
+                                                    : 'Inactive'}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell>{provider.markup_percentage}%</TableCell>
-                                        <TableCell>{provider.rate_limit_ms}ms</TableCell>
-                                        <TableCell>{provider.packages_count}</TableCell>
+                                        <TableCell>
+                                            {provider.markup_percentage}%
+                                        </TableCell>
+                                        <TableCell>
+                                            {provider.rate_limit_ms}ms
+                                        </TableCell>
+                                        <TableCell>
+                                            {provider.packages_count}
+                                        </TableCell>
                                         <TableCell>
                                             <div className="flex gap-1">
-                                                <Button variant="ghost" size="icon" asChild>
-                                                    <Link href={`/admin/providers/${provider.id}/edit`}>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    asChild
+                                                >
+                                                    <Link
+                                                        href={`/admin/providers/${provider.id}/edit`}
+                                                    >
                                                         <Pencil className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => handleDelete(provider)}
+                                                    onClick={() =>
+                                                        handleDelete(provider)
+                                                    }
                                                 >
                                                     <Trash2 className="h-4 w-4 text-destructive" />
                                                 </Button>
@@ -146,12 +179,24 @@ export default function ProvidersIndex({ providers, filters }: Props) {
 
                 {providers.last_page > 1 && (
                     <div className="flex justify-center gap-2">
-                        {Array.from({ length: providers.last_page }, (_, i) => i + 1).map((page) => (
+                        {Array.from(
+                            { length: providers.last_page },
+                            (_, i) => i + 1,
+                        ).map((page) => (
                             <Button
                                 key={page}
-                                variant={page === providers.current_page ? 'default' : 'outline'}
+                                variant={
+                                    page === providers.current_page
+                                        ? 'default'
+                                        : 'outline'
+                                }
                                 size="sm"
-                                onClick={() => router.get('/admin/providers', { ...filters, page })}
+                                onClick={() =>
+                                    router.get('/admin/providers', {
+                                        ...filters,
+                                        page,
+                                    })
+                                }
                             >
                                 {page}
                             </Button>

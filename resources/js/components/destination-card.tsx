@@ -48,7 +48,11 @@ export function DestinationCard({
                             {package_count}
                         </span>
                         <span className="text-sm font-medium text-primary-600">
-                            {trans('destinations.card.plans')}
+                            {trans(
+                                package_count !== 1
+                                    ? 'destinations.card.plans'
+                                    : 'destinations.card.plan',
+                            )}
                         </span>
                     </div>
 

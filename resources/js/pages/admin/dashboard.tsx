@@ -1,6 +1,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import {
     Table,
     TableBody,
@@ -9,13 +15,13 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useTrans } from '@/hooks/use-trans';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import {
     AlertCircle,
     ArrowUpRight,
-    Ban,
     Building2,
     CheckCircle2,
     Clock,
@@ -118,10 +124,6 @@ interface Props {
     orderTrend: TrendData[];
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Admin Dashboard', href: '/admin' },
-];
-
 function getStatusBadgeClass(color: string): string {
     const colors: Record<string, string> = {
         green: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400',
@@ -140,7 +142,7 @@ function getStatusIcon(status: string, size = 'h-3 w-3') {
         case 'completed':
             return <CheckCircle2 className={`${size} text-green-500`} />;
         case 'processing':
-            return <Loader2 className={`${size} text-blue-500 animate-spin`} />;
+            return <Loader2 className={`${size} animate-spin text-blue-500`} />;
         case 'pending_retry':
             return <RefreshCw className={`${size} text-orange-500`} />;
         case 'failed':
@@ -166,18 +168,33 @@ export default function AdminDashboard({
     revenueTrend,
     orderTrend,
 }: Props) {
-    const revenueChange = stats.revenue.last_month > 0
-        ? ((stats.revenue.this_month - stats.revenue.last_month) / stats.revenue.last_month * 100).toFixed(1)
-        : '0';
+    const { trans } = useTrans();
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: trans('admin.dashboard.title'), href: '/admin' },
+    ];
+
+    const revenueChange =
+        stats.revenue.last_month > 0
+            ? (
+                  ((stats.revenue.this_month - stats.revenue.last_month) /
+                      stats.revenue.last_month) *
+                  100
+              ).toFixed(1)
+            : '0';
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Admin Dashboard" />
+            <Head title={trans('admin.dashboard.title')} />
             <div className="flex flex-col gap-6 p-4">
                 {/* Header */}
                 <div>
-                    <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
-                    <p className="text-muted-foreground">Overview of your eSIM business</p>
+                    <h1 className="text-2xl font-semibold">
+                        {trans('admin.dashboard.title')}
+                    </h1>
+                    <p className="text-muted-foreground">
+                        {trans('admin.dashboard.overview')}
+                    </p>
                 </div>
 
                 {/* Revenue Stats */}
@@ -209,15 +226,18 @@ export default function AdminDashboard({
                             <p className="text-2xl font-bold">
                                 {formatCurrency(stats.revenue.this_month)}
                             </p>
-                            <p className={`text-xs ${Number(revenueChange) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {Number(revenueChange) >= 0 ? '+' : ''}{revenueChange}% from last month
+                            <p
+                                className={`text-xs ${Number(revenueChange) >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                            >
+                                {Number(revenueChange) >= 0 ? '+' : ''}
+                                {revenueChange}% from last month
                             </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Total Revenue
+                                {trans('admin.dashboard.total_revenue')}
                             </CardTitle>
                             <Wallet className="h-4 w-4 text-purple-500" />
                         </CardHeader>
@@ -225,7 +245,9 @@ export default function AdminDashboard({
                             <p className="text-2xl font-bold">
                                 {formatCurrency(stats.revenue.total)}
                             </p>
-                            <p className="text-xs text-muted-foreground">All time</p>
+                            <p className="text-xs text-muted-foreground">
+                                All time
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -242,8 +264,7 @@ export default function AdminDashboard({
                             <p className="text-xs text-muted-foreground">
                                 {stats.revenue.total > 0
                                     ? `${((stats.revenue.total_profit / stats.revenue.total) * 100).toFixed(1)}% margin`
-                                    : '0% margin'
-                                }
+                                    : '0% margin'}
                             </p>
                         </CardContent>
                     </Card>
@@ -255,7 +276,9 @@ export default function AdminDashboard({
                             <ShoppingCart className="h-4 w-4 text-blue-500" />
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">{stats.orders.today}</p>
+                            <p className="text-2xl font-bold">
+                                {stats.orders.today}
+                            </p>
                             <p className="text-xs text-muted-foreground">
                                 {stats.orders.today_completed} completed
                             </p>
@@ -268,13 +291,15 @@ export default function AdminDashboard({
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Total Orders
+                                {trans('admin.dashboard.total_orders')}
                             </CardTitle>
                             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">{stats.orders.total}</p>
-                            <div className="flex gap-2 mt-1">
+                            <p className="text-2xl font-bold">
+                                {stats.orders.total}
+                            </p>
+                            <div className="mt-1 flex gap-2">
                                 <span className="text-xs text-green-600">
                                     {stats.orders.completed} completed
                                 </span>
@@ -295,13 +320,15 @@ export default function AdminDashboard({
                             <Users className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">{stats.customers.total}</p>
-                            <div className="flex gap-2 mt-1">
-                                <span className="text-xs text-blue-600 flex items-center gap-1">
+                            <p className="text-2xl font-bold">
+                                {stats.customers.total}
+                            </p>
+                            <div className="mt-1 flex gap-2">
+                                <span className="flex items-center gap-1 text-xs text-blue-600">
                                     <Building2 className="h-3 w-3" />
                                     {stats.customers.b2b} B2B
                                 </span>
-                                <span className="text-xs text-purple-600 flex items-center gap-1">
+                                <span className="flex items-center gap-1 text-xs text-purple-600">
                                     <User className="h-3 w-3" />
                                     {stats.customers.b2c} B2C
                                 </span>
@@ -332,7 +359,9 @@ export default function AdminDashboard({
                             <Package className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">{stats.packages.active}</p>
+                            <p className="text-2xl font-bold">
+                                {stats.packages.active}
+                            </p>
                             <p className="text-xs text-muted-foreground">
                                 of {stats.packages.total} total active
                             </p>
@@ -372,23 +401,39 @@ export default function AdminDashboard({
                 <Card>
                     <CardHeader>
                         <CardTitle>Revenue Trend (Last 7 Days)</CardTitle>
-                        <CardDescription>Daily revenue overview</CardDescription>
+                        <CardDescription>
+                            Daily revenue overview
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex items-end justify-between h-32 gap-2">
+                        <div className="flex h-32 items-end justify-between gap-2">
                             {revenueTrend.map((day, i) => {
-                                const maxRevenue = Math.max(...revenueTrend.map(d => d.revenue || 0), 1);
-                                const height = ((day.revenue || 0) / maxRevenue) * 100;
+                                const maxRevenue = Math.max(
+                                    ...revenueTrend.map((d) => d.revenue || 0),
+                                    1,
+                                );
+                                const height =
+                                    ((day.revenue || 0) / maxRevenue) * 100;
                                 return (
-                                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                                        <div className="w-full bg-muted rounded-t relative" style={{ height: '100px' }}>
+                                    <div
+                                        key={i}
+                                        className="flex flex-1 flex-col items-center gap-1"
+                                    >
+                                        <div
+                                            className="relative w-full rounded-t bg-muted"
+                                            style={{ height: '100px' }}
+                                        >
                                             <div
-                                                className="absolute bottom-0 w-full bg-primary rounded-t transition-all"
+                                                className="absolute bottom-0 w-full rounded-t bg-primary transition-all"
                                                 style={{ height: `${height}%` }}
                                             />
                                         </div>
-                                        <span className="text-xs text-muted-foreground">{day.date}</span>
-                                        <span className="text-xs font-medium">€{(day.revenue || 0).toFixed(0)}</span>
+                                        <span className="text-xs text-muted-foreground">
+                                            {day.date}
+                                        </span>
+                                        <span className="text-xs font-medium">
+                                            €{(day.revenue || 0).toFixed(0)}
+                                        </span>
                                     </div>
                                 );
                             })}
@@ -403,21 +448,25 @@ export default function AdminDashboard({
                             <div>
                                 <CardTitle className="flex items-center gap-2">
                                     <AlertCircle className="h-5 w-5 text-orange-500" />
-                                    Needs Attention
+                                    {trans(
+                                        'admin.dashboard.orders_needing_attention',
+                                    )}
                                 </CardTitle>
-                                <CardDescription>Orders requiring action</CardDescription>
+                                <CardDescription>
+                                    Orders requiring action
+                                </CardDescription>
                             </div>
                             <Button variant="outline" size="sm" asChild>
                                 <Link href="/admin/orders?status=failed">
-                                    View All
+                                    {trans('admin.dashboard.view_all_orders')}
                                     <ArrowUpRight className="ml-1 h-4 w-4" />
                                 </Link>
                             </Button>
                         </CardHeader>
                         <CardContent>
                             {ordersNeedingAttention.length === 0 ? (
-                                <div className="text-center py-8 text-muted-foreground">
-                                    <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-green-500" />
+                                <div className="py-8 text-center text-muted-foreground">
+                                    <CheckCircle2 className="mx-auto mb-2 h-8 w-8 text-green-500" />
                                     <p>All orders are in good standing!</p>
                                 </div>
                             ) : (
@@ -426,31 +475,44 @@ export default function AdminDashboard({
                                         <Link
                                             key={order.id}
                                             href={`/admin/orders/${order.uuid}`}
-                                            className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                                            className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
                                         >
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="font-mono text-sm">{order.order_number}</span>
+                                                    <span className="font-mono text-sm">
+                                                        {order.order_number}
+                                                    </span>
                                                     <Badge
                                                         variant="outline"
                                                         className={`${getStatusBadgeClass(order.status_color)} flex items-center gap-1`}
                                                     >
-                                                        {getStatusIcon(order.status)}
-                                                        {order.status_label}
+                                                        {getStatusIcon(
+                                                            order.status,
+                                                        )}
+                                                        {trans(
+                                                            `statuses.${order.status}`,
+                                                        ) || order.status_label}
                                                     </Badge>
                                                 </div>
-                                                <p className="text-sm text-muted-foreground mt-1">
-                                                    {order.customer_name} · {order.package_name}
+                                                <p className="mt-1 text-sm text-muted-foreground">
+                                                    {order.customer_name} ·{' '}
+                                                    {order.package_name}
                                                 </p>
                                                 {order.failure_reason && (
-                                                    <p className="text-xs text-red-500 mt-1 truncate max-w-[250px]">
+                                                    <p className="mt-1 max-w-[250px] truncate text-xs text-red-500">
                                                         {order.failure_reason}
                                                     </p>
                                                 )}
                                             </div>
                                             <div className="text-right">
-                                                <span className="font-medium">{formatCurrency(order.amount)}</span>
-                                                <p className="text-xs text-muted-foreground">{order.created_at}</p>
+                                                <span className="font-medium">
+                                                    {formatCurrency(
+                                                        order.amount,
+                                                    )}
+                                                </span>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {order.created_at}
+                                                </p>
                                             </div>
                                         </Link>
                                     ))}
@@ -463,48 +525,69 @@ export default function AdminDashboard({
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between">
                             <div>
-                                <CardTitle>Recent Orders</CardTitle>
-                                <CardDescription>Latest order activity</CardDescription>
+                                <CardTitle>
+                                    {trans('admin.dashboard.recent_orders')}
+                                </CardTitle>
+                                <CardDescription>
+                                    Latest order activity
+                                </CardDescription>
                             </div>
                             <Button variant="outline" size="sm" asChild>
                                 <Link href="/admin/orders">
-                                    View All
+                                    {trans('admin.dashboard.view_all_orders')}
                                     <ArrowUpRight className="ml-1 h-4 w-4" />
                                 </Link>
                             </Button>
                         </CardHeader>
                         <CardContent>
                             {recentOrders.length === 0 ? (
-                                <p className="text-center py-8 text-muted-foreground">No orders yet</p>
+                                <p className="py-8 text-center text-muted-foreground">
+                                    {trans('admin.dashboard.no_orders')}
+                                </p>
                             ) : (
                                 <div className="space-y-3">
                                     {recentOrders.slice(0, 5).map((order) => (
                                         <Link
                                             key={order.id}
                                             href={`/admin/orders/${order.uuid}`}
-                                            className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                                            className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
                                         >
                                             <div>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="font-mono text-sm">{order.order_number}</span>
+                                                    <span className="font-mono text-sm">
+                                                        {order.order_number}
+                                                    </span>
                                                     <Badge
                                                         variant="outline"
                                                         className={`${getStatusBadgeClass(order.status_color)} flex items-center gap-1`}
                                                     >
-                                                        {getStatusIcon(order.status)}
-                                                        {order.status_label}
+                                                        {getStatusIcon(
+                                                            order.status,
+                                                        )}
+                                                        {trans(
+                                                            `statuses.${order.status}`,
+                                                        ) || order.status_label}
                                                     </Badge>
-                                                    <Badge variant="outline" className="text-xs">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="text-xs"
+                                                    >
                                                         {order.type.toUpperCase()}
                                                     </Badge>
                                                 </div>
-                                                <p className="text-sm text-muted-foreground mt-1">
+                                                <p className="mt-1 text-sm text-muted-foreground">
                                                     {order.customer_name}
                                                 </p>
                                             </div>
                                             <div className="text-right">
-                                                <span className="font-medium">{formatCurrency(order.amount)}</span>
-                                                <p className="text-xs text-muted-foreground">{order.created_at}</p>
+                                                <span className="font-medium">
+                                                    {formatCurrency(
+                                                        order.amount,
+                                                    )}
+                                                </span>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {order.created_at}
+                                                </p>
                                             </div>
                                         </Link>
                                     ))}
@@ -520,7 +603,9 @@ export default function AdminDashboard({
                         <CardHeader className="flex flex-row items-center justify-between">
                             <div>
                                 <CardTitle>Recent Sync Jobs</CardTitle>
-                                <CardDescription>Package synchronization status</CardDescription>
+                                <CardDescription>
+                                    Package synchronization status
+                                </CardDescription>
                             </div>
                             <Button variant="outline" size="sm" asChild>
                                 <Link href="/admin/sync-jobs">
@@ -543,17 +628,32 @@ export default function AdminDashboard({
                                 <TableBody>
                                     {recentSyncJobs.map((job) => (
                                         <TableRow key={job.id}>
-                                            <TableCell className="font-medium">{job.provider_name}</TableCell>
-                                            <TableCell>{job.type_label}</TableCell>
+                                            <TableCell className="font-medium">
+                                                {job.provider_name}
+                                            </TableCell>
                                             <TableCell>
-                                                <Badge variant={job.status === 'completed' ? 'default' : 'secondary'}>
-                                                    {job.status_label}
+                                                {job.type_label}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge
+                                                    variant={
+                                                        job.status ===
+                                                        'completed'
+                                                            ? 'default'
+                                                            : 'secondary'
+                                                    }
+                                                >
+                                                    {trans(
+                                                        `statuses.${job.status}`,
+                                                    ) || job.status_label}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell>
-                                                {job.total > 0 ? `${job.progress}/${job.total}` : '-'}
+                                                {job.total > 0
+                                                    ? `${job.progress}/${job.total}`
+                                                    : '-'}
                                             </TableCell>
-                                            <TableCell className="text-muted-foreground text-sm">
+                                            <TableCell className="text-sm text-muted-foreground">
                                                 {job.created_at}
                                             </TableCell>
                                         </TableRow>
@@ -563,7 +663,6 @@ export default function AdminDashboard({
                         </CardContent>
                     </Card>
                 )}
-
             </div>
         </AppLayout>
     );

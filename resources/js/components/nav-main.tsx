@@ -34,7 +34,9 @@ export function NavMain({ items = [], label = 'Platform' }: NavMainProps) {
                     <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
                             asChild
-                            isActive={page.url.startsWith(resolveUrl(item.href))}
+                            isActive={page.url.startsWith(
+                                resolveUrl(item.href),
+                            )}
                             tooltip={{ children: item.title }}
                         >
                             <Link href={item.href} prefetch>
@@ -68,7 +70,9 @@ export function NavMainCollapsible({
     const storageKey = `${STORAGE_KEY_PREFIX}${label.toLowerCase().replace(/\s+/g, '_')}`;
 
     // Check if any item in this group is active
-    const isGroupActive = items.some((item) => page.url.startsWith(resolveUrl(item.href)));
+    const isGroupActive = items.some((item) =>
+        page.url.startsWith(resolveUrl(item.href)),
+    );
 
     // Initialize state from localStorage or default
     const [isOpen, setIsOpen] = useState<boolean>(() => {
@@ -115,10 +119,14 @@ export function NavMainCollapsible({
                                     <SidebarMenuSubItem key={item.title}>
                                         <SidebarMenuSubButton
                                             asChild
-                                            isActive={page.url.startsWith(resolveUrl(item.href))}
+                                            isActive={page.url.startsWith(
+                                                resolveUrl(item.href),
+                                            )}
                                         >
                                             <Link href={item.href} prefetch>
-                                                {item.icon && <item.icon className="h-4 w-4" />}
+                                                {item.icon && (
+                                                    <item.icon className="h-4 w-4" />
+                                                )}
                                                 <span>{item.title}</span>
                                             </Link>
                                         </SidebarMenuSubButton>

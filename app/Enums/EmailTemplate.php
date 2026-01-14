@@ -17,6 +17,11 @@ enum EmailTemplate: string
     case BalanceTopUp = 'balance_top_up';
     case LowBalance = 'low_balance';
 
+    // Ticket emails
+    case TicketCreated = 'ticket_created';
+    case TicketReply = 'ticket_reply';
+    case AdminTicketReply = 'admin_ticket_reply';
+
     // Admin notification emails
     case AdminNewOrder = 'admin_new_order';
     case AdminOrderFailed = 'admin_order_failed';
@@ -24,6 +29,7 @@ enum EmailTemplate: string
     case AdminLowStock = 'admin_low_stock';
     case AdminNewB2BCustomer = 'admin_new_b2b_customer';
     case AdminBalanceTopUp = 'admin_balance_top_up';
+    case AdminTicketCreated = 'admin_ticket_created';
 
     public function label(): string
     {
@@ -45,6 +51,10 @@ enum EmailTemplate: string
             self::AdminLowStock => 'Admin: Low Stock Alert',
             self::AdminNewB2BCustomer => 'Admin: New B2B Customer',
             self::AdminBalanceTopUp => 'Admin: Balance Top Up',
+            self::TicketCreated => 'Ticket Created',
+            self::TicketReply => 'Ticket Reply',
+            self::AdminTicketReply => 'Admin: Customer Reply',
+            self::AdminTicketCreated => 'Admin: New Ticket',
         };
     }
 
@@ -70,6 +80,10 @@ enum EmailTemplate: string
             self::AdminLowStock => "[{$appName}] Low Stock Warning",
             self::AdminNewB2BCustomer => "[{$appName}] New B2B Customer Registration",
             self::AdminBalanceTopUp => "[{$appName}] B2B Balance Top Up",
+            self::TicketCreated => "Your Support Ticket Has Been Created",
+            self::TicketReply => "New Reply to Your Support Ticket",
+            self::AdminTicketReply => "[{$appName}] Customer Reply on Ticket",
+            self::AdminTicketCreated => "[{$appName}] New Support Ticket",
         };
     }
 
@@ -100,6 +114,10 @@ enum EmailTemplate: string
             self::AdminLowStock => 10,
             self::AdminNewB2BCustomer => 10,
             self::AdminBalanceTopUp => 10,
+            self::TicketCreated => 7,
+            self::TicketReply => 6,
+            self::AdminTicketReply => 6,
+            self::AdminTicketCreated => 7,
         };
     }
 
@@ -111,7 +129,9 @@ enum EmailTemplate: string
             self::AdminPaymentFailed,
             self::AdminLowStock,
             self::AdminNewB2BCustomer,
-            self::AdminBalanceTopUp => true,
+            self::AdminBalanceTopUp,
+            self::AdminTicketCreated,
+            self::AdminTicketReply => true,
             default => false,
         };
     }

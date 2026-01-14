@@ -18,6 +18,7 @@ import {
     FileText,
     Globe,
     LayoutGrid,
+    LifeBuoy,
     Package,
     Receipt,
     RefreshCw,
@@ -127,12 +128,16 @@ export function AppSidebar() {
                       href: '/admin/invoices',
                       icon: Receipt,
                   },
+                  {
+                      title: 'Tickets',
+                      href: '/admin/tickets',
+                      icon: LifeBuoy,
+                  },
               ]
             : [];
 
         return { mainNavItems, clientNavItems, adminNavItems };
     }, [user]);
-
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -180,7 +185,8 @@ export function AppSidebar() {
                                 <span>Balance</span>
                             </span>
                             <span className="font-semibold text-green-600">
-                                {currency.symbol}{Number(user.balance.available).toFixed(2)}
+                                {currency.symbol}
+                                {Number(user.balance.available).toFixed(2)}
                             </span>
                         </Link>
                     </div>

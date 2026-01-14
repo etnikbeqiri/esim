@@ -20,8 +20,21 @@ Route::get('/package/{package}', [HomeController::class, 'package'])->name('pack
 Route::get('/how-it-works', [HomeController::class, 'howItWorks'])->name('how-it-works');
 Route::get('/privacy', fn () => \Inertia\Inertia::render('public/privacy'))->name('privacy');
 Route::get('/terms', fn () => \Inertia\Inertia::render('public/terms'))->name('terms');
+Route::get('/refund', fn () => \Inertia\Inertia::render('public/refund'))->name('refund');
 Route::get('/faq', fn () => \Inertia\Inertia::render('public/faq'))->name('faq');
 Route::get('/help', fn () => \Inertia\Inertia::render('public/help'))->name('help');
+
+// Public Ticket Routes (Support)
+Route::prefix('tickets')->name('tickets.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Public\TicketController::class, 'index'])->name('index');
+    Route::post('/', [\App\Http\Controllers\Public\TicketController::class, 'store'])->name('store');
+    Route::post('/lookup', [\App\Http\Controllers\Public\TicketController::class, 'lookup'])->name('lookup');
+    Route::get('/{uuid}/{email}', [\App\Http\Controllers\Public\TicketController::class, 'show'])->name('show');
+    Route::get('/{uuid}/{email}/stream', [\App\Http\Controllers\Public\TicketController::class, 'stream'])
+        ->name('stream')
+        ->withoutMiddleware('web'); // SSE needs no web middleware - just raw streaming
+    Route::post('/{uuid}/{email}/reply', [\App\Http\Controllers\Public\TicketController::class, 'reply'])->name('reply');
+});
 
 // Guest Checkout (no auth required)
 // Note: Specific routes must come BEFORE parametric routes to avoid conflicts
@@ -72,6 +85,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Orders
         Route::get('orders', [\App\Http\Controllers\Client\OrderController::class, 'index'])->name('orders.index');
         Route::get('orders/{uuid}', [\App\Http\Controllers\Client\OrderController::class, 'show'])->name('orders.show');
+
+        // Tickets
+        Route::get('tickets', [\App\Http\Controllers\Client\TicketController::class, 'index'])->name('tickets.index');
+        Route::get('tickets/create', [\App\Http\Controllers\Client\TicketController::class, 'create'])->name('tickets.create');
+        Route::post('tickets', [\App\Http\Controllers\Client\TicketController::class, 'store'])->name('tickets.store');
+        Route::get('tickets/{uuid}', [\App\Http\Controllers\Client\TicketController::class, 'show'])->name('tickets.show');
+        Route::post('tickets/{uuid}/reply', [\App\Http\Controllers\Client\TicketController::class, 'reply'])->name('tickets.reply');
 
         // Balance (B2B only)
         Route::get('balance', [\App\Http\Controllers\Client\BalanceController::class, 'index'])->middleware('b2b')->name('balance.index');
@@ -158,6 +178,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('invoices/{invoice}', [\App\Http\Controllers\Admin\InvoiceController::class, 'show'])->name('invoices.show');
         Route::get('invoices/{invoice}/download', [\App\Http\Controllers\Admin\InvoiceController::class, 'download'])->name('invoices.download');
         Route::post('invoices/{invoice}/void', [\App\Http\Controllers\Admin\InvoiceController::class, 'void'])->name('invoices.void');
+
+        // Tickets (Support)
+        Route::get('tickets', [\App\Http\Controllers\Admin\TicketController::class, 'index'])->name('tickets.index');
+        Route::get('tickets/{ticket}', [\App\Http\Controllers\Admin\TicketController::class, 'show'])->name('tickets.show');
+        Route::get('tickets/{ticket}/stream', [\App\Http\Controllers\Admin\TicketController::class, 'stream'])
+            ->name('tickets.stream')
+            ->withoutMiddleware('web'); // SSE needs no web middleware
+        Route::post('tickets/{ticket}/reply', [\App\Http\Controllers\Admin\TicketController::class, 'reply'])->name('tickets.reply');
+        Route::post('tickets/{ticket}/status', [\App\Http\Controllers\Admin\TicketController::class, 'updateStatus'])->name('tickets.update-status');
+        Route::post('tickets/{ticket}/assign', [\App\Http\Controllers\Admin\TicketController::class, 'assign'])->name('tickets.assign');
+        Route::post('tickets/{ticket}/close', [\App\Http\Controllers\Admin\TicketController::class, 'close'])->name('tickets.close');
+        Route::post('tickets/{ticket}/notify', [\App\Http\Controllers\Admin\TicketController::class, 'notify'])->name('tickets.notify');
+        Route::delete('tickets/{ticket}', [\App\Http\Controllers\Admin\TicketController::class, 'destroy'])->name('tickets.destroy');
     });
 });
 

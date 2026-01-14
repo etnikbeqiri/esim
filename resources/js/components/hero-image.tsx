@@ -10,7 +10,10 @@ interface HeroImageProps {
     withFloat?: boolean;
 }
 
-const images: Record<HeroImageVariant, { webp: string; png: string; alt: string }> = {
+const images: Record<
+    HeroImageVariant,
+    { webp: string; png: string; alt: string }
+> = {
     'esim-card': {
         webp: '/img/hero/hero-1.webp',
         png: '/img/hero/hero-1.png',
@@ -53,7 +56,7 @@ export function HeroImage({
                 className={cn(
                     'relative block',
                     sizes[size],
-                    withFloat && 'animate-float'
+                    withFloat && 'animate-float',
                 )}
             >
                 <source srcSet={image.webp} type="image/webp" />

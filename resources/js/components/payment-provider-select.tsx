@@ -1,5 +1,4 @@
 import { PaymentProviderCard } from './payment-provider-card';
-import { PaymentMethodIcons } from './payment-method-icons';
 
 interface PaymentMethod {
     name: string;
@@ -24,7 +23,7 @@ export function PaymentProviderSelect({
     providers,
     value,
     onChange,
-    className = ''
+    className = '',
 }: PaymentProviderSelectProps) {
     if (providers.length === 0) {
         return null;

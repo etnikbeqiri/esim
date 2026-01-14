@@ -34,6 +34,13 @@ export interface ContactInfo {
     privacyEmail: string;
     phone: string | null;
     whatsapp: string | null;
+    companyName: string;
+    companyAddress: string | null;
+    companyCity: string | null;
+    companyPostalCode: string | null;
+    companyCountry: string | null;
+    companyVat: string | null;
+    companyRegistration: string | null;
 }
 
 export interface PaymentInfo {

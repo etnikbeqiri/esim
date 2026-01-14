@@ -24,7 +24,11 @@ export default function AuthSplitLayout({
                     href={home()}
                     className="relative z-20 flex items-center gap-3 text-lg font-medium"
                 >
-                    <img alt="Logo" className="h-12 w-12 object-contain" src="/logo.png" />
+                    <img
+                        alt="Logo"
+                        className="h-12 w-12 object-contain"
+                        src="/logo.png"
+                    />
                     {name}
                 </Link>
                 {quote && (

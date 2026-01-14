@@ -272,7 +272,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                             <ul className="space-y-4 text-sm text-primary-600">
                                 <li>
                                     <Link
-                                        href="/contact"
+                                        href="/tickets"
                                         className="transition-colors hover:text-primary-900"
                                     >
                                         {trans('footer.links.contact')}
@@ -309,6 +309,14 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                         className="transition-colors hover:text-primary-900"
                                     >
                                         {trans('footer.links.terms')}
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href="/refund"
+                                        className="transition-colors hover:text-primary-900"
+                                    >
+                                        {trans('footer.links.refund')}
                                     </Link>
                                 </li>
                             </ul>

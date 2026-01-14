@@ -146,10 +146,7 @@ export function PlansSection() {
                                         {plan.buttonText}
                                     </Button>
                                 ) : (
-                                    <GoldButton
-                                        className="w-full"
-                                        size="lg"
-                                    >
+                                    <GoldButton className="w-full" size="lg">
                                         {plan.buttonText}
                                     </GoldButton>
                                 )}
@@ -165,9 +162,7 @@ export function PlansSection() {
                     <p className="mb-6 text-primary-600">
                         Calculate See what best fits your travel plans
                     </p>
-                    <GoldButton size="lg">
-                        Calculate
-                    </GoldButton>
+                    <GoldButton size="lg">Calculate</GoldButton>
                 </div>
             </div>
         </section>

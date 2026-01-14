@@ -1,7 +1,14 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { useTrans } from '@/hooks/use-trans';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -103,9 +110,7 @@ interface Props {
     stats: Stats | null;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/client' },
-];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '/client' }];
 
 function getStatusBadgeClass(color: string): string {
     const colors: Record<string, string> = {
@@ -125,7 +130,9 @@ function getStatusIcon(status: string, size = 'h-3 w-3') {
         case 'completed':
             return <CheckCircle2 className={`${size} text-primary-500`} />;
         case 'processing':
-            return <Loader2 className={`${size} text-primary-500 animate-spin`} />;
+            return (
+                <Loader2 className={`${size} animate-spin text-primary-500`} />
+            );
         case 'pending_retry':
             return <RefreshCw className={`${size} text-orange-500`} />;
         case 'failed':
@@ -159,70 +166,105 @@ export default function ClientDashboard({
     balanceHistory,
     stats,
 }: Props) {
+    const { trans } = useTrans();
     const isB2B = customer?.is_b2b ?? false;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
+            <Head title={trans('client_dashboard.welcome')} />
             <div className="flex flex-col gap-6 p-4">
                 {/* Welcome Section */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-semibold flex items-center gap-2">
-                            Welcome{customer ? `, ${customer.display_name}` : ''}
+                        <h1 className="flex items-center gap-2 text-2xl font-semibold">
+                            {trans('client_dashboard.welcome')}
+                            {customer ? `, ${customer.display_name}` : ''}
                             {isB2B && customer?.company_name && (
-                                <Badge variant="outline" className="bg-primary-100 text-primary-700 border-primary-200">
-                                    <Building2 className="h-3 w-3 mr-1" />
+                                <Badge
+                                    variant="outline"
+                                    className="border-primary-200 bg-primary-100 text-primary-700"
+                                >
+                                    <Building2 className="mr-1 h-3 w-3" />
                                     {customer.company_name}
                                 </Badge>
                             )}
                         </h1>
                         {customer && (
-                            <p className="text-muted-foreground flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className={isB2B
-                                    ? 'bg-primary-100 text-primary-700 border-primary-200'
-                                    : 'bg-purple-100 text-purple-700 border-purple-200'
-                                }>
-                                    {isB2B ? <Building2 className="h-3 w-3 mr-1" /> : <User className="h-3 w-3 mr-1" />}
+                            <p className="mt-1 flex items-center gap-2 text-muted-foreground">
+                                <Badge
+                                    variant="outline"
+                                    className={
+                                        isB2B
+                                            ? 'border-primary-200 bg-primary-100 text-primary-700'
+                                            : 'border-purple-200 bg-purple-100 text-purple-700'
+                                    }
+                                >
+                                    {isB2B ? (
+                                        <Building2 className="mr-1 h-3 w-3" />
+                                    ) : (
+                                        <User className="mr-1 h-3 w-3" />
+                                    )}
                                     {customer.type_label}
                                 </Badge>
-                                {customer.discount_percentage && Number(customer.discount_percentage) > 0 && (
-                                    <Badge variant="secondary" className="bg-primary-100 text-primary-700">
-                                        {customer.discount_percentage}% discount
-                                    </Badge>
-                                )}
+                                {customer.discount_percentage &&
+                                    Number(customer.discount_percentage) >
+                                        0 && (
+                                        <Badge
+                                            variant="secondary"
+                                            className="bg-primary-100 text-primary-700"
+                                        >
+                                            {customer.discount_percentage}%
+                                            discount
+                                        </Badge>
+                                    )}
                             </p>
                         )}
                     </div>
                     <Button asChild>
                         <Link href="/client/packages">
                             <Globe className="mr-2 h-4 w-4" />
-                            Browse Packages
+                            {trans('client_dashboard.browse_packages')}
                         </Link>
                     </Button>
                 </div>
 
                 {/* Stats Cards */}
-                <div className={`grid gap-4 ${isB2B ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}>
+                <div
+                    className={`grid gap-4 ${isB2B ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}
+                >
                     {isB2B && (
-                        <Card className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200">
+                        <Card className="border-primary-200 bg-gradient-to-br from-primary-50 to-primary-100">
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
                                 <CardTitle className="text-sm font-medium text-primary-700">
-                                    Available Balance
+                                    {trans(
+                                        'client_dashboard.available_balance',
+                                    )}
                                 </CardTitle>
                                 <Wallet className="h-4 w-4 text-primary-500" />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-primary-700">
-                                    {formatCurrency(customer?.available_balance || 0)}
+                                    {formatCurrency(
+                                        customer?.available_balance || 0,
+                                    )}
                                 </div>
-                                {Number(customer?.reserved_balance || 0) > 0 && (
+                                {Number(customer?.reserved_balance || 0) >
+                                    0 && (
                                     <p className="text-xs text-primary-600">
-                                        {formatCurrency(customer?.reserved_balance || 0)} reserved
+                                        {formatCurrency(
+                                            customer?.reserved_balance || 0,
+                                        )}{' '}
+                                        {trans('client_dashboard.reserved')}
                                     </p>
                                 )}
-                                <Link href="/client/balance" className="text-xs text-primary-600 hover:underline mt-1 inline-block">
-                                    View transactions →
+                                <Link
+                                    href="/client/balance"
+                                    className="mt-1 inline-block text-xs text-primary-600 hover:underline"
+                                >
+                                    {trans(
+                                        'client_dashboard.view_transactions',
+                                    )}{' '}
+                                    →
                                 </Link>
                             </CardContent>
                         </Card>
@@ -230,52 +272,66 @@ export default function ClientDashboard({
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Total Orders
+                                {trans('client_dashboard.total_orders')}
                             </CardTitle>
                             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{stats?.total_orders ?? 0}</div>
+                            <div className="text-2xl font-bold">
+                                {stats?.total_orders ?? 0}
+                            </div>
                             <p className="text-xs text-muted-foreground">
-                                {stats?.pending_orders ?? 0} pending
+                                {stats?.pending_orders ?? 0}{' '}
+                                {trans('client_dashboard.pending')}
                             </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Completed
+                                {trans('client_dashboard.completed')}
                             </CardTitle>
                             <CheckCircle2 className="h-4 w-4 text-primary-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-primary-600">{stats?.completed_orders ?? 0}</div>
-                            <p className="text-xs text-muted-foreground">Successful orders</p>
+                            <div className="text-2xl font-bold text-primary-600">
+                                {stats?.completed_orders ?? 0}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                {trans('client_dashboard.successful_orders')}
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Active eSIMs
+                                {trans('client_dashboard.active_esims')}
                             </CardTitle>
                             <Wifi className="h-4 w-4 text-primary-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{stats?.active_esims ?? 0}</div>
-                            <p className="text-xs text-muted-foreground">Ready to use</p>
+                            <div className="text-2xl font-bold">
+                                {stats?.active_esims ?? 0}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                {trans('client_dashboard.ready_to_use')}
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Total Spent
+                                {trans('client_dashboard.total_spent')}
                             </CardTitle>
                             <TrendingUp className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{formatCurrency(stats?.total_spent ?? 0)}</div>
+                            <div className="text-2xl font-bold">
+                                {formatCurrency(stats?.total_spent ?? 0)}
+                            </div>
                             <p className="text-xs text-muted-foreground">
-                                {formatCurrency(stats?.spent_this_month ?? 0)} this month
+                                {formatCurrency(stats?.spent_this_month ?? 0)}{' '}
+                                {trans('client_dashboard.this_month')}
                             </p>
                         </CardContent>
                     </Card>
@@ -287,37 +343,65 @@ export default function ClientDashboard({
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Smartphone className="h-5 w-5 text-primary-500" />
-                                Your Active eSIMs
+                                {trans('client_dashboard.your_active_esims')}
                             </CardTitle>
-                            <CardDescription>Monitor your eSIM data usage</CardDescription>
+                            <CardDescription>
+                                {trans('client_dashboard.monitor_usage')}
+                            </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="grid gap-4 md:grid-cols-3">
                                 {activeEsims.map((esim) => {
-                                    const usagePercent = esim.data_total_bytes > 0
-                                        ? (esim.data_used_bytes / esim.data_total_bytes) * 100
-                                        : 0;
+                                    const usagePercent =
+                                        esim.data_total_bytes > 0
+                                            ? (esim.data_used_bytes /
+                                                  esim.data_total_bytes) *
+                                              100
+                                            : 0;
                                     return (
                                         <Link
                                             key={esim.iccid}
                                             href={`/client/orders/${esim.order_uuid}`}
-                                            className="p-4 rounded-lg border hover:bg-muted/50 transition-colors"
+                                            className="rounded-lg border p-4 transition-colors hover:bg-muted/50"
                                         >
-                                            <div className="flex items-center justify-between mb-2">
-                                                <span className="font-medium">{esim.country}</span>
-                                                <Badge variant={esim.status === 'active' ? 'default' : 'secondary'}>
+                                            <div className="mb-2 flex items-center justify-between">
+                                                <span className="font-medium">
+                                                    {esim.country}
+                                                </span>
+                                                <Badge
+                                                    variant={
+                                                        esim.status === 'active'
+                                                            ? 'default'
+                                                            : 'secondary'
+                                                    }
+                                                >
                                                     {esim.status}
                                                 </Badge>
                                             </div>
-                                            <p className="text-sm text-muted-foreground mb-2">{esim.package_name}</p>
+                                            <p className="mb-2 text-sm text-muted-foreground">
+                                                {esim.package_name}
+                                            </p>
                                             <div className="space-y-1">
                                                 <div className="flex justify-between text-xs">
-                                                    <span>Data Used</span>
                                                     <span>
-                                                        {formatBytes(esim.data_used_bytes)} / {formatBytes(esim.data_total_bytes)}
+                                                        {trans(
+                                                            'client_dashboard.data_used',
+                                                        )}
+                                                    </span>
+                                                    <span>
+                                                        {formatBytes(
+                                                            esim.data_used_bytes,
+                                                        )}{' '}
+                                                        /{' '}
+                                                        {formatBytes(
+                                                            esim.data_total_bytes,
+                                                        )}
                                                     </span>
                                                 </div>
-                                                <Progress value={usagePercent} className="h-2" />
+                                                <Progress
+                                                    value={usagePercent}
+                                                    className="h-2"
+                                                />
                                             </div>
                                         </Link>
                                     );
@@ -332,24 +416,32 @@ export default function ClientDashboard({
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between">
                             <div>
-                                <CardTitle>Recent Orders</CardTitle>
-                                <CardDescription>Your latest eSIM purchases</CardDescription>
+                                <CardTitle>
+                                    {trans('client_dashboard.recent_orders')}
+                                </CardTitle>
+                                <CardDescription>
+                                    {trans('client_dashboard.latest_purchases')}
+                                </CardDescription>
                             </div>
                             <Button variant="outline" size="sm" asChild>
                                 <Link href="/client/orders">
-                                    View All
+                                    {trans('client_dashboard.view_all')}
                                     <ArrowUpRight className="ml-1 h-4 w-4" />
                                 </Link>
                             </Button>
                         </CardHeader>
                         <CardContent>
                             {recentOrders.length === 0 ? (
-                                <div className="text-center py-8">
-                                    <ShoppingCart className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                                    <p className="text-muted-foreground mb-3">No orders yet</p>
+                                <div className="py-8 text-center">
+                                    <ShoppingCart className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
+                                    <p className="mb-3 text-muted-foreground">
+                                        {trans('client_dashboard.no_orders')}
+                                    </p>
                                     <Button asChild>
                                         <Link href="/client/packages">
-                                            Browse Packages
+                                            {trans(
+                                                'client_dashboard.browse_packages',
+                                            )}
                                         </Link>
                                     </Button>
                                 </div>
@@ -359,30 +451,45 @@ export default function ClientDashboard({
                                         <Link
                                             key={order.uuid}
                                             href={`/client/orders/${order.uuid}`}
-                                            className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                                            className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
                                         >
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="font-medium">{order.package_name || 'eSIM Package'}</span>
+                                                    <span className="font-medium">
+                                                        {order.package_name ||
+                                                            trans(
+                                                                'client_dashboard.esim_package',
+                                                            )}
+                                                    </span>
                                                     <Badge
                                                         variant="outline"
                                                         className={`${getStatusBadgeClass(order.status_color)} flex items-center gap-1`}
                                                     >
-                                                        {getStatusIcon(order.status)}
+                                                        {getStatusIcon(
+                                                            order.status,
+                                                        )}
                                                         {order.status_label}
                                                     </Badge>
                                                 </div>
-                                                <p className="text-sm text-muted-foreground mt-1">
-                                                    {order.country_name && `${order.country_name} · `}
-                                                    {order.data_label} · {order.created_at}
+                                                <p className="mt-1 text-sm text-muted-foreground">
+                                                    {order.country_name &&
+                                                        `${order.country_name} · `}
+                                                    {order.data_label} ·{' '}
+                                                    {order.created_at}
                                                 </p>
                                             </div>
                                             <div className="text-right">
-                                                <span className="font-bold">{formatCurrency(order.amount)}</span>
+                                                <span className="font-bold">
+                                                    {formatCurrency(
+                                                        order.amount,
+                                                    )}
+                                                </span>
                                                 {order.has_esim && (
-                                                    <p className="text-xs text-primary-600 flex items-center justify-end gap-1">
+                                                    <p className="flex items-center justify-end gap-1 text-xs text-primary-600">
                                                         <Wifi className="h-3 w-3" />
-                                                        eSIM Ready
+                                                        {trans(
+                                                            'client_dashboard.esim_ready',
+                                                        )}
                                                     </p>
                                                 )}
                                             </div>
@@ -400,13 +507,19 @@ export default function ClientDashboard({
                                 <div>
                                     <CardTitle className="flex items-center gap-2">
                                         <CreditCard className="h-5 w-5" />
-                                        Balance History
+                                        {trans(
+                                            'client_dashboard.balance_history',
+                                        )}
                                     </CardTitle>
-                                    <CardDescription>Recent transactions</CardDescription>
+                                    <CardDescription>
+                                        {trans(
+                                            'client_dashboard.recent_transactions',
+                                        )}
+                                    </CardDescription>
                                 </div>
                                 <Button variant="outline" size="sm" asChild>
                                     <Link href="/client/balance">
-                                        View All
+                                        {trans('client_dashboard.view_all')}
                                         <ArrowUpRight className="ml-1 h-4 w-4" />
                                     </Link>
                                 </Button>
@@ -414,14 +527,19 @@ export default function ClientDashboard({
                             <CardContent>
                                 <div className="space-y-3">
                                     {balanceHistory.map((tx) => {
-                                        const isCredit = ['top_up', 'refund'].includes(tx.type);
+                                        const isCredit = [
+                                            'top_up',
+                                            'refund',
+                                        ].includes(tx.type);
                                         return (
                                             <div
                                                 key={tx.id}
-                                                className="flex items-center justify-between p-3 rounded-lg border"
+                                                className="flex items-center justify-between rounded-lg border p-3"
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`p-2 rounded-full ${isCredit ? 'bg-primary-100' : 'bg-red-100'}`}>
+                                                    <div
+                                                        className={`rounded-full p-2 ${isCredit ? 'bg-primary-100' : 'bg-red-100'}`}
+                                                    >
                                                         {isCredit ? (
                                                             <ArrowDownLeft className="h-4 w-4 text-primary-600" />
                                                         ) : (
@@ -429,18 +547,32 @@ export default function ClientDashboard({
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <p className="font-medium">{tx.type_label}</p>
+                                                        <p className="font-medium">
+                                                            {tx.type_label}
+                                                        </p>
                                                         <p className="text-sm text-muted-foreground">
-                                                            {tx.description || tx.created_at}
+                                                            {tx.description ||
+                                                                tx.created_at}
                                                         </p>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <span className={`font-bold ${isCredit ? 'text-primary-600' : 'text-red-600'}`}>
-                                                        {isCredit ? '+' : '-'}{formatCurrency(tx.amount)}
+                                                    <span
+                                                        className={`font-bold ${isCredit ? 'text-primary-600' : 'text-red-600'}`}
+                                                    >
+                                                        {isCredit ? '+' : '-'}
+                                                        {formatCurrency(
+                                                            tx.amount,
+                                                        )}
                                                     </span>
                                                     <p className="text-xs text-muted-foreground">
-                                                        Balance: {formatCurrency(tx.balance_after)}
+                                                        {trans(
+                                                            'client_dashboard.balance',
+                                                        )}
+                                                        :{' '}
+                                                        {formatCurrency(
+                                                            tx.balance_after,
+                                                        )}
                                                     </p>
                                                 </div>
                                             </div>
@@ -455,41 +587,57 @@ export default function ClientDashboard({
                                 <div>
                                     <CardTitle className="flex items-center gap-2">
                                         <Package className="h-5 w-5" />
-                                        Featured Packages
+                                        {trans(
+                                            'client_dashboard.featured_packages',
+                                        )}
                                     </CardTitle>
-                                    <CardDescription>Popular eSIM plans</CardDescription>
+                                    <CardDescription>
+                                        {trans(
+                                            'client_dashboard.popular_plans',
+                                        )}
+                                    </CardDescription>
                                 </div>
                                 <Button variant="outline" size="sm" asChild>
                                     <Link href="/client/packages">
-                                        View All
+                                        {trans('client_dashboard.view_all')}
                                         <ArrowUpRight className="ml-1 h-4 w-4" />
                                     </Link>
                                 </Button>
                             </CardHeader>
                             <CardContent>
                                 {featuredPackages.length === 0 ? (
-                                    <p className="text-muted-foreground text-center py-8">
-                                        No featured packages available.
+                                    <p className="py-8 text-center text-muted-foreground">
+                                        {trans(
+                                            'client_dashboard.no_featured_packages',
+                                        )}
                                     </p>
                                 ) : (
                                     <div className="space-y-3">
-                                        {featuredPackages.slice(0, 5).map((pkg) => (
-                                            <Link
-                                                key={pkg.id}
-                                                href={`/client/packages/${pkg.id}`}
-                                                className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-                                            >
-                                                <div>
-                                                    <p className="font-medium">{pkg.name}</p>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {pkg.country} · {pkg.data_label} · {pkg.validity_label}
-                                                    </p>
-                                                </div>
-                                                <span className="font-bold text-primary">
-                                                    {formatCurrency(pkg.price)}
-                                                </span>
-                                            </Link>
-                                        ))}
+                                        {featuredPackages
+                                            .slice(0, 5)
+                                            .map((pkg) => (
+                                                <Link
+                                                    key={pkg.id}
+                                                    href={`/client/packages/${pkg.id}`}
+                                                    className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
+                                                >
+                                                    <div>
+                                                        <p className="font-medium">
+                                                            {pkg.name}
+                                                        </p>
+                                                        <p className="text-sm text-muted-foreground">
+                                                            {pkg.country} ·{' '}
+                                                            {pkg.data_label} ·{' '}
+                                                            {pkg.validity_label}
+                                                        </p>
+                                                    </div>
+                                                    <span className="font-bold text-primary">
+                                                        {formatCurrency(
+                                                            pkg.price,
+                                                        )}
+                                                    </span>
+                                                </Link>
+                                            ))}
                                     </div>
                                 )}
                             </CardContent>
@@ -504,13 +652,17 @@ export default function ClientDashboard({
                             <div>
                                 <CardTitle className="flex items-center gap-2">
                                     <Package className="h-5 w-5" />
-                                    Featured Packages
+                                    {trans(
+                                        'client_dashboard.featured_packages',
+                                    )}
                                 </CardTitle>
-                                <CardDescription>Popular eSIM plans</CardDescription>
+                                <CardDescription>
+                                    {trans('client_dashboard.popular_plans')}
+                                </CardDescription>
                             </div>
                             <Button variant="outline" size="sm" asChild>
                                 <Link href="/client/packages">
-                                    View All
+                                    {trans('client_dashboard.view_all')}
                                     <ArrowUpRight className="ml-1 h-4 w-4" />
                                 </Link>
                             </Button>
@@ -521,10 +673,12 @@ export default function ClientDashboard({
                                     <Link
                                         key={pkg.id}
                                         href={`/client/packages/${pkg.id}`}
-                                        className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                                        className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
                                     >
                                         <div>
-                                            <p className="font-medium">{pkg.name}</p>
+                                            <p className="font-medium">
+                                                {pkg.name}
+                                            </p>
                                             <p className="text-sm text-muted-foreground">
                                                 {pkg.country} · {pkg.data_label}
                                             </p>

@@ -48,7 +48,7 @@ export function HeroSection({
     totalCountries = 0,
     searchValue,
     onSearchChange,
-    searchPlaceholder = 'Where are you traveling to?',
+    searchPlaceholder,
 }: HeroSectionProps) {
     const { name } = usePage<SharedData>().props;
     const { trans } = useTrans();
@@ -182,24 +182,24 @@ export function HeroSection({
                     >
                         <Sparkles className="mr-1.5 h-3.5 w-3.5 text-accent-500 md:mr-2 md:h-4 md:w-4" />
                         <span className="bg-gradient-to-r from-primary-800 to-primary-600 bg-clip-text text-transparent">
-                            {trans('hero.badge')}
+                            {badge}
                         </span>
                     </Badge>
 
                     <h1 className="mb-4 text-3xl leading-[1.15] font-extrabold tracking-tight text-primary-900 sm:text-4xl md:mb-6 md:text-6xl lg:text-7xl">
-                        {trans('hero.title')}
+                        {title}
                         {titleHighlight && (
                             <span className="relative block whitespace-nowrap">
                                 <span className="absolute -inset-1 -skew-y-3 bg-primary-100/50 blur-lg filter" />
                                 <span className="relative bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
-                                    {trans('hero.title_highlight')}
+                                    {titleHighlight}
                                 </span>
                             </span>
                         )}
                     </h1>
 
                     <p className="mx-auto mb-6 max-w-2xl text-sm leading-relaxed text-primary-600 sm:text-base md:mb-10 md:text-xl">
-                        {trans('hero.description')}
+                        {description}
                     </p>
 
                     {showSearch && (
@@ -224,9 +224,10 @@ export function HeroSection({
                                     )}
                                     <input
                                         type="text"
-                                        placeholder={trans(
-                                            'hero.search_placeholder',
-                                        )}
+                                        placeholder={
+                                            searchPlaceholder ||
+                                            trans('hero.search_placeholder')
+                                        }
                                         className="h-10 min-w-0 flex-1 bg-transparent text-base text-primary-800 placeholder:text-primary-400 focus:outline-none"
                                         value={searchQuery}
                                         onChange={(e) =>
@@ -270,9 +271,7 @@ export function HeroSection({
                                                     <MapPin className="h-6 w-6 text-primary-400" />
                                                 </div>
                                                 <p className="font-semibold text-primary-900">
-                                                    {trans(
-                                                        'hero.no_results',
-                                                    )}
+                                                    {trans('hero.no_results')}
                                                 </p>
                                                 <p className="mt-1 text-sm text-primary-500">
                                                     {trans(
@@ -290,7 +289,9 @@ export function HeroSection({
                                         <div className="absolute top-full right-0 left-0 z-[100] mt-2 max-h-[70vh] overflow-y-auto rounded-xl border border-primary-100 bg-white shadow-2xl md:rounded-2xl">
                                             <div className="p-1.5 md:p-2">
                                                 <p className="px-2 py-1.5 text-[10px] font-medium text-primary-400 md:px-3 md:py-2 md:text-xs">
-                                                    Quick results
+                                                    {trans(
+                                                        'hero.quick_results',
+                                                    )}
                                                 </p>
                                                 {searchResults.map((result) => (
                                                     <button
@@ -320,11 +321,12 @@ export function HeroSection({
                                                                 {
                                                                     result.package_count
                                                                 }{' '}
-                                                                plan
-                                                                {result.package_count !==
-                                                                1
-                                                                    ? 's'
-                                                                    : ''}
+                                                                {trans(
+                                                                    result.package_count !==
+                                                                        1
+                                                                        ? 'destinations.card.plans'
+                                                                        : 'destinations.card.plan',
+                                                                )}
                                                                 {result.min_price !=
                                                                     null && (
                                                                     <span className="ml-1">
@@ -372,16 +374,12 @@ export function HeroSection({
                             {[
                                 {
                                     icon: Globe,
-                                    label: trans(
-                                        'hero.stats.countries',
-                                    ),
+                                    label: trans('hero.stats.countries'),
                                     value: `${totalCountries}+`,
                                 },
                                 {
                                     icon: Zap,
-                                    label: trans(
-                                        'hero.stats.activation',
-                                    ),
+                                    label: trans('hero.stats.activation'),
                                     value: trans('hero.stats.instant'),
                                 },
                                 {
@@ -415,7 +413,7 @@ export function HeroSection({
             {/* Scroll Indicator - hidden on mobile */}
             <div className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 opacity-50 md:flex">
                 <span className="text-xs font-medium tracking-widest text-primary-400 uppercase">
-                    Scroll
+                    {trans('common.scroll')}
                 </span>
                 <div className="h-12 w-0.5 overflow-hidden rounded-full bg-primary-100">
                     <div className="animate-pulse-slow h-1/2 w-full bg-primary-300" />

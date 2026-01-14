@@ -59,7 +59,9 @@ export function FAQSection({
                                         ? 'border-accent-400 bg-white shadow-lg shadow-accent-500/20'
                                         : 'border-primary-100 bg-white hover:border-primary-200 hover:shadow-md'
                                 }`}
-                                onClick={() => setOpenIndex(isOpen ? null : index)}
+                                onClick={() =>
+                                    setOpenIndex(isOpen ? null : index)
+                                }
                             >
                                 <button className="flex w-full items-center justify-between p-5 text-left md:p-6">
                                     <span className="flex items-center gap-3 pr-4">
@@ -93,12 +95,14 @@ export function FAQSection({
 
                                 <div
                                     className={`grid transition-all duration-300 ease-in-out ${
-                                        isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                                        isOpen
+                                            ? 'grid-rows-[1fr]'
+                                            : 'grid-rows-[0fr]'
                                     }`}
                                 >
                                     <div className="overflow-hidden">
                                         <div className="border-t border-primary-100 px-5 py-5 md:px-6">
-                                            <p className="pl-11 text-gray-950 leading-relaxed">
+                                            <p className="pl-11 leading-relaxed text-gray-950">
                                                 {faq.answer}
                                             </p>
                                         </div>

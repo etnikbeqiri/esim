@@ -8,14 +8,20 @@ interface LegalPageLayoutProps {
     children: ReactNode;
 }
 
-export function LegalPageLayout({ title, lastUpdated, children }: LegalPageLayoutProps) {
+export function LegalPageLayout({
+    title,
+    lastUpdated,
+    children,
+}: LegalPageLayoutProps) {
     const { name } = usePage<SharedData>().props;
 
     return (
         <div className="py-12 md:py-16">
             <div className="container mx-auto px-4">
                 <div className="mx-auto max-w-3xl">
-                    <h1 className="mb-4 text-3xl font-bold md:text-4xl">{title}</h1>
+                    <h1 className="mb-4 text-3xl font-bold md:text-4xl">
+                        {title}
+                    </h1>
                     {lastUpdated && (
                         <p className="mb-8 text-sm text-muted-foreground">
                             Last updated: {lastUpdated}

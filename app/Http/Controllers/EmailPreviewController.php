@@ -214,6 +214,42 @@ class EmailPreviewController extends Controller
                 'currency' => $currency,
                 'customerId' => '1',
             ],
+
+            // Ticket templates
+            EmailTemplate::TicketCreated => [
+                'customerName' => 'John Doe',
+                'ticketReference' => 'TKT-ABC12345',
+                'ticketSubject' => 'Issue with my eSIM activation',
+                'ticketUrl' => config('app.url') . '/tickets/550e8400-e29b-41d4-a716-446655440000/john@example.com',
+            ],
+
+            EmailTemplate::TicketReply => [
+                'customerName' => 'John Doe',
+                'ticketReference' => 'TKT-ABC12345',
+                'ticketSubject' => 'Issue with my eSIM activation',
+                'ticketUrl' => config('app.url') . '/tickets/550e8400-e29b-41d4-a716-446655440000/john@example.com',
+                'replyPreview' => "Thank you for contacting us. I've looked into your issue and found that your eSIM needs to be re-provisioned. I've initiated the process and you should receive a new QR code within the next few minutes.",
+            ],
+
+            EmailTemplate::AdminTicketCreated => [
+                'ticketReference' => 'TKT-ABC12345',
+                'customerName' => 'John Doe',
+                'customerEmail' => 'john@example.com',
+                'ticketSubject' => 'Issue with my eSIM activation',
+                'ticketPriority' => 'High',
+                'ticketMessage' => "Hello,\n\nI purchased an eSIM for France yesterday but I'm having trouble activating it. When I scan the QR code, my phone shows an error message saying 'Unable to add eSIM'.\n\nI've tried restarting my phone and scanning the code again but it still doesn't work. My phone is an iPhone 14 Pro running iOS 17.2.\n\nPlease help me resolve this issue.\n\nThank you,\nJohn",
+                'adminTicketUrl' => config('app.url') . '/admin/tickets/550e8400-e29b-41d4-a716-446655440000',
+            ],
+
+            EmailTemplate::AdminTicketReply => [
+                'ticketReference' => 'TKT-ABC12345',
+                'customerName' => 'John Doe',
+                'customerEmail' => 'john@example.com',
+                'ticketSubject' => 'Issue with my eSIM activation',
+                'replyMessage' => "Hi,\n\nThank you for looking into this. I tried the steps you suggested but unfortunately the issue persists.\n\nI've attached a screenshot of the error message I'm seeing. Is there anything else I can try?\n\nThanks,\nJohn",
+                'adminTicketUrl' => config('app.url') . '/admin/tickets/550e8400-e29b-41d4-a716-446655440000',
+                'assignedTo' => 'Admin User',
+            ],
         };
     }
 

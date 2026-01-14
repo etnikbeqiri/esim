@@ -10,16 +10,38 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, Building2, Key, Loader2, LogIn, Mail, Save, User, Wallet } from 'lucide-react';
+import {
+    ArrowLeft,
+    Building2,
+    Key,
+    Loader2,
+    LogIn,
+    Mail,
+    Save,
+    User,
+    Wallet,
+} from 'lucide-react';
 import { useState } from 'react';
 
 interface Customer {
@@ -57,7 +79,9 @@ interface Props {
 
 export default function EditCustomer({ customer, customerTypes }: Props) {
     const { currency } = usePage<SharedData>().props;
-    const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
+    const [generatedPassword, setGeneratedPassword] = useState<string | null>(
+        null,
+    );
     const [passwordResetLoading, setPasswordResetLoading] = useState(false);
     const [impersonateLoading, setImpersonateLoading] = useState(false);
 
@@ -104,10 +128,17 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                 onSuccess: (page) => {
                     setPasswordResetLoading(false);
                     // Extract password from flash message if generated
-                    const props = page.props as { flash?: { success?: string } };
+                    const props = page.props as {
+                        flash?: { success?: string };
+                    };
                     const successMsg = props.flash?.success;
-                    if (method === 'generate' && successMsg?.includes('New password:')) {
-                        const pwd = successMsg.split('New password:')[1]?.trim();
+                    if (
+                        method === 'generate' &&
+                        successMsg?.includes('New password:')
+                    ) {
+                        const pwd = successMsg
+                            .split('New password:')[1]
+                            ?.trim();
                         if (pwd) setGeneratedPassword(pwd);
                     }
                 },
@@ -124,11 +155,16 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
     const isB2B = data.type === 'b2b';
 
     return (
-        <AppLayout breadcrumbs={[
-            { title: 'Customers', href: '/admin/customers' },
-            { title: customer.user?.name || 'Customer', href: `/admin/customers/${customer.id}` },
-            { title: 'Edit', href: `/admin/customers/${customer.id}/edit` },
-        ]}>
+        <AppLayout
+            breadcrumbs={[
+                { title: 'Customers', href: '/admin/customers' },
+                {
+                    title: customer.user?.name || 'Customer',
+                    href: `/admin/customers/${customer.id}`,
+                },
+                { title: 'Edit', href: `/admin/customers/${customer.id}/edit` },
+            ]}
+        >
             <Head title={`Edit ${customer.user?.name || 'Customer'}`} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
@@ -141,7 +177,9 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                             </Link>
                         </Button>
                         <div>
-                            <h1 className="text-2xl font-bold">Edit Customer</h1>
+                            <h1 className="text-2xl font-bold">
+                                Edit Customer
+                            </h1>
                             <p className="text-muted-foreground">
                                 {customer.user?.name} ({customer.user?.email})
                             </p>
@@ -149,7 +187,10 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-2">
+                <form
+                    onSubmit={handleSubmit}
+                    className="grid gap-6 lg:grid-cols-2"
+                >
                     {/* Account Settings */}
                     <Card>
                         <CardHeader>
@@ -166,29 +207,39 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                                 <Label htmlFor="type">Customer Type</Label>
                                 <Select
                                     value={data.type}
-                                    onValueChange={(value) => setData('type', value)}
+                                    onValueChange={(value) =>
+                                        setData('type', value)
+                                    }
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select type" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {customerTypes.map((type) => (
-                                            <SelectItem key={type.value} value={type.value}>
+                                            <SelectItem
+                                                key={type.value}
+                                                value={type.value}
+                                            >
                                                 {type.label}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                                 {errors.type && (
-                                    <p className="text-sm text-destructive">{errors.type}</p>
+                                    <p className="text-sm text-destructive">
+                                        {errors.type}
+                                    </p>
                                 )}
                                 <p className="text-xs text-muted-foreground">
-                                    B2B customers can pay with balance. B2C customers pay with card.
+                                    B2B customers can pay with balance. B2C
+                                    customers pay with card.
                                 </p>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="discount_percentage">Discount Percentage</Label>
+                                <Label htmlFor="discount_percentage">
+                                    Discount Percentage
+                                </Label>
                                 <div className="relative">
                                     <Input
                                         id="discount_percentage"
@@ -197,21 +248,30 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                                         max="100"
                                         step="0.01"
                                         value={data.discount_percentage}
-                                        onChange={(e) => setData('discount_percentage', e.target.value)}
+                                        onChange={(e) =>
+                                            setData(
+                                                'discount_percentage',
+                                                e.target.value,
+                                            )
+                                        }
                                         className="pr-8"
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                    <span className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground">
                                         %
                                     </span>
                                 </div>
                                 {errors.discount_percentage && (
-                                    <p className="text-sm text-destructive">{errors.discount_percentage}</p>
+                                    <p className="text-sm text-destructive">
+                                        {errors.discount_percentage}
+                                    </p>
                                 )}
                             </div>
 
                             <div className="flex items-center justify-between rounded-lg border p-4">
                                 <div className="space-y-0.5">
-                                    <Label htmlFor="is_active">Active Account</Label>
+                                    <Label htmlFor="is_active">
+                                        Active Account
+                                    </Label>
                                     <p className="text-xs text-muted-foreground">
                                         Inactive customers cannot make purchases
                                     </p>
@@ -219,7 +279,9 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                                 <Switch
                                     id="is_active"
                                     checked={data.is_active}
-                                    onCheckedChange={(checked) => setData('is_active', checked)}
+                                    onCheckedChange={(checked) =>
+                                        setData('is_active', checked)
+                                    }
                                 />
                             </div>
                         </CardContent>
@@ -238,15 +300,21 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="company_name">Company Name</Label>
+                                <Label htmlFor="company_name">
+                                    Company Name
+                                </Label>
                                 <Input
                                     id="company_name"
                                     value={data.company_name}
-                                    onChange={(e) => setData('company_name', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('company_name', e.target.value)
+                                    }
                                     placeholder="Acme Inc."
                                 />
                                 {errors.company_name && (
-                                    <p className="text-sm text-destructive">{errors.company_name}</p>
+                                    <p className="text-sm text-destructive">
+                                        {errors.company_name}
+                                    </p>
                                 )}
                             </div>
 
@@ -255,11 +323,15 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                                 <Input
                                     id="phone"
                                     value={data.phone}
-                                    onChange={(e) => setData('phone', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('phone', e.target.value)
+                                    }
                                     placeholder="+1 234 567 8900"
                                 />
                                 {errors.phone && (
-                                    <p className="text-sm text-destructive">{errors.phone}</p>
+                                    <p className="text-sm text-destructive">
+                                        {errors.phone}
+                                    </p>
                                 )}
                             </div>
 
@@ -268,11 +340,15 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                                 <Input
                                     id="vat_number"
                                     value={data.vat_number}
-                                    onChange={(e) => setData('vat_number', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('vat_number', e.target.value)
+                                    }
                                     placeholder="EU123456789"
                                 />
                                 {errors.vat_number && (
-                                    <p className="text-sm text-destructive">{errors.vat_number}</p>
+                                    <p className="text-sm text-destructive">
+                                        {errors.vat_number}
+                                    </p>
                                 )}
                             </div>
 
@@ -281,12 +357,16 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                                 <Textarea
                                     id="address"
                                     value={data.address}
-                                    onChange={(e) => setData('address', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('address', e.target.value)
+                                    }
                                     placeholder="123 Main St, City, Country"
                                     rows={3}
                                 />
                                 {errors.address && (
-                                    <p className="text-sm text-destructive">{errors.address}</p>
+                                    <p className="text-sm text-destructive">
+                                        {errors.address}
+                                    </p>
                                 )}
                             </div>
                         </CardContent>
@@ -306,41 +386,74 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 {/* User Details Form */}
-                                <form onSubmit={handleUserSubmit} className="space-y-4">
+                                <form
+                                    onSubmit={handleUserSubmit}
+                                    className="space-y-4"
+                                >
                                     <div className="grid gap-4 sm:grid-cols-2">
                                         <div className="space-y-2">
-                                            <Label htmlFor="user_name">Name</Label>
+                                            <Label htmlFor="user_name">
+                                                Name
+                                            </Label>
                                             <Input
                                                 id="user_name"
                                                 value={userData.name}
-                                                onChange={(e) => setUserData('name', e.target.value)}
+                                                onChange={(e) =>
+                                                    setUserData(
+                                                        'name',
+                                                        e.target.value,
+                                                    )
+                                                }
                                             />
                                             {userErrors.name && (
-                                                <p className="text-sm text-destructive">{userErrors.name}</p>
+                                                <p className="text-sm text-destructive">
+                                                    {userErrors.name}
+                                                </p>
                                             )}
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="user_email">Email</Label>
+                                            <Label htmlFor="user_email">
+                                                Email
+                                            </Label>
                                             <Input
                                                 id="user_email"
                                                 type="email"
                                                 value={userData.email}
-                                                onChange={(e) => setUserData('email', e.target.value)}
+                                                onChange={(e) =>
+                                                    setUserData(
+                                                        'email',
+                                                        e.target.value,
+                                                    )
+                                                }
                                             />
                                             {userErrors.email && (
-                                                <p className="text-sm text-destructive">{userErrors.email}</p>
+                                                <p className="text-sm text-destructive">
+                                                    {userErrors.email}
+                                                </p>
                                             )}
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                         <span>Email verified:</span>
-                                        <span className={customer.user.email_verified_at ? 'text-green-600' : 'text-yellow-600'}>
+                                        <span
+                                            className={
+                                                customer.user.email_verified_at
+                                                    ? 'text-green-600'
+                                                    : 'text-yellow-600'
+                                            }
+                                        >
                                             {customer.user.email_verified_at
-                                                ? new Date(customer.user.email_verified_at).toLocaleDateString()
+                                                ? new Date(
+                                                      customer.user.email_verified_at,
+                                                  ).toLocaleDateString()
                                                 : 'Not verified'}
                                         </span>
                                     </div>
-                                    <Button type="submit" variant="secondary" disabled={userProcessing}>
+                                    <Button
+                                        type="submit"
+                                        variant="secondary"
+                                        disabled={userProcessing}
+                                    >
                                         {userProcessing ? (
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                         ) : (
@@ -352,12 +465,19 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
 
                                 {/* Divider */}
                                 <div className="border-t pt-6">
-                                    <h4 className="mb-4 font-medium">Account Actions</h4>
+                                    <h4 className="mb-4 font-medium">
+                                        Account Actions
+                                    </h4>
                                     <div className="flex flex-wrap gap-3">
                                         {/* Reset Password */}
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Button variant="outline" disabled={passwordResetLoading}>
+                                                <Button
+                                                    variant="outline"
+                                                    disabled={
+                                                        passwordResetLoading
+                                                    }
+                                                >
                                                     {passwordResetLoading ? (
                                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                                     ) : (
@@ -368,31 +488,50 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                                             </AlertDialogTrigger>
                                             <AlertDialogContent>
                                                 <AlertDialogHeader>
-                                                    <AlertDialogTitle>Reset User Password</AlertDialogTitle>
+                                                    <AlertDialogTitle>
+                                                        Reset User Password
+                                                    </AlertDialogTitle>
                                                     <AlertDialogDescription>
-                                                        Choose how to reset the password for {customer.user.email}
+                                                        Choose how to reset the
+                                                        password for{' '}
+                                                        {customer.user.email}
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <div className="flex flex-col gap-3 py-4">
                                                     <Button
                                                         variant="outline"
-                                                        onClick={() => handleResetPassword('generate')}
-                                                        disabled={passwordResetLoading}
+                                                        onClick={() =>
+                                                            handleResetPassword(
+                                                                'generate',
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            passwordResetLoading
+                                                        }
                                                     >
                                                         <Key className="mr-2 h-4 w-4" />
                                                         Generate New Password
                                                     </Button>
                                                     <Button
                                                         variant="outline"
-                                                        onClick={() => handleResetPassword('link')}
-                                                        disabled={passwordResetLoading}
+                                                        onClick={() =>
+                                                            handleResetPassword(
+                                                                'link',
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            passwordResetLoading
+                                                        }
                                                     >
                                                         <Mail className="mr-2 h-4 w-4" />
-                                                        Send Reset Link via Email
+                                                        Send Reset Link via
+                                                        Email
                                                     </Button>
                                                 </div>
                                                 <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogCancel>
+                                                        Cancel
+                                                    </AlertDialogCancel>
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>
                                         </AlertDialog>
@@ -400,7 +539,12 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                                         {/* Login as User */}
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Button variant="outline" disabled={impersonateLoading}>
+                                                <Button
+                                                    variant="outline"
+                                                    disabled={
+                                                        impersonateLoading
+                                                    }
+                                                >
                                                     {impersonateLoading ? (
                                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                                     ) : (
@@ -411,15 +555,27 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                                             </AlertDialogTrigger>
                                             <AlertDialogContent>
                                                 <AlertDialogHeader>
-                                                    <AlertDialogTitle>Login as User</AlertDialogTitle>
+                                                    <AlertDialogTitle>
+                                                        Login as User
+                                                    </AlertDialogTitle>
                                                     <AlertDialogDescription>
-                                                        You will be logged in as {customer.user.name} ({customer.user.email}).
-                                                        You can return to your admin account at any time.
+                                                        You will be logged in as{' '}
+                                                        {customer.user.name} (
+                                                        {customer.user.email}).
+                                                        You can return to your
+                                                        admin account at any
+                                                        time.
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={handleImpersonate}>
+                                                    <AlertDialogCancel>
+                                                        Cancel
+                                                    </AlertDialogCancel>
+                                                    <AlertDialogAction
+                                                        onClick={
+                                                            handleImpersonate
+                                                        }
+                                                    >
                                                         Continue
                                                     </AlertDialogAction>
                                                 </AlertDialogFooter>
@@ -437,7 +593,8 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                                                 {generatedPassword}
                                             </p>
                                             <p className="mt-2 text-xs text-green-600 dark:text-green-400">
-                                                Make sure to copy this password - it won't be shown again.
+                                                Make sure to copy this password
+                                                - it won't be shown again.
                                             </p>
                                         </div>
                                     )}
@@ -461,9 +618,11 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                             <CardContent className="space-y-4">
                                 <div className="grid gap-4 sm:grid-cols-3">
                                     <div className="space-y-2">
-                                        <Label htmlFor="balance_amount">Current Balance</Label>
+                                        <Label htmlFor="balance_amount">
+                                            Current Balance
+                                        </Label>
                                         <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                            <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
                                                 {currency.symbol}
                                             </span>
                                             <Input
@@ -472,19 +631,29 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                                                 min="0"
                                                 step="0.01"
                                                 value={data.balance_amount}
-                                                onChange={(e) => setData('balance_amount', e.target.value)}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        'balance_amount',
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 className="pl-8"
                                             />
                                         </div>
                                         {errors.balance_amount && (
-                                            <p className="text-sm text-destructive">{errors.balance_amount}</p>
+                                            <p className="text-sm text-destructive">
+                                                {errors.balance_amount}
+                                            </p>
                                         )}
                                     </div>
 
                                     <div className="space-y-2">
                                         <Label>Reserved</Label>
                                         <div className="flex h-10 items-center rounded-md border bg-muted px-3">
-                                            {currency.symbol}{Number(customer.balance?.reserved || 0).toFixed(2)}
+                                            {currency.symbol}
+                                            {Number(
+                                                customer.balance?.reserved || 0,
+                                            ).toFixed(2)}
                                         </div>
                                         <p className="text-xs text-muted-foreground">
                                             Amount reserved for pending orders
@@ -494,7 +663,11 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                                     <div className="space-y-2">
                                         <Label>Available</Label>
                                         <div className="flex h-10 items-center rounded-md border bg-muted px-3">
-                                            {currency.symbol}{Number(customer.balance?.available_balance || 0).toFixed(2)}
+                                            {currency.symbol}
+                                            {Number(
+                                                customer.balance
+                                                    ?.available_balance || 0,
+                                            ).toFixed(2)}
                                         </div>
                                         <p className="text-xs text-muted-foreground">
                                             Balance minus reserved
@@ -516,7 +689,9 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                             Save Changes
                         </Button>
                         <Button type="button" variant="outline" asChild>
-                            <Link href={`/admin/customers/${customer.id}`}>Cancel</Link>
+                            <Link href={`/admin/customers/${customer.id}`}>
+                                Cancel
+                            </Link>
                         </Button>
                     </div>
                 </form>

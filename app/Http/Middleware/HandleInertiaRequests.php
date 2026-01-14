@@ -102,6 +102,13 @@ class HandleInertiaRequests extends Middleware
                 'privacyEmail' => config('contact.privacy_email'),
                 'phone' => config('contact.phone'),
                 'whatsapp' => config('contact.whatsapp'),
+                'companyName' => config('contact.company_name'),
+                'companyAddress' => config('contact.company_address'),
+                'companyCity' => config('contact.company_city'),
+                'companyPostalCode' => config('contact.company_postal_code'),
+                'companyCountry' => config('contact.company_country'),
+                'companyVat' => config('contact.company_vat'),
+                'companyRegistration' => config('contact.company_registration'),
             ],
             'payment' => [
                 'providers' => PaymentProvider::activePublicProvidersArray(),

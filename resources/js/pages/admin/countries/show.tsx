@@ -64,7 +64,11 @@ function formatData(mb: number): string {
     return `${mb} MB`;
 }
 
-export default function CountryShow({ country, packages, defaultCurrency }: Props) {
+export default function CountryShow({
+    country,
+    packages,
+    defaultCurrency,
+}: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
         { title: 'Countries', href: '/admin/countries' },
@@ -77,7 +81,10 @@ export default function CountryShow({ country, packages, defaultCurrency }: Prop
         router.post(`/admin/countries/${country.id}/toggle-active`);
     }
 
-    function getEffectivePrice(pkg: Package): { price: number; isCustom: boolean } {
+    function getEffectivePrice(pkg: Package): {
+        price: number;
+        isCustom: boolean;
+    } {
         if (pkg.custom_retail_price !== null) {
             return { price: Number(pkg.custom_retail_price), isCustom: true };
         }
@@ -97,21 +104,33 @@ export default function CountryShow({ country, packages, defaultCurrency }: Prop
                     <div>
                         <div className="flex items-center gap-2">
                             {country.flag_emoji && (
-                                <span className="text-2xl">{country.flag_emoji}</span>
+                                <span className="text-2xl">
+                                    {country.flag_emoji}
+                                </span>
                             )}
-                            <h1 className="text-2xl font-semibold">{country.name}</h1>
+                            <h1 className="text-2xl font-semibold">
+                                {country.name}
+                            </h1>
                         </div>
                         <p className="text-muted-foreground">
-                            {country.iso_code} / {country.iso_code_3} | {country.region || 'No region'}
+                            {country.iso_code} / {country.iso_code_3} |{' '}
+                            {country.region || 'No region'}
                         </p>
                     </div>
                     <div className="ml-auto flex gap-2">
                         {country.is_popular && (
-                            <Badge variant="outline" className="border-yellow-500 text-yellow-600">
+                            <Badge
+                                variant="outline"
+                                className="border-yellow-500 text-yellow-600"
+                            >
                                 Popular
                             </Badge>
                         )}
-                        <Badge variant={country.is_active ? 'default' : 'secondary'}>
+                        <Badge
+                            variant={
+                                country.is_active ? 'default' : 'secondary'
+                            }
+                        >
                             {country.is_active ? 'Enabled' : 'Disabled'}
                         </Badge>
                         <Button
@@ -127,27 +146,38 @@ export default function CountryShow({ country, packages, defaultCurrency }: Prop
                 <div className="grid gap-4 md:grid-cols-3">
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Total Packages</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Total Packages
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">{country.packages_count}</p>
+                            <p className="text-2xl font-bold">
+                                {country.packages_count}
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Active Packages</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Active Packages
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold text-green-600">{country.active_packages_count}</p>
+                            <p className="text-2xl font-bold text-green-600">
+                                {country.active_packages_count}
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Inactive Packages</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Inactive Packages
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <p className="text-2xl font-bold text-muted-foreground">
-                                {country.packages_count - country.active_packages_count}
+                                {country.packages_count -
+                                    country.active_packages_count}
                             </p>
                         </CardContent>
                     </Card>
@@ -162,7 +192,9 @@ export default function CountryShow({ country, packages, defaultCurrency }: Prop
                     </CardHeader>
                     <CardContent>
                         {packages.data.length === 0 ? (
-                            <p className="text-muted-foreground text-center py-8">No packages in this country</p>
+                            <p className="py-8 text-center text-muted-foreground">
+                                No packages in this country
+                            </p>
                         ) : (
                             <Table>
                                 <TableHeader>
@@ -179,10 +211,11 @@ export default function CountryShow({ country, packages, defaultCurrency }: Prop
                                 </TableHeader>
                                 <TableBody>
                                     {packages.data.map((pkg) => {
-                                        const { price, isCustom } = getEffectivePrice(pkg);
+                                        const { price, isCustom } =
+                                            getEffectivePrice(pkg);
                                         return (
                                             <TableRow key={pkg.id}>
-                                                <TableCell className="font-medium max-w-[200px] truncate">
+                                                <TableCell className="max-w-[200px] truncate font-medium">
                                                     <div className="flex items-center gap-1">
                                                         {pkg.is_featured && (
                                                             <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
@@ -190,28 +223,57 @@ export default function CountryShow({ country, packages, defaultCurrency }: Prop
                                                         {pkg.name}
                                                     </div>
                                                 </TableCell>
-                                                <TableCell>{pkg.provider?.name || '-'}</TableCell>
-                                                <TableCell>{formatData(pkg.data_mb)}</TableCell>
-                                                <TableCell>{pkg.validity_days}d</TableCell>
+                                                <TableCell>
+                                                    {pkg.provider?.name || '-'}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {formatData(pkg.data_mb)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {pkg.validity_days}d
+                                                </TableCell>
                                                 <TableCell className="text-muted-foreground">
-                                                    {currencySymbol}{Number(pkg.cost_price).toFixed(2)}
+                                                    {currencySymbol}
+                                                    {Number(
+                                                        pkg.cost_price,
+                                                    ).toFixed(2)}
                                                 </TableCell>
                                                 <TableCell className="font-medium">
                                                     <div className="flex items-center gap-1">
-                                                        {currencySymbol}{price.toFixed(2)}
+                                                        {currencySymbol}
+                                                        {price.toFixed(2)}
                                                         {isCustom && (
-                                                            <Badge variant="secondary" className="text-xs">Custom</Badge>
+                                                            <Badge
+                                                                variant="secondary"
+                                                                className="text-xs"
+                                                            >
+                                                                Custom
+                                                            </Badge>
                                                         )}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Badge variant={pkg.is_active ? 'default' : 'secondary'}>
-                                                        {pkg.is_active ? 'Active' : 'Inactive'}
+                                                    <Badge
+                                                        variant={
+                                                            pkg.is_active
+                                                                ? 'default'
+                                                                : 'secondary'
+                                                        }
+                                                    >
+                                                        {pkg.is_active
+                                                            ? 'Active'
+                                                            : 'Inactive'}
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Button variant="ghost" size="icon" asChild>
-                                                        <Link href={`/admin/packages/${pkg.id}`}>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        asChild
+                                                    >
+                                                        <Link
+                                                            href={`/admin/packages/${pkg.id}`}
+                                                        >
                                                             <Eye className="h-4 w-4" />
                                                         </Link>
                                                     </Button>
@@ -224,13 +286,30 @@ export default function CountryShow({ country, packages, defaultCurrency }: Prop
                         )}
 
                         {packages.last_page > 1 && (
-                            <div className="flex justify-center gap-2 mt-4">
-                                {Array.from({ length: Math.min(packages.last_page, 10) }, (_, i) => i + 1).map((page) => (
+                            <div className="mt-4 flex justify-center gap-2">
+                                {Array.from(
+                                    {
+                                        length: Math.min(
+                                            packages.last_page,
+                                            10,
+                                        ),
+                                    },
+                                    (_, i) => i + 1,
+                                ).map((page) => (
                                     <Button
                                         key={page}
-                                        variant={page === packages.current_page ? 'default' : 'outline'}
+                                        variant={
+                                            page === packages.current_page
+                                                ? 'default'
+                                                : 'outline'
+                                        }
                                         size="sm"
-                                        onClick={() => router.get(`/admin/countries/${country.id}`, { page })}
+                                        onClick={() =>
+                                            router.get(
+                                                `/admin/countries/${country.id}`,
+                                                { page },
+                                            )
+                                        }
                                     >
                                         {page}
                                     </Button>

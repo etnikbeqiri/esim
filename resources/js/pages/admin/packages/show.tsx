@@ -74,11 +74,16 @@ export default function PackageShow({ package: pkg, defaultCurrency }: Props) {
     const currencyCode = defaultCurrency?.code || 'EUR';
     const costPrice = Number(pkg.cost_price);
     const retailPrice = Number(pkg.retail_price);
-    const customRetailPrice = pkg.custom_retail_price ? Number(pkg.custom_retail_price) : null;
+    const customRetailPrice = pkg.custom_retail_price
+        ? Number(pkg.custom_retail_price)
+        : null;
     const effectivePrice = customRetailPrice ?? retailPrice;
-    const sourceCostPrice = pkg.source_cost_price ? Number(pkg.source_cost_price) : null;
+    const sourceCostPrice = pkg.source_cost_price
+        ? Number(pkg.source_cost_price)
+        : null;
     const margin = effectivePrice - costPrice;
-    const marginPercent = costPrice > 0 ? ((margin / costPrice) * 100).toFixed(1) : '0';
+    const marginPercent =
+        costPrice > 0 ? ((margin / costPrice) * 100).toFixed(1) : '0';
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -92,28 +97,38 @@ export default function PackageShow({ package: pkg, defaultCurrency }: Props) {
                     </Button>
                     <div>
                         <div className="flex items-center gap-2">
-                            <h1 className="text-2xl font-semibold">{pkg.name}</h1>
+                            <h1 className="text-2xl font-semibold">
+                                {pkg.name}
+                            </h1>
                             {pkg.is_featured && (
                                 <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
                             )}
                         </div>
                         <p className="text-muted-foreground">
-                            Provider: {pkg.provider?.name} | Country: {pkg.country?.name}
+                            Provider: {pkg.provider?.name} | Country:{' '}
+                            {pkg.country?.name}
                         </p>
                     </div>
                     <div className="ml-auto flex gap-2">
                         {pkg.is_featured && (
-                            <Badge variant="outline" className="border-yellow-500 text-yellow-600">
+                            <Badge
+                                variant="outline"
+                                className="border-yellow-500 text-yellow-600"
+                            >
                                 Featured
                             </Badge>
                         )}
                         {customRetailPrice !== null && (
                             <Badge variant="secondary">Custom Price</Badge>
                         )}
-                        <Badge variant={pkg.is_active ? 'default' : 'secondary'}>
+                        <Badge
+                            variant={pkg.is_active ? 'default' : 'secondary'}
+                        >
                             {pkg.is_active ? 'Active' : 'Inactive'}
                         </Badge>
-                        <Badge variant={pkg.in_stock ? 'default' : 'destructive'}>
+                        <Badge
+                            variant={pkg.in_stock ? 'default' : 'destructive'}
+                        >
                             {pkg.in_stock ? 'In Stock' : 'Out of Stock'}
                         </Badge>
                         <Button variant="outline" size="sm" asChild>
@@ -128,26 +143,38 @@ export default function PackageShow({ package: pkg, defaultCurrency }: Props) {
                 <div className="grid gap-4 md:grid-cols-3">
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Data</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Data
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">{formatData(pkg.data_mb)}</p>
+                            <p className="text-2xl font-bold">
+                                {formatData(pkg.data_mb)}
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Validity</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Validity
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">{pkg.validity_days} days</p>
+                            <p className="text-2xl font-bold">
+                                {pkg.validity_days} days
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Margin</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Margin
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">{margin.toFixed(2)} ({marginPercent}%)</p>
+                            <p className="text-2xl font-bold">
+                                {margin.toFixed(2)} ({marginPercent}%)
+                            </p>
                         </CardContent>
                     </Card>
                 </div>
@@ -159,46 +186,94 @@ export default function PackageShow({ package: pkg, defaultCurrency }: Props) {
                         </CardHeader>
                         <CardContent className="space-y-2">
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Provider Package ID</span>
-                                <span className="font-mono">{pkg.provider_package_id}</span>
+                                <span className="text-muted-foreground">
+                                    Provider Package ID
+                                </span>
+                                <span className="font-mono">
+                                    {pkg.provider_package_id}
+                                </span>
                             </div>
                             {sourceCostPrice !== null && (
                                 <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Source Cost ({pkg.source_currency?.code || 'USD'})</span>
-                                    <span>{pkg.source_currency?.symbol || '$'}{sourceCostPrice.toFixed(2)}</span>
+                                    <span className="text-muted-foreground">
+                                        Source Cost (
+                                        {pkg.source_currency?.code || 'USD'})
+                                    </span>
+                                    <span>
+                                        {pkg.source_currency?.symbol || '$'}
+                                        {sourceCostPrice.toFixed(2)}
+                                    </span>
                                 </div>
                             )}
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Cost Price ({currencyCode})</span>
-                                <span>{currencySymbol}{costPrice.toFixed(2)}</span>
+                                <span className="text-muted-foreground">
+                                    Cost Price ({currencyCode})
+                                </span>
+                                <span>
+                                    {currencySymbol}
+                                    {costPrice.toFixed(2)}
+                                </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">System Price ({currencyCode})</span>
-                                <span className={customRetailPrice !== null ? 'text-muted-foreground line-through' : 'font-medium'}>
-                                    {currencySymbol}{retailPrice.toFixed(2)}
+                                <span className="text-muted-foreground">
+                                    System Price ({currencyCode})
+                                </span>
+                                <span
+                                    className={
+                                        customRetailPrice !== null
+                                            ? 'text-muted-foreground line-through'
+                                            : 'font-medium'
+                                    }
+                                >
+                                    {currencySymbol}
+                                    {retailPrice.toFixed(2)}
                                 </span>
                             </div>
                             {customRetailPrice !== null && (
                                 <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Custom Price ({currencyCode})</span>
-                                    <span className="font-medium text-primary">{currencySymbol}{customRetailPrice.toFixed(2)}</span>
+                                    <span className="text-muted-foreground">
+                                        Custom Price ({currencyCode})
+                                    </span>
+                                    <span className="font-medium text-primary">
+                                        {currencySymbol}
+                                        {customRetailPrice.toFixed(2)}
+                                    </span>
                                 </div>
                             )}
-                            <div className="flex justify-between border-t pt-2 mt-2">
-                                <span className="text-muted-foreground">Effective Price</span>
-                                <span className="font-bold">{currencySymbol}{effectivePrice.toFixed(2)}</span>
+                            <div className="mt-2 flex justify-between border-t pt-2">
+                                <span className="text-muted-foreground">
+                                    Effective Price
+                                </span>
+                                <span className="font-bold">
+                                    {currencySymbol}
+                                    {effectivePrice.toFixed(2)}
+                                </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Created</span>
-                                <span>{new Date(pkg.created_at).toLocaleDateString()}</span>
+                                <span className="text-muted-foreground">
+                                    Created
+                                </span>
+                                <span>
+                                    {new Date(
+                                        pkg.created_at,
+                                    ).toLocaleDateString()}
+                                </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Updated</span>
-                                <span>{new Date(pkg.updated_at).toLocaleDateString()}</span>
+                                <span className="text-muted-foreground">
+                                    Updated
+                                </span>
+                                <span>
+                                    {new Date(
+                                        pkg.updated_at,
+                                    ).toLocaleDateString()}
+                                </span>
                             </div>
                             {pkg.description && (
                                 <div className="pt-2">
-                                    <span className="text-muted-foreground">Description</span>
+                                    <span className="text-muted-foreground">
+                                        Description
+                                    </span>
                                     <p className="mt-1">{pkg.description}</p>
                                 </div>
                             )}
@@ -211,7 +286,9 @@ export default function PackageShow({ package: pkg, defaultCurrency }: Props) {
                         </CardHeader>
                         <CardContent>
                             {pkg.orders.length === 0 ? (
-                                <p className="text-muted-foreground text-center py-4">No orders yet</p>
+                                <p className="py-4 text-center text-muted-foreground">
+                                    No orders yet
+                                </p>
                             ) : (
                                 <Table>
                                     <TableHeader>
@@ -225,14 +302,24 @@ export default function PackageShow({ package: pkg, defaultCurrency }: Props) {
                                         {pkg.orders.map((order) => (
                                             <TableRow key={order.id}>
                                                 <TableCell>
-                                                    <Link href={`/admin/orders/${order.id}`} className="hover:underline">
+                                                    <Link
+                                                        href={`/admin/orders/${order.id}`}
+                                                        className="hover:underline"
+                                                    >
                                                         {order.order_number}
                                                     </Link>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Badge variant="outline">{order.status}</Badge>
+                                                    <Badge variant="outline">
+                                                        {order.status}
+                                                    </Badge>
                                                 </TableCell>
-                                                <TableCell>{currencySymbol}{Number(order.amount).toFixed(2)}</TableCell>
+                                                <TableCell>
+                                                    {currencySymbol}
+                                                    {Number(
+                                                        order.amount,
+                                                    ).toFixed(2)}
+                                                </TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>

@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { useTrans } from '@/hooks/use-trans';
 import { cn } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
@@ -12,10 +13,13 @@ interface BackButtonProps {
 
 export function BackButton({
     href,
-    label = 'Back',
+    label,
     variant = 'default',
     className,
 }: BackButtonProps) {
+    const { trans } = useTrans();
+    const buttonLabel = label || trans('common.back');
+
     if (variant === 'default') {
         return (
             <Link
@@ -26,7 +30,7 @@ export function BackButton({
                 )}
             >
                 <ArrowLeft className="h-4 w-4" />
-                {label}
+                {buttonLabel}
             </Link>
         );
     }
@@ -35,7 +39,7 @@ export function BackButton({
         <Button variant={variant} size="sm" asChild className={className}>
             <Link href={href}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                {label}
+                {buttonLabel}
             </Link>
         </Button>
     );

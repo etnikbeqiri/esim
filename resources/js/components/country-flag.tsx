@@ -11,7 +11,11 @@ const sizeClasses = {
     xl: 'h-12 w-18',
 };
 
-export function CountryFlag({ countryCode, size = 'md', className = '' }: CountryFlagProps) {
+export function CountryFlag({
+    countryCode,
+    size = 'md',
+    className = '',
+}: CountryFlagProps) {
     const code = countryCode.toLowerCase();
     const src = `https://flagcdn.com/${code}.svg`;
 

@@ -14,7 +14,6 @@ import {
     Linkedin,
     Sparkles,
     Twitter,
-    User,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -218,23 +217,8 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                 </p>
                             )}
 
-                            {/* Author & Share */}
-                            <div className="flex flex-wrap items-center justify-between gap-6 border-t border-primary-200/60 pt-6">
-                                {article.author && (
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-accent-300 via-accent-400 to-accent-300 shadow-md ring-2 shadow-accent-500/25 ring-white">
-                                            <User className="h-6 w-6 text-accent-950" />
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-primary-900">
-                                                {article.author.name}
-                                            </p>
-                                            <p className="text-xs font-bold tracking-wider text-accent-600 uppercase">
-                                                {trans('blog.article.author')}
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
+                            {/* Share */}
+                            <div className="flex flex-wrap items-center justify-end gap-6 border-t border-primary-200/60 pt-6">
                                 <div className="flex items-center gap-2">
                                     <span className="mr-2 text-sm font-medium text-primary-500">
                                         {trans('blog.article.share')}
@@ -354,7 +338,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                         className="border-primary-200 bg-white text-primary-700 transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-800"
                                     >
                                         <Twitter className="mr-2 h-4 w-4" />
-                                        Twitter
+                                        {trans('blog.article.share_twitter')}
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -363,7 +347,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                         className="border-primary-200 bg-white text-primary-700 transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-800"
                                     >
                                         <Facebook className="mr-2 h-4 w-4" />
-                                        Facebook
+                                        {trans('blog.article.share_facebook')}
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -372,7 +356,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                         className="border-primary-200 bg-white text-primary-700 transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-800"
                                     >
                                         <Linkedin className="mr-2 h-4 w-4" />
-                                        LinkedIn
+                                        {trans('blog.article.share_linkedin')}
                                     </Button>
                                 </div>
                             </div>
@@ -460,17 +444,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                             <h3 className="mb-4 line-clamp-2 flex-1 leading-snug font-bold text-primary-900 transition-colors group-hover:text-primary-600">
                                                 {related.title}
                                             </h3>
-                                            <div className="flex items-center justify-between border-t border-primary-50 pt-4">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-primary-200 to-primary-300 text-[9px] font-bold text-primary-800">
-                                                        {related.author?.name?.charAt(
-                                                            0,
-                                                        ) || 'A'}
-                                                    </div>
-                                                    <span className="text-xs font-medium text-primary-500">
-                                                        {related.author?.name}
-                                                    </span>
-                                                </div>
+                                            <div className="flex items-center justify-end border-t border-primary-50 pt-4">
                                                 <span className="inline-flex items-center gap-1.5 text-xs font-bold tracking-wide text-primary-600 uppercase transition-colors group-hover:text-accent-600">
                                                     {trans(
                                                         'blog.article.read_article',

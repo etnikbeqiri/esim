@@ -1,0 +1,541 @@
+import { CTASection } from '@/components/cta-section';
+import { HeroSection } from '@/components/hero-section';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useTrans } from '@/hooks/use-trans';
+import GuestLayout from '@/layouts/guest-layout';
+import { type SharedData } from '@/types';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import {
+    CheckCircle,
+    ChevronRight,
+    Clock,
+    Mail,
+    MessageSquare,
+    Phone,
+    Search,
+    Send,
+    Shield,
+    Ticket,
+    XCircle,
+} from 'lucide-react';
+
+interface UserTicket {
+    uuid: string;
+    reference: string;
+    subject: string;
+    status: string;
+    status_label: string;
+    status_color: string;
+    created_at: string;
+    updated_at: string;
+}
+
+interface TicketsPageProps extends SharedData {
+    flash?: {
+        success?: string;
+        error?: string;
+    };
+    prefill?: {
+        name: string;
+        email: string;
+    } | null;
+    userTickets?: UserTicket[];
+}
+
+export default function TicketsIndex() {
+    const { name, contact, flash, prefill, userTickets } = usePage<TicketsPageProps>().props;
+    const { trans } = useTrans();
+
+    // Ticket creation form - prefill with logged in user data
+    const { data, setData, post, processing, errors, reset } = useForm({
+        name: prefill?.name || '',
+        email: prefill?.email || '',
+        subject: '',
+        message: '',
+        priority: 'medium',
+    });
+
+    // Lookup form - prefill email for logged in users
+    const lookupForm = useForm({
+        reference: '',
+        email: prefill?.email || '',
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post('/tickets', {
+            onSuccess: () => {
+                reset();
+            },
+        });
+    };
+
+    const handleCheckStatus = (e: React.FormEvent) => {
+        e.preventDefault();
+        lookupForm.post('/tickets/lookup', {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    return (
+        <GuestLayout>
+            <Head title={trans('ticket.page_title', { app_name: name })}>
+                <meta
+                    name="description"
+                    content={trans('ticket.page_description', { app_name: name })}
+                />
+            </Head>
+
+            {/* Hero Section - Consistent with other pages */}
+            <HeroSection
+                badge={trans('ticket.hero_badge')}
+                title={trans('ticket.hero_title')}
+                description={trans('ticket.hero_description')}
+                showSearch={false}
+                showStats={false}
+            />
+
+            {/* Main Ticket Section */}
+            <section className="bg-gradient-to-b from-primary-50/50 to-white py-8 md:py-12">
+                <div className="container mx-auto px-4">
+                    <div className="mx-auto max-w-2xl">
+                        {/* Success Message */}
+                        {flash?.success && (
+                            <div className="mb-8 flex items-start gap-4 rounded-2xl border border-green-200 bg-gradient-to-r from-green-50 to-white p-6 shadow-sm">
+                                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-green-100">
+                                    <CheckCircle className="h-6 w-6 text-green-600" />
+                                </div>
+                                <div>
+                                    <h3 className="mb-1 font-bold text-green-900">
+                                        {trans('ticket.success_title')}
+                                    </h3>
+                                    <p className="text-sm text-green-700">
+                                        {flash.success}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Error Message */}
+                        {flash?.error && (
+                            <div className="mb-8 flex items-start gap-4 rounded-2xl border border-red-200 bg-gradient-to-r from-red-50 to-white p-6 shadow-sm">
+                                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-red-100">
+                                    <XCircle className="h-6 w-6 text-red-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-red-700">
+                                        {flash.error}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Your Tickets (logged in) or Lookup (guest) */}
+                        {userTickets && userTickets.length > 0 ? (
+                            <div className="mb-8 rounded-2xl border border-primary-100 bg-white p-6 shadow-sm">
+                                <div className="mb-4 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100">
+                                            <Ticket className="h-5 w-5 text-primary-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-primary-900">
+                                                Your Tickets
+                                            </h3>
+                                            <p className="text-sm text-primary-600">
+                                                {userTickets.length} ticket{userTickets.length !== 1 ? 's' : ''}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    {userTickets.map((ticket) => (
+                                        <Link
+                                            key={ticket.uuid}
+                                            href={`/tickets/${ticket.uuid}/${prefill?.email}`}
+                                            className="flex items-center justify-between rounded-xl border border-primary-100 bg-primary-50/50 p-4 transition-all hover:border-primary-200 hover:bg-primary-50"
+                                        >
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-center gap-2">
+                                                    <code className="rounded bg-primary-100 px-1.5 py-0.5 text-xs font-medium text-primary-700">
+                                                        {ticket.reference}
+                                                    </code>
+                                                    <span
+                                                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                                                            ticket.status === 'open'
+                                                                ? 'bg-green-100 text-green-700'
+                                                                : ticket.status === 'in_progress'
+                                                                  ? 'bg-blue-100 text-blue-700'
+                                                                  : ticket.status === 'waiting_on_customer'
+                                                                    ? 'bg-yellow-100 text-yellow-700'
+                                                                    : 'bg-gray-100 text-gray-700'
+                                                        }`}
+                                                    >
+                                                        {ticket.status_label}
+                                                    </span>
+                                                </div>
+                                                <p className="mt-1 truncate font-medium text-primary-900">
+                                                    {ticket.subject}
+                                                </p>
+                                                <p className="text-xs text-primary-500">
+                                                    Created {ticket.created_at}
+                                                </p>
+                                            </div>
+                                            <ChevronRight className="h-5 w-5 flex-shrink-0 text-primary-400" />
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : prefill ? (
+                            <div className="mb-8 rounded-2xl border border-primary-100 bg-white p-6 shadow-sm">
+                                <div className="flex items-center gap-3 text-primary-600">
+                                    <Ticket className="h-5 w-5" />
+                                    <p className="text-sm">
+                                        You don't have any support tickets yet. Submit one below if you need help.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="mb-8 rounded-2xl border border-primary-100 bg-white p-4 shadow-sm md:p-6">
+                                <div className="flex flex-col gap-3 md:flex-row md:items-start md:gap-4">
+                                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary-100 md:mt-0">
+                                        <Search className="h-6 w-6 text-primary-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h3 className="mb-2 text-lg font-bold text-primary-900 md:mb-1 md:text-base">
+                                            {trans('ticket.lookup_title')}
+                                        </h3>
+                                        <p className="mb-4 text-sm leading-relaxed text-primary-600 md:mb-4">
+                                            {trans('ticket.lookup_description')}
+                                        </p>
+                                        <form
+                                            onSubmit={handleCheckStatus}
+                                            className="space-y-3"
+                                        >
+                                            <div className="space-y-3 md:flex md:gap-3 md:space-y-0">
+                                                <Input
+                                                    value={lookupForm.data.reference}
+                                                    onChange={(e) => lookupForm.setData('reference', e.target.value)}
+                                                    placeholder="TKT-XXXXXXXX"
+                                                    required
+                                                    className="h-11 flex-1 text-base md:h-10"
+                                                />
+                                                <Input
+                                                    type="email"
+                                                    value={lookupForm.data.email}
+                                                    onChange={(e) => lookupForm.setData('email', e.target.value)}
+                                                    placeholder={trans('ticket.lookup_email_placeholder')}
+                                                    required
+                                                    className="h-11 flex-1 text-base md:h-10"
+                                                />
+                                            </div>
+                                            <Button
+                                                type="submit"
+                                                variant="outline"
+                                                className="h-11 w-full md:h-10 md:w-auto"
+                                                disabled={lookupForm.processing}
+                                            >
+                                                <Search className="mr-2 h-4 w-4" />
+                                                {trans('ticket.lookup_button')}
+                                            </Button>
+                                        </form>
+                                        {lookupForm.errors.reference && (
+                                            <p className="mt-2 text-sm text-red-500">{lookupForm.errors.reference}</p>
+                                        )}
+                                        {lookupForm.errors.email && (
+                                            <p className="mt-2 text-sm text-red-500">{lookupForm.errors.email}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Create New Ticket Form */}
+                        <div className="rounded-2xl border border-accent-200 bg-gradient-to-br from-accent-50/50 to-white p-6 shadow-sm md:p-8">
+                            <div className="mb-8 text-center">
+                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-300 to-accent-500 shadow-lg shadow-accent-400/30">
+                                    <Ticket className="h-8 w-8 text-accent-950" />
+                                </div>
+                                <h2 className="mb-2 text-2xl font-bold text-primary-900">
+                                    {trans('ticket.form_title')}
+                                </h2>
+                                <p className="text-sm text-primary-600">
+                                    {trans('ticket.form_description')}
+                                </p>
+
+                                {/* Trust Indicators */}
+                                <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-primary-500">
+                                    <span className="flex items-center gap-1">
+                                        <Clock className="h-3.5 w-3.5" />
+                                        {trans('ticket.badge_response')}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                        <Shield className="h-3.5 w-3.5" />
+                                        {trans('ticket.badge_secure')}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                {/* Name & Email */}
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="name">
+                                            {trans('ticket.field_name')} *
+                                        </Label>
+                                        <Input
+                                            id="name"
+                                            value={data.name}
+                                            onChange={(e) => setData('name', e.target.value)}
+                                            placeholder={trans('ticket.field_name_placeholder')}
+                                            className={errors.name ? 'border-red-500' : ''}
+                                            required
+                                        />
+                                        {errors.name && (
+                                            <p className="text-sm text-red-500">{errors.name}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email">
+                                            {trans('ticket.field_email')} *
+                                        </Label>
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            value={data.email}
+                                            onChange={(e) => setData('email', e.target.value)}
+                                            placeholder={trans('ticket.field_email_placeholder')}
+                                            className={errors.email ? 'border-red-500' : ''}
+                                            required
+                                        />
+                                        {errors.email && (
+                                            <p className="text-sm text-red-500">{errors.email}</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Subject & Priority */}
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="subject">
+                                            {trans('ticket.field_subject')} *
+                                        </Label>
+                                        <Input
+                                            id="subject"
+                                            value={data.subject}
+                                            onChange={(e) => setData('subject', e.target.value)}
+                                            placeholder={trans('ticket.field_subject_placeholder')}
+                                            className={errors.subject ? 'border-red-500' : ''}
+                                            required
+                                        />
+                                        {errors.subject && (
+                                            <p className="text-sm text-red-500">{errors.subject}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="priority">
+                                            {trans('ticket.field_priority')}
+                                        </Label>
+                                        <Select
+                                            value={data.priority}
+                                            onValueChange={(value) => setData('priority', value)}
+                                        >
+                                            <SelectTrigger id="priority">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="low">
+                                                    {trans('ticket.priority_low')}
+                                                </SelectItem>
+                                                <SelectItem value="medium">
+                                                    {trans('ticket.priority_medium')}
+                                                </SelectItem>
+                                                <SelectItem value="high">
+                                                    {trans('ticket.priority_high')}
+                                                </SelectItem>
+                                                <SelectItem value="urgent">
+                                                    {trans('ticket.priority_urgent')}
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+
+                                {/* Message */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="message">
+                                        {trans('ticket.field_message')} *
+                                    </Label>
+                                    <Textarea
+                                        id="message"
+                                        rows={6}
+                                        value={data.message}
+                                        onChange={(e) => setData('message', e.target.value)}
+                                        placeholder={trans('ticket.field_message_placeholder')}
+                                        className={errors.message ? 'border-red-500' : ''}
+                                        required
+                                    />
+                                    {errors.message && (
+                                        <p className="text-sm text-red-500">{errors.message}</p>
+                                    )}
+                                </div>
+
+                                {/* Submit Button */}
+                                <Button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="h-12 w-full text-base font-semibold"
+                                >
+                                    {processing ? (
+                                        <>
+                                            <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                            {trans('ticket.submitting')}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Send className="mr-2 h-5 w-5" />
+                                            {trans('ticket.submit_button')}
+                                        </>
+                                    )}
+                                </Button>
+
+                                <p className="text-center text-xs text-primary-500">
+                                    {trans('ticket.form_note')}
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Quick Contact Options */}
+            <section className="py-16 md:py-24">
+                <div className="container mx-auto px-4">
+                    <div className="mb-12 text-center">
+                        <h2 className="mb-4 text-2xl font-bold text-primary-900 md:text-3xl">
+                            {trans('ticket.quick_options_title')}
+                        </h2>
+                        <p className="text-muted-foreground">
+                            {trans('ticket.quick_options_desc')}
+                        </p>
+                    </div>
+
+                    <div className={`mx-auto grid max-w-4xl gap-6 ${
+                        // Count contact methods
+                        [contact?.supportEmail, contact?.phone, contact?.whatsapp].filter(Boolean).length === 1
+                            ? 'grid-cols-1 max-w-sm'
+                            : 'md:grid-cols-3'
+                    }`}>
+                        {/* Email Card */}
+                        <a
+                            href={`mailto:${contact?.supportEmail || ''}`}
+                            className="group flex flex-col items-center rounded-2xl border border-primary-100 bg-white p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-accent-200 hover:shadow-lg"
+                        >
+                            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-300 to-accent-500 shadow-lg shadow-accent-400/30 transition-transform duration-300 group-hover:scale-110">
+                                <Mail className="h-7 w-7 text-accent-950" />
+                            </div>
+                            <h3 className="mb-2 font-bold text-primary-900">
+                                {trans('ticket.quick_email')}
+                            </h3>
+                            <p className="text-sm font-medium text-primary-600">
+                                {contact?.supportEmail}
+                            </p>
+                        </a>
+
+                        {/* Phone Card */}
+                        {contact?.phone && (
+                            <a
+                                href={`tel:${contact.phone}`}
+                                className="group flex flex-col items-center rounded-2xl border border-primary-100 bg-white p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-accent-200 hover:shadow-lg"
+                            >
+                                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-300 to-primary-500 shadow-lg shadow-primary-400/30 transition-transform duration-300 group-hover:scale-110">
+                                    <Phone className="h-7 w-7 text-primary-950" />
+                                </div>
+                                <h3 className="mb-2 font-bold text-primary-900">
+                                    {trans('ticket.quick_phone')}
+                                </h3>
+                                <p className="text-sm font-medium text-primary-600">
+                                    {contact.phone}
+                                </p>
+                            </a>
+                        )}
+
+                        {/* WhatsApp Card */}
+                        {contact?.whatsapp && (
+                            <a
+                                href={`https://wa.me/${contact.whatsapp.replace(/\D/g, '')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group flex flex-col items-center rounded-2xl border border-primary-100 bg-white p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-accent-200 hover:shadow-lg"
+                            >
+                                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-green-400 to-green-600 shadow-lg shadow-green-400/30 transition-transform duration-300 group-hover:scale-110">
+                                    <MessageSquare className="h-7 w-7 text-green-950" />
+                                </div>
+                                <h3 className="mb-2 font-bold text-primary-900">
+                                    {trans('ticket.quick_whatsapp')}
+                                </h3>
+                                <p className="text-sm font-medium text-primary-600">
+                                    {trans('ticket.quick_whatsapp_desc')}
+                                </p>
+                            </a>
+                        )}
+                    </div>
+
+                    {/* Company Details */}
+                    {(contact?.companyName || contact?.companyAddress) && (
+                        <div className="mx-auto mt-12 max-w-2xl rounded-2xl border border-primary-100 bg-white p-6 text-center shadow-sm md:p-8">
+                            {contact?.companyName && (
+                                <h3 className="mb-4 text-xl font-bold text-primary-900">
+                                    {contact.companyName}
+                                </h3>
+                            )}
+                            <div className="space-y-2 text-sm text-primary-600">
+                                {contact?.companyAddress && (
+                                    <p>{contact.companyAddress}</p>
+                                )}
+                                {(contact?.companyPostalCode || contact?.companyCity) && (
+                                    <p>
+                                        {contact?.companyPostalCode && `${contact.companyPostalCode} `}
+                                        {contact?.companyCity}
+                                    </p>
+                                )}
+                                {contact?.companyCountry && (
+                                    <p>{contact.companyCountry}</p>
+                                )}
+                                {(contact?.companyVat || contact?.companyRegistration) && (
+                                    <div className="mt-4 border-t border-primary-100 pt-4">
+                                        {contact?.companyVat && (
+                                            <p className="font-medium">
+                                                <span className="text-primary-400">VAT:</span> {contact.companyVat}
+                                            </p>
+                                        )}
+                                        {contact?.companyRegistration && (
+                                            <p className="font-medium">
+                                                <span className="text-primary-400">Registration:</span> {contact.companyRegistration}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            <CTASection />
+        </GuestLayout>
+    );
+}

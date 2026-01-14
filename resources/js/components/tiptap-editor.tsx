@@ -1,29 +1,29 @@
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+import { Button } from '@/components/ui/button';
+import { Toggle } from '@/components/ui/toggle';
+import { cn } from '@/lib/utils';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Toggle } from '@/components/ui/toggle';
-import { Button } from '@/components/ui/button';
+import { EditorContent, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 import {
     Bold,
-    Italic,
-    Strikethrough,
     Code,
     Heading1,
     Heading2,
     Heading3,
+    Image as ImageIcon,
+    Italic,
+    Link as LinkIcon,
     List,
     ListOrdered,
-    Quote,
-    Undo,
-    Redo,
-    Link as LinkIcon,
-    Image as ImageIcon,
     Minus,
+    Quote,
+    Redo,
+    Strikethrough,
+    Undo,
 } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
-import { cn } from '@/lib/utils';
 
 interface TiptapEditorProps {
     content?: string;
@@ -89,43 +89,57 @@ export function TiptapEditor({
             return;
         }
 
-        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+        editor
+            .chain()
+            .focus()
+            .extendMarkRange('link')
+            .setLink({ href: url })
+            .run();
     }, [editor]);
 
-    const handleImageUpload = useCallback(async (file: File) => {
-        if (!editor || !uploadUrl) return;
+    const handleImageUpload = useCallback(
+        async (file: File) => {
+            if (!editor || !uploadUrl) return;
 
-        setIsUploading(true);
-        const formData = new FormData();
-        formData.append('image', file);
+            setIsUploading(true);
+            const formData = new FormData();
+            formData.append('image', file);
 
-        try {
-            const response = await fetch(uploadUrl, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content || '',
-                },
-            });
+            try {
+                const response = await fetch(uploadUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN':
+                            document.querySelector<HTMLMetaElement>(
+                                'meta[name="csrf-token"]',
+                            )?.content || '',
+                    },
+                });
 
-            if (response.ok) {
-                const { url } = await response.json();
-                editor.chain().focus().setImage({ src: url }).run();
+                if (response.ok) {
+                    const { url } = await response.json();
+                    editor.chain().focus().setImage({ src: url }).run();
+                }
+            } catch (error) {
+                console.error('Failed to upload image:', error);
+            } finally {
+                setIsUploading(false);
             }
-        } catch (error) {
-            console.error('Failed to upload image:', error);
-        } finally {
-            setIsUploading(false);
-        }
-    }, [editor, uploadUrl]);
+        },
+        [editor, uploadUrl],
+    );
 
-    const onFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            handleImageUpload(file);
-        }
-        e.target.value = '';
-    }, [handleImageUpload]);
+    const onFileChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const file = e.target.files?.[0];
+            if (file) {
+                handleImageUpload(file);
+            }
+            e.target.value = '';
+        },
+        [handleImageUpload],
+    );
 
     if (!editor) {
         return null;
@@ -137,7 +151,9 @@ export function TiptapEditor({
                 <Toggle
                     size="sm"
                     pressed={editor.isActive('bold')}
-                    onPressedChange={() => editor.chain().focus().toggleBold().run()}
+                    onPressedChange={() =>
+                        editor.chain().focus().toggleBold().run()
+                    }
                     aria-label="Bold"
                 >
                     <Bold className="size-4" />
@@ -145,7 +161,9 @@ export function TiptapEditor({
                 <Toggle
                     size="sm"
                     pressed={editor.isActive('italic')}
-                    onPressedChange={() => editor.chain().focus().toggleItalic().run()}
+                    onPressedChange={() =>
+                        editor.chain().focus().toggleItalic().run()
+                    }
                     aria-label="Italic"
                 >
                     <Italic className="size-4" />
@@ -153,7 +171,9 @@ export function TiptapEditor({
                 <Toggle
                     size="sm"
                     pressed={editor.isActive('strike')}
-                    onPressedChange={() => editor.chain().focus().toggleStrike().run()}
+                    onPressedChange={() =>
+                        editor.chain().focus().toggleStrike().run()
+                    }
                     aria-label="Strikethrough"
                 >
                     <Strikethrough className="size-4" />
@@ -161,18 +181,22 @@ export function TiptapEditor({
                 <Toggle
                     size="sm"
                     pressed={editor.isActive('code')}
-                    onPressedChange={() => editor.chain().focus().toggleCode().run()}
+                    onPressedChange={() =>
+                        editor.chain().focus().toggleCode().run()
+                    }
                     aria-label="Code"
                 >
                     <Code className="size-4" />
                 </Toggle>
 
-                <div className="mx-1 h-6 w-px bg-border self-center" />
+                <div className="mx-1 h-6 w-px self-center bg-border" />
 
                 <Toggle
                     size="sm"
                     pressed={editor.isActive('heading', { level: 1 })}
-                    onPressedChange={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                    onPressedChange={() =>
+                        editor.chain().focus().toggleHeading({ level: 1 }).run()
+                    }
                     aria-label="Heading 1"
                 >
                     <Heading1 className="size-4" />
@@ -180,7 +204,9 @@ export function TiptapEditor({
                 <Toggle
                     size="sm"
                     pressed={editor.isActive('heading', { level: 2 })}
-                    onPressedChange={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                    onPressedChange={() =>
+                        editor.chain().focus().toggleHeading({ level: 2 }).run()
+                    }
                     aria-label="Heading 2"
                 >
                     <Heading2 className="size-4" />
@@ -188,18 +214,22 @@ export function TiptapEditor({
                 <Toggle
                     size="sm"
                     pressed={editor.isActive('heading', { level: 3 })}
-                    onPressedChange={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                    onPressedChange={() =>
+                        editor.chain().focus().toggleHeading({ level: 3 }).run()
+                    }
                     aria-label="Heading 3"
                 >
                     <Heading3 className="size-4" />
                 </Toggle>
 
-                <div className="mx-1 h-6 w-px bg-border self-center" />
+                <div className="mx-1 h-6 w-px self-center bg-border" />
 
                 <Toggle
                     size="sm"
                     pressed={editor.isActive('bulletList')}
-                    onPressedChange={() => editor.chain().focus().toggleBulletList().run()}
+                    onPressedChange={() =>
+                        editor.chain().focus().toggleBulletList().run()
+                    }
                     aria-label="Bullet List"
                 >
                     <List className="size-4" />
@@ -207,7 +237,9 @@ export function TiptapEditor({
                 <Toggle
                     size="sm"
                     pressed={editor.isActive('orderedList')}
-                    onPressedChange={() => editor.chain().focus().toggleOrderedList().run()}
+                    onPressedChange={() =>
+                        editor.chain().focus().toggleOrderedList().run()
+                    }
                     aria-label="Ordered List"
                 >
                     <ListOrdered className="size-4" />
@@ -215,13 +247,15 @@ export function TiptapEditor({
                 <Toggle
                     size="sm"
                     pressed={editor.isActive('blockquote')}
-                    onPressedChange={() => editor.chain().focus().toggleBlockquote().run()}
+                    onPressedChange={() =>
+                        editor.chain().focus().toggleBlockquote().run()
+                    }
                     aria-label="Quote"
                 >
                     <Quote className="size-4" />
                 </Toggle>
 
-                <div className="mx-1 h-6 w-px bg-border self-center" />
+                <div className="mx-1 h-6 w-px self-center bg-border" />
 
                 <Toggle
                     size="sm"
@@ -254,7 +288,9 @@ export function TiptapEditor({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => editor.chain().focus().setHorizontalRule().run()}
+                    onClick={() =>
+                        editor.chain().focus().setHorizontalRule().run()
+                    }
                     className="h-8 px-2"
                 >
                     <Minus className="size-4" />

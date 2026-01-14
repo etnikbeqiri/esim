@@ -1,6 +1,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import {
     Table,
     TableBody,
@@ -9,6 +15,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useTrans } from '@/hooks/use-trans';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type InvoiceListItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
@@ -22,11 +29,6 @@ interface Props {
         total: number;
     };
 }
-
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Client', href: '/client' },
-    { title: 'Invoices', href: '/client/invoices' },
-];
 
 function getStatusBadgeClass(color: string): string {
     const colors: Record<string, string> = {
@@ -52,43 +54,86 @@ function getTypeIcon(type: string) {
 }
 
 export default function InvoicesIndex({ invoices }: Props) {
+    const { trans } = useTrans();
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Client', href: '/client' },
+        { title: trans('client_invoices.title'), href: '/client/invoices' },
+    ];
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Invoices" />
+            <Head title={trans('client_invoices.title')} />
             <div className="flex flex-col gap-6 p-4">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-semibold">Invoices</h1>
-                        <p className="text-muted-foreground">View and download your invoices</p>
+                        <h1 className="text-2xl font-semibold">
+                            {trans('client_invoices.title')}
+                        </h1>
+                        <p className="text-muted-foreground">
+                            {trans('client_invoices.subtitle')}
+                        </p>
                     </div>
                 </div>
 
                 {/* Invoices Table */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Invoice History</CardTitle>
-                        <CardDescription>{invoices.total} invoice{invoices.total !== 1 ? 's' : ''}</CardDescription>
+                        <CardTitle>
+                            {trans('client_invoices.history_title')}
+                        </CardTitle>
+                        <CardDescription>
+                            {trans('client_invoices.history_desc', {
+                                count: invoices.total.toString(),
+                            })}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         {invoices.data.length === 0 ? (
                             <div className="py-12 text-center">
                                 <FileText className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                                <p className="mt-4 text-muted-foreground">No invoices yet</p>
+                                <p className="mt-4 text-muted-foreground">
+                                    {trans('client_invoices.no_invoices')}
+                                </p>
                                 <p className="mt-1 text-sm text-muted-foreground">
-                                    Invoices will appear here after you make purchases or top-ups.
+                                    {trans('client_invoices.no_invoices_desc')}
                                 </p>
                             </div>
                         ) : (
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Invoice</TableHead>
-                                        <TableHead>Type</TableHead>
-                                        <TableHead>Date</TableHead>
-                                        <TableHead>Amount</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
+                                        <TableHead>
+                                            {trans(
+                                                'client_invoices.table.invoice',
+                                            )}
+                                        </TableHead>
+                                        <TableHead>
+                                            {trans(
+                                                'client_invoices.table.type',
+                                            )}
+                                        </TableHead>
+                                        <TableHead>
+                                            {trans(
+                                                'client_invoices.table.date',
+                                            )}
+                                        </TableHead>
+                                        <TableHead>
+                                            {trans(
+                                                'client_invoices.table.amount',
+                                            )}
+                                        </TableHead>
+                                        <TableHead>
+                                            {trans(
+                                                'client_invoices.table.status',
+                                            )}
+                                        </TableHead>
+                                        <TableHead className="text-right">
+                                            {trans(
+                                                'client_invoices.table.actions',
+                                            )}
+                                        </TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -100,7 +145,9 @@ export default function InvoicesIndex({ invoices }: Props) {
                                             <TableCell>
                                                 <div className="flex items-center gap-2">
                                                     {getTypeIcon(invoice.type)}
-                                                    <span>{invoice.type_label}</span>
+                                                    <span>
+                                                        {invoice.type_label}
+                                                    </span>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-muted-foreground">
@@ -112,23 +159,41 @@ export default function InvoicesIndex({ invoices }: Props) {
                                             <TableCell>
                                                 <Badge
                                                     variant="outline"
-                                                    className={getStatusBadgeClass(invoice.status_color)}
+                                                    className={getStatusBadgeClass(
+                                                        invoice.status_color,
+                                                    )}
                                                 >
                                                     {invoice.status_label}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-2">
-                                                    <Button variant="ghost" size="sm" asChild>
-                                                        <Link href={`/client/invoices/${invoice.uuid}`}>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        asChild
+                                                    >
+                                                        <Link
+                                                            href={`/client/invoices/${invoice.uuid}`}
+                                                        >
                                                             <Eye className="mr-1 h-4 w-4" />
-                                                            View
+                                                            {trans(
+                                                                'client_invoices.actions.view',
+                                                            )}
                                                         </Link>
                                                     </Button>
-                                                    <Button variant="ghost" size="sm" asChild>
-                                                        <a href={`/client/invoices/${invoice.uuid}/download`}>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        asChild
+                                                    >
+                                                        <a
+                                                            href={`/client/invoices/${invoice.uuid}/download`}
+                                                        >
                                                             <Download className="mr-1 h-4 w-4" />
-                                                            PDF
+                                                            {trans(
+                                                                'client_invoices.actions.download_pdf',
+                                                            )}
                                                         </a>
                                                     </Button>
                                                 </div>
@@ -144,12 +209,21 @@ export default function InvoicesIndex({ invoices }: Props) {
                 {/* Pagination */}
                 {invoices.last_page > 1 && (
                     <div className="flex justify-center gap-2">
-                        {Array.from({ length: Math.min(invoices.last_page, 10) }, (_, i) => i + 1).map((page) => (
+                        {Array.from(
+                            { length: Math.min(invoices.last_page, 10) },
+                            (_, i) => i + 1,
+                        ).map((page) => (
                             <Button
                                 key={page}
-                                variant={page === invoices.current_page ? 'default' : 'outline'}
+                                variant={
+                                    page === invoices.current_page
+                                        ? 'default'
+                                        : 'outline'
+                                }
                                 size="sm"
-                                onClick={() => router.get('/client/invoices', { page })}
+                                onClick={() =>
+                                    router.get('/client/invoices', { page })
+                                }
                             >
                                 {page}
                             </Button>

@@ -1,18 +1,18 @@
 import { cn } from '@/lib/utils';
-import {
-    VisaFlatRoundedIcon,
-    MastercardFlatRoundedIcon,
-    AmexIcon,
-    MaestroFlatRoundedIcon,
-    DiscoverFlatRoundedIcon,
-    DinersClubFlatRoundedIcon,
-    JCBFlatRoundedIcon,
-    UnionPayFlatRoundedIcon,
-    PayPalFlatRoundedIcon,
-    AlipayFlatRoundedIcon,
-    GenericFlatRoundedIcon,
-} from 'react-svg-credit-card-payment-icons';
 import { Wallet } from 'lucide-react';
+import {
+    AlipayFlatRoundedIcon,
+    AmexIcon,
+    DinersClubFlatRoundedIcon,
+    DiscoverFlatRoundedIcon,
+    GenericFlatRoundedIcon,
+    JCBFlatRoundedIcon,
+    MaestroFlatRoundedIcon,
+    MastercardFlatRoundedIcon,
+    PayPalFlatRoundedIcon,
+    UnionPayFlatRoundedIcon,
+    VisaFlatRoundedIcon,
+} from 'react-svg-credit-card-payment-icons';
 
 interface PaymentMethodIconsProps {
     methods: Array<{ name: string; icon: string }>;
@@ -34,7 +34,10 @@ const iconComponents: Record<string, React.ComponentType<any>> = {
     generic: GenericFlatRoundedIcon,
 };
 
-export function PaymentMethodIcons({ methods, className }: PaymentMethodIconsProps) {
+export function PaymentMethodIcons({
+    methods,
+    className,
+}: PaymentMethodIconsProps) {
     return (
         <div className={cn('flex flex-wrap items-center gap-2', className)}>
             {methods.map((method) => {

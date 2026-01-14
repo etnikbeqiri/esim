@@ -255,21 +255,7 @@ export default function BlogIndex({ articles, meta }: Props) {
                                                     </p>
                                                 )}
 
-                                                <div className="mt-auto flex items-center justify-between border-t border-primary-50 pt-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-primary-200 to-primary-300 text-[10px] font-bold text-primary-800">
-                                                            {article.author?.name?.charAt(
-                                                                0,
-                                                            ) || 'A'}
-                                                        </div>
-                                                        <span className="text-xs font-medium text-primary-500">
-                                                            {
-                                                                article.author
-                                                                    ?.name
-                                                            }
-                                                        </span>
-                                                    </div>
-
+                                                <div className="mt-auto flex items-center justify-end border-t border-primary-50 pt-4">
                                                     <span className="inline-flex items-center gap-1.5 text-xs font-bold tracking-wide text-primary-600 uppercase transition-colors group-hover:text-accent-600">
                                                         {trans(
                                                             'blog.article.read_article',

@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
-import { usePage } from '@inertiajs/react';
 import { type SharedData } from '@/types';
+import { usePage } from '@inertiajs/react';
+import { useEffect, useRef } from 'react';
 
 interface PayseraTrustBadgeProps {
     projectId?: string;
@@ -16,7 +16,8 @@ export function PayseraTrustBadge({
     const { payment } = usePage<SharedData>().props;
 
     // Check if Paysera is in the active providers list
-    const isEnabled = payment?.providers?.some(p => p.id === 'paysera') ?? false;
+    const isEnabled =
+        payment?.providers?.some((p) => p.id === 'paysera') ?? false;
 
     useEffect(() => {
         // Only load script if Paysera is enabled and not already loaded

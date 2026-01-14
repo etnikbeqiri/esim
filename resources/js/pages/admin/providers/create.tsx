@@ -47,10 +47,16 @@ export default function ProvidersCreate() {
                                     <Input
                                         id="name"
                                         value={data.name}
-                                        onChange={(e) => setData('name', e.target.value)}
+                                        onChange={(e) =>
+                                            setData('name', e.target.value)
+                                        }
                                         placeholder="SMSPool"
                                     />
-                                    {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
+                                    {errors.name && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.name}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -58,23 +64,37 @@ export default function ProvidersCreate() {
                                     <Input
                                         id="slug"
                                         value={data.slug}
-                                        onChange={(e) => setData('slug', e.target.value)}
+                                        onChange={(e) =>
+                                            setData('slug', e.target.value)
+                                        }
                                         placeholder="smspool"
                                     />
-                                    {errors.slug && <p className="text-sm text-destructive">{errors.slug}</p>}
+                                    {errors.slug && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.slug}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="api_base_url">API Base URL</Label>
+                                <Label htmlFor="api_base_url">
+                                    API Base URL
+                                </Label>
                                 <Input
                                     id="api_base_url"
                                     type="url"
                                     value={data.api_base_url}
-                                    onChange={(e) => setData('api_base_url', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('api_base_url', e.target.value)
+                                    }
                                     placeholder="https://api.provider.com"
                                 />
-                                {errors.api_base_url && <p className="text-sm text-destructive">{errors.api_base_url}</p>}
+                                {errors.api_base_url && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.api_base_url}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="space-y-2">
@@ -83,34 +103,62 @@ export default function ProvidersCreate() {
                                     id="api_key"
                                     type="password"
                                     value={data.api_key}
-                                    onChange={(e) => setData('api_key', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('api_key', e.target.value)
+                                    }
                                     placeholder="Enter API key"
                                 />
-                                {errors.api_key && <p className="text-sm text-destructive">{errors.api_key}</p>}
+                                {errors.api_key && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.api_key}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="rate_limit_ms">Rate Limit (ms)</Label>
+                                    <Label htmlFor="rate_limit_ms">
+                                        Rate Limit (ms)
+                                    </Label>
                                     <Input
                                         id="rate_limit_ms"
                                         type="number"
                                         value={data.rate_limit_ms}
-                                        onChange={(e) => setData('rate_limit_ms', parseInt(e.target.value))}
+                                        onChange={(e) =>
+                                            setData(
+                                                'rate_limit_ms',
+                                                parseInt(e.target.value),
+                                            )
+                                        }
                                     />
-                                    {errors.rate_limit_ms && <p className="text-sm text-destructive">{errors.rate_limit_ms}</p>}
+                                    {errors.rate_limit_ms && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.rate_limit_ms}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="markup_percentage">Markup (%)</Label>
+                                    <Label htmlFor="markup_percentage">
+                                        Markup (%)
+                                    </Label>
                                     <Input
                                         id="markup_percentage"
                                         type="number"
                                         step="0.01"
                                         value={data.markup_percentage}
-                                        onChange={(e) => setData('markup_percentage', parseFloat(e.target.value))}
+                                        onChange={(e) =>
+                                            setData(
+                                                'markup_percentage',
+                                                parseFloat(e.target.value),
+                                            )
+                                        }
                                     />
-                                    {errors.markup_percentage && <p className="text-sm text-destructive">{errors.markup_percentage}</p>}
+                                    {errors.markup_percentage && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.markup_percentage}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
@@ -118,7 +166,9 @@ export default function ProvidersCreate() {
                                 <Checkbox
                                     id="is_active"
                                     checked={data.is_active}
-                                    onCheckedChange={(checked) => setData('is_active', !!checked)}
+                                    onCheckedChange={(checked) =>
+                                        setData('is_active', !!checked)
+                                    }
                                 />
                                 <Label htmlFor="is_active">Active</Label>
                             </div>

@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { useAppearance } from '@/hooks/use-appearance';
 import { Sun } from 'lucide-react';
 import { HTMLAttributes } from 'react';
 
@@ -8,7 +7,10 @@ export default function AppearanceToggleDropdown({
     ...props
 }: HTMLAttributes<HTMLDivElement>) {
     return (
-        <div className={`${className} pointer-events-none opacity-50`} {...props}>
+        <div
+            className={`${className} pointer-events-none opacity-50`}
+            {...props}
+        >
             <Button
                 variant="ghost"
                 size="icon"
