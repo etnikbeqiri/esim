@@ -86,7 +86,8 @@ COPY --chown=www-data:www-data . .
 # Run composer scripts that need the full codebase
 RUN composer dump-autoload --optimize
 
-# Build frontend assets
+COPY --chown=www-data:www-data .env .env
+
 RUN npm run build
 
 # Create storage link
