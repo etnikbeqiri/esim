@@ -124,6 +124,8 @@ return [
             'middle_east' => 'Middle East',
             'caribbean' => 'Caribbean',
             'central_america' => 'Central America',
+            'regional' => 'Regional',
+            'virtuals' => 'Virtual',
             'local' => 'Local',
         ],
         'empty' => [

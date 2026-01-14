@@ -121,6 +121,8 @@ return [
             'middle_east' => 'Lindja e Mesme',
             'caribbean' => 'Karaibet',
             'central_america' => 'Amerika Qendrore',
+            'regional' => 'Rajonale',
+            'virtuals' => 'Virtuale',
             'local' => 'Lokale',
         ],
         'empty' => [
