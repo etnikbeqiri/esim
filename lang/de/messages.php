@@ -555,10 +555,12 @@ return [
             'description' => 'Unser Support-Team ist hier, um Ihnen zu helfen',
             'email_support' => [
                 'title' => 'E-Mail-Support',
+                'response_time' => 'Antwort normalerweise innerhalb von 24 Stunden',
             ],
             'view_all_faqs' => [
                 'title' => 'Alle Fragen anzeigen',
                 'description' => 'Durchsuchen Sie die vollständige FAQ-Liste',
+                'count' => '50+ Fragen beantwortet',
             ],
         ],
     ],
@@ -1496,6 +1498,9 @@ return [
         'quick_phone' => 'Anrufen',
         'quick_whatsapp' => 'WhatsApp',
         'quick_whatsapp_desc' => 'Chatten Sie mit uns',
+        'email_response_time' => 'Antwort normalerweise innerhalb von 24 Stunden',
+        'phone_hours' => 'Mo-Fr, 9:00 - 17:00 MEZ',
+        'whatsapp_response_time' => 'Antwortet normalerweise innerhalb von Minuten',
 
         // Lookup section
         'lookup_title' => 'Ticket bereits erstellt?',

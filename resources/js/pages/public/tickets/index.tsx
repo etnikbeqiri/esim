@@ -422,54 +422,62 @@ export default function TicketsIndex() {
             </section>
 
             {/* Quick Contact Options */}
-            <section className="py-16 md:py-24">
-                <div className="container mx-auto px-4">
-                    <div className="mb-12 text-center">
-                        <h2 className="mb-4 text-2xl font-bold text-primary-900 md:text-3xl">
+            <section className="relative overflow-hidden border-t border-primary-100 py-8 md:py-16">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-accent-50/30" />
+
+                <div className="relative z-10 container mx-auto px-4">
+                    <div className="mb-5 text-center md:mb-8">
+                        <h2 className="mb-2 text-lg font-bold text-primary-900 md:text-2xl">
                             {trans('ticket.quick_options_title')}
                         </h2>
-                        <p className="text-muted-foreground">
+                        <p className="text-sm text-primary-600 md:text-base">
                             {trans('ticket.quick_options_desc')}
                         </p>
                     </div>
 
-                    <div className={`mx-auto grid max-w-4xl gap-6 ${
-                        // Count contact methods
-                        [contact?.supportEmail, contact?.phone, contact?.whatsapp].filter(Boolean).length === 1
-                            ? 'grid-cols-1 max-w-sm'
-                            : 'md:grid-cols-3'
-                    }`}>
+                    {/* Contact Cards Grid */}
+                    <div className="mx-auto grid max-w-4xl gap-3 md:grid-cols-3 md:gap-5">
                         {/* Email Card */}
                         <a
                             href={`mailto:${contact?.supportEmail || ''}`}
-                            className="group flex flex-col items-center rounded-2xl border border-primary-100 bg-white p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-accent-200 hover:shadow-lg"
+                            className="group flex items-center gap-3 rounded-xl border border-primary-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:flex-col md:rounded-2xl md:p-6 md:text-center"
                         >
-                            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-300 to-accent-500 shadow-lg shadow-accent-400/30 transition-transform duration-300 group-hover:scale-110">
-                                <Mail className="h-7 w-7 text-accent-950" />
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-300 transition-colors group-hover:bg-accent-400 md:mb-4 md:h-12 md:w-12 md:rounded-xl">
+                                <Mail className="h-5 w-5 text-accent-950 md:h-6 md:w-6" />
                             </div>
-                            <h3 className="mb-2 font-bold text-primary-900">
-                                {trans('ticket.quick_email')}
-                            </h3>
-                            <p className="text-sm font-medium text-primary-600">
-                                {contact?.supportEmail}
-                            </p>
+                            <div>
+                                <h3 className="text-sm font-bold text-primary-900 md:mb-1 md:text-base">
+                                    {trans('ticket.quick_email')}
+                                </h3>
+                                <p className="text-xs text-primary-600 md:text-sm">
+                                    {contact?.supportEmail}
+                                </p>
+                                <p className="mt-1 text-[10px] text-primary-400 md:mt-2 md:text-xs">
+                                    {trans('ticket.email_response_time')}
+                                </p>
+                            </div>
                         </a>
 
                         {/* Phone Card */}
                         {contact?.phone && (
                             <a
                                 href={`tel:${contact.phone}`}
-                                className="group flex flex-col items-center rounded-2xl border border-primary-100 bg-white p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-accent-200 hover:shadow-lg"
+                                className="group flex items-center gap-3 rounded-xl border border-primary-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:flex-col md:rounded-2xl md:p-6 md:text-center"
                             >
-                                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-300 to-primary-500 shadow-lg shadow-primary-400/30 transition-transform duration-300 group-hover:scale-110">
-                                    <Phone className="h-7 w-7 text-primary-950" />
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100 transition-colors group-hover:bg-primary-200 md:mb-4 md:h-12 md:w-12 md:rounded-xl">
+                                    <Phone className="h-5 w-5 text-primary-600 md:h-6 md:w-6" />
                                 </div>
-                                <h3 className="mb-2 font-bold text-primary-900">
-                                    {trans('ticket.quick_phone')}
-                                </h3>
-                                <p className="text-sm font-medium text-primary-600">
-                                    {contact.phone}
-                                </p>
+                                <div>
+                                    <h3 className="text-sm font-bold text-primary-900 md:mb-1 md:text-base">
+                                        {trans('ticket.quick_phone')}
+                                    </h3>
+                                    <p className="text-xs text-primary-600 md:text-sm">
+                                        {contact.phone}
+                                    </p>
+                                    <p className="mt-1 text-[10px] text-primary-400 md:mt-2 md:text-xs">
+                                        {trans('ticket.phone_hours')}
+                                    </p>
+                                </div>
                             </a>
                         )}
 
@@ -479,56 +487,59 @@ export default function TicketsIndex() {
                                 href={`https://wa.me/${contact.whatsapp.replace(/\D/g, '')}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="group flex flex-col items-center rounded-2xl border border-primary-100 bg-white p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-accent-200 hover:shadow-lg"
+                                className="group flex items-center gap-3 rounded-xl border border-primary-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:flex-col md:rounded-2xl md:p-6 md:text-center"
                             >
-                                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-green-400 to-green-600 shadow-lg shadow-green-400/30 transition-transform duration-300 group-hover:scale-110">
-                                    <MessageSquare className="h-7 w-7 text-green-950" />
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-100 transition-colors group-hover:bg-green-200 md:mb-4 md:h-12 md:w-12 md:rounded-xl">
+                                    <MessageSquare className="h-5 w-5 text-green-600 md:h-6 md:w-6" />
                                 </div>
-                                <h3 className="mb-2 font-bold text-primary-900">
-                                    {trans('ticket.quick_whatsapp')}
-                                </h3>
-                                <p className="text-sm font-medium text-primary-600">
-                                    {trans('ticket.quick_whatsapp_desc')}
-                                </p>
+                                <div>
+                                    <h3 className="text-sm font-bold text-primary-900 md:mb-1 md:text-base">
+                                        {trans('ticket.quick_whatsapp')}
+                                    </h3>
+                                    <p className="text-xs text-primary-600 md:text-sm">
+                                        {trans('ticket.quick_whatsapp_desc')}
+                                    </p>
+                                    <p className="mt-1 text-[10px] text-primary-400 md:mt-2 md:text-xs">
+                                        {trans('ticket.whatsapp_response_time')}
+                                    </p>
+                                </div>
                             </a>
                         )}
                     </div>
 
                     {/* Company Details */}
                     {(contact?.companyName || contact?.companyAddress) && (
-                        <div className="mx-auto mt-12 max-w-2xl rounded-2xl border border-primary-100 bg-white p-6 text-center shadow-sm md:p-8">
-                            {contact?.companyName && (
-                                <h3 className="mb-4 text-xl font-bold text-primary-900">
-                                    {contact.companyName}
-                                </h3>
-                            )}
-                            <div className="space-y-2 text-sm text-primary-600">
-                                {contact?.companyAddress && (
-                                    <p>{contact.companyAddress}</p>
-                                )}
-                                {(contact?.companyPostalCode || contact?.companyCity) && (
-                                    <p>
-                                        {contact?.companyPostalCode && `${contact.companyPostalCode} `}
-                                        {contact?.companyCity}
-                                    </p>
-                                )}
-                                {contact?.companyCountry && (
-                                    <p>{contact.companyCountry}</p>
-                                )}
-                                {(contact?.companyVat || contact?.companyRegistration) && (
-                                    <div className="mt-4 border-t border-primary-100 pt-4">
-                                        {contact?.companyVat && (
-                                            <p className="font-medium">
-                                                <span className="text-primary-400">VAT:</span> {contact.companyVat}
-                                            </p>
+                        <div className="mx-auto mt-6 max-w-2xl rounded-xl border border-primary-100 bg-white p-4 shadow-sm md:mt-10 md:rounded-2xl md:p-6">
+                            <div className="flex items-start gap-3 md:gap-4">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100 md:h-12 md:w-12 md:rounded-xl">
+                                    <svg className="h-5 w-5 text-primary-600 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                </div>
+                                <div className="flex-1">
+                                    {contact?.companyName && (
+                                        <h3 className="mb-1 text-sm font-bold text-primary-900 md:text-base">
+                                            {contact.companyName}
+                                        </h3>
+                                    )}
+                                    <div className="text-xs text-primary-600 md:text-sm">
+                                        {contact?.companyAddress && <p>{contact.companyAddress}</p>}
+                                        {(contact?.companyPostalCode || contact?.companyCity) && (
+                                            <p>{contact?.companyPostalCode} {contact?.companyCity}</p>
                                         )}
-                                        {contact?.companyRegistration && (
-                                            <p className="font-medium">
-                                                <span className="text-primary-400">Registration:</span> {contact.companyRegistration}
-                                            </p>
-                                        )}
+                                        {contact?.companyCountry && <p>{contact.companyCountry}</p>}
                                     </div>
-                                )}
+                                    {(contact?.companyVat || contact?.companyRegistration) && (
+                                        <div className="mt-2 flex flex-wrap gap-2 text-[10px] text-primary-400 md:mt-3 md:gap-3 md:text-xs">
+                                            {contact?.companyVat && (
+                                                <span>VAT: {contact.companyVat}</span>
+                                            )}
+                                            {contact?.companyRegistration && (
+                                                <span>Reg: {contact.companyRegistration}</span>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}

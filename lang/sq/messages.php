@@ -552,10 +552,12 @@ return [
             'description' => 'Ekipi ynë i mbështetjes është këtu për t\'ju ndihmuar',
             'email_support' => [
                 'title' => 'Mbështetje me Email',
+                'response_time' => 'Zakonisht përgjigjet brenda 24 orëve',
             ],
             'view_all_faqs' => [
                 'title' => 'Shiko Të Gjitha Pyetjet',
                 'description' => 'Shfletoni listën e plotë të pyetjeve të shpeshta',
+                'count' => '50+ pyetje të përgjiguara',
             ],
         ],
     ],
@@ -1580,6 +1582,9 @@ return [
         'quick_phone' => 'Na Thirr',
         'quick_whatsapp' => 'WhatsApp',
         'quick_whatsapp_desc' => 'Bisedo me ne',
+        'email_response_time' => 'Zakonisht përgjigjet brenda 24 orëve',
+        'phone_hours' => 'Hën-Pre, 9:00 - 17:00 CET',
+        'whatsapp_response_time' => 'Zakonisht përgjigjet brenda minutave',
 
         // Lookup section
         'lookup_title' => 'Keni Krijuar Tashmë një Tiketë?',

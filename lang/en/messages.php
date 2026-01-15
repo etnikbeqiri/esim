@@ -555,10 +555,12 @@ return [
             'description' => 'Our support team is here to assist you',
             'email_support' => [
                 'title' => 'Email Support',
+                'response_time' => 'Typically responds within 24 hours',
             ],
             'view_all_faqs' => [
                 'title' => 'View All FAQs',
                 'description' => 'Browse complete FAQ list',
+                'count' => '50+ questions answered',
             ],
         ],
     ],
@@ -1496,6 +1498,9 @@ return [
         'quick_phone' => 'Call Us',
         'quick_whatsapp' => 'WhatsApp',
         'quick_whatsapp_desc' => 'Chat with us',
+        'email_response_time' => 'Typically responds within 24 hours',
+        'phone_hours' => 'Mon-Fri, 9:00 - 17:00 CET',
+        'whatsapp_response_time' => 'Usually replies within minutes',
 
         // Lookup section
         'lookup_title' => 'Already Submitted a Ticket?',
