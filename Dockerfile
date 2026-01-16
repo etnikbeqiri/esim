@@ -30,13 +30,17 @@ RUN mkdir -p /var/log/supervisor \
 RUN docker-php-ext-configure gd \
     --with-freetype \
     --with-jpeg \
-    --with-webp \
-    && docker-php-ext-install -j$(nproc) \
-    pdo_mysql \
-    opcache \
-    gd \
-    zip \
-    && apk del --no-cache \
+    --with-webp
+
+RUN docker-php-ext-install -j$(nproc) pdo_mysql
+RUN docker-php-ext-install -j$(nproc) gd
+RUN docker-php-ext-install -j$(nproc) zip
+
+# Enable opcache (built-in with PHP 8.5)
+RUN docker-php-ext-enable opcache || true
+
+# Clean up dev dependencies
+RUN apk del --no-cache \
     freetype-dev \
     libjpeg-turbo-dev \
     libpng-dev \
