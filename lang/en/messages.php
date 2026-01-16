@@ -13,6 +13,7 @@ return [
         'destinations' => 'Destinations',
         'how_it_works' => 'How it Works',
         'blog' => 'Blog',
+        'devices' => 'Devices',
         'login' => 'Log in',
         'get_started' => 'Get Started',
         'my_account' => 'My Account',
@@ -1627,6 +1628,38 @@ return [
         'pin' => 'PIN',
         'puk' => 'PUK',
         'apn' => 'APN',
+    ],
+
+    'devices_page' => [
+        'meta_title' => 'eSIM Compatible Devices - Check Your Phone',
+        'meta_description' => 'Check if your phone supports eSIM. Browse our complete list of eSIM compatible devices from Apple, Samsung, Google, and more.',
+        'title' => 'eSIM Compatible Devices',
+        'description' => 'Check if your phone supports eSIM technology. Browse our comprehensive list of compatible devices from all major brands.',
+        'hero' => [
+            'badge' => 'Device Compatibility',
+            'title' => 'Check Your',
+            'title_highlight' => 'Device Compatibility',
+        ],
+        'search_placeholder' => 'Search devices...',
+        'all_brands' => 'All',
+        'other_brands' => 'Other',
+        'detection' => [
+            'supported_title' => 'Your device supports eSIM!',
+            'supported_description' => 'We detected you\'re using a :device, which supports eSIM technology. You can purchase and activate an eSIM on this device.',
+            'not_recognized_title' => 'Device not recognized',
+            'not_recognized_description' => 'We couldn\'t automatically detect your device. Please search for your phone model below to check eSIM compatibility.',
+        ],
+        'results' => [
+            'showing' => 'Showing :count device',
+            'showing_plural' => 'Showing :count devices',
+            'matching' => 'matching ":query"',
+        ],
+        'empty' => [
+            'title' => 'No devices found',
+            'no_filter' => 'No devices available for this filter',
+            'try_different' => 'Try a different search term',
+            'clear_filters' => 'Clear Filters',
+        ],
     ],
 ];
 

@@ -10,6 +10,7 @@ return [
         'destinations' => 'Destinacionet',
         'how_it_works' => 'Si Punon',
         'blog' => 'Blogu',
+        'devices' => 'Pajisjet',
         'login' => 'Kyçu',
         'get_started' => 'Fillo Tani',
         'my_account' => 'Llogaria Ime',
@@ -1711,5 +1712,37 @@ return [
         'pin' => 'PIN',
         'puk' => 'PUK',
         'apn' => 'APN',
+    ],
+
+    'devices_page' => [
+        'meta_title' => 'Pajisje të Përputhshme me eSIM - Kontrollo Telefonin Tënd',
+        'meta_description' => 'Kontrollo nëse telefoni yt mbështet eSIM. Shfletoni listën tonë të plotë të pajisjeve të përputhshme me eSIM nga Apple, Samsung, Google dhe më shumë.',
+        'title' => 'Pajisje të Përputhshme me eSIM',
+        'description' => 'Kontrollo nëse telefoni yt mbështet teknologjinë eSIM. Shfletoni listën tonë të plotë të pajisjeve të përputhshme nga të gjitha markat kryesore.',
+        'hero' => [
+            'badge' => 'Përputhshmëria e Pajisjes',
+            'title' => 'Kontrollo',
+            'title_highlight' => 'Përputhshmërinë e Pajisjes',
+        ],
+        'search_placeholder' => 'Kërko pajisje...',
+        'all_brands' => 'Të gjitha',
+        'other_brands' => 'Të tjera',
+        'detection' => [
+            'supported_title' => 'Pajisja juaj mbështet eSIM!',
+            'supported_description' => 'Kemi zbuluar që po përdorni :device, e cila mbështet teknologjinë eSIM. Mund të blini dhe aktivizoni një eSIM në këtë pajisje.',
+            'not_recognized_title' => 'Pajisja nuk u njoh',
+            'not_recognized_description' => 'Nuk mundëm të zbulojmë automatikisht pajisjen tuaj. Ju lutemi kërkoni modelin e telefonit tuaj më poshtë për të kontrolluar përputhshmërinë me eSIM.',
+        ],
+        'results' => [
+            'showing' => 'Duke shfaqur :count pajisje',
+            'showing_plural' => 'Duke shfaqur :count pajisje',
+            'matching' => 'që përputhen me ":query"',
+        ],
+        'empty' => [
+            'title' => 'Nuk u gjetën pajisje',
+            'no_filter' => 'Nuk ka pajisje të disponueshme për këtë filtër',
+            'try_different' => 'Provoni një term tjetër kërkimi',
+            'clear_filters' => 'Pastro Filtrat',
+        ],
     ],
 ];

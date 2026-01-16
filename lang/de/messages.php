@@ -13,6 +13,7 @@ return [
         'destinations' => 'Reiseziele',
         'how_it_works' => 'So funktioniert\'s',
         'blog' => 'Blog',
+        'devices' => 'Geräte',
         'login' => 'Anmelden',
         'get_started' => 'Loslegen',
         'my_account' => 'Mein Konto',
@@ -1627,6 +1628,38 @@ return [
         'pin' => 'PIN',
         'puk' => 'PUK',
         'apn' => 'APN',
+    ],
+
+    'devices_page' => [
+        'meta_title' => 'eSIM-kompatible Geräte - Prüfen Sie Ihr Handy',
+        'meta_description' => 'Prüfen Sie, ob Ihr Handy eSIM unterstützt. Durchsuchen Sie unsere vollständige Liste eSIM-kompatibler Geräte von Apple, Samsung, Google und mehr.',
+        'title' => 'eSIM-kompatible Geräte',
+        'description' => 'Prüfen Sie, ob Ihr Handy die eSIM-Technologie unterstützt. Durchsuchen Sie unsere umfassende Liste kompatibler Geräte aller großen Marken.',
+        'hero' => [
+            'badge' => 'Gerätekompatibilität',
+            'title' => 'Prüfen Sie Ihre',
+            'title_highlight' => 'Gerätekompatibilität',
+        ],
+        'search_placeholder' => 'Geräte suchen...',
+        'all_brands' => 'Alle',
+        'other_brands' => 'Andere',
+        'detection' => [
+            'supported_title' => 'Ihr Gerät unterstützt eSIM!',
+            'supported_description' => 'Wir haben erkannt, dass Sie ein :device verwenden, das die eSIM-Technologie unterstützt. Sie können eine eSIM auf diesem Gerät kaufen und aktivieren.',
+            'not_recognized_title' => 'Gerät nicht erkannt',
+            'not_recognized_description' => 'Wir konnten Ihr Gerät nicht automatisch erkennen. Bitte suchen Sie unten nach Ihrem Handymodell, um die eSIM-Kompatibilität zu prüfen.',
+        ],
+        'results' => [
+            'showing' => ':count Gerät wird angezeigt',
+            'showing_plural' => ':count Geräte werden angezeigt',
+            'matching' => 'passend zu ":query"',
+        ],
+        'empty' => [
+            'title' => 'Keine Geräte gefunden',
+            'no_filter' => 'Keine Geräte für diesen Filter verfügbar',
+            'try_different' => 'Versuchen Sie einen anderen Suchbegriff',
+            'clear_filters' => 'Filter löschen',
+        ],
     ],
 ];
 

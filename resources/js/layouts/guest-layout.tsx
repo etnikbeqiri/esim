@@ -60,6 +60,12 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                         >
                             {trans('nav.blog')}
                         </Link>
+                        <Link
+                            href="/devices"
+                            className="rounded-full px-5 py-2.5 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-50 hover:text-primary-900"
+                        >
+                            {trans('nav.devices')}
+                        </Link>
                     </nav>
 
                     {/* Desktop Auth Buttons */}
@@ -148,6 +154,13 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 {trans('nav.blog')}
+                            </Link>
+                            <Link
+                                href="/devices"
+                                className="rounded-xl px-4 py-3 text-sm font-medium text-primary-900 hover:bg-primary-50"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                {trans('nav.devices')}
                             </Link>
                             <div className="mt-3 flex items-center justify-between border-t border-primary-100 pt-4">
                                 <LanguageSwitcher showLabel />
@@ -259,6 +272,14 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                         className="transition-colors hover:text-primary-900"
                                     >
                                         {trans('nav.blog')}
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href="/devices"
+                                        className="transition-colors hover:text-primary-900"
+                                    >
+                                        {trans('nav.devices')}
                                     </Link>
                                 </li>
                             </ul>

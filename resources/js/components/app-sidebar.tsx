@@ -25,6 +25,7 @@ import {
     Server,
     Settings,
     ShoppingCart,
+    Smartphone,
     Users,
     Wallet,
 } from 'lucide-react';
@@ -132,6 +133,11 @@ export function AppSidebar() {
                       title: 'Tickets',
                       href: '/admin/tickets',
                       icon: LifeBuoy,
+                  },
+                  {
+                      title: 'Devices',
+                      href: '/admin/devices',
+                      icon: Smartphone,
                   },
               ]
             : [];

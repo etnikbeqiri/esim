@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\EmailPreviewController;
 use App\Http\Controllers\Public\ArticleController;
+use App\Http\Controllers\Public\DeviceController;
 use App\Http\Controllers\Public\HomeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -49,6 +50,9 @@ Route::get('/order/{order:uuid}/check', [\App\Http\Controllers\Public\CheckoutCo
 // Blog Routes
 Route::get('/blog', [ArticleController::class, 'index'])->name('blog.index');
 Route::get('/blog/{article:slug}', [ArticleController::class, 'show'])->name('blog.show');
+
+// Device Compatibility
+Route::get('/devices', [DeviceController::class, 'index'])->name('devices.index');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
@@ -191,6 +195,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('tickets/{ticket}/close', [\App\Http\Controllers\Admin\TicketController::class, 'close'])->name('tickets.close');
         Route::post('tickets/{ticket}/notify', [\App\Http\Controllers\Admin\TicketController::class, 'notify'])->name('tickets.notify');
         Route::delete('tickets/{ticket}', [\App\Http\Controllers\Admin\TicketController::class, 'destroy'])->name('tickets.destroy');
+
+        // Devices
+        Route::get('devices', [\App\Http\Controllers\Admin\DeviceController::class, 'index'])->name('devices.index');
+        Route::post('devices', [\App\Http\Controllers\Admin\DeviceController::class, 'store'])->name('devices.store');
+        Route::put('devices/{device}', [\App\Http\Controllers\Admin\DeviceController::class, 'update'])->name('devices.update');
+        Route::delete('devices/{device}', [\App\Http\Controllers\Admin\DeviceController::class, 'destroy'])->name('devices.destroy');
+        Route::post('devices/{device}/toggle', [\App\Http\Controllers\Admin\DeviceController::class, 'toggleActive'])->name('devices.toggle');
+
+        // Brands
+        Route::get('brands', [\App\Http\Controllers\Admin\BrandController::class, 'index'])->name('brands.index');
+        Route::post('brands', [\App\Http\Controllers\Admin\BrandController::class, 'store'])->name('brands.store');
+        Route::put('brands/{brand}', [\App\Http\Controllers\Admin\BrandController::class, 'update'])->name('brands.update');
+        Route::delete('brands/{brand}', [\App\Http\Controllers\Admin\BrandController::class, 'destroy'])->name('brands.destroy');
+        Route::post('brands/{brand}/toggle', [\App\Http\Controllers\Admin\BrandController::class, 'toggleActive'])->name('brands.toggle');
     });
 });
 
