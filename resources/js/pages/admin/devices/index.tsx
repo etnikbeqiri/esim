@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -18,6 +19,13 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -38,7 +46,7 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Check, Pencil, Plus, Search, Smartphone, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Check, ChevronDown, Pencil, Plus, Power, Search, Smartphone, Trash2, X } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 
 interface Brand {
@@ -70,6 +78,8 @@ interface Props {
         search?: string;
         brand_id?: string;
         esim_supported?: string;
+        sort?: string;
+        direction?: string;
     };
 }
 
@@ -103,6 +113,25 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
     const [editDevice, setEditDevice] = useState<Device | null>(null);
     const [formData, setFormData] = useState<DeviceFormData>(initialFormData);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+
+    const allSelected = devices.data.length > 0 && selectedIds.length === devices.data.length;
+    const someSelected = selectedIds.length > 0 && selectedIds.length < devices.data.length;
+
+    function toggleSelectAll() {
+        if (allSelected) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(devices.data.map((d) => d.id));
+        }
+    }
+
+    function toggleSelect(id: number) {
+        setSelectedIds((prev) =>
+            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+        );
+    }
 
     function handleSearch(e: FormEvent) {
         e.preventDefault();
@@ -115,15 +144,56 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
     }
 
     function handleToggleActive(device: Device) {
-        router.post(`/admin/devices/${device.id}/toggle`, {}, { preserveState: true });
+        router.post(`/admin/devices/${device.slug}/toggle`, {}, { preserveState: true });
     }
 
     function handleDelete() {
         if (!deleteDevice) return;
-        router.delete(`/admin/devices/${deleteDevice.id}`, {
+        router.delete(`/admin/devices/${deleteDevice.slug}`, {
             preserveState: true,
             onSuccess: () => setDeleteDevice(null),
         });
+    }
+
+    function handleBulkDelete() {
+        router.post('/admin/devices/bulk-delete', { ids: selectedIds }, {
+            preserveState: true,
+            onSuccess: () => {
+                setSelectedIds([]);
+                setShowBulkDeleteConfirm(false);
+            },
+        });
+    }
+
+    function handleBulkToggle(isActive: boolean) {
+        router.post('/admin/devices/bulk-toggle', { ids: selectedIds, is_active: isActive }, {
+            preserveState: true,
+            onSuccess: () => setSelectedIds([]),
+        });
+    }
+
+    function handleSort(field: string) {
+        const currentSort = filters.sort || 'name';
+        const currentDirection = filters.direction || 'asc';
+
+        let newDirection = 'asc';
+        if (currentSort === field) {
+            newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+        }
+
+        router.get('/admin/devices', { ...filters, sort: field, direction: newDirection }, { preserveState: true });
+    }
+
+    function SortIcon({ field }: { field: string }) {
+        const currentSort = filters.sort || 'name';
+        const currentDirection = filters.direction || 'asc';
+
+        if (currentSort !== field) {
+            return <ArrowUpDown className="ml-1 h-4 w-4 text-muted-foreground/50" />;
+        }
+        return currentDirection === 'asc'
+            ? <ArrowUp className="ml-1 h-4 w-4" />
+            : <ArrowDown className="ml-1 h-4 w-4" />;
     }
 
     function openCreateDialog() {
@@ -161,7 +231,7 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
         };
 
         if (editDevice) {
-            router.put(`/admin/devices/${editDevice.id}`, data, {
+            router.put(`/admin/devices/${editDevice.slug}`, data, {
                 preserveState: true,
                 onSuccess: () => {
                     setIsCreateOpen(false);
@@ -204,7 +274,7 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                     </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <form onSubmit={handleSearch} className="flex gap-2">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -237,17 +307,98 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                             ))}
                         </SelectContent>
                     </Select>
+
+                    {selectedIds.length > 0 && (
+                        <div className="flex items-center gap-2 ml-auto">
+                            <span className="text-sm text-muted-foreground">
+                                {selectedIds.length} selected
+                            </span>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm">
+                                        Bulk Actions
+                                        <ChevronDown className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleBulkToggle(true)}>
+                                        <Power className="mr-2 h-4 w-4" />
+                                        Activate Selected
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleBulkToggle(false)}>
+                                        <Power className="mr-2 h-4 w-4" />
+                                        Deactivate Selected
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        onClick={() => setShowBulkDeleteConfirm(true)}
+                                        className="text-destructive focus:text-destructive"
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete Selected
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setSelectedIds([])}
+                            >
+                                Clear
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="rounded-lg border">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Brand</TableHead>
-                                <TableHead>Device Name</TableHead>
-                                <TableHead>Year</TableHead>
+                                <TableHead className="w-[50px]">
+                                    <Checkbox
+                                        checked={allSelected}
+                                        onCheckedChange={toggleSelectAll}
+                                        aria-label="Select all"
+                                        className={someSelected ? 'opacity-50' : ''}
+                                    />
+                                </TableHead>
+                                <TableHead>
+                                    <button
+                                        onClick={() => handleSort('brand')}
+                                        className="flex items-center font-medium hover:text-foreground"
+                                    >
+                                        Brand
+                                        <SortIcon field="brand" />
+                                    </button>
+                                </TableHead>
+                                <TableHead>
+                                    <button
+                                        onClick={() => handleSort('name')}
+                                        className="flex items-center font-medium hover:text-foreground"
+                                    >
+                                        Device Name
+                                        <SortIcon field="name" />
+                                    </button>
+                                </TableHead>
+                                <TableHead>
+                                    <button
+                                        onClick={() => handleSort('release_year')}
+                                        className="flex items-center font-medium hover:text-foreground"
+                                    >
+                                        Year
+                                        <SortIcon field="release_year" />
+                                    </button>
+                                </TableHead>
                                 <TableHead>eSIM</TableHead>
-                                <TableHead>Status</TableHead>
+                                <TableHead>
+                                    <button
+                                        onClick={() => handleSort('is_active')}
+                                        className="flex items-center font-medium hover:text-foreground"
+                                    >
+                                        Status
+                                        <SortIcon field="is_active" />
+                                    </button>
+                                </TableHead>
                                 <TableHead className="w-[100px]"></TableHead>
                             </TableRow>
                         </TableHeader>
@@ -255,7 +406,7 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                             {devices.data.length === 0 ? (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={6}
+                                        colSpan={7}
                                         className="text-center py-8 text-muted-foreground"
                                     >
                                         No devices found
@@ -263,7 +414,17 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                                 </TableRow>
                             ) : (
                                 devices.data.map((device) => (
-                                    <TableRow key={device.id}>
+                                    <TableRow
+                                        key={device.id}
+                                        className={selectedIds.includes(device.id) ? 'bg-muted/50' : ''}
+                                    >
+                                        <TableCell>
+                                            <Checkbox
+                                                checked={selectedIds.includes(device.id)}
+                                                onCheckedChange={() => toggleSelect(device.id)}
+                                                aria-label={`Select ${device.name}`}
+                                            />
+                                        </TableCell>
                                         <TableCell>{device.brand?.name}</TableCell>
                                         <TableCell className="font-medium">{device.name}</TableCell>
                                         <TableCell>{device.release_year || '-'}</TableCell>
@@ -473,6 +634,31 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                             className="bg-destructive hover:bg-destructive/90"
                         >
                             Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Bulk Delete Confirmation */}
+            <AlertDialog
+                open={showBulkDeleteConfirm}
+                onOpenChange={setShowBulkDeleteConfirm}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete {selectedIds.length} Devices</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete {selectedIds.length} selected device(s)?
+                            This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleBulkDelete}
+                            className="bg-destructive hover:bg-destructive/90"
+                        >
+                            Delete {selectedIds.length} Devices
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

@@ -24,7 +24,7 @@ import {
     Wifi,
     WifiOff,
 } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface Message {
     uuid: string;
@@ -123,6 +123,12 @@ export default function TicketShow({ ticket: initialTicket, messages: initialMes
     // Local state for real-time updates
     const [messages, setMessages] = useState<Message[]>(initialMessages);
     const [ticket, setTicket] = useState<Ticket>(initialTicket);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Auto-scroll to bottom when new messages arrive
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
 
     const [currentStatus, setCurrentStatus] = useState(ticket.status);
     const [currentAssigned, setCurrentAssigned] = useState(
@@ -372,6 +378,7 @@ export default function TicketShow({ ticket: initialTicket, messages: initialMes
                                         </div>
                                     </div>
                                 ))}
+                                <div ref={messagesEndRef} />
                             </div>
                         </div>
 

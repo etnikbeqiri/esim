@@ -6,13 +6,19 @@ use App\Events\Ticket\TicketCreated;
 use App\Events\Ticket\TicketMessageCreated;
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
+use App\Services\TicketService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Thunk\Verbs\Facades\Verbs;
 
 class TicketController extends Controller
 {
+    public function __construct(
+        protected TicketService $ticketService
+    ) {}
+
     /**
      * Display a listing of user's tickets.
      */
@@ -168,5 +174,17 @@ class TicketController extends Controller
         );
 
         return back()->with('success', 'Message sent successfully.');
+    }
+
+    /**
+     * Stream ticket updates via SSE.
+     */
+    public function stream(string $uuid): StreamedResponse
+    {
+        $ticket = Ticket::where('uuid', $uuid)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        return $this->ticketService->streamUpdates($ticket, includeInternal: false);
     }
 }

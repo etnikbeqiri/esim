@@ -26,6 +26,7 @@ import {
     Settings,
     ShoppingCart,
     Smartphone,
+    Tag,
     Users,
     Wallet,
 } from 'lucide-react';
@@ -138,6 +139,11 @@ export function AppSidebar() {
                       title: 'Devices',
                       href: '/admin/devices',
                       icon: Smartphone,
+                  },
+                  {
+                      title: 'Brands',
+                      href: '/admin/brands',
+                      icon: Tag,
                   },
               ]
             : [];

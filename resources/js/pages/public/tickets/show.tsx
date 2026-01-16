@@ -6,7 +6,7 @@ import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, usePage } from '@inertiajs/react';
 import { ArrowLeft, Loader2, Wifi, WifiOff } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface TicketData {
     uuid: string;
@@ -58,6 +58,12 @@ export default function TicketShow() {
     // Local state for real-time updates
     const [messages, setMessages] = useState<MessageData[]>(initialMessages);
     const [ticket, setTicket] = useState<TicketData>(initialTicket);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Auto-scroll to bottom when new messages arrive
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
 
     // Handle incoming SSE updates
     const handleMessagesUpdate = useCallback((data: unknown) => {
@@ -225,6 +231,7 @@ export default function TicketShow() {
                             {messages.map((msg) => (
                                 <TicketMessage key={msg.uuid} message={msg} />
                             ))}
+                            <div ref={messagesEndRef} />
                         </div>
 
                         {/* Reply Form */}

@@ -14,6 +14,15 @@ class DeviceController extends Controller
 {
     public function index(Request $request): Response
     {
+        $sortField = $request->get('sort', 'name');
+        $sortDirection = $request->get('direction', 'asc');
+
+        // Validate sort field
+        $allowedSorts = ['name', 'release_year', 'is_active', 'brand'];
+        if (!in_array($sortField, $allowedSorts)) {
+            $sortField = 'name';
+        }
+
         $devices = Device::query()
             ->with('brand:id,name,slug')
             ->when($request->search, function ($q, $search) {
@@ -24,9 +33,13 @@ class DeviceController extends Controller
             })
             ->when($request->brand_id, fn($q, $brandId) => $q->where('brand_id', $brandId))
             ->when($request->esim_supported !== null, fn($q) => $q->where('esim_supported', $request->boolean('esim_supported')))
-            ->orderBy('brand_id')
-            ->orderByDesc('release_year')
-            ->orderBy('name')
+            ->when($sortField === 'brand', function ($q) use ($sortDirection) {
+                $q->join('brands', 'devices.brand_id', '=', 'brands.id')
+                    ->orderBy('brands.name', $sortDirection)
+                    ->select('devices.*');
+            }, function ($q) use ($sortField, $sortDirection) {
+                $q->orderBy($sortField, $sortDirection);
+            })
             ->paginate(50)
             ->withQueryString();
 
@@ -38,7 +51,7 @@ class DeviceController extends Controller
         return Inertia::render('admin/devices/index', [
             'devices' => $devices,
             'brands' => $brands,
-            'filters' => $request->only('search', 'brand_id', 'esim_supported'),
+            'filters' => $request->only('search', 'brand_id', 'esim_supported', 'sort', 'direction'),
         ]);
     }
 
@@ -95,6 +108,33 @@ class DeviceController extends Controller
         $device->delete();
 
         return back()->with('success', 'Device deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:devices,id'],
+        ]);
+
+        $count = Device::whereIn('id', $validated['ids'])->delete();
+
+        return back()->with('success', "{$count} device(s) deleted successfully.");
+    }
+
+    public function bulkToggle(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:devices,id'],
+            'is_active' => ['required', 'boolean'],
+        ]);
+
+        Device::whereIn('id', $validated['ids'])->update(['is_active' => $validated['is_active']]);
+
+        $status = $validated['is_active'] ? 'activated' : 'deactivated';
+
+        return back()->with('success', count($validated['ids']) . " device(s) {$status} successfully.");
     }
 
     public function toggleActive(Device $device): RedirectResponse

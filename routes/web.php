@@ -95,6 +95,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('tickets/create', [\App\Http\Controllers\Client\TicketController::class, 'create'])->name('tickets.create');
         Route::post('tickets', [\App\Http\Controllers\Client\TicketController::class, 'store'])->name('tickets.store');
         Route::get('tickets/{uuid}', [\App\Http\Controllers\Client\TicketController::class, 'show'])->name('tickets.show');
+        Route::get('tickets/{uuid}/stream', [\App\Http\Controllers\Client\TicketController::class, 'stream'])->name('tickets.stream');
         Route::post('tickets/{uuid}/reply', [\App\Http\Controllers\Client\TicketController::class, 'reply'])->name('tickets.reply');
 
         // Balance (B2B only)
@@ -187,8 +188,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('tickets', [\App\Http\Controllers\Admin\TicketController::class, 'index'])->name('tickets.index');
         Route::get('tickets/{ticket}', [\App\Http\Controllers\Admin\TicketController::class, 'show'])->name('tickets.show');
         Route::get('tickets/{ticket}/stream', [\App\Http\Controllers\Admin\TicketController::class, 'stream'])
-            ->name('tickets.stream')
-            ->withoutMiddleware('web'); // SSE needs no web middleware
+            ->name('tickets.stream');
         Route::post('tickets/{ticket}/reply', [\App\Http\Controllers\Admin\TicketController::class, 'reply'])->name('tickets.reply');
         Route::post('tickets/{ticket}/status', [\App\Http\Controllers\Admin\TicketController::class, 'updateStatus'])->name('tickets.update-status');
         Route::post('tickets/{ticket}/assign', [\App\Http\Controllers\Admin\TicketController::class, 'assign'])->name('tickets.assign');
@@ -199,6 +199,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Devices
         Route::get('devices', [\App\Http\Controllers\Admin\DeviceController::class, 'index'])->name('devices.index');
         Route::post('devices', [\App\Http\Controllers\Admin\DeviceController::class, 'store'])->name('devices.store');
+        Route::post('devices/bulk-delete', [\App\Http\Controllers\Admin\DeviceController::class, 'bulkDestroy'])->name('devices.bulk-destroy');
+        Route::post('devices/bulk-toggle', [\App\Http\Controllers\Admin\DeviceController::class, 'bulkToggle'])->name('devices.bulk-toggle');
         Route::put('devices/{device}', [\App\Http\Controllers\Admin\DeviceController::class, 'update'])->name('devices.update');
         Route::delete('devices/{device}', [\App\Http\Controllers\Admin\DeviceController::class, 'destroy'])->name('devices.destroy');
         Route::post('devices/{device}/toggle', [\App\Http\Controllers\Admin\DeviceController::class, 'toggleActive'])->name('devices.toggle');
@@ -206,6 +208,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Brands
         Route::get('brands', [\App\Http\Controllers\Admin\BrandController::class, 'index'])->name('brands.index');
         Route::post('brands', [\App\Http\Controllers\Admin\BrandController::class, 'store'])->name('brands.store');
+        Route::post('brands/bulk-delete', [\App\Http\Controllers\Admin\BrandController::class, 'bulkDestroy'])->name('brands.bulk-destroy');
+        Route::post('brands/bulk-toggle', [\App\Http\Controllers\Admin\BrandController::class, 'bulkToggle'])->name('brands.bulk-toggle');
         Route::put('brands/{brand}', [\App\Http\Controllers\Admin\BrandController::class, 'update'])->name('brands.update');
         Route::delete('brands/{brand}', [\App\Http\Controllers\Admin\BrandController::class, 'destroy'])->name('brands.destroy');
         Route::post('brands/{brand}/toggle', [\App\Http\Controllers\Admin\BrandController::class, 'toggleActive'])->name('brands.toggle');

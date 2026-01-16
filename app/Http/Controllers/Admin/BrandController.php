@@ -13,16 +13,25 @@ class BrandController extends Controller
 {
     public function index(Request $request): Response
     {
+        $sortField = $request->get('sort', 'sort_order');
+        $sortDirection = $request->get('direction', 'asc');
+
+        // Validate sort field
+        $allowedSorts = ['name', 'slug', 'devices_count', 'sort_order', 'is_active'];
+        if (!in_array($sortField, $allowedSorts)) {
+            $sortField = 'sort_order';
+        }
+
         $brands = Brand::query()
             ->withCount('devices')
             ->when($request->search, fn($q, $search) => $q->where('name', 'like', "%{$search}%"))
-            ->ordered()
+            ->orderBy($sortField, $sortDirection)
             ->paginate(30)
             ->withQueryString();
 
         return Inertia::render('admin/brands/index', [
             'brands' => $brands,
-            'filters' => $request->only('search'),
+            'filters' => $request->only('search', 'sort', 'direction'),
         ]);
     }
 
@@ -73,6 +82,44 @@ class BrandController extends Controller
         $brand->delete();
 
         return back()->with('success', 'Brand deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:brands,id'],
+        ]);
+
+        // Check if any brand has devices
+        $brandsWithDevices = Brand::whereIn('id', $validated['ids'])
+            ->withCount('devices')
+            ->get()
+            ->filter(fn($b) => $b->devices_count > 0);
+
+        if ($brandsWithDevices->isNotEmpty()) {
+            $names = $brandsWithDevices->pluck('name')->join(', ');
+            return back()->with('error', "Cannot delete brands with devices: {$names}");
+        }
+
+        $count = Brand::whereIn('id', $validated['ids'])->delete();
+
+        return back()->with('success', "{$count} brand(s) deleted successfully.");
+    }
+
+    public function bulkToggle(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:brands,id'],
+            'is_active' => ['required', 'boolean'],
+        ]);
+
+        Brand::whereIn('id', $validated['ids'])->update(['is_active' => $validated['is_active']]);
+
+        $status = $validated['is_active'] ? 'activated' : 'deactivated';
+
+        return back()->with('success', count($validated['ids']) . " brand(s) {$status} successfully.");
     }
 
     public function toggleActive(Brand $brand): RedirectResponse
