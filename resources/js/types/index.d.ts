@@ -34,6 +34,22 @@ export interface ContactInfo {
     privacyEmail: string;
     phone: string | null;
     whatsapp: string | null;
+    companyName: string;
+    companyAddress: string | null;
+    companyCity: string | null;
+    companyPostalCode: string | null;
+    companyCountry: string | null;
+    companyVat: string | null;
+    companyRegistration: string | null;
+}
+
+export interface PaymentInfo {
+    providers: Array<{
+        id: string;
+        name: string;
+        description: string;
+        payment_methods: Array<{ name: string; icon: string }>;
+    }>;
 }
 
 export interface SharedData {
@@ -54,6 +70,7 @@ export interface SharedData {
     locale: string;
     availableLocales: LocaleOption[];
     contact: ContactInfo;
+    payment: PaymentInfo;
     [key: string]: unknown;
 }
 

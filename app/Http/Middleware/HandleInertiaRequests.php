@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\PaymentProvider;
 use App\Services\CurrencyService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
@@ -101,7 +102,25 @@ class HandleInertiaRequests extends Middleware
                 'privacyEmail' => config('contact.privacy_email'),
                 'phone' => config('contact.phone'),
                 'whatsapp' => config('contact.whatsapp'),
+                'companyName' => config('contact.company_name'),
+                'companyAddress' => config('contact.company_address'),
+                'companyCity' => config('contact.company_city'),
+                'companyPostalCode' => config('contact.company_postal_code'),
+                'companyCountry' => config('contact.company_country'),
+                'companyVat' => config('contact.company_vat'),
+                'companyRegistration' => config('contact.company_registration'),
             ],
+            'payment' => [
+                'providers' => PaymentProvider::activePublicProvidersArray(),
+            ],
+            'translations' => function () {
+                $locale = app()->getLocale();
+                // Load only the necessary files or all of them. 
+                // For a small app, all might be fine. For larger, split it.
+                // We return 'messages' file content merged at the root level so the frontend hook works as expected.
+                // If you need more files, use array_merge(trans('messages'), trans('auth'), ...);
+                return trans('messages');
+            },
         ];
     }
 }

@@ -343,4 +343,26 @@ class StripeGateway implements PaymentGatewayContract
         $separator = str_contains($url, '?') ? '&' : '?';
         return "{$url}{$separator}payment_id={$uuid}&status={$status}";
     }
+
+    public function canHandleCallback(\Illuminate\Http\Request $request): bool
+    {
+        // Stripe uses webhooks for payment confirmation
+        // Callbacks use standard payment_id + status params
+        return !empty($request->query('payment_id')) && !empty($request->query('status'));
+    }
+
+    public function handleCallback(\Illuminate\Http\Request $request): ?array
+    {
+        $paymentId = $request->query('payment_id');
+        $status = $request->query('status');
+
+        if (!$paymentId || !$status) {
+            return null;
+        }
+
+        return [
+            'order_id' => $paymentId,
+            'status' => $status,
+        ];
+    }
 }

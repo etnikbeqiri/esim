@@ -16,6 +16,7 @@ class PaymentGatewayFactory
         return match ($provider) {
             PaymentProvider::Stripe => app(StripeGateway::class),
             PaymentProvider::Payrexx => app(PayrexxGateway::class),
+            PaymentProvider::Paysera => app(PayseraGateway::class),
             PaymentProvider::Balance => app(BalanceGateway::class),
         };
     }

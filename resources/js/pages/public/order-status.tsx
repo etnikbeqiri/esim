@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link, router } from '@inertiajs/react';
 import {
@@ -53,7 +54,7 @@ function getStatusIcon(status: string) {
         case 'completed':
             return <CheckCircle2 className="h-5 w-5 text-green-500" />;
         case 'processing':
-            return <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />;
+            return <Loader2 className="h-5 w-5 animate-spin text-blue-500" />;
         case 'pending_retry':
             return <RefreshCw className="h-5 w-5 text-orange-500" />;
         case 'failed':
@@ -76,7 +77,13 @@ function getStatusBadgeClass(color: string): string {
 }
 
 export default function OrderStatus({ order }: Props) {
-    const isProcessing = ['processing', 'pending', 'pending_retry', 'awaiting_payment'].includes(order.status);
+    const { trans } = useTrans();
+    const isProcessing = [
+        'processing',
+        'pending',
+        'pending_retry',
+        'awaiting_payment',
+    ].includes(order.status);
     const isCompleted = order.status === 'completed';
     const isFailed = order.status === 'failed';
 
@@ -85,7 +92,10 @@ export default function OrderStatus({ order }: Props) {
         if (!isProcessing) return;
 
         const interval = setInterval(() => {
-            router.reload({ only: ['order'], preserveState: true, preserveScroll: true });
+            router.reload({
+                only: ['order'],
+                preserveUrl: true,
+            });
         }, 3000);
 
         return () => clearInterval(interval);
@@ -93,7 +103,11 @@ export default function OrderStatus({ order }: Props) {
 
     return (
         <GuestLayout>
-            <Head title={`Order ${order.order_number}`} />
+            <Head
+                title={trans('order_status_page.meta_title', {
+                    order_number: order.order_number,
+                })}
+            />
 
             <section className="py-12 md:py-20">
                 <div className="container mx-auto px-4">
@@ -108,11 +122,15 @@ export default function OrderStatus({ order }: Props) {
                                 {order.status_label}
                             </Badge>
                             <h1 className="text-2xl font-bold md:text-3xl">
-                                Order Status
+                                {trans('order_status_page.title')}
                             </h1>
                             <div className="mt-2 flex items-center justify-center gap-2 text-sm text-muted-foreground">
                                 <Calendar className="h-4 w-4" />
-                                <span>Placed on {order.created_at}</span>
+                                <span>
+                                    {trans('order_status_page.placed_on', {
+                                        date: order.created_at,
+                                    })}
+                                </span>
                             </div>
                         </div>
 
@@ -123,10 +141,14 @@ export default function OrderStatus({ order }: Props) {
                                     <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
                                     <div>
                                         <p className="font-medium text-blue-700 dark:text-blue-400">
-                                            Processing your order...
+                                            {trans(
+                                                'order_status_page.processing.title',
+                                            )}
                                         </p>
                                         <p className="text-sm text-blue-600 dark:text-blue-500">
-                                            This page will update automatically.
+                                            {trans(
+                                                'order_status_page.processing.description',
+                                            )}
                                         </p>
                                     </div>
                                 </CardContent>
@@ -139,10 +161,14 @@ export default function OrderStatus({ order }: Props) {
                                     <XCircle className="h-5 w-5 text-red-600" />
                                     <div>
                                         <p className="font-medium text-red-700 dark:text-red-400">
-                                            Order could not be completed
+                                            {trans(
+                                                'order_status_page.failed.title',
+                                            )}
                                         </p>
                                         <p className="text-sm text-red-600 dark:text-red-500">
-                                            Your payment has been refunded. Please contact support if you need assistance.
+                                            {trans(
+                                                'order_status_page.failed.description',
+                                            )}
                                         </p>
                                     </div>
                                 </CardContent>
@@ -161,8 +187,10 @@ export default function OrderStatus({ order }: Props) {
                         {isCompleted && order.esim && (
                             <EsimQrCard
                                 esim={order.esim}
-                                title="Your eSIM"
-                                description="Scan the QR code with your phone to install the eSIM"
+                                title={trans('order_status_page.esim.title')}
+                                description={trans(
+                                    'order_status_page.esim.description',
+                                )}
                             />
                         )}
 
@@ -173,9 +201,15 @@ export default function OrderStatus({ order }: Props) {
                                     <div className="rounded-full bg-blue-100 p-4 dark:bg-blue-900">
                                         <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
                                     </div>
-                                    <h3 className="mt-4 font-semibold">Preparing your eSIM...</h3>
+                                    <h3 className="mt-4 font-semibold">
+                                        {trans(
+                                            'order_status_page.preparing.title',
+                                        )}
+                                    </h3>
                                     <p className="mt-1 text-sm text-muted-foreground">
-                                        Your eSIM details will appear here once ready
+                                        {trans(
+                                            'order_status_page.preparing.description',
+                                        )}
                                     </p>
                                 </CardContent>
                             </Card>
@@ -184,23 +218,43 @@ export default function OrderStatus({ order }: Props) {
                         {/* Payment Summary */}
                         <Card className="mt-6">
                             <CardHeader className="pb-4">
-                                <CardTitle className="text-base">Payment Summary</CardTitle>
+                                <CardTitle className="text-base">
+                                    {trans('order_status_page.payment.title')}
+                                </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-muted-foreground">Payment Method</span>
-                                    <span className="font-medium">{order.payment_method}</span>
+                                    <span className="text-muted-foreground">
+                                        {trans(
+                                            'order_status_page.payment.method',
+                                        )}
+                                    </span>
+                                    <span className="font-medium">
+                                        {order.payment_method}
+                                    </span>
                                 </div>
                                 {order.paid_at && (
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-muted-foreground">Paid On</span>
-                                        <span className="font-medium">{order.paid_at}</span>
+                                        <span className="text-muted-foreground">
+                                            {trans(
+                                                'order_status_page.payment.paid_on',
+                                            )}
+                                        </span>
+                                        <span className="font-medium">
+                                            {order.paid_at}
+                                        </span>
                                     </div>
                                 )}
                                 <Separator />
-                                <div className="flex justify-between items-center pt-1">
-                                    <span className="font-medium">Total Paid</span>
-                                    <span className="text-xl font-bold">€{Number(order.amount).toFixed(2)}</span>
+                                <div className="flex items-center justify-between pt-1">
+                                    <span className="font-medium">
+                                        {trans(
+                                            'order_status_page.payment.total',
+                                        )}
+                                    </span>
+                                    <span className="text-xl font-bold">
+                                        €{Number(order.amount).toFixed(2)}
+                                    </span>
                                 </div>
                             </CardContent>
                         </Card>
@@ -208,7 +262,9 @@ export default function OrderStatus({ order }: Props) {
                         {/* Actions */}
                         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
                             <Button asChild variant="outline">
-                                <Link href="/destinations">Browse More Plans</Link>
+                                <Link href="/destinations">
+                                    {trans('order_status_page.actions.browse')}
+                                </Link>
                             </Button>
                         </div>
                     </div>

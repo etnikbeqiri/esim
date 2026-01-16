@@ -19,6 +19,13 @@ class ProviderController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        $providers->getCollection()->transform(fn ($provider) => $provider->makeVisible([
+            'api_base_url',
+            'rate_limit_ms',
+            'markup_percentage',
+            'custom_regions',
+        ]));
+
         return Inertia::render('admin/providers/index', [
             'providers' => $providers,
             'filters' => $request->only('search'),
@@ -53,7 +60,12 @@ class ProviderController extends Controller
     public function edit(Provider $provider): Response
     {
         return Inertia::render('admin/providers/edit', [
-            'provider' => $provider,
+            'provider' => $provider->makeVisible([
+                'api_base_url',
+                'rate_limit_ms',
+                'markup_percentage',
+                'custom_regions',
+            ]),
         ]);
     }
 

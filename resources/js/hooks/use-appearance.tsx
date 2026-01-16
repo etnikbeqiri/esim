@@ -20,11 +20,11 @@ const setCookie = (name: string, value: string, days = 365) => {
 };
 
 const applyTheme = (appearance: Appearance) => {
-    const isDark =
-        appearance === 'dark' || (appearance === 'system' && prefersDark());
+    // FORCE LIGHT MODE - Always use light theme
+    const isDark = false;
 
-    document.documentElement.classList.toggle('dark', isDark);
-    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    document.documentElement.classList.remove('dark');
+    document.documentElement.style.colorScheme = 'light';
 };
 
 const mediaQuery = () => {

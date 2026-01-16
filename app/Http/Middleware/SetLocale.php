@@ -43,7 +43,14 @@ class SetLocale
             }
         }
 
-        // 4. Fallback to config default
+        // 4. Check browser Accept-Language header
+        // This handles the "first request" scenario automatically based on browser settings
+        $browserLocale = $request->getPreferredLanguage($this->supportedLocales);
+        if ($browserLocale && in_array($browserLocale, $this->supportedLocales)) {
+            return $browserLocale;
+        }
+
+        // 5. Fallback to config default
         return config('app.locale', 'en');
     }
 }

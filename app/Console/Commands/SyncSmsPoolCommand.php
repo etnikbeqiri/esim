@@ -167,6 +167,13 @@ class SyncSmsPoolCommand extends Command
                             'validity_days' => $packageData->validityDays,
                             'cost_price' => $costPrice,
                             'retail_price' => $retailPrice,
+                            'network_type' => $packageData->networkType,
+                            'supported_networks' => $packageData->supportedNetworks,
+                            'coverage_type' => $packageData->coverageType,
+                            'coverage_countries' => $packageData->coverageCountries,
+                            'sms_included' => $packageData->smsIncluded,
+                            'voice_included' => $packageData->voiceIncluded,
+                            'hotspot_allowed' => $packageData->hotspotAllowed,
                             'is_active' => true,
                             'in_stock' => $packageData->inStock,
                         ]

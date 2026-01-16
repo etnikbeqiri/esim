@@ -62,26 +62,41 @@ RUN chmod 0644 /etc/cron.d/laravel-cron && \
 
 WORKDIR /var/www/html
 
-# Copy application code
-COPY . .
+# Create storage directories with correct ownership BEFORE copying files
+RUN mkdir -p storage/logs storage/app/public storage/app/backup storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html
 
-# Install Composer dependencies
-RUN COMPOSE_BAKE=true composer install --optimize-autoloader --no-interaction
+# ============================================
+# LAYER 1: Composer dependencies (cached if composer.json/lock unchanged)
+# ============================================
+COPY --chown=www-data:www-data composer.json composer.lock ./
+RUN COMPOSE_BAKE=true composer install --optimize-autoloader --no-interaction --no-scripts
 
-# Install frontend dependencies and build assets
-RUN npm install && npm run build
+# ============================================
+# LAYER 2: NPM dependencies (cached if package.json/lock unchanged)
+# ============================================
+COPY --chown=www-data:www-data package.json package-lock.json ./
+RUN npm ci
 
-# Create storage link (config caching done at runtime via entrypoint)
+# ============================================
+# LAYER 3: Application code (changes most frequently)
+# ============================================
+COPY --chown=www-data:www-data . .
+
+# Run composer scripts that need the full codebase
+RUN composer dump-autoload --optimize
+
+COPY --chown=www-data:www-data .env .env
+
+RUN npm run build
+
+# Create storage link
 RUN php artisan storage:link
 
-# Fix storage permissions
-RUN mkdir -p storage/logs \
-    && mkdir -p storage/app/backup \
+# Ensure storage and cache directories have correct permissions
+RUN chmod -R 775 storage bootstrap/cache \
     && touch storage/logs/laravel.log \
-    && chown -R www-data:www-data /var/www/html \
-    && find storage -type f -exec chmod 666 {} \; \
-    && find storage -type d -exec chmod 777 {} \; \
-    && chmod -R 777 bootstrap/cache
+    && chmod 664 storage/logs/laravel.log
 
 EXPOSE 80
 

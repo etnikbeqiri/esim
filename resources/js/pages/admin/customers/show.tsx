@@ -137,7 +137,7 @@ function getStatusIcon(status: string, size = 'h-3 w-3') {
         case 'completed':
             return <CheckCircle2 className={`${size} text-green-500`} />;
         case 'processing':
-            return <Loader2 className={`${size} text-blue-500 animate-spin`} />;
+            return <Loader2 className={`${size} animate-spin text-blue-500`} />;
         case 'pending_retry':
             return <RefreshCw className={`${size} text-orange-500`} />;
         case 'failed':
@@ -151,31 +151,52 @@ function getStatusIcon(status: string, size = 'h-3 w-3') {
     }
 }
 
-export default function CustomerShow({ customer, orders, stats, invoices }: Props) {
+export default function CustomerShow({
+    customer,
+    orders,
+    stats,
+    invoices,
+}: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
         { title: 'Customers', href: '/admin/customers' },
-        { title: customer.user?.name || `Customer #${customer.id}`, href: `/admin/customers/${customer.id}` },
+        {
+            title: customer.user?.name || `Customer #${customer.id}`,
+            href: `/admin/customers/${customer.id}`,
+        },
     ];
 
     const impersonateForm = useForm({});
     const resetPasswordForm = useForm({ method: 'generate' });
 
     function handleImpersonate() {
-        if (!confirm(`Are you sure you want to login as ${customer.user?.name}?`)) return;
+        if (
+            !confirm(
+                `Are you sure you want to login as ${customer.user?.name}?`,
+            )
+        )
+            return;
         impersonateForm.post(`/admin/customers/${customer.id}/impersonate`);
     }
 
     function handleResetPassword() {
-        if (!confirm(`Generate a new password for ${customer.user?.email}?`)) return;
-        resetPasswordForm.post(`/admin/customers/${customer.id}/reset-password`);
+        if (!confirm(`Generate a new password for ${customer.user?.email}?`))
+            return;
+        resetPasswordForm.post(
+            `/admin/customers/${customer.id}/reset-password`,
+        );
     }
 
     function goToPage(page: number) {
-        router.get(`/admin/customers/${customer.id}`, { page }, { preserveState: true, preserveScroll: true });
+        router.get(
+            `/admin/customers/${customer.id}`,
+            { page },
+            { preserveState: true, preserveScroll: true },
+        );
     }
 
-    const canFail = (status: string) => ['awaiting_payment', 'pending_retry'].includes(status);
+    const canFail = (status: string) =>
+        ['awaiting_payment', 'pending_retry'].includes(status);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -190,21 +211,27 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                     </Button>
                     <div className="flex-1">
                         <div className="flex items-center gap-2">
-                            <h1 className="text-2xl font-semibold">{customer.user?.name || `Customer #${customer.id}`}</h1>
+                            <h1 className="text-2xl font-semibold">
+                                {customer.user?.name ||
+                                    `Customer #${customer.id}`}
+                            </h1>
                             {!customer.is_active && (
                                 <Badge variant="destructive">Inactive</Badge>
                             )}
                         </div>
                         {customer.user && (
-                            <p className="text-muted-foreground">{customer.user.email}</p>
+                            <p className="text-muted-foreground">
+                                {customer.user.email}
+                            </p>
                         )}
                     </div>
                     <div className="flex items-center gap-2">
                         <Badge
                             variant="outline"
-                            className={customer.type === 'b2b'
-                                ? 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400'
-                                : 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400'
+                            className={
+                                customer.type === 'b2b'
+                                    ? 'border-blue-200 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                    : 'border-purple-200 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
                             }
                         >
                             {customer.type.toUpperCase()}
@@ -218,7 +245,9 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                                                 variant="outline"
                                                 size="icon"
                                                 onClick={handleImpersonate}
-                                                disabled={impersonateForm.processing}
+                                                disabled={
+                                                    impersonateForm.processing
+                                                }
                                             >
                                                 {impersonateForm.processing ? (
                                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -227,7 +256,9 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                                                 )}
                                             </Button>
                                         </TooltipTrigger>
-                                        <TooltipContent>Login as this user</TooltipContent>
+                                        <TooltipContent>
+                                            Login as this user
+                                        </TooltipContent>
                                     </Tooltip>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
@@ -235,7 +266,9 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                                                 variant="outline"
                                                 size="icon"
                                                 onClick={handleResetPassword}
-                                                disabled={resetPasswordForm.processing}
+                                                disabled={
+                                                    resetPasswordForm.processing
+                                                }
                                             >
                                                 {resetPasswordForm.processing ? (
                                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -244,13 +277,17 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                                                 )}
                                             </Button>
                                         </TooltipTrigger>
-                                        <TooltipContent>Reset password</TooltipContent>
+                                        <TooltipContent>
+                                            Reset password
+                                        </TooltipContent>
                                     </Tooltip>
                                 </>
                             )}
                         </TooltipProvider>
                         <Button variant="outline" size="sm" asChild>
-                            <Link href={`/admin/invoices/generate?customer_id=${customer.id}`}>
+                            <Link
+                                href={`/admin/invoices/generate?customer_id=${customer.id}`}
+                            >
                                 <Receipt className="mr-2 h-4 w-4" />
                                 Generate Invoice
                             </Link>
@@ -268,51 +305,65 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                 <div className="grid gap-4 md:grid-cols-5">
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Total Orders</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Total Orders
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">{stats.total_orders}</p>
+                            <p className="text-2xl font-bold">
+                                {stats.total_orders}
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Total Spent</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Total Spent
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold">€{Number(stats.total_spent).toFixed(2)}</p>
+                            <p className="text-2xl font-bold">
+                                €{Number(stats.total_spent).toFixed(2)}
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                            <CardTitle className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
                                 <CheckCircle2 className="h-4 w-4 text-green-500" />
                                 Completed
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold text-green-600">{stats.completed_orders}</p>
+                            <p className="text-2xl font-bold text-green-600">
+                                {stats.completed_orders}
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                            <CardTitle className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
                                 <Clock className="h-4 w-4 text-yellow-500" />
                                 Pending
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold text-yellow-600">{stats.pending_orders}</p>
+                            <p className="text-2xl font-bold text-yellow-600">
+                                {stats.pending_orders}
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                            <CardTitle className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
                                 <XCircle className="h-4 w-4 text-red-500" />
                                 Failed
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold text-red-600">{stats.failed_orders}</p>
+                            <p className="text-2xl font-bold text-red-600">
+                                {stats.failed_orders}
+                            </p>
                         </CardContent>
                     </Card>
                 </div>
@@ -325,46 +376,85 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                         </CardHeader>
                         <CardContent className="space-y-3">
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Customer ID</span>
-                                <span className="font-mono">#{customer.id}</span>
+                                <span className="text-muted-foreground">
+                                    Customer ID
+                                </span>
+                                <span className="font-mono">
+                                    #{customer.id}
+                                </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Type</span>
+                                <span className="text-muted-foreground">
+                                    Type
+                                </span>
                                 <Badge
                                     variant="outline"
-                                    className={customer.type === 'b2b'
-                                        ? 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400'
-                                        : 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400'
+                                    className={
+                                        customer.type === 'b2b'
+                                            ? 'border-blue-200 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                            : 'border-purple-200 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
                                     }
                                 >
                                     {customer.type_label}
                                 </Badge>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Discount</span>
-                                <span className="font-medium">{customer.discount_percentage}%</span>
+                                <span className="text-muted-foreground">
+                                    Discount
+                                </span>
+                                <span className="font-medium">
+                                    {customer.discount_percentage}%
+                                </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Email Verified</span>
-                                <Badge variant={customer.user?.email_verified_at ? 'default' : 'secondary'}>
-                                    {customer.user?.email_verified_at ? 'Yes' : 'No'}
+                                <span className="text-muted-foreground">
+                                    Email Verified
+                                </span>
+                                <Badge
+                                    variant={
+                                        customer.user?.email_verified_at
+                                            ? 'default'
+                                            : 'secondary'
+                                    }
+                                >
+                                    {customer.user?.email_verified_at
+                                        ? 'Yes'
+                                        : 'No'}
                                 </Badge>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Status</span>
-                                <Badge variant={customer.is_active ? 'default' : 'destructive'}>
+                                <span className="text-muted-foreground">
+                                    Status
+                                </span>
+                                <Badge
+                                    variant={
+                                        customer.is_active
+                                            ? 'default'
+                                            : 'destructive'
+                                    }
+                                >
                                     {customer.is_active ? 'Active' : 'Inactive'}
                                 </Badge>
                             </div>
                             {customer.stripe_customer_id && (
                                 <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Stripe ID</span>
-                                    <span className="font-mono text-xs">{customer.stripe_customer_id}</span>
+                                    <span className="text-muted-foreground">
+                                        Stripe ID
+                                    </span>
+                                    <span className="font-mono text-xs">
+                                        {customer.stripe_customer_id}
+                                    </span>
                                 </div>
                             )}
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Joined</span>
-                                <span>{new Date(customer.created_at).toLocaleDateString()}</span>
+                                <span className="text-muted-foreground">
+                                    Joined
+                                </span>
+                                <span>
+                                    {new Date(
+                                        customer.created_at,
+                                    ).toLocaleDateString()}
+                                </span>
                             </div>
                         </CardContent>
                     </Card>
@@ -378,42 +468,76 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                                 {customer.balance && (
                                     <>
                                         <div className="flex justify-between">
-                                            <span className="text-muted-foreground">Total Balance</span>
-                                            <span className="font-medium">€{Number(customer.balance.balance).toFixed(2)}</span>
+                                            <span className="text-muted-foreground">
+                                                Total Balance
+                                            </span>
+                                            <span className="font-medium">
+                                                €
+                                                {Number(
+                                                    customer.balance.balance,
+                                                ).toFixed(2)}
+                                            </span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-muted-foreground">Reserved</span>
-                                            <span className="text-orange-600">€{Number(customer.balance.reserved).toFixed(2)}</span>
+                                            <span className="text-muted-foreground">
+                                                Reserved
+                                            </span>
+                                            <span className="text-orange-600">
+                                                €
+                                                {Number(
+                                                    customer.balance.reserved,
+                                                ).toFixed(2)}
+                                            </span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-muted-foreground">Available</span>
-                                            <span className="font-bold text-green-600">€{Number(customer.balance.available_balance).toFixed(2)}</span>
+                                            <span className="text-muted-foreground">
+                                                Available
+                                            </span>
+                                            <span className="font-bold text-green-600">
+                                                €
+                                                {Number(
+                                                    customer.balance
+                                                        .available_balance,
+                                                ).toFixed(2)}
+                                            </span>
                                         </div>
                                         <hr className="my-2" />
                                     </>
                                 )}
                                 {customer.company_name && (
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Company</span>
+                                        <span className="text-muted-foreground">
+                                            Company
+                                        </span>
                                         <span>{customer.company_name}</span>
                                     </div>
                                 )}
                                 {customer.vat_number && (
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">VAT Number</span>
-                                        <span className="font-mono text-sm">{customer.vat_number}</span>
+                                        <span className="text-muted-foreground">
+                                            VAT Number
+                                        </span>
+                                        <span className="font-mono text-sm">
+                                            {customer.vat_number}
+                                        </span>
                                     </div>
                                 )}
                                 {customer.phone && (
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Phone</span>
+                                        <span className="text-muted-foreground">
+                                            Phone
+                                        </span>
                                         <span>{customer.phone}</span>
                                     </div>
                                 )}
                                 {customer.address && (
                                     <div>
-                                        <span className="text-muted-foreground">Address</span>
-                                        <p className="text-sm mt-1">{customer.address}</p>
+                                        <span className="text-muted-foreground">
+                                            Address
+                                        </span>
+                                        <p className="mt-1 text-sm">
+                                            {customer.address}
+                                        </p>
                                     </div>
                                 )}
                             </CardContent>
@@ -426,18 +550,26 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                             <CardContent className="space-y-3">
                                 {customer.phone && (
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Phone</span>
+                                        <span className="text-muted-foreground">
+                                            Phone
+                                        </span>
                                         <span>{customer.phone}</span>
                                     </div>
                                 )}
                                 {customer.address && (
                                     <div>
-                                        <span className="text-muted-foreground">Address</span>
-                                        <p className="text-sm mt-1">{customer.address}</p>
+                                        <span className="text-muted-foreground">
+                                            Address
+                                        </span>
+                                        <p className="mt-1 text-sm">
+                                            {customer.address}
+                                        </p>
                                     </div>
                                 )}
                                 {!customer.phone && !customer.address && (
-                                    <p className="text-muted-foreground text-center py-4">No contact info provided</p>
+                                    <p className="py-4 text-center text-muted-foreground">
+                                        No contact info provided
+                                    </p>
                                 )}
                             </CardContent>
                         </Card>
@@ -453,13 +585,16 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                         </CardTitle>
                         {orders.total > 0 && (
                             <span className="text-sm text-muted-foreground">
-                                Showing {orders.from}-{orders.to} of {orders.total}
+                                Showing {orders.from}-{orders.to} of{' '}
+                                {orders.total}
                             </span>
                         )}
                     </CardHeader>
                     <CardContent>
                         {orders.data.length === 0 ? (
-                            <p className="text-muted-foreground text-center py-8">No orders yet</p>
+                            <p className="py-8 text-center text-muted-foreground">
+                                No orders yet
+                            </p>
                         ) : (
                             <>
                                 <Table>
@@ -471,7 +606,9 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                                             <TableHead>Status</TableHead>
                                             <TableHead>Amount</TableHead>
                                             <TableHead>Date</TableHead>
-                                            <TableHead className="text-right">Actions</TableHead>
+                                            <TableHead className="text-right">
+                                                Actions
+                                            </TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -480,79 +617,123 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                                                 <TableCell>
                                                     <Link
                                                         href={`/admin/orders/${order.uuid}`}
-                                                        className="font-mono text-sm hover:underline text-primary"
+                                                        className="font-mono text-sm text-primary hover:underline"
                                                     >
                                                         {order.order_number}
                                                     </Link>
                                                 </TableCell>
                                                 <TableCell>
                                                     <span className="text-sm">
-                                                        {order.package_name || '-'}
+                                                        {order.package_name ||
+                                                            '-'}
                                                     </span>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Badge variant="outline" className="text-xs">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="text-xs"
+                                                    >
                                                         {order.type.toUpperCase()}
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell>
                                                     <TooltipProvider>
                                                         <Tooltip>
-                                                            <TooltipTrigger asChild>
+                                                            <TooltipTrigger
+                                                                asChild
+                                                            >
                                                                 <Badge
                                                                     variant="outline"
-                                                                    className={`${getStatusBadgeClass(order.status_color)} flex items-center gap-1 w-fit`}
+                                                                    className={`${getStatusBadgeClass(order.status_color)} flex w-fit items-center gap-1`}
                                                                 >
-                                                                    {getStatusIcon(order.status)}
-                                                                    {order.status_label}
-                                                                    {order.retry_count > 0 && (
+                                                                    {getStatusIcon(
+                                                                        order.status,
+                                                                    )}
+                                                                    {
+                                                                        order.status_label
+                                                                    }
+                                                                    {order.retry_count >
+                                                                        0 && (
                                                                         <span className="ml-1 text-xs opacity-75">
-                                                                            ({order.retry_count})
+                                                                            (
+                                                                            {
+                                                                                order.retry_count
+                                                                            }
+                                                                            )
                                                                         </span>
                                                                     )}
                                                                 </Badge>
                                                             </TooltipTrigger>
                                                             {order.failure_reason && (
                                                                 <TooltipContent className="max-w-xs">
-                                                                    <p className="text-xs">{order.failure_reason}</p>
+                                                                    <p className="text-xs">
+                                                                        {
+                                                                            order.failure_reason
+                                                                        }
+                                                                    </p>
                                                                 </TooltipContent>
                                                             )}
                                                         </Tooltip>
                                                     </TooltipProvider>
                                                 </TableCell>
                                                 <TableCell className="font-medium">
-                                                    €{Number(order.amount).toFixed(2)}
+                                                    €
+                                                    {Number(
+                                                        order.amount,
+                                                    ).toFixed(2)}
                                                 </TableCell>
-                                                <TableCell className="text-muted-foreground text-sm">
-                                                    {new Date(order.created_at).toLocaleDateString()}
+                                                <TableCell className="text-sm text-muted-foreground">
+                                                    {new Date(
+                                                        order.created_at,
+                                                    ).toLocaleDateString()}
                                                 </TableCell>
                                                 <TableCell className="text-right">
                                                     <div className="flex items-center justify-end gap-1">
-                                                        <Button variant="ghost" size="sm" asChild>
-                                                            <Link href={`/admin/orders/${order.uuid}`}>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            asChild
+                                                        >
+                                                            <Link
+                                                                href={`/admin/orders/${order.uuid}`}
+                                                            >
                                                                 View
                                                             </Link>
                                                         </Button>
-                                                        {canFail(order.status) && (
+                                                        {canFail(
+                                                            order.status,
+                                                        ) && (
                                                             <TooltipProvider>
                                                                 <Tooltip>
-                                                                    <TooltipTrigger asChild>
+                                                                    <TooltipTrigger
+                                                                        asChild
+                                                                    >
                                                                         <Button
                                                                             variant="ghost"
                                                                             size="icon"
-                                                                            className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                                            className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600"
                                                                             onClick={() => {
-                                                                                if (confirm('Mark this order as failed?')) {
-                                                                                    router.post(`/admin/orders/${order.uuid}/fail`, {
-                                                                                        reason: 'Manually failed by admin',
-                                                                                    });
+                                                                                if (
+                                                                                    confirm(
+                                                                                        'Mark this order as failed?',
+                                                                                    )
+                                                                                ) {
+                                                                                    router.post(
+                                                                                        `/admin/orders/${order.uuid}/fail`,
+                                                                                        {
+                                                                                            reason: 'Manually failed by admin',
+                                                                                        },
+                                                                                    );
                                                                                 }
                                                                             }}
                                                                         >
                                                                             <Ban className="h-4 w-4" />
                                                                         </Button>
                                                                     </TooltipTrigger>
-                                                                    <TooltipContent>Mark as Failed</TooltipContent>
+                                                                    <TooltipContent>
+                                                                        Mark as
+                                                                        Failed
+                                                                    </TooltipContent>
                                                                 </Tooltip>
                                                             </TooltipProvider>
                                                         )}
@@ -565,16 +746,23 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
 
                                 {/* Pagination */}
                                 {orders.last_page > 1 && (
-                                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                                    <div className="mt-4 flex items-center justify-between border-t pt-4">
                                         <p className="text-sm text-muted-foreground">
-                                            Page {orders.current_page} of {orders.last_page}
+                                            Page {orders.current_page} of{' '}
+                                            {orders.last_page}
                                         </p>
                                         <div className="flex items-center gap-2">
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => goToPage(orders.current_page - 1)}
-                                                disabled={orders.current_page === 1}
+                                                onClick={() =>
+                                                    goToPage(
+                                                        orders.current_page - 1,
+                                                    )
+                                                }
+                                                disabled={
+                                                    orders.current_page === 1
+                                                }
                                             >
                                                 <ChevronLeft className="h-4 w-4" />
                                                 Previous
@@ -582,8 +770,15 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => goToPage(orders.current_page + 1)}
-                                                disabled={orders.current_page === orders.last_page}
+                                                onClick={() =>
+                                                    goToPage(
+                                                        orders.current_page + 1,
+                                                    )
+                                                }
+                                                disabled={
+                                                    orders.current_page ===
+                                                    orders.last_page
+                                                }
                                             >
                                                 Next
                                                 <ChevronRight className="h-4 w-4" />
@@ -605,7 +800,9 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                                 Recent Invoices
                             </CardTitle>
                             <Button variant="outline" size="sm" asChild>
-                                <Link href={`/admin/invoices?customer_id=${customer.id}`}>
+                                <Link
+                                    href={`/admin/invoices?customer_id=${customer.id}`}
+                                >
                                     View All
                                 </Link>
                             </Button>
@@ -619,7 +816,9 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                                         <TableHead>Status</TableHead>
                                         <TableHead>Amount</TableHead>
                                         <TableHead>Date</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
+                                        <TableHead className="text-right">
+                                            Actions
+                                        </TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -628,31 +827,44 @@ export default function CustomerShow({ customer, orders, stats, invoices }: Prop
                                             <TableCell>
                                                 <Link
                                                     href={`/admin/invoices/${invoice.uuid}`}
-                                                    className="font-mono text-sm hover:underline text-primary"
+                                                    className="font-mono text-sm text-primary hover:underline"
                                                 >
                                                     {invoice.invoice_number}
                                                 </Link>
                                             </TableCell>
                                             <TableCell>
-                                                <span className="text-sm">{invoice.type_label}</span>
+                                                <span className="text-sm">
+                                                    {invoice.type_label}
+                                                </span>
                                             </TableCell>
                                             <TableCell>
                                                 <Badge
                                                     variant="outline"
-                                                    className={getStatusBadgeClass(invoice.status_color)}
+                                                    className={getStatusBadgeClass(
+                                                        invoice.status_color,
+                                                    )}
                                                 >
                                                     {invoice.status_label}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="font-medium">
-                                                €{Number(invoice.total).toFixed(2)}
+                                                €
+                                                {Number(invoice.total).toFixed(
+                                                    2,
+                                                )}
                                             </TableCell>
-                                            <TableCell className="text-muted-foreground text-sm">
+                                            <TableCell className="text-sm text-muted-foreground">
                                                 {invoice.invoice_date}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Button variant="ghost" size="sm" asChild>
-                                                    <Link href={`/admin/invoices/${invoice.uuid}`}>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    asChild
+                                                >
+                                                    <Link
+                                                        href={`/admin/invoices/${invoice.uuid}`}
+                                                    >
                                                         View
                                                     </Link>
                                                 </Button>

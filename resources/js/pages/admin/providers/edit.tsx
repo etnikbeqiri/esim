@@ -1,12 +1,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -36,7 +36,7 @@ export default function ProvidersEdit({ provider }: Props) {
     const [newRegionName, setNewRegionName] = useState('');
 
     const [customRegions, setCustomRegions] = useState<Record<string, string>>(
-        provider.custom_regions || {}
+        provider.custom_regions || {},
     );
 
     const { data, setData, put, processing, errors } = useForm({
@@ -90,9 +90,15 @@ export default function ProvidersEdit({ provider }: Props) {
                                     <Input
                                         id="name"
                                         value={data.name}
-                                        onChange={(e) => setData('name', e.target.value)}
+                                        onChange={(e) =>
+                                            setData('name', e.target.value)
+                                        }
                                     />
-                                    {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
+                                    {errors.name && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.name}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -100,57 +106,101 @@ export default function ProvidersEdit({ provider }: Props) {
                                     <Input
                                         id="slug"
                                         value={data.slug}
-                                        onChange={(e) => setData('slug', e.target.value)}
+                                        onChange={(e) =>
+                                            setData('slug', e.target.value)
+                                        }
                                     />
-                                    {errors.slug && <p className="text-sm text-destructive">{errors.slug}</p>}
+                                    {errors.slug && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.slug}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="api_base_url">API Base URL</Label>
+                                <Label htmlFor="api_base_url">
+                                    API Base URL
+                                </Label>
                                 <Input
                                     id="api_base_url"
                                     type="url"
                                     value={data.api_base_url}
-                                    onChange={(e) => setData('api_base_url', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('api_base_url', e.target.value)
+                                    }
                                 />
-                                {errors.api_base_url && <p className="text-sm text-destructive">{errors.api_base_url}</p>}
+                                {errors.api_base_url && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.api_base_url}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="api_key">API Key (leave blank to keep current)</Label>
+                                <Label htmlFor="api_key">
+                                    API Key (leave blank to keep current)
+                                </Label>
                                 <Input
                                     id="api_key"
                                     type="password"
                                     value={data.api_key}
-                                    onChange={(e) => setData('api_key', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('api_key', e.target.value)
+                                    }
                                     placeholder="Enter new API key or leave blank"
                                 />
-                                {errors.api_key && <p className="text-sm text-destructive">{errors.api_key}</p>}
+                                {errors.api_key && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.api_key}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="rate_limit_ms">Rate Limit (ms)</Label>
+                                    <Label htmlFor="rate_limit_ms">
+                                        Rate Limit (ms)
+                                    </Label>
                                     <Input
                                         id="rate_limit_ms"
                                         type="number"
                                         value={data.rate_limit_ms}
-                                        onChange={(e) => setData('rate_limit_ms', parseInt(e.target.value))}
+                                        onChange={(e) =>
+                                            setData(
+                                                'rate_limit_ms',
+                                                parseInt(e.target.value),
+                                            )
+                                        }
                                     />
-                                    {errors.rate_limit_ms && <p className="text-sm text-destructive">{errors.rate_limit_ms}</p>}
+                                    {errors.rate_limit_ms && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.rate_limit_ms}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="markup_percentage">Markup (%)</Label>
+                                    <Label htmlFor="markup_percentage">
+                                        Markup (%)
+                                    </Label>
                                     <Input
                                         id="markup_percentage"
                                         type="number"
                                         step="0.01"
                                         value={data.markup_percentage}
-                                        onChange={(e) => setData('markup_percentage', parseFloat(e.target.value))}
+                                        onChange={(e) =>
+                                            setData(
+                                                'markup_percentage',
+                                                parseFloat(e.target.value),
+                                            )
+                                        }
                                     />
-                                    {errors.markup_percentage && <p className="text-sm text-destructive">{errors.markup_percentage}</p>}
+                                    {errors.markup_percentage && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.markup_percentage}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
@@ -158,35 +208,52 @@ export default function ProvidersEdit({ provider }: Props) {
                                 <Checkbox
                                     id="is_active"
                                     checked={data.is_active}
-                                    onCheckedChange={(checked) => setData('is_active', !!checked)}
+                                    onCheckedChange={(checked) =>
+                                        setData('is_active', !!checked)
+                                    }
                                 />
                                 <Label htmlFor="is_active">Active</Label>
                             </div>
 
-                            <div className="border-t pt-6 mt-6">
-                                <h3 className="text-lg font-medium mb-2">Custom Regions</h3>
-                                <p className="text-sm text-muted-foreground mb-4">
-                                    Define custom region codes for this provider (e.g., EU for European Union packages).
+                            <div className="mt-6 border-t pt-6">
+                                <h3 className="mb-2 text-lg font-medium">
+                                    Custom Regions
+                                </h3>
+                                <p className="mb-4 text-sm text-muted-foreground">
+                                    Define custom region codes for this provider
+                                    (e.g., EU for European Union packages).
                                 </p>
 
                                 {Object.keys(customRegions).length > 0 && (
-                                    <div className="space-y-2 mb-4">
-                                        {Object.entries(customRegions).map(([code, name]) => (
-                                            <div key={code} className="flex items-center justify-between rounded-lg border p-3">
-                                                <div className="flex items-center gap-3">
-                                                    <Badge variant="outline" className="font-mono">{code}</Badge>
-                                                    <span>{name}</span>
-                                                </div>
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => removeRegion(code)}
+                                    <div className="mb-4 space-y-2">
+                                        {Object.entries(customRegions).map(
+                                            ([code, name]) => (
+                                                <div
+                                                    key={code}
+                                                    className="flex items-center justify-between rounded-lg border p-3"
                                                 >
-                                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                                </Button>
-                                            </div>
-                                        ))}
+                                                    <div className="flex items-center gap-3">
+                                                        <Badge
+                                                            variant="outline"
+                                                            className="font-mono"
+                                                        >
+                                                            {code}
+                                                        </Badge>
+                                                        <span>{name}</span>
+                                                    </div>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                            removeRegion(code)
+                                                        }
+                                                    >
+                                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                                    </Button>
+                                                </div>
+                                            ),
+                                        )}
                                     </div>
                                 )}
 
@@ -194,24 +261,37 @@ export default function ProvidersEdit({ provider }: Props) {
                                     <Input
                                         placeholder="Code (e.g., EU)"
                                         value={newRegionCode}
-                                        onChange={(e) => setNewRegionCode(e.target.value.toUpperCase())}
+                                        onChange={(e) =>
+                                            setNewRegionCode(
+                                                e.target.value.toUpperCase(),
+                                            )
+                                        }
                                         className="w-32 font-mono"
                                         maxLength={10}
                                     />
                                     <Input
                                         placeholder="Name (e.g., European Union)"
                                         value={newRegionName}
-                                        onChange={(e) => setNewRegionName(e.target.value)}
+                                        onChange={(e) =>
+                                            setNewRegionName(e.target.value)
+                                        }
                                         className="flex-1"
-                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addRegion())}
+                                        onKeyDown={(e) =>
+                                            e.key === 'Enter' &&
+                                            (e.preventDefault(), addRegion())
+                                        }
                                     />
-                                    <Button type="button" variant="outline" onClick={addRegion}>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={addRegion}
+                                    >
                                         <Plus className="h-4 w-4" />
                                     </Button>
                                 </div>
 
                                 {Object.keys(customRegions).length === 0 && (
-                                    <p className="text-sm text-muted-foreground mt-2">
+                                    <p className="mt-2 text-sm text-muted-foreground">
                                         No custom regions defined.
                                     </p>
                                 )}

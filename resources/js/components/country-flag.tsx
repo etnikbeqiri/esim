@@ -11,7 +11,11 @@ const sizeClasses = {
     xl: 'h-12 w-18',
 };
 
-export function CountryFlag({ countryCode, size = 'md', className = '' }: CountryFlagProps) {
+export function CountryFlag({
+    countryCode,
+    size = 'md',
+    className = '',
+}: CountryFlagProps) {
     const code = countryCode.toLowerCase();
     const src = `https://flagcdn.com/${code}.svg`;
 
@@ -19,7 +23,7 @@ export function CountryFlag({ countryCode, size = 'md', className = '' }: Countr
         <img
             src={src}
             alt={`${countryCode.toUpperCase()} flag`}
-            className={`inline-block rounded-sm object-cover shadow-sm ${sizeClasses[size]} ${className}`}
+            className={`inline-block object-cover ${sizeClasses[size]} ${className}`}
             loading="lazy"
         />
     );

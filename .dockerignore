@@ -36,8 +36,8 @@ public/hot
 public/storage
 
 # Environment files
-.env
 .env.*
+!.env
 !.env.example
 
 # Logs and cache

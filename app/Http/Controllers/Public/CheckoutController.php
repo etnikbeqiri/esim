@@ -70,12 +70,17 @@ class CheckoutController extends Controller
     {
         abort_unless($package->is_active, 404);
 
+        // Get allowed payment providers from enum
+        $allowedProviders = collect(PaymentProvider::publicProviders())
+            ->map(fn (PaymentProvider $provider) => $provider->value)
+            ->implode(',');
+
         $validated = $request->validate([
             'email' => 'required|email|max:255',
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:50',
             'accept_terms' => 'required|accepted',
-            'payment_provider' => 'nullable|string|in:stripe,payrexx',
+            "payment_provider" => "nullable|string|in:{$allowedProviders}",
         ]);
 
         // Get selected payment provider or use default
@@ -111,16 +116,23 @@ class CheckoutController extends Controller
     /**
      * Handle payment gateway callback.
      */
-    public function callback(Request $request): RedirectResponse
+    public function callback(Request $request, \App\Services\Payment\PaymentCallbackHandler $callbackHandler): RedirectResponse
     {
-        $paymentId = $request->query('payment_id');
-        $status = $request->query('status');
+        $result = $callbackHandler->handle($request);
 
-        Log::info('Payment callback', compact('paymentId', 'status'));
+        if (!$result) {
+            Log::warning('Payment callback could not be handled', [
+                'query' => $request->query()->all(),
+            ]);
 
-        if (!$paymentId) {
             return redirect()->route('home')->withErrors(['error' => 'Invalid payment callback']);
         }
+
+        $paymentId = $result['order_id'];
+        $status = $result['status'];
+        $provider = $result['provider']->value;
+
+        Log::info('Payment callback handled', compact('paymentId', 'status', 'provider'));
 
         $order = Order::where('uuid', $paymentId)->first();
 

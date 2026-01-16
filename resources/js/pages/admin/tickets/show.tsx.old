@@ -1,0 +1,295 @@
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import {
+    ArrowLeft,
+    Archive,
+    CheckCircle2,
+    Clock,
+    Loader2,
+    Mail,
+    MapPin,
+    Phone,
+    Save,
+    Trash2,
+    User,
+} from 'lucide-react';
+
+interface TicketUser {
+    id: number;
+    name: string;
+    email: string;
+}
+
+interface AssignedAdmin {
+    id: number;
+    name: string;
+    email: string;
+}
+
+interface Ticket {
+    id: number;
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+    status: string;
+    status_label: string;
+    status_color: string;
+    created_at: string;
+    resolved_at: string | null;
+    user: TicketUser | null;
+    assigned_admin: AssignedAdmin | null;
+}
+
+interface Props {
+    ticket: Ticket;
+}
+
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Dashboard', href: '/admin/dashboard' },
+    { title: 'Tickets', href: '/admin/tickets' },
+    { title: 'Ticket Details', href: '#' },
+];
+
+const statusOptions = [
+    { value: 'open', label: 'Open', icon: Mail },
+    { value: 'in_progress', label: 'In Progress', icon: Loader2 },
+    { value: 'closed', label: 'Closed', icon: CheckCircle2 },
+    { value: 'archived', label: 'Archived', icon: Archive },
+];
+
+function getStatusBadgeClass(color: string): string {
+    const colors: Record<string, string> = {
+        green: 'bg-green-100 text-green-700 border-green-200',
+        yellow: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+        red: 'bg-red-100 text-red-700 border-red-200',
+        blue: 'bg-blue-100 text-blue-700 border-blue-200',
+        gray: 'bg-gray-100 text-gray-700 border-gray-200',
+        purple: 'bg-purple-100 text-purple-700 border-purple-200',
+        orange: 'bg-orange-100 text-orange-700 border-orange-200',
+    };
+    return colors[color] || colors.gray;
+}
+
+export default function TicketShow({ ticket }: Props) {
+    const { data, setData, post, processing } = useForm({
+        status: ticket.status,
+    });
+
+    function updateStatus() {
+        post(`/admin/tickets/${ticket.id}/status`);
+    }
+
+    function deleteTicket() {
+        if (confirm('Are you sure you want to delete this ticket?')) {
+            router.delete(`/admin/tickets/${ticket.id}`);
+        }
+    }
+
+    function formatDate(dateString: string): string {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    }
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title={`Ticket #${ticket.id} - ${ticket.subject}`} />
+
+            <div className="flex flex-col gap-4 p-4">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Button variant="ghost" size="icon" asChild>
+                            <Link href="/admin/tickets">
+                                <ArrowLeft className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                        <div>
+                            <h1 className="text-2xl font-semibold">Ticket #{ticket.id}</h1>
+                            <p className="text-sm text-muted-foreground">
+                                Created on {formatDate(ticket.created_at)}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={deleteTicket}
+                            className="text-red-500 hover:text-red-700"
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="grid gap-4 lg:grid-cols-3">
+                    {/* Main Content */}
+                    <div className="lg:col-span-2 space-y-4">
+                        {/* Status Update */}
+                        <div className="rounded-md border bg-card p-4">
+                            <Label htmlFor="status">Update Status</Label>
+                            <div className="mt-2 flex gap-2">
+                                <Select
+                                    value={data.status}
+                                    onValueChange={(value) => setData('status', value)}
+                                >
+                                    <SelectTrigger className="flex-1">
+                                        <SelectValue placeholder="Select status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {statusOptions.map((option) => {
+                                            const Icon = option.icon;
+                                            return (
+                                                <SelectItem key={option.value} value={option.value}>
+                                                    <div className="flex items-center gap-2">
+                                                        <Icon className="h-4 w-4" />
+                                                        {option.label}
+                                                    </div>
+                                                </SelectItem>
+                                            );
+                                        })}
+                                    </SelectContent>
+                                </Select>
+                                <Button
+                                    onClick={updateStatus}
+                                    disabled={processing || data.status === ticket.status}
+                                >
+                                    <Save className="mr-2 h-4 w-4" />
+                                    {processing ? 'Saving...' : 'Update'}
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Ticket Details */}
+                        <div className="rounded-md border bg-card p-4">
+                            <div className="mb-4 flex items-start justify-between">
+                                <div>
+                                    <h2 className="text-xl font-semibold">{ticket.subject}</h2>
+                                    <Badge
+                                        variant="outline"
+                                        className={`mt-2 ${getStatusBadgeClass(ticket.status_color)}`}
+                                    >
+                                        {ticket.status_label}
+                                    </Badge>
+                                </div>
+                            </div>
+
+                            <div className="rounded-md bg-muted/50 p-4">
+                                <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                                    {ticket.message}
+                                </p>
+                            </div>
+
+                            <div className="mt-4 text-xs text-muted-foreground">
+                                {formatDate(ticket.created_at)}
+                            </div>
+                        </div>
+
+                        {/* Customer Info */}
+                        <div className="rounded-md border bg-card p-4">
+                            <h3 className="mb-4 font-semibold">Contact Information</h3>
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100">
+                                        <User className="h-5 w-5 text-primary-600" />
+                                    </div>
+                                    <div>
+                                        <p className="font-medium">{ticket.name}</p>
+                                        <p className="text-sm text-muted-foreground">{ticket.email}</p>
+                                    </div>
+                                </div>
+                                {ticket.user && (
+                                    <div className="rounded-md bg-primary-50 p-3">
+                                        <p className="text-sm font-medium text-primary-900">
+                                            Registered User
+                                        </p>
+                                        <div className="mt-1 flex items-center gap-2">
+                                            <Link
+                                                href={`/admin/customers/${ticket.user.id}`}
+                                                className="text-sm text-primary-600 hover:underline"
+                                            >
+                                                View Customer Profile
+                                            </Link>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Sidebar */}
+                    <div className="space-y-4">
+                        {/* Quick Stats */}
+                        <div className="rounded-md border bg-card p-4">
+                            <h3 className="mb-3 font-semibold">Ticket Info</h3>
+                            <dl className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                    <dt className="text-muted-foreground">Status</dt>
+                                    <dd className="font-medium">{ticket.status_label}</dd>
+                                </div>
+                                <div className="flex justify-between">
+                                    <dt className="text-muted-foreground">Created</dt>
+                                    <dd className="font-medium">{formatDate(ticket.created_at)}</dd>
+                                </div>
+                                {ticket.resolved_at && (
+                                    <div className="flex justify-between">
+                                        <dt className="text-muted-foreground">Resolved</dt>
+                                        <dd className="font-medium">{formatDate(ticket.resolved_at)}</dd>
+                                    </div>
+                                )}
+                                {ticket.assigned_admin && (
+                                    <div className="flex justify-between">
+                                        <dt className="text-muted-foreground">Assigned To</dt>
+                                        <dd className="font-medium">{ticket.assigned_admin.name}</dd>
+                                    </div>
+                                )}
+                            </dl>
+                        </div>
+
+                        {/* Quick Actions */}
+                        <div className="rounded-md border bg-card p-4">
+                            <h3 className="mb-3 font-semibold">Quick Actions</h3>
+                            <div className="space-y-2">
+                                <Button
+                                    variant="outline"
+                                    className="w-full justify-start"
+                                    asChild
+                                >
+                                    <a href={`mailto:${ticket.email}`}>
+                                        <Mail className="mr-2 h-4 w-4" />
+                                        Reply via Email
+                                    </a>
+                                </Button>
+                                {ticket.user && (
+                                    <Button
+                                        variant="outline"
+                                        className="w-full justify-start"
+                                        asChild
+                                    >
+                                        <Link href={`/admin/customers/${ticket.user.id}`}>
+                                            <User className="mr-2 h-4 w-4" />
+                                            View Customer
+                                        </Link>
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </AppLayout>
+    );
+}

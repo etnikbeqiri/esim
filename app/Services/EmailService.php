@@ -114,12 +114,32 @@ class EmailService
     }
 
     /**
+     * Get the best email address for an order.
+     * Priority: payment email (from payment form) > order email (from checkout) > customer account email.
+     */
+    protected function getOrderEmail(Order $order): ?string
+    {
+        return $order->payments()->latest()->first()?->customer_email
+            ?? $order->customer_email
+            ?? $order->customer?->user?->email;
+    }
+
+    /**
+     * Get the best name for an order.
+     */
+    protected function getOrderName(Order $order): ?string
+    {
+        return $order->customer_name
+            ?? $order->customer?->user?->name;
+    }
+
+    /**
      * Send order confirmation email.
      */
     public function sendOrderConfirmation(Order $order): ?EmailQueue
     {
-        $email = $order->customer_email ?? $order->customer?->user?->email;
-        $name = $order->customer_name ?? $order->customer?->user?->name;
+        $email = $this->getOrderEmail($order);
+        $name = $this->getOrderName($order);
 
         if (!$email) {
             Log::warning('Cannot send order confirmation - no email address', ['order_id' => $order->id]);
@@ -144,8 +164,8 @@ class EmailService
      */
     public function sendEsimDelivery(Order $order): ?EmailQueue
     {
-        $email = $order->customer_email ?? $order->customer?->user?->email;
-        $name = $order->customer_name ?? $order->customer?->user?->name;
+        $email = $this->getOrderEmail($order);
+        $name = $this->getOrderName($order);
 
         if (!$email) {
             Log::warning('Cannot send eSIM delivery - no email address', ['order_id' => $order->id]);
@@ -175,8 +195,8 @@ class EmailService
      */
     public function sendPaymentReceipt(Order $order): ?EmailQueue
     {
-        $email = $order->customer_email ?? $order->customer?->user?->email;
-        $name = $order->customer_name ?? $order->customer?->user?->name;
+        $email = $this->getOrderEmail($order);
+        $name = $this->getOrderName($order);
 
         if (!$email) {
             return null;
@@ -199,8 +219,8 @@ class EmailService
      */
     public function sendPaymentFailed(Order $order, string $reason = ''): ?EmailQueue
     {
-        $email = $order->customer_email ?? $order->customer?->user?->email;
-        $name = $order->customer_name ?? $order->customer?->user?->name;
+        $email = $this->getOrderEmail($order);
+        $name = $this->getOrderName($order);
 
         if (!$email) {
             return null;
@@ -224,8 +244,8 @@ class EmailService
      */
     public function sendOrderFailed(Order $order, string $reason = ''): ?EmailQueue
     {
-        $email = $order->customer_email ?? $order->customer?->user?->email;
-        $name = $order->customer_name ?? $order->customer?->user?->name;
+        $email = $this->getOrderEmail($order);
+        $name = $this->getOrderName($order);
 
         if (!$email) {
             return null;
@@ -249,8 +269,8 @@ class EmailService
      */
     public function sendRefundNotification(Order $order, float $amount): ?EmailQueue
     {
-        $email = $order->customer_email ?? $order->customer?->user?->email;
-        $name = $order->customer_name ?? $order->customer?->user?->name;
+        $email = $this->getOrderEmail($order);
+        $name = $this->getOrderName($order);
 
         if (!$email) {
             return null;

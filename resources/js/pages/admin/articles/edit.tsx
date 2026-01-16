@@ -1,14 +1,14 @@
+import { ImageUpload } from '@/components/image-upload';
+import { TiptapEditor } from '@/components/tiptap-editor';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { TiptapEditor } from '@/components/tiptap-editor';
-import { ImageUpload } from '@/components/image-upload';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm, router } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { ExternalLink } from 'lucide-react';
 
 interface Article {
@@ -84,7 +84,11 @@ export default function ArticlesEdit({ article }: Props) {
                     <h1 className="text-2xl font-semibold">Edit Article</h1>
                     {article.is_published && (
                         <Button variant="outline" size="sm" asChild>
-                            <a href={`/blog/${article.slug}`} target="_blank" rel="noopener noreferrer">
+                            <a
+                                href={`/blog/${article.slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
                                 <ExternalLink className="mr-2 h-4 w-4" />
                                 View Article
                             </a>
@@ -94,7 +98,7 @@ export default function ArticlesEdit({ article }: Props) {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid gap-6 lg:grid-cols-3">
-                        <div className="lg:col-span-2 space-y-6">
+                        <div className="space-y-6 lg:col-span-2">
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Article Content</CardTitle>
@@ -105,10 +109,16 @@ export default function ArticlesEdit({ article }: Props) {
                                         <Input
                                             id="title"
                                             value={data.title}
-                                            onChange={(e) => setData('title', e.target.value)}
+                                            onChange={(e) =>
+                                                setData('title', e.target.value)
+                                            }
                                             placeholder="Enter article title"
                                         />
-                                        {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
+                                        {errors.title && (
+                                            <p className="text-sm text-destructive">
+                                                {errors.title}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div className="space-y-2">
@@ -116,13 +126,20 @@ export default function ArticlesEdit({ article }: Props) {
                                         <Input
                                             id="slug"
                                             value={data.slug}
-                                            onChange={(e) => setData('slug', e.target.value)}
+                                            onChange={(e) =>
+                                                setData('slug', e.target.value)
+                                            }
                                             placeholder="article-url-slug"
                                         />
                                         <p className="text-xs text-muted-foreground">
-                                            URL: /blog/{data.slug || 'article-slug'}
+                                            URL: /blog/
+                                            {data.slug || 'article-slug'}
                                         </p>
-                                        {errors.slug && <p className="text-sm text-destructive">{errors.slug}</p>}
+                                        {errors.slug && (
+                                            <p className="text-sm text-destructive">
+                                                {errors.slug}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div className="space-y-2">
@@ -130,24 +147,39 @@ export default function ArticlesEdit({ article }: Props) {
                                         <Textarea
                                             id="excerpt"
                                             value={data.excerpt}
-                                            onChange={(e) => setData('excerpt', e.target.value)}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'excerpt',
+                                                    e.target.value,
+                                                )
+                                            }
                                             placeholder="Brief description for previews and SEO"
                                             rows={3}
                                         />
                                         <p className="text-xs text-muted-foreground">
                                             {data.excerpt.length}/500 characters
                                         </p>
-                                        {errors.excerpt && <p className="text-sm text-destructive">{errors.excerpt}</p>}
+                                        {errors.excerpt && (
+                                            <p className="text-sm text-destructive">
+                                                {errors.excerpt}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div className="space-y-2">
                                         <Label>Content</Label>
                                         <TiptapEditor
                                             content={data.content}
-                                            onChange={(content) => setData('content', content)}
+                                            onChange={(content) =>
+                                                setData('content', content)
+                                            }
                                             placeholder="Write your article content..."
                                         />
-                                        {errors.content && <p className="text-sm text-destructive">{errors.content}</p>}
+                                        {errors.content && (
+                                            <p className="text-sm text-destructive">
+                                                {errors.content}
+                                            </p>
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -163,24 +195,46 @@ export default function ArticlesEdit({ article }: Props) {
                                         <Checkbox
                                             id="is_published"
                                             checked={data.is_published}
-                                            onCheckedChange={(checked) => setData('is_published', !!checked)}
+                                            onCheckedChange={(checked) =>
+                                                setData(
+                                                    'is_published',
+                                                    !!checked,
+                                                )
+                                            }
                                         />
-                                        <Label htmlFor="is_published">Published</Label>
+                                        <Label htmlFor="is_published">
+                                            Published
+                                        </Label>
                                     </div>
 
-                                    <div className="text-sm text-muted-foreground space-y-1">
+                                    <div className="space-y-1 text-sm text-muted-foreground">
                                         <p>Views: {article.views_count}</p>
                                         {article.published_at && (
-                                            <p>Published: {new Date(article.published_at).toLocaleDateString()}</p>
+                                            <p>
+                                                Published:{' '}
+                                                {new Date(
+                                                    article.published_at,
+                                                ).toLocaleDateString()}
+                                            </p>
                                         )}
                                     </div>
 
                                     <div className="flex gap-2 pt-4">
-                                        <Button type="submit" disabled={processing} className="flex-1">
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="flex-1"
+                                        >
                                             Save Changes
                                         </Button>
-                                        <Button type="button" variant="outline" asChild>
-                                            <Link href="/admin/articles">Cancel</Link>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            asChild
+                                        >
+                                            <Link href="/admin/articles">
+                                                Cancel
+                                            </Link>
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -191,22 +245,31 @@ export default function ArticlesEdit({ article }: Props) {
                                     <CardTitle>Featured Image</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    {article.featured_image_url && !data.remove_featured_image && !data.featured_image ? (
+                                    {article.featured_image_url &&
+                                    !data.remove_featured_image &&
+                                    !data.featured_image ? (
                                         <ImageUpload
                                             value={article.featured_image_url}
-                                            onChange={(file) => setData('featured_image', file)}
+                                            onChange={(file) =>
+                                                setData('featured_image', file)
+                                            }
                                             onRemove={handleRemoveImage}
                                         />
                                     ) : (
                                         <ImageUpload
                                             onChange={(file) => {
                                                 setData('featured_image', file);
-                                                setData('remove_featured_image', false);
+                                                setData(
+                                                    'remove_featured_image',
+                                                    false,
+                                                );
                                             }}
                                         />
                                     )}
                                     {errors.featured_image && (
-                                        <p className="text-sm text-destructive mt-2">{errors.featured_image}</p>
+                                        <p className="mt-2 text-sm text-destructive">
+                                            {errors.featured_image}
+                                        </p>
                                     )}
                                 </CardContent>
                             </Card>
@@ -217,32 +280,51 @@ export default function ArticlesEdit({ article }: Props) {
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="meta_description">Meta Description</Label>
+                                        <Label htmlFor="meta_description">
+                                            Meta Description
+                                        </Label>
                                         <Textarea
                                             id="meta_description"
                                             value={data.meta_description}
-                                            onChange={(e) => setData('meta_description', e.target.value)}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'meta_description',
+                                                    e.target.value,
+                                                )
+                                            }
                                             placeholder="SEO description (max 160 characters)"
                                             rows={3}
                                         />
                                         <p className="text-xs text-muted-foreground">
-                                            {data.meta_description.length}/160 characters
+                                            {data.meta_description.length}/160
+                                            characters
                                         </p>
                                         {errors.meta_description && (
-                                            <p className="text-sm text-destructive">{errors.meta_description}</p>
+                                            <p className="text-sm text-destructive">
+                                                {errors.meta_description}
+                                            </p>
                                         )}
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="meta_keywords">Meta Keywords</Label>
+                                        <Label htmlFor="meta_keywords">
+                                            Meta Keywords
+                                        </Label>
                                         <Input
                                             id="meta_keywords"
                                             value={data.meta_keywords}
-                                            onChange={(e) => setData('meta_keywords', e.target.value)}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'meta_keywords',
+                                                    e.target.value,
+                                                )
+                                            }
                                             placeholder="keyword1, keyword2, keyword3"
                                         />
                                         {errors.meta_keywords && (
-                                            <p className="text-sm text-destructive">{errors.meta_keywords}</p>
+                                            <p className="text-sm text-destructive">
+                                                {errors.meta_keywords}
+                                            </p>
                                         )}
                                     </div>
                                 </CardContent>

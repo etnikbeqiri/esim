@@ -324,17 +324,86 @@ class SmsPoolProvider extends BaseProvider
 
     protected function extractNetworkOperators(array $networkInfo): array
     {
-        $operators = [];
+        $result = [];
 
-        foreach ($networkInfo as $network) {
-            if (!empty($network['operator'])) {
-                $operators[] = $network['operator'];
-            } elseif (!empty($network['name'])) {
-                $operators[] = $network['name'];
+        // Country name to ISO code mapping
+        $countryToIso = [
+            'Austria' => 'AT', 'Belgium' => 'BE', 'Bulgaria' => 'BG', 'Croatia' => 'HR', 'Cyprus' => 'CY',
+            'Czech Republic' => 'CZ', 'Denmark' => 'DK', 'Estonia' => 'EE', 'Finland' => 'FI', 'France' => 'FR',
+            'Germany' => 'DE', 'Greece' => 'GR', 'Hungary' => 'HU', 'Iceland' => 'IS', 'Ireland' => 'IE',
+            'Italy' => 'IT', 'Latvia' => 'LV', 'Liechtenstein' => 'LI', 'Lithuania' => 'LT', 'Luxembourg' => 'LU',
+            'Malta' => 'MT', 'Netherlands' => 'NL', 'Norway' => 'NO', 'Poland' => 'PL', 'Portugal' => 'PT',
+            'Romania' => 'RO', 'Slovakia' => 'SK', 'Slovenia' => 'SI', 'Spain' => 'ES', 'Sweden' => 'SE',
+            'Switzerland' => 'CH', 'Turkey' => 'TR', 'Ukraine' => 'UA', 'United Kingdom' => 'GB',
+            'United States' => 'US', 'Canada' => 'CA', 'Australia' => 'AU', 'New Zealand' => 'NZ',
+            'Japan' => 'JP', 'South Korea' => 'KR', 'China' => 'CN', 'Singapore' => 'SG', 'Thailand' => 'TH',
+            'Vietnam' => 'VN', 'Malaysia' => 'MY', 'Indonesia' => 'ID', 'Philippines' => 'PH', 'India' => 'IN',
+            'Brazil' => 'BR', 'Mexico' => 'MX', 'Argentina' => 'AR', 'Chile' => 'CL', 'Colombia' => 'CO',
+            'Peru' => 'PE', 'Ecuador' => 'EC', 'Venezuela' => 'VE', 'Uruguay' => 'UY', 'Paraguay' => 'PY',
+            'Bolivia' => 'BO', 'Costa Rica' => 'CR', 'Panama' => 'PA', 'Guatemala' => 'GT', 'Honduras' => 'HN',
+            'El Salvador' => 'SV', 'Nicaragua' => 'NI', 'Dominican Republic' => 'DO', 'Puerto Rico' => 'PR',
+            'Jamaica' => 'JM', 'Trinidad and Tobago' => 'TT', 'Bahamas' => 'BS', 'Barbados' => 'BB',
+            'South Africa' => 'ZA', 'Egypt' => 'EG', 'Morocco' => 'MA', 'Tunisia' => 'TN', 'Algeria' => 'DZ',
+            'Nigeria' => 'NG', 'Kenya' => 'KE', 'Ghana' => 'GH', 'Tanzania' => 'TZ', 'Uganda' => 'UG',
+            'Ethiopia' => 'ET', 'Senegal' => 'SN', 'Ivory Coast' => 'CI', 'Cameroon' => 'CM',
+            'Israel' => 'IL', 'UAE' => 'AE', 'United Arab Emirates' => 'AE', 'Saudi Arabia' => 'SA',
+            'Qatar' => 'QA', 'Kuwait' => 'KW', 'Bahrain' => 'BH', 'Oman' => 'OM', 'Jordan' => 'JO',
+            'Lebanon' => 'LB', 'Iraq' => 'IQ', 'Iran' => 'IR', 'Pakistan' => 'PK', 'Bangladesh' => 'BD',
+            'Sri Lanka' => 'LK', 'Nepal' => 'NP', 'Myanmar' => 'MM', 'Cambodia' => 'KH', 'Laos' => 'LA',
+            'Hong Kong' => 'HK', 'Taiwan' => 'TW', 'Macau' => 'MO', 'Mongolia' => 'MN',
+            'Russia' => 'RU', 'Belarus' => 'BY', 'Moldova' => 'MD', 'Georgia' => 'GE', 'Armenia' => 'AM',
+            'Azerbaijan' => 'AZ', 'Kazakhstan' => 'KZ', 'Uzbekistan' => 'UZ', 'Turkmenistan' => 'TM',
+            'Kyrgyzstan' => 'KG', 'Tajikistan' => 'TJ', 'Serbia' => 'RS', 'Montenegro' => 'ME',
+            'Bosnia and Herzegovina' => 'BA', 'North Macedonia' => 'MK', 'Albania' => 'AL', 'Kosovo' => 'XK',
+            'Fiji' => 'FJ', 'Papua New Guinea' => 'PG', 'Guam' => 'GU', 'Samoa' => 'WS',
+        ];
+
+        foreach ($networkInfo as $countryNetwork) {
+            $countryName = $countryNetwork['country'] ?? null;
+            $networks = $countryNetwork['network'] ?? [];
+
+            // If no country key, it's a flat structure
+            if ($countryName === null) {
+                $networks = [$countryNetwork];
+                $countryName = null;
+            }
+
+            $operators = [];
+            foreach ($networks as $network) {
+                $name = $network['operatorName'] ?? $network['operator'] ?? $network['name'] ?? null;
+                if (empty($name)) {
+                    continue;
+                }
+
+                $typeField = $network['networkType'] ?? $network['speed'] ?? $network['type'] ?? '4G';
+                $type = '4G';
+                if (str_contains(strtoupper($typeField), '5G')) {
+                    $type = '5G';
+                } elseif (str_contains(strtoupper($typeField), '3G')) {
+                    $type = '3G';
+                }
+
+                $operators[] = [
+                    'name' => $name,
+                    'type' => $type,
+                ];
+            }
+
+            if (!empty($operators)) {
+                if ($countryName) {
+                    $result[] = [
+                        'country' => $countryName,
+                        'iso_code' => $countryToIso[$countryName] ?? null,
+                        'operators' => $operators,
+                    ];
+                } else {
+                    // Flat structure - just add operators directly
+                    $result = array_merge($result, $operators);
+                }
             }
         }
 
-        return array_unique($operators);
+        return $result;
     }
 
     protected function generatePackageName(array $item, string $countryCode = ''): string
@@ -356,8 +425,24 @@ class SmsPoolProvider extends BaseProvider
         $duration = (int) ($item['duration'] ?? 30);
         $extendable = ($item['extendable'] ?? 0) >= 1 ? 'Yes' : 'No';
 
-        $operators = $this->extractNetworkOperators($networkInfo);
-        $operatorText = !empty($operators) ? implode(', ', array_slice($operators, 0, 3)) : 'Local networks';
+        $networks = $this->extractNetworkOperators($networkInfo);
+        $operatorNames = [];
+
+        // Handle both grouped (regional) and flat (single country) structures
+        foreach (array_slice($networks, 0, 3) as $item) {
+            if (isset($item['country'])) {
+                // Regional: get first operator from each country
+                $firstOp = $item['operators'][0]['name'] ?? null;
+                if ($firstOp) {
+                    $operatorNames[] = $item['country'];
+                }
+            } else {
+                // Single country: just get the name
+                $operatorNames[] = $item['name'] ?? '';
+            }
+        }
+
+        $operatorText = !empty($operatorNames) ? implode(', ', $operatorNames) : 'Local networks';
 
         return "{$dataGb} GB data, {$speed} speed, {$duration} days validity. Networks: {$operatorText}. Top-up available: {$extendable}";
     }

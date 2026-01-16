@@ -1,6 +1,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -94,16 +100,23 @@ const INVOICE_TYPE_DESCRIPTIONS: Record<string, string> = {
     statement: 'Generate account statement for a date range (B2B only)',
 };
 
-export default function GenerateInvoice({ types, defaultCurrency, preselectedCustomer }: Props) {
+export default function GenerateInvoice({
+    types,
+    defaultCurrency,
+    preselectedCustomer,
+}: Props) {
     const currencySymbol = defaultCurrency?.symbol || '€';
 
     // Step management
     const [step, setStep] = useState(preselectedCustomer ? 2 : 1);
 
     // Step 1: Customer selection
-    const [selectedCustomer, setSelectedCustomer] = useState<CustomerSearchResult | null>(preselectedCustomer);
+    const [selectedCustomer, setSelectedCustomer] =
+        useState<CustomerSearchResult | null>(preselectedCustomer);
     const [customerSearch, setCustomerSearch] = useState('');
-    const [customerResults, setCustomerResults] = useState<CustomerSearchResult[]>([]);
+    const [customerResults, setCustomerResults] = useState<
+        CustomerSearchResult[]
+    >([]);
     const [searchLoading, setSearchLoading] = useState(false);
 
     // Step 2: Invoice type selection
@@ -111,7 +124,9 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
 
     // Step 3: Item/date selection
     const [dateRange, setDateRange] = useState({ start: '', end: '' });
-    const [items, setItems] = useState<(UninvoicedOrder | UninvoicedTransaction)[]>([]);
+    const [items, setItems] = useState<
+        (UninvoicedOrder | UninvoicedTransaction)[]
+    >([]);
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [itemsLoading, setItemsLoading] = useState(false);
 
@@ -137,7 +152,7 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
             setSearchLoading(true);
             try {
                 const response = await fetch(
-                    `/admin/invoices/search-customers?search=${encodeURIComponent(customerSearch)}`
+                    `/admin/invoices/search-customers?search=${encodeURIComponent(customerSearch)}`,
                 );
                 const data = await response.json();
                 setCustomerResults(data);
@@ -152,19 +167,22 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
 
     // Fetch uninvoiced items when step 3 is active
     const fetchItems = useCallback(async () => {
-        if (!selectedCustomer || !selectedType || selectedType === 'statement') return;
+        if (!selectedCustomer || !selectedType || selectedType === 'statement')
+            return;
 
         setItemsLoading(true);
         try {
             const endpoint =
-                selectedType === 'purchase' ? 'uninvoiced-orders' : 'uninvoiced-transactions';
+                selectedType === 'purchase'
+                    ? 'uninvoiced-orders'
+                    : 'uninvoiced-transactions';
 
             const params = new URLSearchParams();
             if (dateRange.start) params.set('start_date', dateRange.start);
             if (dateRange.end) params.set('end_date', dateRange.end);
 
             const response = await fetch(
-                `/admin/invoices/customers/${selectedCustomer.id}/${endpoint}?${params}`
+                `/admin/invoices/customers/${selectedCustomer.id}/${endpoint}?${params}`,
             );
             const data = await response.json();
             setItems(data);
@@ -212,7 +230,9 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
         if (checked) {
             setSelectedItems([...selectedItems, uuid]);
         } else {
-            setSelectedItems(selectedItems.filter((itemUuid) => itemUuid !== uuid));
+            setSelectedItems(
+                selectedItems.filter((itemUuid) => itemUuid !== uuid),
+            );
         }
     }
 
@@ -285,7 +305,11 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                                       : 'bg-muted text-muted-foreground'
                             }`}
                         >
-                            {step > s.num ? <Check className="h-4 w-4" /> : s.num}
+                            {step > s.num ? (
+                                <Check className="h-4 w-4" />
+                            ) : (
+                                s.num
+                            )}
                         </div>
                         <span
                             className={`ml-2 text-sm ${step === s.num ? 'font-medium' : 'text-muted-foreground'}`}
@@ -331,11 +355,13 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                 <Input
                                     placeholder="Search customers..."
                                     value={customerSearch}
-                                    onChange={(e) => setCustomerSearch(e.target.value)}
+                                    onChange={(e) =>
+                                        setCustomerSearch(e.target.value)
+                                    }
                                     className="pl-9"
                                 />
                             </div>
@@ -351,7 +377,9 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                                     {customerResults.map((customer) => (
                                         <div
                                             key={customer.id}
-                                            onClick={() => handleSelectCustomer(customer)}
+                                            onClick={() =>
+                                                handleSelectCustomer(customer)
+                                            }
                                             className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-muted"
                                         >
                                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
@@ -363,7 +391,8 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                                             </div>
                                             <div className="flex-1">
                                                 <div className="font-medium">
-                                                    {customer.company_name || customer.name}
+                                                    {customer.company_name ||
+                                                        customer.name}
                                                 </div>
                                                 <div className="text-sm text-muted-foreground">
                                                     {customer.email}
@@ -402,7 +431,8 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                             <CardDescription>
                                 Generating invoice for:{' '}
                                 <span className="font-medium">
-                                    {selectedCustomer.company_name || selectedCustomer.name}
+                                    {selectedCustomer.company_name ||
+                                        selectedCustomer.name}
                                 </span>
                             </CardDescription>
                         </CardHeader>
@@ -411,7 +441,9 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                                 {availableTypes.map((type) => (
                                     <div
                                         key={type.value}
-                                        onClick={() => handleSelectType(type.value)}
+                                        onClick={() =>
+                                            handleSelectType(type.value)
+                                        }
                                         className={`cursor-pointer rounded-lg border-2 p-4 transition-colors ${
                                             selectedType === type.value
                                                 ? 'border-primary bg-primary/5'
@@ -429,9 +461,15 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                                                 {INVOICE_TYPE_ICONS[type.value]}
                                             </div>
                                             <div>
-                                                <div className="font-medium">{type.label}</div>
+                                                <div className="font-medium">
+                                                    {type.label}
+                                                </div>
                                                 <div className="mt-1 text-xs text-muted-foreground">
-                                                    {INVOICE_TYPE_DESCRIPTIONS[type.value]}
+                                                    {
+                                                        INVOICE_TYPE_DESCRIPTIONS[
+                                                            type.value
+                                                        ]
+                                                    }
                                                 </div>
                                             </div>
                                         </div>
@@ -440,11 +478,17 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                             </div>
 
                             <div className="flex justify-between pt-4">
-                                <Button variant="outline" onClick={() => setStep(1)}>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setStep(1)}
+                                >
                                     <ArrowLeft className="mr-2 h-4 w-4" />
                                     Back
                                 </Button>
-                                <Button onClick={() => setStep(3)} disabled={!selectedType}>
+                                <Button
+                                    onClick={() => setStep(3)}
+                                    disabled={!selectedType}
+                                >
                                     Continue
                                     <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
@@ -474,25 +518,35 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label>
-                                        {selectedType === 'statement' ? 'Start Date' : 'From Date (optional)'}
+                                        {selectedType === 'statement'
+                                            ? 'Start Date'
+                                            : 'From Date (optional)'}
                                     </Label>
                                     <Input
                                         type="date"
                                         value={dateRange.start}
                                         onChange={(e) =>
-                                            setDateRange((prev) => ({ ...prev, start: e.target.value }))
+                                            setDateRange((prev) => ({
+                                                ...prev,
+                                                start: e.target.value,
+                                            }))
                                         }
                                     />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>
-                                        {selectedType === 'statement' ? 'End Date' : 'To Date (optional)'}
+                                        {selectedType === 'statement'
+                                            ? 'End Date'
+                                            : 'To Date (optional)'}
                                     </Label>
                                     <Input
                                         type="date"
                                         value={dateRange.end}
                                         onChange={(e) =>
-                                            setDateRange((prev) => ({ ...prev, end: e.target.value }))
+                                            setDateRange((prev) => ({
+                                                ...prev,
+                                                end: e.target.value,
+                                            }))
                                         }
                                     />
                                 </div>
@@ -500,7 +554,11 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
 
                             {/* Apply filter button for non-statement types */}
                             {selectedType !== 'statement' && (
-                                <Button variant="secondary" onClick={fetchItems} disabled={itemsLoading}>
+                                <Button
+                                    variant="secondary"
+                                    onClick={fetchItems}
+                                    disabled={itemsLoading}
+                                >
                                     {itemsLoading ? (
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     ) : (
@@ -519,7 +577,8 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                                         </div>
                                     ) : items.length === 0 ? (
                                         <div className="py-8 text-center text-muted-foreground">
-                                            No uninvoiced items found for this period
+                                            No uninvoiced items found for this
+                                            period
                                         </div>
                                     ) : (
                                         <>
@@ -527,17 +586,25 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                                             <div className="flex items-center gap-2 rounded-lg bg-muted p-3">
                                                 <Checkbox
                                                     checked={
-                                                        selectedItems.length === items.length && items.length > 0
+                                                        selectedItems.length ===
+                                                            items.length &&
+                                                        items.length > 0
                                                     }
-                                                    onCheckedChange={handleSelectAll}
+                                                    onCheckedChange={
+                                                        handleSelectAll
+                                                    }
                                                 />
                                                 <Label className="cursor-pointer">
-                                                    Select All ({items.length} items)
+                                                    Select All ({items.length}{' '}
+                                                    items)
                                                 </Label>
                                                 {selectedItems.length > 0 && (
                                                     <span className="ml-auto font-medium">
-                                                        Selected: {currencySymbol}
-                                                        {selectedTotal.toFixed(2)}
+                                                        Selected:{' '}
+                                                        {currencySymbol}
+                                                        {selectedTotal.toFixed(
+                                                            2,
+                                                        )}
                                                     </span>
                                                 )}
                                             </div>
@@ -549,45 +616,73 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                                                         <TableRow>
                                                             <TableHead className="w-12" />
                                                             <TableHead>
-                                                                {selectedType === 'purchase'
+                                                                {selectedType ===
+                                                                'purchase'
                                                                     ? 'Order #'
                                                                     : 'Description'}
                                                             </TableHead>
-                                                            {selectedType === 'purchase' && (
-                                                                <TableHead>Package</TableHead>
+                                                            {selectedType ===
+                                                                'purchase' && (
+                                                                <TableHead>
+                                                                    Package
+                                                                </TableHead>
                                                             )}
-                                                            <TableHead className="text-right">Amount</TableHead>
-                                                            <TableHead>Date</TableHead>
+                                                            <TableHead className="text-right">
+                                                                Amount
+                                                            </TableHead>
+                                                            <TableHead>
+                                                                Date
+                                                            </TableHead>
                                                         </TableRow>
                                                     </TableHeader>
                                                     <TableBody>
                                                         {items.map((item) => (
-                                                            <TableRow key={item.uuid}>
+                                                            <TableRow
+                                                                key={item.uuid}
+                                                            >
                                                                 <TableCell>
                                                                     <Checkbox
-                                                                        checked={selectedItems.includes(item.uuid)}
-                                                                        onCheckedChange={(checked) =>
-                                                                            handleSelectItem(item.uuid, !!checked)
+                                                                        checked={selectedItems.includes(
+                                                                            item.uuid,
+                                                                        )}
+                                                                        onCheckedChange={(
+                                                                            checked,
+                                                                        ) =>
+                                                                            handleSelectItem(
+                                                                                item.uuid,
+                                                                                !!checked,
+                                                                            )
                                                                         }
                                                                     />
                                                                 </TableCell>
                                                                 <TableCell className="font-mono">
-                                                                    {'order_number' in item
+                                                                    {'order_number' in
+                                                                    item
                                                                         ? item.order_number
-                                                                        : item.description || 'Balance Top-Up'}
+                                                                        : item.description ||
+                                                                          'Balance Top-Up'}
                                                                 </TableCell>
-                                                                {selectedType === 'purchase' && (
+                                                                {selectedType ===
+                                                                    'purchase' && (
                                                                     <TableCell>
-                                                                        {(item as UninvoicedOrder).package_name ||
+                                                                        {(
+                                                                            item as UninvoicedOrder
+                                                                        )
+                                                                            .package_name ||
                                                                             '-'}
                                                                     </TableCell>
                                                                 )}
                                                                 <TableCell className="text-right font-medium">
-                                                                    {currencySymbol}
-                                                                    {item.amount.toFixed(2)}
+                                                                    {
+                                                                        currencySymbol
+                                                                    }
+                                                                    {item.amount.toFixed(
+                                                                        2,
+                                                                    )}
                                                                 </TableCell>
                                                                 <TableCell className="text-muted-foreground">
-                                                                    {'completed_at' in item
+                                                                    {'completed_at' in
+                                                                    item
                                                                         ? item.completed_at
                                                                         : item.created_at}
                                                                 </TableCell>
@@ -602,11 +697,17 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                             )}
 
                             <div className="flex justify-between pt-4">
-                                <Button variant="outline" onClick={() => setStep(2)}>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setStep(2)}
+                                >
                                     <ArrowLeft className="mr-2 h-4 w-4" />
                                     Back
                                 </Button>
-                                <Button onClick={() => setStep(4)} disabled={!canProceed()}>
+                                <Button
+                                    onClick={() => setStep(4)}
+                                    disabled={!canProceed()}
+                                >
                                     Continue
                                     <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
@@ -630,23 +731,36 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                             <div className="rounded-lg bg-muted p-4">
                                 <div className="grid gap-4 md:grid-cols-3">
                                     <div>
-                                        <p className="text-sm text-muted-foreground">Customer</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            Customer
+                                        </p>
                                         <p className="font-medium">
-                                            {selectedCustomer.company_name || selectedCustomer.name}
+                                            {selectedCustomer.company_name ||
+                                                selectedCustomer.name}
                                         </p>
                                         <p className="text-sm text-muted-foreground">
                                             {selectedCustomer.email}
                                         </p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-muted-foreground">Invoice Type</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            Invoice Type
+                                        </p>
                                         <p className="font-medium capitalize">
-                                            {types.find((t) => t.value === selectedType)?.label}
+                                            {
+                                                types.find(
+                                                    (t) =>
+                                                        t.value ===
+                                                        selectedType,
+                                                )?.label
+                                            }
                                         </p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-muted-foreground">
-                                            {selectedType === 'statement' ? 'Period' : 'Items'}
+                                            {selectedType === 'statement'
+                                                ? 'Period'
+                                                : 'Items'}
                                         </p>
                                         <p className="font-medium">
                                             {selectedType === 'statement'
@@ -658,51 +772,77 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                             </div>
 
                             {/* Items Preview (for non-statement) */}
-                            {selectedType !== 'statement' && selectedItems.length > 0 && (
-                                <div className="rounded-lg border">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>
-                                                    {selectedType === 'purchase' ? 'Order #' : 'Description'}
-                                                </TableHead>
-                                                <TableHead className="text-right">Amount</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {items
-                                                .filter((item) => selectedItems.includes(item.uuid))
-                                                .map((item) => (
-                                                    <TableRow key={item.uuid}>
-                                                        <TableCell className="font-mono">
-                                                            {'order_number' in item
-                                                                ? item.order_number
-                                                                : item.description || 'Balance Top-Up'}
-                                                        </TableCell>
-                                                        <TableCell className="text-right font-medium">
-                                                            {currencySymbol}
-                                                            {item.amount.toFixed(2)}
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            <TableRow className="bg-muted/50">
-                                                <TableCell className="font-semibold">Total</TableCell>
-                                                <TableCell className="text-right text-lg font-bold">
-                                                    {currencySymbol}
-                                                    {selectedTotal.toFixed(2)}
-                                                </TableCell>
-                                            </TableRow>
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            )}
+                            {selectedType !== 'statement' &&
+                                selectedItems.length > 0 && (
+                                    <div className="rounded-lg border">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>
+                                                        {selectedType ===
+                                                        'purchase'
+                                                            ? 'Order #'
+                                                            : 'Description'}
+                                                    </TableHead>
+                                                    <TableHead className="text-right">
+                                                        Amount
+                                                    </TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {items
+                                                    .filter((item) =>
+                                                        selectedItems.includes(
+                                                            item.uuid,
+                                                        ),
+                                                    )
+                                                    .map((item) => (
+                                                        <TableRow
+                                                            key={item.uuid}
+                                                        >
+                                                            <TableCell className="font-mono">
+                                                                {'order_number' in
+                                                                item
+                                                                    ? item.order_number
+                                                                    : item.description ||
+                                                                      'Balance Top-Up'}
+                                                            </TableCell>
+                                                            <TableCell className="text-right font-medium">
+                                                                {currencySymbol}
+                                                                {item.amount.toFixed(
+                                                                    2,
+                                                                )}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                <TableRow className="bg-muted/50">
+                                                    <TableCell className="font-semibold">
+                                                        Total
+                                                    </TableCell>
+                                                    <TableCell className="text-right text-lg font-bold">
+                                                        {currencySymbol}
+                                                        {selectedTotal.toFixed(
+                                                            2,
+                                                        )}
+                                                    </TableCell>
+                                                </TableRow>
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                )}
 
                             <div className="flex justify-between pt-4">
-                                <Button variant="outline" onClick={() => setStep(3)}>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setStep(3)}
+                                >
                                     <ArrowLeft className="mr-2 h-4 w-4" />
                                     Back
                                 </Button>
-                                <Button onClick={handleSubmit} disabled={submitting}>
+                                <Button
+                                    onClick={handleSubmit}
+                                    disabled={submitting}
+                                >
                                     {submitting ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -712,7 +852,8 @@ export default function GenerateInvoice({ types, defaultCurrency, preselectedCus
                                         <>
                                             <Check className="mr-2 h-4 w-4" />
                                             Generate{' '}
-                                            {selectedType !== 'statement' && selectedItems.length > 1
+                                            {selectedType !== 'statement' &&
+                                            selectedItems.length > 1
                                                 ? `${selectedItems.length} Invoices`
                                                 : 'Invoice'}
                                         </>

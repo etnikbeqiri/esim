@@ -1,142 +1,214 @@
 import { LegalPageLayout, LegalSection } from '@/components/legal-page-layout';
+import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
-import { type SharedData } from '@/types';
+import { SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 
 export default function Terms() {
     const { name, contact } = usePage<SharedData>().props;
+    const { trans } = useTrans();
 
     return (
         <GuestLayout>
-            <Head title={`Terms of Service - ${name}`}>
+            <Head
+                title={trans('terms_page.meta_title', {
+                    app_name: name,
+                })}
+            >
                 <meta
                     name="description"
-                    content={`Terms of Service for ${name}. Read our terms and conditions for using our eSIM services.`}
+                    content={trans('terms_page.meta_description', {
+                        app_name: name,
+                    })}
                 />
             </Head>
 
-            <LegalPageLayout title="Terms of Service" lastUpdated="December 2024">
-                <LegalSection title="Agreement to Terms">
+            <LegalPageLayout
+                title={trans('terms_page.title')}
+                lastUpdated={trans('terms_page.last_updated')}
+            >
+                <LegalSection
+                    title={trans('terms_page.sections.agreement.title')}
+                >
                     <p>
-                        By accessing or using {name}'s website and services, you agree to be bound
-                        by these Terms of Service. If you do not agree to these terms, please do
-                        not use our services.
+                        {trans('terms_page.sections.agreement.content', {
+                            app_name: name,
+                        })}
                     </p>
                 </LegalSection>
 
-                <LegalSection title="Description of Service">
+                <LegalSection
+                    title={trans('terms_page.sections.description.title')}
+                >
                     <p>
-                        {name} provides eSIM (embedded SIM) services that allow you to access
-                        mobile data networks while traveling internationally. Our service includes:
+                        {trans('terms_page.sections.description.content', {
+                            app_name: name,
+                        })}
                     </p>
-                    <ul className="list-disc space-y-2 pl-6">
-                        <li>Digital eSIM profiles for mobile data access</li>
-                        <li>QR codes for eSIM installation</li>
-                        <li>Customer support for activation and usage</li>
-                    </ul>
-                </LegalSection>
-
-                <LegalSection title="Eligibility">
-                    <p>
-                        To use our services, you must have a device that supports eSIM technology.
-                        You are responsible for verifying that your device is eSIM-compatible and
-                        carrier-unlocked before making a purchase.
-                    </p>
-                </LegalSection>
-
-                <LegalSection title="Purchases and Payment">
-                    <p>
-                        All purchases are final once the eSIM has been delivered. Prices are
-                        displayed in the currency selected at checkout and include all applicable
-                        taxes.
-                    </p>
-                    <ul className="list-disc space-y-2 pl-6">
-                        <li>Payment is required at the time of purchase</li>
-                        <li>We accept major credit cards and other payment methods as displayed</li>
-                        <li>You agree to provide accurate billing information</li>
-                    </ul>
-                </LegalSection>
-
-                <LegalSection title="eSIM Delivery and Activation">
-                    <p>
-                        eSIM profiles are delivered instantly via email after successful payment.
-                        You are responsible for:
-                    </p>
-                    <ul className="list-disc space-y-2 pl-6">
-                        <li>Providing a valid email address for delivery</li>
-                        <li>Following the installation instructions provided</li>
-                        <li>Activating the eSIM within the validity period</li>
-                    </ul>
-                </LegalSection>
-
-                <LegalSection title="Data Plans and Usage">
-                    <p>
-                        Each eSIM plan includes a specific data allowance and validity period as
-                        described at the time of purchase:
-                    </p>
-                    <ul className="list-disc space-y-2 pl-6">
-                        <li>Data allowances are non-transferable</li>
-                        <li>Unused data expires at the end of the validity period</li>
-                        <li>Validity period begins upon first connection to a network</li>
-                        <li>Data speeds may vary based on network conditions</li>
-                    </ul>
-                </LegalSection>
-
-                <LegalSection title="Refund Policy">
-                    <p>Due to the digital nature of our products:</p>
                     <ul className="list-disc space-y-2 pl-6">
                         <li>
-                            Refunds are available for unused eSIMs within 7 days of purchase
+                            {trans(
+                                'terms_page.sections.description.items.profiles',
+                            )}
                         </li>
                         <li>
-                            No refunds are available once the eSIM has been installed or activated
+                            {trans('terms_page.sections.description.items.qr')}
                         </li>
                         <li>
-                            Technical issues will be resolved through customer support before
-                            considering refunds
+                            {trans(
+                                'terms_page.sections.description.items.support',
+                            )}
                         </li>
                     </ul>
                 </LegalSection>
 
-                <LegalSection title="Acceptable Use">
-                    <p>You agree not to use our services for:</p>
+                <LegalSection
+                    title={trans('terms_page.sections.eligibility.title')}
+                >
+                    <p>{trans('terms_page.sections.eligibility.content')}</p>
+                </LegalSection>
+
+                <LegalSection
+                    title={trans('terms_page.sections.purchases.title')}
+                >
+                    <p>{trans('terms_page.sections.purchases.content')}</p>
                     <ul className="list-disc space-y-2 pl-6">
-                        <li>Any illegal or unauthorized purpose</li>
-                        <li>Reselling or redistributing eSIM profiles</li>
-                        <li>Interfering with or disrupting our services</li>
-                        <li>Attempting to bypass any security measures</li>
+                        <li>
+                            {trans(
+                                'terms_page.sections.purchases.items.payment',
+                            )}
+                        </li>
+                        <li>
+                            {trans(
+                                'terms_page.sections.purchases.items.methods',
+                            )}
+                        </li>
+                        <li>
+                            {trans(
+                                'terms_page.sections.purchases.items.billing',
+                            )}
+                        </li>
                     </ul>
                 </LegalSection>
 
-                <LegalSection title="Limitation of Liability">
-                    <p>
-                        {name} is not liable for any indirect, incidental, or consequential
-                        damages arising from the use of our services. Our liability is limited to
-                        the amount paid for the specific eSIM in question.
-                    </p>
-                    <p>
-                        We do not guarantee uninterrupted service and are not responsible for
-                        network issues controlled by third-party carriers.
-                    </p>
+                <LegalSection
+                    title={trans('terms_page.sections.delivery.title')}
+                >
+                    <p>{trans('terms_page.sections.delivery.content')}</p>
+                    <ul className="list-disc space-y-2 pl-6">
+                        <li>
+                            {trans('terms_page.sections.delivery.items.email')}
+                        </li>
+                        <li>
+                            {trans(
+                                'terms_page.sections.delivery.items.instructions',
+                            )}
+                        </li>
+                        <li>
+                            {trans(
+                                'terms_page.sections.delivery.items.activation',
+                            )}
+                        </li>
+                    </ul>
                 </LegalSection>
 
-                <LegalSection title="Changes to Terms">
-                    <p>
-                        We reserve the right to modify these terms at any time. Continued use of
-                        our services after changes constitutes acceptance of the new terms.
-                    </p>
+                <LegalSection title={trans('terms_page.sections.usage.title')}>
+                    <p>{trans('terms_page.sections.usage.content')}</p>
+                    <ul className="list-disc space-y-2 pl-6">
+                        <li>
+                            {trans(
+                                'terms_page.sections.usage.items.transferable',
+                            )}
+                        </li>
+                        <li>
+                            {trans('terms_page.sections.usage.items.expiry')}
+                        </li>
+                        <li>
+                            {trans('terms_page.sections.usage.items.start')}
+                        </li>
+                        <li>
+                            {trans('terms_page.sections.usage.items.speeds')}
+                        </li>
+                    </ul>
                 </LegalSection>
 
-                <LegalSection title="Governing Law">
-                    <p>
-                        These terms are governed by applicable laws. Any disputes shall be resolved
-                        through appropriate legal channels.
-                    </p>
+                <LegalSection title={trans('terms_page.sections.refund.title')}>
+                    <p>{trans('terms_page.sections.refund.content')}</p>
+                    <ul className="list-disc space-y-2 pl-6">
+                        <li>
+                            {trans(
+                                'terms_page.sections.refund.items.available',
+                            )}
+                        </li>
+                        <li>
+                            {trans(
+                                'terms_page.sections.refund.items.installed',
+                            )}
+                        </li>
+                        <li>
+                            {trans(
+                                'terms_page.sections.refund.items.technical',
+                            )}
+                        </li>
+                    </ul>
                 </LegalSection>
 
-                <LegalSection title="Contact Us">
+                <LegalSection
+                    title={trans('terms_page.sections.acceptable.title')}
+                >
+                    <p>{trans('terms_page.sections.acceptable.content')}</p>
+                    <ul className="list-disc space-y-2 pl-6">
+                        <li>
+                            {trans(
+                                'terms_page.sections.acceptable.items.illegal',
+                            )}
+                        </li>
+                        <li>
+                            {trans(
+                                'terms_page.sections.acceptable.items.reselling',
+                            )}
+                        </li>
+                        <li>
+                            {trans(
+                                'terms_page.sections.acceptable.items.interfering',
+                            )}
+                        </li>
+                        <li>
+                            {trans(
+                                'terms_page.sections.acceptable.items.bypassing',
+                            )}
+                        </li>
+                    </ul>
+                </LegalSection>
+
+                <LegalSection
+                    title={trans('terms_page.sections.liability.title')}
+                >
                     <p>
-                        For questions about these Terms of Service, please contact us at{' '}
+                        {trans('terms_page.sections.liability.content_1', {
+                            app_name: name,
+                        })}
+                    </p>
+                    <p>{trans('terms_page.sections.liability.content_2')}</p>
+                </LegalSection>
+
+                <LegalSection
+                    title={trans('terms_page.sections.changes.title')}
+                >
+                    <p>{trans('terms_page.sections.changes.content')}</p>
+                </LegalSection>
+
+                <LegalSection
+                    title={trans('terms_page.sections.governing.title')}
+                >
+                    <p>{trans('terms_page.sections.governing.content')}</p>
+                </LegalSection>
+
+                <LegalSection
+                    title={trans('terms_page.sections.contact.title')}
+                >
+                    <p>
+                        {trans('terms_page.sections.contact.content')}{' '}
                         <a
                             href={`mailto:${contact.legalEmail}`}
                             className="text-primary hover:underline"

@@ -1,9 +1,10 @@
 import { CTASection } from '@/components/cta-section';
-import { FAQSection, type FAQItem } from '@/components/faq-section';
+import { FAQItem, FAQSection } from '@/components/faq-section';
 import { HelpCard } from '@/components/help-card';
 import { HeroSection } from '@/components/hero-section';
+import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
-import { type SharedData } from '@/types';
+import { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     BookOpen,
@@ -16,37 +17,46 @@ import {
     Wifi,
 } from 'lucide-react';
 
-const quickFaqs: FAQItem[] = [
-    {
-        question: 'How do I install my eSIM?',
-        answer: 'Go to Settings > Cellular > Add Cellular Plan on iPhone, or Settings > Network > SIM cards > Add eSIM on Android. Scan the QR code we sent you and follow the prompts.',
-    },
-    {
-        question: 'Why is my eSIM not connecting?',
-        answer: 'Make sure data roaming is enabled and the eSIM is set as your data line. Try restarting your phone. Ensure you\'re in an area with network coverage.',
-    },
-    {
-        question: 'Can I get a refund?',
-        answer: 'Refunds are available for unused eSIMs within 7 days of purchase. Once installed or activated, eSIMs cannot be refunded.',
-    },
-];
-
 export default function Help() {
     const { name, contact } = usePage<SharedData>().props;
+    const { trans } = useTrans();
+
+    const quickFaqs: FAQItem[] = [
+        {
+            question: trans('help_page.quick_faqs.items.install.question'),
+            answer: trans('help_page.quick_faqs.items.install.answer'),
+        },
+        {
+            question: trans(
+                'help_page.quick_faqs.items.not_connecting.question',
+            ),
+            answer: trans('help_page.quick_faqs.items.not_connecting.answer'),
+        },
+        {
+            question: trans('help_page.quick_faqs.items.refund.question'),
+            answer: trans('help_page.quick_faqs.items.refund.answer'),
+        },
+    ];
 
     return (
         <GuestLayout>
-            <Head title={`Help Center - ${name}`}>
+            <Head
+                title={trans('help_page.meta_title', {
+                    app_name: name,
+                })}
+            >
                 <meta
                     name="description"
-                    content={`Get help with ${name} eSIM services. Find guides, FAQs, and contact support for assistance with your eSIM.`}
+                    content={trans('help_page.meta_description', {
+                        app_name: name,
+                    })}
                 />
             </Head>
 
             <HeroSection
-                badge="We're Here to Help"
-                title="Help Center"
-                description="Find guides, tutorials, and answers to help you get the most out of your eSIM experience."
+                badge={trans('help_page.hero.badge')}
+                title={trans('help_page.hero.title')}
+                description={trans('help_page.hero.description')}
                 showStats={false}
             />
 
@@ -54,46 +64,68 @@ export default function Help() {
             <section className="py-16 md:py-24">
                 <div className="container mx-auto px-4">
                     <div className="mb-12 text-center">
-                        <h2 className="mb-4 text-2xl font-bold md:text-3xl">Browse by Topic</h2>
+                        <h2 className="mb-4 text-2xl font-bold md:text-3xl">
+                            {trans('help_page.categories.title')}
+                        </h2>
                         <p className="text-muted-foreground">
-                            Select a category to find the help you need
+                            {trans('help_page.categories.description')}
                         </p>
                     </div>
 
                     <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 lg:grid-cols-3">
                         <HelpCard
-                            title="Getting Started"
-                            description="New to eSIM? Learn the basics and get set up quickly."
+                            title={trans(
+                                'help_page.categories.getting_started.title',
+                            )}
+                            description={trans(
+                                'help_page.categories.getting_started.description',
+                            )}
                             icon={BookOpen}
                             href="/how-it-works"
                         />
                         <HelpCard
-                            title="Installation Guide"
-                            description="Step-by-step instructions for installing your eSIM."
+                            title={trans(
+                                'help_page.categories.installation.title',
+                            )}
+                            description={trans(
+                                'help_page.categories.installation.description',
+                            )}
                             icon={QrCode}
                             href="/how-it-works"
                         />
                         <HelpCard
-                            title="Device Compatibility"
-                            description="Check if your device supports eSIM technology."
+                            title={trans(
+                                'help_page.categories.compatibility.title',
+                            )}
+                            description={trans(
+                                'help_page.categories.compatibility.description',
+                            )}
                             icon={Smartphone}
                             href="/how-it-works"
                         />
                         <HelpCard
-                            title="Troubleshooting"
-                            description="Solutions for common connection and activation issues."
+                            title={trans(
+                                'help_page.categories.troubleshooting.title',
+                            )}
+                            description={trans(
+                                'help_page.categories.troubleshooting.description',
+                            )}
                             icon={Settings}
                             href="/faq"
                         />
                         <HelpCard
-                            title="FAQs"
-                            description="Answers to frequently asked questions."
+                            title={trans('help_page.categories.faqs.title')}
+                            description={trans(
+                                'help_page.categories.faqs.description',
+                            )}
                             icon={HelpCircle}
                             href="/faq"
                         />
                         <HelpCard
-                            title="Network Coverage"
-                            description="Check coverage in your travel destination."
+                            title={trans('help_page.categories.coverage.title')}
+                            description={trans(
+                                'help_page.categories.coverage.description',
+                            )}
                             icon={Wifi}
                             href="/destinations"
                         />
@@ -103,46 +135,60 @@ export default function Help() {
 
             {/* Quick FAQs */}
             <FAQSection
-                title="Quick Answers"
-                subtitle="Most commonly asked questions"
+                title={trans('help_page.quick_faqs.title')}
+                subtitle={trans('help_page.quick_faqs.subtitle')}
                 items={quickFaqs}
             />
 
             {/* Contact Section */}
-            <section className="py-16 md:py-24">
-                <div className="container mx-auto px-4">
-                    <div className="mb-12 text-center">
-                        <h2 className="mb-4 text-2xl font-bold md:text-3xl">Still Need Help?</h2>
-                        <p className="text-muted-foreground">
-                            Our support team is here to assist you
-                        </p>
-                    </div>
+            <section className="relative overflow-hidden border-t border-primary-100 py-8 md:py-16">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-accent-50/30" />
 
-                    <div className="mx-auto grid max-w-2xl gap-6 md:grid-cols-2">
-                        <a href={`mailto:${contact.supportEmail}`}>
-                            <div className="flex items-center gap-4 rounded-xl border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-md">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                                    <Mail className="h-6 w-6 text-primary" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Email Support</h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        {contact.supportEmail}
-                                    </p>
-                                </div>
+                <div className="relative z-10 container mx-auto px-4">
+                    <h2 className="mb-5 text-center text-lg font-bold text-primary-900 md:mb-8 md:text-2xl">
+                        {trans('help_page.contact.title')}
+                    </h2>
+
+                    <div className="mx-auto grid max-w-3xl gap-3 md:grid-cols-2 md:gap-5">
+                        {/* Email Support Card */}
+                        <a
+                            href={`mailto:${contact.supportEmail}`}
+                            className="group flex items-center gap-3 rounded-xl border border-primary-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:rounded-2xl md:p-6"
+                        >
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-300 transition-colors group-hover:bg-accent-400 md:h-12 md:w-12 md:rounded-xl">
+                                <Mail className="h-5 w-5 text-accent-950 md:h-6 md:w-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-bold text-primary-900 md:mb-1 md:text-base">
+                                    {trans('help_page.contact.email_support.title')}
+                                </h3>
+                                <p className="text-xs text-primary-600 md:text-sm">
+                                    {contact.supportEmail}
+                                </p>
+                                <p className="mt-1 text-[10px] text-primary-400 md:text-xs">
+                                    {trans('help_page.contact.email_support.response_time')}
+                                </p>
                             </div>
                         </a>
-                        <Link href="/faq">
-                            <div className="flex items-center gap-4 rounded-xl border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-md">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                                    <MessageCircle className="h-6 w-6 text-primary" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">View All FAQs</h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        Browse complete FAQ list
-                                    </p>
-                                </div>
+
+                        {/* FAQ Card */}
+                        <Link
+                            href="/faq"
+                            className="group flex items-center gap-3 rounded-xl border border-primary-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:rounded-2xl md:p-6"
+                        >
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100 transition-colors group-hover:bg-primary-200 md:h-12 md:w-12 md:rounded-xl">
+                                <MessageCircle className="h-5 w-5 text-primary-600 md:h-6 md:w-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-bold text-primary-900 md:mb-1 md:text-base">
+                                    {trans('help_page.contact.view_all_faqs.title')}
+                                </h3>
+                                <p className="text-xs text-primary-600 md:text-sm">
+                                    {trans('help_page.contact.view_all_faqs.description')}
+                                </p>
+                                <p className="mt-1 text-[10px] text-primary-400 md:text-xs">
+                                    {trans('help_page.contact.view_all_faqs.count')}
+                                </p>
                             </div>
                         </Link>
                     </div>

@@ -1,7 +1,7 @@
-import { useCallback, useState } from 'react';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { ImageIcon, X, Upload } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { ImageIcon, Upload, X } from 'lucide-react';
+import { useCallback, useState } from 'react';
 
 interface ImageUploadProps {
     value?: string | null;
@@ -26,59 +26,73 @@ export function ImageUpload({
     const [isDragging, setIsDragging] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleFile = useCallback((file: File) => {
-        setError(null);
+    const handleFile = useCallback(
+        (file: File) => {
+            setError(null);
 
-        // Validate file type
-        const validTypes = accept.split(',').map((t) => t.trim());
-        if (!validTypes.includes(file.type)) {
-            setError('Invalid file type. Please upload a JPG, PNG, or WebP image.');
-            return;
-        }
+            // Validate file type
+            const validTypes = accept.split(',').map((t) => t.trim());
+            if (!validTypes.includes(file.type)) {
+                setError(
+                    'Invalid file type. Please upload a JPG, PNG, or WebP image.',
+                );
+                return;
+            }
 
-        // Validate file size
-        if (file.size > maxSize * 1024 * 1024) {
-            setError(`File size must be less than ${maxSize}MB.`);
-            return;
-        }
+            // Validate file size
+            if (file.size > maxSize * 1024 * 1024) {
+                setError(`File size must be less than ${maxSize}MB.`);
+                return;
+            }
 
-        // Create preview
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            setPreview(e.target?.result as string);
-        };
-        reader.readAsDataURL(file);
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setPreview(e.target?.result as string);
+            };
+            reader.readAsDataURL(file);
 
-        onChange?.(file);
-    }, [accept, maxSize, onChange]);
+            onChange?.(file);
+        },
+        [accept, maxSize, onChange],
+    );
 
-    const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDragging(false);
+    const handleDrop = useCallback(
+        (e: React.DragEvent<HTMLDivElement>) => {
+            e.preventDefault();
+            setIsDragging(false);
 
-        const file = e.dataTransfer.files[0];
-        if (file) {
-            handleFile(file);
-        }
-    }, [handleFile]);
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        },
+        [handleFile],
+    );
 
     const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsDragging(true);
     }, []);
 
-    const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDragging(false);
-    }, []);
+    const handleDragLeave = useCallback(
+        (e: React.DragEvent<HTMLDivElement>) => {
+            e.preventDefault();
+            setIsDragging(false);
+        },
+        [],
+    );
 
-    const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            handleFile(file);
-        }
-        e.target.value = '';
-    }, [handleFile]);
+    const handleFileChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const file = e.target.files?.[0];
+            if (file) {
+                handleFile(file);
+            }
+            e.target.value = '';
+        },
+        [handleFile],
+    );
 
     const handleRemove = useCallback(() => {
         setPreview(null);
@@ -100,7 +114,7 @@ export function ImageUpload({
                         type="button"
                         variant="destructive"
                         size="icon"
-                        className="absolute -right-2 -top-2 size-6"
+                        className="absolute -top-2 -right-2 size-6"
                         onClick={handleRemove}
                         disabled={disabled}
                     >
@@ -114,11 +128,17 @@ export function ImageUpload({
                     onDragLeave={handleDragLeave}
                     className={cn(
                         'flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors',
-                        isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25',
+                        isDragging
+                            ? 'border-primary bg-primary/5'
+                            : 'border-muted-foreground/25',
                         disabled && 'cursor-not-allowed opacity-50',
-                        !disabled && 'cursor-pointer hover:border-primary hover:bg-muted/50',
+                        !disabled &&
+                            'cursor-pointer hover:border-primary hover:bg-muted/50',
                     )}
-                    onClick={() => !disabled && document.getElementById('image-upload-input')?.click()}
+                    onClick={() =>
+                        !disabled &&
+                        document.getElementById('image-upload-input')?.click()
+                    }
                 >
                     <div className="flex flex-col items-center gap-2 text-center">
                         <div className="rounded-full bg-muted p-3">
@@ -130,7 +150,9 @@ export function ImageUpload({
                         </div>
                         <div className="space-y-1">
                             <p className="text-sm font-medium">
-                                {isDragging ? 'Drop image here' : 'Drop an image or click to upload'}
+                                {isDragging
+                                    ? 'Drop image here'
+                                    : 'Drop an image or click to upload'}
                             </p>
                             <p className="text-xs text-muted-foreground">
                                 JPG, PNG, or WebP (max {maxSize}MB)
@@ -147,9 +169,7 @@ export function ImageUpload({
                     />
                 </div>
             )}
-            {error && (
-                <p className="text-sm text-destructive">{error}</p>
-            )}
+            {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
     );
 }

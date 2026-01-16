@@ -1,22 +1,52 @@
+import { BackButton } from '@/components/back-button';
 import { CountryFlag } from '@/components/country-flag';
+import { FeatureItem } from '@/components/feature-item';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import { GoldButton } from '@/components/ui/gold-button';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link } from '@inertiajs/react';
 import {
-    ArrowLeft,
+    ArrowRight,
     Calendar,
-    CheckCircle2,
     Database,
     Globe,
+    Info,
+    Search,
     Shield,
     Smartphone,
     Wifi,
     Zap,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+
+interface NetworkOperator {
+    name: string;
+    type: string;
+}
+
+interface CountryNetwork {
+    country: string;
+    iso_code?: string | null;
+    operators: NetworkOperator[];
+}
+
+type NetworkData = NetworkOperator[] | CountryNetwork[];
 
 interface Package {
     id: number;
@@ -34,6 +64,7 @@ interface Package {
     hotspot_allowed: boolean;
     coverage_type: string | null;
     description: string | null;
+    networks?: NetworkData;
 }
 
 interface Country {
@@ -50,7 +81,164 @@ interface Props {
 
 type SortOption = 'data' | 'price-asc' | 'price-desc' | 'validity';
 
+// Network Coverage Dialog Component with search
+function NetworkCoverageDialog({
+    networks,
+    isFeatured,
+}: {
+    networks: NetworkData;
+    isFeatured: boolean;
+}) {
+    const { trans } = useTrans();
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const isGrouped = networks.length > 0 && 'country' in networks[0];
+
+    const filteredNetworks = useMemo(() => {
+        if (!searchQuery.trim()) return networks;
+
+        const query = searchQuery.toLowerCase();
+
+        if (isGrouped) {
+            return (networks as CountryNetwork[]).filter(
+                (cn) =>
+                    cn.country.toLowerCase().includes(query) ||
+                    cn.operators.some((op) =>
+                        op.name.toLowerCase().includes(query),
+                    ),
+            );
+        } else {
+            return (networks as NetworkOperator[]).filter((op) =>
+                op.name.toLowerCase().includes(query),
+            );
+        }
+    }, [networks, searchQuery, isGrouped]);
+
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <button
+                    className={`mt-2 flex w-full items-center justify-center gap-1.5 rounded-md py-1.5 text-[10px] font-semibold transition-colors md:mt-4 md:gap-2 md:rounded-lg md:py-2 md:text-xs ${
+                        isFeatured
+                            ? 'bg-accent-100 text-accent-700 hover:bg-accent-200'
+                            : 'bg-primary-50 text-primary-600 hover:bg-primary-100'
+                    }`}
+                >
+                    <Info className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                    {trans('country_page.coverage.view')}
+                </button>
+            </DialogTrigger>
+            <DialogContent className="max-h-[85vh] w-[calc(100vw-2rem)] max-w-md overflow-hidden rounded-xl border-primary-200 bg-white p-4 md:rounded-lg md:p-6">
+                <DialogHeader className="pb-2 md:pb-4">
+                    <DialogTitle className="flex items-center gap-2 text-sm text-primary-900 md:text-base">
+                        <Wifi className="h-4 w-4 text-primary-600 md:h-5 md:w-5" />
+                        {trans('country_page.coverage.title')}
+                    </DialogTitle>
+                </DialogHeader>
+
+                {/* Search Input */}
+                {isGrouped && (networks as CountryNetwork[]).length > 5 && (
+                    <div className="relative mb-2 md:mb-0">
+                        <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-primary-400 md:left-3 md:h-4 md:w-4" />
+                        <input
+                            type="text"
+                            placeholder={trans(
+                                'country_page.coverage.search_placeholder',
+                            )}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full rounded-md border border-primary-200 bg-primary-50 py-1.5 pr-3 pl-8 text-base text-gray-950 placeholder:text-primary-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-400/20 focus:outline-none md:rounded-lg md:py-2 md:pr-4 md:pl-10 md:text-sm"
+                        />
+                    </div>
+                )}
+
+                <div className="max-h-[55vh] overflow-y-auto pr-1 md:pr-2">
+                    <p className="mb-2 text-xs text-primary-600 md:mb-4 md:text-sm">
+                        {isGrouped
+                            ? filteredNetworks.length === 1
+                                ? trans('country_page.coverage.country_count', {
+                                      count: filteredNetworks.length.toString(),
+                                  })
+                                : trans(
+                                      'country_page.coverage.countries_count',
+                                      {
+                                          count: filteredNetworks.length.toString(),
+                                      },
+                                  )
+                            : trans('country_page.coverage.available_networks')}
+                    </p>
+
+                    {filteredNetworks.length === 0 ? (
+                        <p className="py-3 text-center text-xs text-primary-500 md:py-4 md:text-sm">
+                            {trans('country_page.coverage.no_results', {
+                                query: searchQuery,
+                            })}
+                        </p>
+                    ) : isGrouped ? (
+                        // Regional packages - grouped by country
+                        <div className="space-y-3 md:space-y-4">
+                            {(filteredNetworks as CountryNetwork[]).map(
+                                (countryNet, idx) => (
+                                    <div key={idx}>
+                                        <h4 className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-primary-900 md:mb-2 md:gap-2 md:text-sm">
+                                            <CountryFlag
+                                                countryCode={
+                                                    countryNet.iso_code || 'XX'
+                                                }
+                                                size="sm"
+                                                className="h-4 w-5 rounded md:h-5 md:w-6"
+                                            />
+                                            {countryNet.country}
+                                        </h4>
+                                        <div className="space-y-1 pl-6 md:space-y-1.5 md:pl-8">
+                                            {countryNet.operators.map(
+                                                (op, opIdx) => (
+                                                    <div
+                                                        key={opIdx}
+                                                        className="flex items-center justify-between rounded-md border border-primary-100 bg-primary-50 px-2 py-1.5 md:rounded-lg md:px-3 md:py-2"
+                                                    >
+                                                        <span className="text-xs font-medium text-primary-900 md:text-sm">
+                                                            {op.name}
+                                                        </span>
+                                                        <span className="rounded bg-accent-300 px-1.5 py-0.5 text-[10px] font-bold text-accent-950 md:rounded-md md:px-2 md:text-xs">
+                                                            {op.type}
+                                                        </span>
+                                                    </div>
+                                                ),
+                                            )}
+                                        </div>
+                                    </div>
+                                ),
+                            )}
+                        </div>
+                    ) : (
+                        // Single country packages - flat list
+                        <div className="space-y-1.5 md:space-y-2">
+                            {(filteredNetworks as NetworkOperator[]).map(
+                                (network, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="flex items-center justify-between rounded-md border border-primary-100 bg-primary-50 px-2.5 py-2 md:rounded-lg md:px-4 md:py-3"
+                                    >
+                                        <span className="text-xs font-semibold text-primary-900 md:text-base">
+                                            {network.name}
+                                        </span>
+                                        <span className="rounded bg-accent-300 px-1.5 py-0.5 text-[10px] font-bold text-accent-950 md:rounded-md md:px-2 md:py-1 md:text-xs">
+                                            {network.type}
+                                        </span>
+                                    </div>
+                                ),
+                            )}
+                        </div>
+                    )}
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 export default function CountryPage({ country, packages }: Props) {
+    const { trans } = useTrans();
     const [sortBy, setSortBy] = useState<SortOption>('data');
 
     const sortedPackages = useMemo(() => {
@@ -59,9 +247,13 @@ export default function CountryPage({ country, packages }: Props) {
             case 'data':
                 return sorted.sort((a, b) => a.data_mb - b.data_mb);
             case 'price-asc':
-                return sorted.sort((a, b) => Number(a.retail_price) - Number(b.retail_price));
+                return sorted.sort(
+                    (a, b) => Number(a.retail_price) - Number(b.retail_price),
+                );
             case 'price-desc':
-                return sorted.sort((a, b) => Number(b.retail_price) - Number(a.retail_price));
+                return sorted.sort(
+                    (a, b) => Number(b.retail_price) - Number(a.retail_price),
+                );
             case 'validity':
                 return sorted.sort((a, b) => b.validity_days - a.validity_days);
             default:
@@ -69,72 +261,110 @@ export default function CountryPage({ country, packages }: Props) {
         }
     }, [packages, sortBy]);
 
-    const lowestPrice = packages.length > 0
-        ? Math.min(...packages.map((p) => Number(p.retail_price)))
-        : 0;
+    const lowestPrice =
+        packages.length > 0
+            ? Math.min(...packages.map((p) => Number(p.retail_price)))
+            : 0;
 
     return (
         <GuestLayout>
-            <Head title={`${country.name} eSIM Data Plans`}>
+            <Head
+                title={`${country.name} ${trans('country_page.meta_title_suffix')}`}
+            >
                 <meta
                     name="description"
-                    content={`Buy eSIM data plans for ${country.name}. ${packages.length} plans available with instant delivery. No roaming fees.`}
+                    content={trans('country_page.meta_description', {
+                        country: country.name,
+                        count: packages.length.toString(),
+                    })}
                 />
             </Head>
 
             {/* Hero Header */}
-            <section className="relative overflow-hidden bg-gradient-to-b from-muted/50 to-background pb-12 pt-8 md:pb-16 md:pt-12">
-                <div className="container mx-auto px-4">
+            <section className="bg-mesh relative overflow-hidden py-8 md:py-20">
+                {/* Decorative blobs */}
+                <div className="animate-float absolute top-10 -left-20 h-48 w-48 rounded-full bg-primary-200/40 blur-3xl md:h-80 md:w-80" />
+                <div className="animate-float-delayed absolute -right-20 bottom-10 h-48 w-48 rounded-full bg-accent-200/30 blur-3xl md:h-80 md:w-80" />
+
+                <div className="relative z-10 container mx-auto px-4">
                     {/* Back Link */}
-                    <Link
+                    <BackButton
                         href="/destinations"
-                        className="mb-6 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-                    >
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        All Destinations
-                    </Link>
+                        label={trans('country_page.back_to_destinations')}
+                        className="mb-4 md:mb-8"
+                    />
 
                     {/* Country Info */}
-                    <div className="flex flex-col items-center text-center md:flex-row md:items-start md:text-left md:gap-8">
+                    <div className="flex flex-col items-center text-center md:flex-row md:items-center md:gap-10 md:text-left">
                         {/* Flag */}
-                        <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-2xl bg-background shadow-lg md:mb-0 md:h-32 md:w-32 overflow-hidden">
-                            <CountryFlag countryCode={country.iso_code} className="h-16 w-24 md:h-20 md:w-28" />
+                        <div className="group relative mb-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/60 bg-white/70 p-2 shadow-lg backdrop-blur-sm md:mb-0 md:h-40 md:w-40 md:rounded-3xl md:p-3 md:shadow-xl">
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent" />
+                            <CountryFlag
+                                countryCode={country.iso_code}
+                                className="relative z-10 h-14 w-20 transform shadow-md transition-transform duration-500 group-hover:scale-110 md:h-28 md:w-40"
+                            />
                         </div>
 
                         {/* Details */}
                         <div className="flex-1">
-                            <div className="mb-2 flex flex-wrap items-center justify-center gap-2 md:justify-start">
+                            <div className="mb-2 flex flex-wrap items-center justify-center gap-1.5 md:mb-4 md:justify-start md:gap-2">
                                 {country.region && (
-                                    <Badge variant="secondary">
-                                        <Globe className="mr-1 h-3 w-3" />
+                                    <Badge
+                                        variant="secondary"
+                                        className="border-primary-200 bg-primary-100 px-2 py-0.5 text-xs text-primary-800 md:px-3 md:py-1 md:text-sm"
+                                    >
+                                        <Globe className="mr-1 h-3 w-3 md:mr-1.5 md:h-3.5 md:w-3.5" />
                                         {country.region}
                                     </Badge>
                                 )}
-                                <Badge variant="outline">
-                                    {packages.length} Plan{packages.length !== 1 ? 's' : ''}
+                                <Badge
+                                    variant="outline"
+                                    className="border-primary-300 bg-white/50 px-2 py-0.5 text-xs text-primary-700 backdrop-blur-sm md:px-3 md:py-1 md:text-sm"
+                                >
+                                    {packages.length}{' '}
+                                    {packages.length !== 1
+                                        ? trans('country_page.plans_unit')
+                                        : trans('country_page.plan_unit')}
                                 </Badge>
                             </div>
 
-                            <h1 className="mb-2 text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
+                            <h1 className="mb-2 text-2xl font-extrabold tracking-tight text-primary-900 sm:text-3xl md:mb-4 md:text-5xl lg:text-6xl">
                                 {country.name}
                             </h1>
 
-                            <p className="mb-4 text-muted-foreground md:text-lg">
-                                Get instant mobile data with our eSIM plans. No physical SIM needed.
+                            <p className="mb-4 max-w-2xl text-sm font-medium text-balance text-primary-700 md:mb-6 md:text-xl">
+                                {trans('country_page.hero_description')}
                             </p>
 
                             {packages.length > 0 && (
-                                <div className="flex flex-wrap items-center justify-center gap-4 text-sm md:justify-start">
-                                    <div className="flex items-center gap-1.5">
-                                        <Zap className="h-4 w-4 text-primary" />
-                                        <span>Instant Delivery</span>
+                                <div className="inline-flex flex-wrap items-center justify-center gap-2 rounded-xl border border-white/60 bg-white/60 px-3 py-2 shadow-sm backdrop-blur-sm md:justify-start md:gap-4 md:rounded-2xl md:px-5 md:py-3">
+                                    <div className="flex items-center gap-1.5 text-primary-800 md:gap-2">
+                                        <div className="rounded-full bg-accent-100 p-1 md:p-1.5">
+                                            <Zap className="h-3 w-3 text-accent-600 md:h-4 md:w-4" />
+                                        </div>
+                                        <span className="text-xs font-medium md:text-sm">
+                                            {trans(
+                                                'country_page.badges.instant',
+                                            )}
+                                        </span>
                                     </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <Shield className="h-4 w-4 text-primary" />
-                                        <span>Secure Payment</span>
+                                    <div className="flex items-center gap-1.5 text-primary-800 md:gap-2">
+                                        <div className="rounded-full bg-primary-100 p-1 md:p-1.5">
+                                            <Shield className="h-3 w-3 text-primary-600 md:h-4 md:w-4" />
+                                        </div>
+                                        <span className="text-xs font-medium md:text-sm">
+                                            {trans(
+                                                'country_page.badges.secure',
+                                            )}
+                                        </span>
                                     </div>
-                                    <div className="flex items-center gap-1.5 font-semibold text-primary">
-                                        Starting from €{lowestPrice.toFixed(2)}
+                                    <div className="flex items-center gap-1.5 border-l border-primary-200 pl-2 md:gap-2 md:pl-4">
+                                        <span className="text-xs font-medium text-primary-600 md:text-sm">
+                                            {trans('country_page.from')}
+                                        </span>
+                                        <span className="text-base font-bold text-accent-500 md:text-xl">
+                                            €{lowestPrice.toFixed(2)}
+                                        </span>
                                     </div>
                                 </div>
                             )}
@@ -144,131 +374,280 @@ export default function CountryPage({ country, packages }: Props) {
             </section>
 
             {/* Packages */}
-            <section className="py-8 md:py-12">
-                <div className="container mx-auto px-4">
+            <section className="relative bg-white py-8 md:py-16">
+                {/* Subtle pattern */}
+                <div className="absolute inset-0 bg-[radial-gradient(#0d9488_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] [background-size:24px_24px] opacity-[0.02]" />
+
+                <div className="relative z-10 container mx-auto px-4">
                     {packages.length === 0 ? (
-                        <div className="py-16 text-center">
-                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                                <Smartphone className="h-8 w-8 text-muted-foreground" />
+                        <div className="rounded-xl border border-primary-100 bg-primary-50 py-10 text-center md:rounded-2xl md:py-16">
+                            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 md:mb-5 md:h-16 md:w-16">
+                                <Smartphone className="h-6 w-6 text-primary-500 md:h-8 md:w-8" />
                             </div>
-                            <h3 className="text-lg font-semibold">No plans available</h3>
-                            <p className="mt-1 text-muted-foreground">
-                                Check back later for available data plans
+                            <h3 className="text-lg font-bold text-primary-900 md:text-xl">
+                                {trans('country_page.no_plans.title')}
+                            </h3>
+                            <p className="mt-2 text-sm text-primary-600 md:text-base">
+                                {trans('country_page.no_plans.description', {
+                                    country: country.name,
+                                })}
                             </p>
-                            <Button variant="outline" className="mt-4" asChild>
-                                <Link href="/destinations">Browse Other Destinations</Link>
-                            </Button>
+                            <GoldButton className="mt-5 md:mt-6" asChild>
+                                <Link href="/destinations">
+                                    {trans(
+                                        'country_page.no_plans.browse_other',
+                                    )}
+                                </Link>
+                            </GoldButton>
                         </div>
                     ) : (
                         <>
                             {/* Sort Controls */}
-                            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                <h2 className="text-xl font-semibold">
-                                    Choose Your Plan
+                            <div className="mb-5 flex flex-col gap-3 rounded-xl border border-primary-100 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between md:mb-8 md:gap-4 md:rounded-2xl md:p-4">
+                                <h2 className="flex items-center gap-2 text-base font-bold text-primary-900 md:gap-3 md:text-xl">
+                                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-100 text-xs font-extrabold text-accent-700 md:h-8 md:w-8 md:text-sm">
+                                        {packages.length}
+                                    </span>
+                                    {trans('country_page.available_packages')}
                                 </h2>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-muted-foreground">Sort:</span>
-                                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                                        <SelectTrigger className="w-[160px]">
+                                <div className="flex items-center gap-2 md:gap-3">
+                                    <span className="text-xs font-medium text-primary-900 md:text-sm">
+                                        {trans('country_page.sort.label')}
+                                    </span>
+                                    <Select
+                                        value={sortBy}
+                                        onValueChange={(v) =>
+                                            setSortBy(v as SortOption)
+                                        }
+                                    >
+                                        <SelectTrigger className="h-8 w-[115px] border-primary-200 bg-white text-xs text-primary-900 focus:ring-primary-400 md:h-10 md:w-[160px] md:text-sm">
                                             <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="data">Data Amount</SelectItem>
-                                            <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                                            <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                                            <SelectItem value="validity">Validity</SelectItem>
+                                        <SelectContent className="border-primary-200 bg-white">
+                                            <SelectItem
+                                                value="data"
+                                                className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm"
+                                            >
+                                                {trans(
+                                                    'country_page.sort.data',
+                                                )}
+                                            </SelectItem>
+                                            <SelectItem
+                                                value="price-asc"
+                                                className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm"
+                                            >
+                                                {trans(
+                                                    'country_page.sort.price_asc',
+                                                )}
+                                            </SelectItem>
+                                            <SelectItem
+                                                value="price-desc"
+                                                className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm"
+                                            >
+                                                {trans(
+                                                    'country_page.sort.price_desc',
+                                                )}
+                                            </SelectItem>
+                                            <SelectItem
+                                                value="validity"
+                                                className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm"
+                                            >
+                                                {trans(
+                                                    'country_page.sort.validity',
+                                                )}
+                                            </SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
 
                             {/* Package Grid */}
-                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                {sortedPackages.map((pkg, index) => (
-                                    <Card
+                            <div className="grid gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+                                {sortedPackages.map((pkg) => (
+                                    <div
                                         key={pkg.id}
-                                        className={`relative flex flex-col transition-all hover:shadow-lg ${
+                                        className={`group relative flex flex-col overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:rounded-2xl ${
                                             pkg.is_featured
-                                                ? 'border-primary shadow-md ring-1 ring-primary'
-                                                : ''
+                                                ? 'border-accent-400 bg-white shadow-md'
+                                                : 'border-primary-100 bg-white hover:border-primary-200'
                                         }`}
                                     >
                                         {/* Featured Badge */}
                                         {pkg.is_featured && (
-                                            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                                                <Badge className="shadow-sm">
-                                                    Most Popular
-                                                </Badge>
+                                            <div className="absolute top-0 right-0 z-20">
+                                                <div className="rounded-bl-lg bg-gradient-to-l from-accent-500 via-accent-400 to-accent-300 px-2.5 py-1 text-[10px] font-bold text-accent-950 shadow-md shadow-accent-500/30 md:rounded-bl-xl md:px-4 md:py-1.5 md:text-xs">
+                                                    {trans(
+                                                        'country_page.best_value',
+                                                    )}
+                                                </div>
                                             </div>
                                         )}
 
-                                        <CardContent className={`flex-1 ${pkg.is_featured ? 'pt-8' : 'pt-6'}`}>
-                                            {/* Plan Name & Network */}
-                                            <div className="mb-4">
-                                                <h3 className="font-semibold">{pkg.name}</h3>
-                                                {pkg.network_type && (
-                                                    <span className="text-xs text-muted-foreground">
-                                                        {pkg.network_type} Network
+                                        <div
+                                            className={`relative z-10 flex-1 p-3 md:p-5 ${pkg.is_featured ? 'pt-6 md:pt-8' : ''}`}
+                                        >
+                                            {/* Plan Name & Price Row - Mobile Optimized */}
+                                            <div className="mb-3 flex items-start justify-between gap-2 md:mb-4 md:block">
+                                                <div>
+                                                    <h3 className="text-sm font-bold text-primary-900 md:mb-4 md:text-lg">
+                                                        {pkg.name}
+                                                    </h3>
+                                                    {pkg.network_type && (
+                                                        <p
+                                                            className={`text-[10px] font-bold tracking-wide uppercase md:text-xs ${
+                                                                pkg.is_featured
+                                                                    ? 'text-accent-500'
+                                                                    : 'text-primary-400'
+                                                            }`}
+                                                        >
+                                                            {pkg.network_type}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <div className="text-right md:mb-4 md:text-left">
+                                                    <span className="text-xl font-extrabold tracking-tight text-primary-900 md:text-3xl">
+                                                        €
+                                                        {Number(
+                                                            pkg.retail_price,
+                                                        ).toFixed(2)}
                                                     </span>
-                                                )}
+                                                </div>
                                             </div>
 
-                                            {/* Price */}
-                                            <div className="mb-4">
-                                                <span className="text-3xl font-bold">
-                                                    €{Number(pkg.retail_price).toFixed(2)}
-                                                </span>
-                                            </div>
+                                            <div className="mb-3 h-px bg-primary-100 md:mb-5" />
 
-                                            {/* Data & Validity */}
-                                            <div className="mb-4 space-y-2">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                                                        <Database className="h-4 w-4 text-primary" />
+                                            {/* Data & Validity - Compact on Mobile */}
+                                            <div className="mb-3 flex gap-2 md:mb-5 md:block md:space-y-3">
+                                                <div className="flex flex-1 items-center gap-2 rounded-lg bg-primary-50/50 p-2 md:gap-3 md:bg-transparent md:p-0">
+                                                    <div
+                                                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md shadow-sm md:h-9 md:w-9 md:rounded-lg ${
+                                                            pkg.is_featured
+                                                                ? 'bg-accent-300 text-accent-950'
+                                                                : 'bg-primary-100 text-primary-600'
+                                                        }`}
+                                                    >
+                                                        <Database className="h-3.5 w-3.5 md:h-4 md:w-4" />
                                                     </div>
                                                     <div>
-                                                        <p className="font-medium">{pkg.data_label}</p>
-                                                        <p className="text-xs text-muted-foreground">High-speed data</p>
+                                                        <p className="text-xs leading-tight font-bold text-primary-900 md:text-base">
+                                                            {pkg.data_label}
+                                                        </p>
+                                                        <p className="hidden text-xs text-primary-500 md:block">
+                                                            {trans(
+                                                                'country_page.data_included',
+                                                            )}
+                                                        </p>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                                                        <Calendar className="h-4 w-4 text-primary" />
+                                                <div className="flex flex-1 items-center gap-2 rounded-lg bg-primary-50/50 p-2 md:gap-3 md:bg-transparent md:p-0">
+                                                    <div
+                                                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md shadow-sm md:h-9 md:w-9 md:rounded-lg ${
+                                                            pkg.is_featured
+                                                                ? 'bg-accent-300 text-accent-950'
+                                                                : 'bg-primary-100 text-primary-600'
+                                                        }`}
+                                                    >
+                                                        <Calendar className="h-3.5 w-3.5 md:h-4 md:w-4" />
                                                     </div>
                                                     <div>
-                                                        <p className="font-medium">{pkg.validity_label}</p>
-                                                        <p className="text-xs text-muted-foreground">Validity period</p>
+                                                        <p className="text-xs leading-tight font-bold text-primary-900 md:text-base">
+                                                            {pkg.validity_label}
+                                                        </p>
+                                                        <p className="hidden text-xs text-primary-500 md:block">
+                                                            {trans(
+                                                                'country_page.validity_period',
+                                                            )}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {/* Features */}
-                                            <div className="space-y-1.5 text-sm text-muted-foreground">
-                                                <div className="flex items-center gap-2">
-                                                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                                    <span>Instant QR code delivery</span>
-                                                </div>
+                                            {/* Features - Hidden on Mobile, Visible on Desktop */}
+                                            <div className="hidden space-y-2 text-sm md:block">
+                                                <FeatureItem
+                                                    variant={
+                                                        pkg.is_featured
+                                                            ? 'gold'
+                                                            : 'default'
+                                                    }
+                                                >
+                                                    {trans(
+                                                        'country_page.features.instant_delivery',
+                                                    )}
+                                                </FeatureItem>
                                                 {pkg.hotspot_allowed && (
-                                                    <div className="flex items-center gap-2">
-                                                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                                        <span>Hotspot / Tethering</span>
-                                                    </div>
+                                                    <FeatureItem
+                                                        variant={
+                                                            pkg.is_featured
+                                                                ? 'gold'
+                                                                : 'default'
+                                                        }
+                                                    >
+                                                        {trans(
+                                                            'country_page.features.hotspot',
+                                                        )}
+                                                    </FeatureItem>
                                                 )}
-                                                <div className="flex items-center gap-2">
-                                                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                                    <span>24/7 Support</span>
-                                                </div>
+                                                <FeatureItem
+                                                    variant={
+                                                        pkg.is_featured
+                                                            ? 'gold'
+                                                            : 'default'
+                                                    }
+                                                >
+                                                    {trans(
+                                                        'country_page.features.support',
+                                                    )}
+                                                </FeatureItem>
                                             </div>
-                                        </CardContent>
 
-                                        <CardFooter className="pt-0">
-                                            <Button className="w-full" size="lg" asChild>
-                                                <Link href={`/checkout/${pkg.id}`}>
-                                                    Get This Plan
-                                                </Link>
-                                            </Button>
-                                        </CardFooter>
-                                    </Card>
+                                            {/* Network Info Button */}
+                                            {pkg.networks &&
+                                                pkg.networks.length > 0 && (
+                                                    <NetworkCoverageDialog
+                                                        networks={pkg.networks}
+                                                        isFeatured={
+                                                            pkg.is_featured
+                                                        }
+                                                    />
+                                                )}
+                                        </div>
+
+                                        <div className="relative z-10 p-3 pt-0 md:p-5 md:pt-0">
+                                            {pkg.is_featured ? (
+                                                <GoldButton
+                                                    className="h-9 w-full text-xs md:h-11 md:text-sm"
+                                                    asChild
+                                                >
+                                                    <Link
+                                                        href={`/checkout/${pkg.id}`}
+                                                    >
+                                                        {trans(
+                                                            'country_page.select_plan',
+                                                        )}
+                                                        <ArrowRight className="ml-1.5 h-3.5 w-3.5 md:ml-2 md:h-4 md:w-4" />
+                                                    </Link>
+                                                </GoldButton>
+                                            ) : (
+                                                <Button
+                                                    className="h-9 w-full bg-primary-600 text-xs font-semibold text-white hover:bg-primary-700 md:h-11 md:text-sm"
+                                                    asChild
+                                                >
+                                                    <Link
+                                                        href={`/checkout/${pkg.id}`}
+                                                    >
+                                                        {trans(
+                                                            'country_page.select_plan',
+                                                        )}
+                                                        <ArrowRight className="ml-1.5 h-3.5 w-3.5 md:ml-2 md:h-4 md:w-4" />
+                                                    </Link>
+                                                </Button>
+                                            )}
+                                        </div>
+
+                                        {/* Subtle hover gradient */}
+                                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary-50/0 to-accent-50/0 transition-all duration-300 group-hover:from-primary-50/50 group-hover:to-accent-50/30" />
+                                    </div>
                                 ))}
                             </div>
                         </>
@@ -277,47 +656,82 @@ export default function CountryPage({ country, packages }: Props) {
             </section>
 
             {/* Features Section */}
-            <section className="border-t bg-muted/30 py-12 md:py-16">
-                <div className="container mx-auto px-4">
-                    <h2 className="mb-8 text-center text-2xl font-bold">
-                        Why Choose Our eSIM?
+            <section className="relative overflow-hidden border-t border-primary-100 py-8 md:py-16">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-accent-50/30" />
+
+                <div className="relative z-10 container mx-auto px-4">
+                    <h2 className="mb-5 text-center text-lg font-bold text-primary-900 md:mb-8 md:text-2xl">
+                        {trans('country_page.why_choose.title')}
                     </h2>
-                    <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
-                        <div className="flex flex-col items-center text-center">
-                            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-                                <Zap className="h-7 w-7 text-primary" />
+                    <div className="mx-auto grid max-w-4xl gap-3 md:grid-cols-3 md:gap-5">
+                        {[
+                            {
+                                icon: Zap,
+                                title: trans(
+                                    'country_page.why_choose.instant.title',
+                                ),
+                                description: trans(
+                                    'country_page.why_choose.instant.desc',
+                                ),
+                            },
+                            {
+                                icon: Wifi,
+                                title: trans(
+                                    'country_page.why_choose.connected.title',
+                                ),
+                                description: trans(
+                                    'country_page.why_choose.connected.desc',
+                                ),
+                            },
+                            {
+                                icon: Shield,
+                                title: trans(
+                                    'country_page.why_choose.no_fees.title',
+                                ),
+                                description: trans(
+                                    'country_page.why_choose.no_fees.desc',
+                                ),
+                            },
+                        ].map((feature, i) => (
+                            <div
+                                key={i}
+                                className="group flex items-center gap-3 rounded-xl border border-primary-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:flex-col md:rounded-2xl md:p-6 md:text-center"
+                            >
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-300 transition-colors group-hover:bg-accent-400 md:mb-4 md:h-12 md:w-12 md:rounded-xl">
+                                    <feature.icon className="h-5 w-5 text-accent-950 md:h-6 md:w-6" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-bold text-primary-900 md:mb-2 md:text-base">
+                                        {feature.title}
+                                    </h3>
+                                    <p className="text-xs text-primary-600 md:text-sm">
+                                        {feature.description}
+                                    </p>
+                                </div>
                             </div>
-                            <h3 className="mb-2 font-semibold">Instant Activation</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Get your eSIM QR code instantly after purchase. No waiting, no shipping.
-                            </p>
-                        </div>
-                        <div className="flex flex-col items-center text-center">
-                            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-                                <Wifi className="h-7 w-7 text-primary" />
-                            </div>
-                            <h3 className="mb-2 font-semibold">Stay Connected</h3>
-                            <p className="text-sm text-muted-foreground">
-                                High-speed data on local networks. Works as soon as you land.
-                            </p>
-                        </div>
-                        <div className="flex flex-col items-center text-center">
-                            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-                                <Shield className="h-7 w-7 text-primary" />
-                            </div>
-                            <h3 className="mb-2 font-semibold">No Hidden Fees</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Transparent pricing. No roaming charges, no surprises.
-                            </p>
-                        </div>
+                        ))}
                     </div>
 
-                    <div className="mt-10 flex justify-center gap-3">
-                        <Button variant="outline" asChild>
-                            <Link href="/how-it-works">How It Works</Link>
+                    <div className="mt-6 flex justify-center gap-2 md:mt-10 md:gap-3">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            className="h-8 rounded-full border-primary-300 bg-white px-3 text-xs text-primary-900 shadow-sm hover:border-primary-400 hover:bg-primary-50 md:h-9 md:px-4 md:text-sm"
+                        >
+                            <Link href="/how-it-works">
+                                {trans('country_page.buttons.how_it_works')}
+                            </Link>
                         </Button>
-                        <Button variant="outline" asChild>
-                            <Link href="/help">Need Help?</Link>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            className="h-8 rounded-full border-primary-300 bg-white px-3 text-xs text-primary-900 shadow-sm hover:border-primary-400 hover:bg-primary-50 md:h-9 md:px-4 md:text-sm"
+                        >
+                            <Link href="/help">
+                                {trans('country_page.buttons.help')}
+                            </Link>
                         </Button>
                     </div>
                 </div>

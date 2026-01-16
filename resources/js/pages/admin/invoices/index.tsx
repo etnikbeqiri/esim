@@ -1,7 +1,13 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -13,7 +19,15 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Download, Eye, FileText, Plus, Receipt, ScrollText, Search } from 'lucide-react';
+import {
+    Download,
+    Eye,
+    FileText,
+    Plus,
+    Receipt,
+    ScrollText,
+    Search,
+} from 'lucide-react';
 import { FormEvent, useState } from 'react';
 
 interface Invoice {
@@ -86,17 +100,30 @@ function getTypeIcon(type: string) {
     }
 }
 
-export default function InvoicesIndex({ invoices, types, statuses, filters, defaultCurrency }: Props) {
+export default function InvoicesIndex({
+    invoices,
+    types,
+    statuses,
+    filters,
+    defaultCurrency,
+}: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const currencySymbol = defaultCurrency?.symbol || '€';
 
     function handleSearch(e: FormEvent) {
         e.preventDefault();
-        router.get('/admin/invoices', { ...filters, search }, { preserveState: true });
+        router.get(
+            '/admin/invoices',
+            { ...filters, search },
+            { preserveState: true },
+        );
     }
 
     function handleFilterChange(key: string, value: string) {
-        const newFilters = { ...filters, [key]: value === 'all' ? undefined : value };
+        const newFilters = {
+            ...filters,
+            [key]: value === 'all' ? undefined : value,
+        };
         router.get('/admin/invoices', newFilters, { preserveState: true });
     }
 
@@ -107,7 +134,9 @@ export default function InvoicesIndex({ invoices, types, statuses, filters, defa
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">Invoices</h1>
                     <div className="flex items-center gap-4">
-                        <span className="text-muted-foreground">{invoices.total} invoices</span>
+                        <span className="text-muted-foreground">
+                            {invoices.total} invoices
+                        </span>
                         <Button asChild>
                             <Link href="/admin/invoices/generate">
                                 <Plus className="mr-2 h-4 w-4" />
@@ -120,19 +149,24 @@ export default function InvoicesIndex({ invoices, types, statuses, filters, defa
                 <div className="flex flex-wrap gap-2">
                     <form onSubmit={handleSearch} className="flex gap-2">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                                 type="search"
                                 placeholder="Invoice # or email..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="pl-9 w-[200px]"
+                                className="w-[200px] pl-9"
                             />
                         </div>
-                        <Button type="submit" variant="secondary">Search</Button>
+                        <Button type="submit" variant="secondary">
+                            Search
+                        </Button>
                     </form>
 
-                    <Select value={filters.type || 'all'} onValueChange={(v) => handleFilterChange('type', v)}>
+                    <Select
+                        value={filters.type || 'all'}
+                        onValueChange={(v) => handleFilterChange('type', v)}
+                    >
                         <SelectTrigger className="w-[140px]">
                             <SelectValue placeholder="All types" />
                         </SelectTrigger>
@@ -146,7 +180,10 @@ export default function InvoicesIndex({ invoices, types, statuses, filters, defa
                         </SelectContent>
                     </Select>
 
-                    <Select value={filters.status || 'all'} onValueChange={(v) => handleFilterChange('status', v)}>
+                    <Select
+                        value={filters.status || 'all'}
+                        onValueChange={(v) => handleFilterChange('status', v)}
+                    >
                         <SelectTrigger className="w-[140px]">
                             <SelectValue placeholder="All statuses" />
                         </SelectTrigger>
@@ -177,54 +214,88 @@ export default function InvoicesIndex({ invoices, types, statuses, filters, defa
                         <TableBody>
                             {invoices.data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                                    <TableCell
+                                        colSpan={7}
+                                        className="py-8 text-center text-muted-foreground"
+                                    >
                                         No invoices found
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 invoices.data.map((invoice) => (
                                     <TableRow key={invoice.id}>
-                                        <TableCell className="font-mono">{invoice.invoice_number}</TableCell>
+                                        <TableCell className="font-mono">
+                                            {invoice.invoice_number}
+                                        </TableCell>
                                         <TableCell>
                                             {invoice.customer?.user ? (
                                                 <Link
                                                     href={`/admin/customers/${invoice.customer.id}`}
                                                     className="hover:underline"
                                                 >
-                                                    <div className="font-medium">{invoice.customer.user.name}</div>
-                                                    <div className="text-sm text-muted-foreground">{invoice.customer.user.email}</div>
+                                                    <div className="font-medium">
+                                                        {
+                                                            invoice.customer
+                                                                .user.name
+                                                        }
+                                                    </div>
+                                                    <div className="text-sm text-muted-foreground">
+                                                        {
+                                                            invoice.customer
+                                                                .user.email
+                                                        }
+                                                    </div>
                                                 </Link>
-                                            ) : '-'}
+                                            ) : (
+                                                '-'
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 {getTypeIcon(invoice.type)}
-                                                <span>{invoice.type_label}</span>
+                                                <span>
+                                                    {invoice.type_label}
+                                                </span>
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <Badge
                                                 variant="outline"
-                                                className={getStatusBadgeClass(invoice.status_color)}
+                                                className={getStatusBadgeClass(
+                                                    invoice.status_color,
+                                                )}
                                             >
                                                 {invoice.status_label}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="font-medium">
-                                            {currencySymbol}{Number(invoice.total).toFixed(2)}
+                                            {currencySymbol}
+                                            {Number(invoice.total).toFixed(2)}
                                         </TableCell>
-                                        <TableCell className="text-muted-foreground whitespace-nowrap">
+                                        <TableCell className="whitespace-nowrap text-muted-foreground">
                                             {invoice.invoice_date}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex gap-1">
-                                                <Button variant="ghost" size="icon" asChild>
-                                                    <Link href={`/admin/invoices/${invoice.uuid}`}>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    asChild
+                                                >
+                                                    <Link
+                                                        href={`/admin/invoices/${invoice.uuid}`}
+                                                    >
                                                         <Eye className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
-                                                <Button variant="ghost" size="icon" asChild>
-                                                    <a href={`/admin/invoices/${invoice.uuid}/download`}>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    asChild
+                                                >
+                                                    <a
+                                                        href={`/admin/invoices/${invoice.uuid}/download`}
+                                                    >
                                                         <Download className="h-4 w-4" />
                                                     </a>
                                                 </Button>
@@ -239,12 +310,24 @@ export default function InvoicesIndex({ invoices, types, statuses, filters, defa
 
                 {invoices.last_page > 1 && (
                     <div className="flex justify-center gap-2">
-                        {Array.from({ length: Math.min(invoices.last_page, 10) }, (_, i) => i + 1).map((page) => (
+                        {Array.from(
+                            { length: Math.min(invoices.last_page, 10) },
+                            (_, i) => i + 1,
+                        ).map((page) => (
                             <Button
                                 key={page}
-                                variant={page === invoices.current_page ? 'default' : 'outline'}
+                                variant={
+                                    page === invoices.current_page
+                                        ? 'default'
+                                        : 'outline'
+                                }
                                 size="sm"
-                                onClick={() => router.get('/admin/invoices', { ...filters, page })}
+                                onClick={() =>
+                                    router.get('/admin/invoices', {
+                                        ...filters,
+                                        page,
+                                    })
+                                }
                             >
                                 {page}
                             </Button>

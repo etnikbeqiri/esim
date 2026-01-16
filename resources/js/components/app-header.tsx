@@ -38,7 +38,6 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-
 const activeItemStyles =
     'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
 
@@ -95,7 +94,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 </Link>
                                             ))}
                                         </div>
-
                                     </div>
                                 </div>
                             </SheetContent>
@@ -155,7 +153,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                             >
                                 <Wallet className="h-4 w-4 text-muted-foreground" />
                                 <span className="font-semibold text-green-600">
-                                    {currency.symbol}{Number(auth.user.balance.available).toFixed(2)}
+                                    {currency.symbol}
+                                    {Number(
+                                        auth.user.balance.available,
+                                    ).toFixed(2)}
                                 </span>
                             </Link>
                         )}

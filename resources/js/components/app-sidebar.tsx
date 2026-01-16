@@ -18,12 +18,14 @@ import {
     FileText,
     Globe,
     LayoutGrid,
+    LifeBuoy,
     Package,
     Receipt,
     RefreshCw,
     Server,
     Settings,
     ShoppingCart,
+    Smartphone,
     Users,
     Wallet,
 } from 'lucide-react';
@@ -127,12 +129,21 @@ export function AppSidebar() {
                       href: '/admin/invoices',
                       icon: Receipt,
                   },
+                  {
+                      title: 'Tickets',
+                      href: '/admin/tickets',
+                      icon: LifeBuoy,
+                  },
+                  {
+                      title: 'Devices',
+                      href: '/admin/devices',
+                      icon: Smartphone,
+                  },
               ]
             : [];
 
         return { mainNavItems, clientNavItems, adminNavItems };
     }, [user]);
-
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -180,7 +191,8 @@ export function AppSidebar() {
                                 <span>Balance</span>
                             </span>
                             <span className="font-semibold text-green-600">
-                                {currency.symbol}{Number(user.balance.available).toFixed(2)}
+                                {currency.symbol}
+                                {Number(user.balance.available).toFixed(2)}
                             </span>
                         </Link>
                     </div>

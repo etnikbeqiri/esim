@@ -1,68 +1,73 @@
-<x-email.layout title="Welcome!">
-    <x-email.heading>Welcome to {{ config('app.name') }}! 🌍</x-email.heading>
+<x-email.layout title="Welcome">
+    <x-email.heading>Welcome to {{ config('app.name') }}</x-email.heading>
 
     <x-email.text>Hello {{ $customerName ?? 'there' }},</x-email.text>
 
-    <x-email.text>Thank you for joining us! We're excited to help you stay connected wherever your travels take you.</x-email.text>
+    <x-email.text>Welcome to {{ config('app.name') }}! We're delighted to have you join our global community of travelers. Our platform is designed to ensure you stay connected seamlessly, no matter where your journeys take you.</x-email.text>
 
     @if($isB2B ?? false)
         <x-email.alert type="info">
-            <strong>B2B Account Activated:</strong> Your business account is ready. You can now access wholesale pricing and manage orders through your dashboard.
+            <strong>Business Account Activated:</strong> Your corporate account is now active. You have immediate access to wholesale pricing structures and can manage all orders through your dedicated business dashboard.
         </x-email.alert>
 
-        <x-email.heading :level="2">Getting Started with Your B2B Account</x-email.heading>
+        <x-email.heading :level="2">Getting Started</x-email.heading>
 
-        <x-email.steps>
-            <x-email.step number="1" title="Top Up Your Balance">
-                Add funds to your account to start purchasing eSIMs at wholesale prices.
-            </x-email.step>
+        <x-email.step number="1" title="Fund Your Account">
+            Add funds to your account balance to begin purchasing eSIMs at our competitive wholesale rates.
+        </x-email.step>
 
-            <x-email.step number="2" title="Browse Available Packages">
-                Explore our range of eSIM packages for different countries and data needs.
-            </x-email.step>
+        <x-email.step number="2" title="Explore Available Plans">
+            Browse our comprehensive catalog of eSIM packages across 190+ destinations worldwide.
+        </x-email.step>
 
-            <x-email.step number="3" title="Start Ordering">
-                Purchase eSIMs instantly from your balance - no payment processing delays.
-            </x-email.step>
-        </x-email.steps>
+        <x-email.step number="3" title="Start Purchasing">
+            Place orders instantly with instant provisioning—no payment processing delays affecting your workflow.
+        </x-email.step>
 
-        <div style="text-align: center; margin-top: 24px;">
-            <x-email.button :href="config('app.url') . '/client/balance'">Top Up Balance</x-email.button>
+        <div style="text-align: center; margin-top: 32px;">
+            <x-email.button :href="config('app.url') . '/client/balance'">Fund Your Account</x-email.button>
         </div>
     @else
-        <x-email.heading :level="2">What's Next?</x-email.heading>
+        <x-email.heading :level="2">Your Journey Begins Here</x-email.heading>
 
-        <x-email.steps>
-            <x-email.step number="1" title="Choose Your Destination">
-                Browse our eSIM packages for over 190+ countries and regions.
-            </x-email.step>
+        <x-email.step number="1" title="Choose Your Destination">
+            Explore our extensive range of eSIM packages covering over 190 countries and regions globally.
+        </x-email.step>
 
-            <x-email.step number="2" title="Select a Data Plan">
-                Choose the data amount and validity that fits your travel needs.
-            </x-email.step>
+        <x-email.step number="2" title="Select Your Data Plan">
+            Choose the data allocation and validity period that best matches your travel requirements.
+        </x-email.step>
 
-            <x-email.step number="3" title="Get Instant Delivery">
-                Receive your eSIM QR code via email within seconds of purchase.
-            </x-email.step>
-        </x-email.steps>
+        <x-email.step number="3" title="Receive Instant Delivery">
+            Your eSIM QR code will be delivered to your inbox within seconds of completing your purchase.
+        </x-email.step>
 
-        <div style="text-align: center; margin-top: 24px;">
+        <div style="text-align: center; margin-top: 32px;">
             <x-email.button :href="config('app.url') . '/destinations'">Explore Destinations</x-email.button>
         </div>
     @endif
 
     <x-email.divider />
 
-    <x-email.heading :level="2">Why Choose {{ config('app.name') }}?</x-email.heading>
+    <x-email.heading :level="2">The {{ config('app.name') }} Advantage</x-email.heading>
 
-    <x-email.table>
-        <x-email.table-row label="✓ Instant Delivery" value="Get your eSIM in seconds, not days" />
-        <x-email.table-row label="✓ Easy Installation" value="Simple QR code scanning - no physical SIM needed" />
-        <x-email.table-row label="✓ Global Coverage" value="Stay connected in 190+ countries" />
-        <x-email.table-row label="✓ 24/7 Support" value="Our team is always here to help" />
-    </x-email.table>
+    <x-email.step number="✓" title="Instant Provisioning">
+        Receive your eSIM within seconds of purchase—never wait to get connected.
+    </x-email.step>
 
-    <x-email.text muted small center class="mt-4">
-        Questions? Reply to this email or visit our <a href="{{ config('app.url') }}/help">Help Center</a>.
-    </x-email.text>
+    <x-email.step number="✓" title="Effortless Setup">
+        Activate via QR code scan—no physical SIM cards or technical expertise required.
+    </x-email.step>
+
+    <x-email.step number="✓" title="Global Reach">
+        Stay connected in over 190 countries with our extensive network partners.
+    </x-email.step>
+
+    <x-email.step number="✓" title="Round-the-Clock Support">
+        Our multilingual support team is available 24/7 to assist you whenever needed.
+    </x-email.step>
+
+    <div style="text-align: center; margin-top: 32px;">
+        <x-email.button :href="config('app.url') . '/help'" variant="outline">Help Center</x-email.button>
+    </div>
 </x-email.layout>

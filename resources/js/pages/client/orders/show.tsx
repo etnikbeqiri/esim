@@ -1,6 +1,13 @@
+import { BackButton } from '@/components/back-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
@@ -85,7 +92,7 @@ function getStatusIcon(status: string) {
         case 'completed':
             return <CheckCircle2 className="h-5 w-5 text-green-500" />;
         case 'processing':
-            return <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />;
+            return <Loader2 className="h-5 w-5 animate-spin text-blue-500" />;
         case 'pending_retry':
             return <RefreshCw className="h-5 w-5 text-orange-500" />;
         case 'failed':
@@ -120,13 +127,22 @@ export default function OrderShow({ order, customer }: Props) {
     ];
 
     // Poll for updates when order is still processing
-    const isActive = ['processing', 'pending_retry', 'pending', 'awaiting_payment'].includes(order.status);
+    const isActive = [
+        'processing',
+        'pending_retry',
+        'pending',
+        'awaiting_payment',
+    ].includes(order.status);
 
     useEffect(() => {
         if (!isActive) return;
 
         const interval = setInterval(() => {
-            router.reload({ only: ['order'], preserveState: true, preserveScroll: true });
+            router.reload({
+                only: ['order'],
+                preserveState: true,
+                preserveScroll: true,
+            });
         }, 3000);
 
         return () => clearInterval(interval);
@@ -156,8 +172,12 @@ export default function OrderShow({ order, customer }: Props) {
                             </Link>
                         </Button>
                         <div>
-                            <h1 className="text-2xl font-bold tracking-tight">{order.order_number}</h1>
-                            <p className="text-sm text-muted-foreground">Placed on {order.created_at}</p>
+                            <h1 className="text-2xl font-bold tracking-tight">
+                                {order.order_number}
+                            </h1>
+                            <p className="text-sm text-muted-foreground">
+                                Placed on {order.created_at}
+                            </p>
                         </div>
                     </div>
                     <Badge
@@ -179,17 +199,23 @@ export default function OrderShow({ order, customer }: Props) {
                                     Processing your order...
                                 </p>
                                 <p className="text-sm text-blue-600 dark:text-blue-500">
-                                    This may take a few moments. The page will update automatically.
+                                    This may take a few moments. The page will
+                                    update automatically.
                                 </p>
                             </div>
                             {isPendingRetry && (
                                 <div className="w-24">
                                     <Progress
-                                        value={(order.retry_count / order.max_retries) * 100}
+                                        value={
+                                            (order.retry_count /
+                                                order.max_retries) *
+                                            100
+                                        }
                                         className="h-2"
                                     />
                                     <p className="mt-1 text-xs text-blue-600">
-                                        Attempt {order.retry_count}/{order.max_retries}
+                                        Attempt {order.retry_count}/
+                                        {order.max_retries}
                                     </p>
                                 </div>
                             )}
@@ -224,7 +250,8 @@ export default function OrderShow({ order, customer }: Props) {
                                     Order completed successfully!
                                 </p>
                                 <p className="text-sm text-green-600 dark:text-green-500">
-                                    Your eSIM is ready. Scan the QR code or use the activation code to install it.
+                                    Your eSIM is ready. Scan the QR code or use
+                                    the activation code to install it.
                                 </p>
                             </div>
                         </CardContent>
@@ -239,15 +266,19 @@ export default function OrderShow({ order, customer }: Props) {
                                 <Package className="h-5 w-5" />
                                 Package Details
                             </CardTitle>
-                            <CardDescription>Information about your purchased eSIM package</CardDescription>
+                            <CardDescription>
+                                Information about your purchased eSIM package
+                            </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {order.package ? (
                                 <>
                                     <div className="rounded-lg bg-muted/50 p-4">
-                                        <h3 className="font-semibold text-lg">{order.package.name}</h3>
+                                        <h3 className="text-lg font-semibold">
+                                            {order.package.name}
+                                        </h3>
                                         {order.package.country && (
-                                            <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                                            <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                                                 <Globe className="h-3.5 w-3.5" />
                                                 {order.package.country}
                                             </p>
@@ -260,8 +291,12 @@ export default function OrderShow({ order, customer }: Props) {
                                                 <HardDrive className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                                             </div>
                                             <div>
-                                                <p className="text-xs text-muted-foreground">Data</p>
-                                                <p className="font-medium">{order.package.data_label}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Data
+                                                </p>
+                                                <p className="font-medium">
+                                                    {order.package.data_label}
+                                                </p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
@@ -269,8 +304,15 @@ export default function OrderShow({ order, customer }: Props) {
                                                 <Timer className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                                             </div>
                                             <div>
-                                                <p className="text-xs text-muted-foreground">Validity</p>
-                                                <p className="font-medium">{order.package.validity_label}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Validity
+                                                </p>
+                                                <p className="font-medium">
+                                                    {
+                                                        order.package
+                                                            .validity_label
+                                                    }
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -278,13 +320,19 @@ export default function OrderShow({ order, customer }: Props) {
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <CreditCard className="h-4 w-4 text-muted-foreground" />
-                                            <span className="text-muted-foreground">Total Paid</span>
+                                            <span className="text-muted-foreground">
+                                                Total Paid
+                                            </span>
                                         </div>
-                                        <span className="text-xl font-bold">€{Number(order.amount).toFixed(2)}</span>
+                                        <span className="text-xl font-bold">
+                                            €{Number(order.amount).toFixed(2)}
+                                        </span>
                                     </div>
                                 </>
                             ) : (
-                                <p className="text-muted-foreground">Package information not available</p>
+                                <p className="text-muted-foreground">
+                                    Package information not available
+                                </p>
                             )}
                         </CardContent>
                     </Card>
@@ -310,7 +358,9 @@ export default function OrderShow({ order, customer }: Props) {
                                         <div className="flex justify-center">
                                             <div className="rounded-xl border-2 border-dashed border-muted-foreground/25 bg-white p-4">
                                                 <img
-                                                    src={order.esim.qr_code_data}
+                                                    src={
+                                                        order.esim.qr_code_data
+                                                    }
                                                     alt="eSIM QR Code"
                                                     className="h-48 w-48"
                                                 />
@@ -322,17 +372,27 @@ export default function OrderShow({ order, customer }: Props) {
                                     {order.esim.lpa_string && (
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
-                                                <label className="text-sm font-medium">Activation Code</label>
+                                                <label className="text-sm font-medium">
+                                                    Activation Code
+                                                </label>
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
                                                     className="h-7 gap-1.5"
-                                                    onClick={() => copyToClipboard(order.esim!.lpa_string!, 'lpa')}
+                                                    onClick={() =>
+                                                        copyToClipboard(
+                                                            order.esim!
+                                                                .lpa_string!,
+                                                            'lpa',
+                                                        )
+                                                    }
                                                 >
                                                     {copied === 'lpa' ? (
                                                         <>
                                                             <CheckCircle className="h-3.5 w-3.5 text-green-500" />
-                                                            <span className="text-green-600">Copied!</span>
+                                                            <span className="text-green-600">
+                                                                Copied!
+                                                            </span>
                                                         </>
                                                     ) : (
                                                         <>
@@ -343,7 +403,7 @@ export default function OrderShow({ order, customer }: Props) {
                                                 </Button>
                                             </div>
                                             <div className="rounded-lg bg-muted p-3">
-                                                <code className="text-xs break-all font-mono">
+                                                <code className="font-mono text-xs break-all">
                                                     {order.esim.lpa_string}
                                                 </code>
                                             </div>
@@ -355,8 +415,10 @@ export default function OrderShow({ order, customer }: Props) {
                                     {/* ICCID */}
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-medium">ICCID</p>
-                                            <code className="text-xs font-mono text-muted-foreground">
+                                            <p className="text-sm font-medium">
+                                                ICCID
+                                            </p>
+                                            <code className="font-mono text-xs text-muted-foreground">
                                                 {order.esim.iccid}
                                             </code>
                                         </div>
@@ -364,7 +426,12 @@ export default function OrderShow({ order, customer }: Props) {
                                             variant="ghost"
                                             size="icon"
                                             className="h-8 w-8"
-                                            onClick={() => copyToClipboard(order.esim!.iccid, 'iccid')}
+                                            onClick={() =>
+                                                copyToClipboard(
+                                                    order.esim!.iccid,
+                                                    'iccid',
+                                                )
+                                            }
                                         >
                                             {copied === 'iccid' ? (
                                                 <CheckCircle className="h-4 w-4 text-green-500" />
@@ -381,9 +448,12 @@ export default function OrderShow({ order, customer }: Props) {
                                             <div className="rounded-full bg-blue-100 p-4 dark:bg-blue-900">
                                                 <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
                                             </div>
-                                            <h3 className="mt-4 font-semibold">Preparing your eSIM...</h3>
+                                            <h3 className="mt-4 font-semibold">
+                                                Preparing your eSIM...
+                                            </h3>
                                             <p className="mt-1 text-sm text-muted-foreground">
-                                                This usually takes less than a minute
+                                                This usually takes less than a
+                                                minute
                                             </p>
                                         </>
                                     ) : isFailed ? (
@@ -391,7 +461,9 @@ export default function OrderShow({ order, customer }: Props) {
                                             <div className="rounded-full bg-red-100 p-4 dark:bg-red-900">
                                                 <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
                                             </div>
-                                            <h3 className="mt-4 font-semibold">eSIM not available</h3>
+                                            <h3 className="mt-4 font-semibold">
+                                                eSIM not available
+                                            </h3>
                                             <p className="mt-1 text-sm text-muted-foreground">
                                                 The order could not be completed
                                             </p>
@@ -401,9 +473,12 @@ export default function OrderShow({ order, customer }: Props) {
                                             <div className="rounded-full bg-muted p-4">
                                                 <Smartphone className="h-8 w-8 text-muted-foreground" />
                                             </div>
-                                            <h3 className="mt-4 font-semibold">eSIM details pending</h3>
+                                            <h3 className="mt-4 font-semibold">
+                                                eSIM details pending
+                                            </h3>
                                             <p className="mt-1 text-sm text-muted-foreground">
-                                                Details will appear here once the order is processed
+                                                Details will appear here once
+                                                the order is processed
                                             </p>
                                         </>
                                     )}
@@ -415,12 +490,11 @@ export default function OrderShow({ order, customer }: Props) {
 
                 {/* Actions */}
                 <div className="flex flex-wrap gap-3">
-                    <Button variant="outline" asChild>
-                        <Link href="/client/orders">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Orders
-                        </Link>
-                    </Button>
+                    <BackButton
+                        href="/client/orders"
+                        label="Back to Orders"
+                        variant="outline"
+                    />
                     {(isFailed || isCompleted) && (
                         <Button asChild>
                             <Link href="/client/packages">

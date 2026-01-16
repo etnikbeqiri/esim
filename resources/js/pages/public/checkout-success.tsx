@@ -3,6 +3,8 @@ import { OrderSummaryCard } from '@/components/order-summary-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { GoldButton } from '@/components/ui/gold-button';
+import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link, router } from '@inertiajs/react';
 import {
@@ -41,7 +43,15 @@ interface Props {
 }
 
 export default function CheckoutSuccess({ order }: Props) {
-    const isProcessing = ['processing', 'pending', 'pending_retry'].includes(order.status);
+    const { trans } = useTrans();
+
+    const isProcessing = [
+        'processing',
+        'pending',
+        'pending_retry',
+        'awaiting_payment',
+    ].includes(order.status);
+    const isAwaitingPayment = order.status === 'awaiting_payment';
     const isCompleted = order.status === 'completed';
     const isFailed = order.status === 'failed';
 
@@ -49,70 +59,126 @@ export default function CheckoutSuccess({ order }: Props) {
     useEffect(() => {
         if (!isProcessing) return;
 
+        // Immediate check (1s) in case webhook fired during page load
+        const quickCheck = setTimeout(() => {
+            router.reload({ only: ['order'] });
+        }, 1000);
+
         const interval = setInterval(() => {
-            router.reload({ only: ['order'], preserveState: true, preserveScroll: true });
+            router.reload({ only: ['order'] });
         }, 3000);
 
-        return () => clearInterval(interval);
-    }, [isProcessing, order.status]);
+        return () => {
+            clearTimeout(quickCheck);
+            clearInterval(interval);
+        };
+    }, [isProcessing]); // removed order.status dependency to prevent re-creating interval excessively
 
     return (
         <GuestLayout>
-            <Head title={isCompleted ? 'Order Complete' : isProcessing ? 'Processing Order' : 'Order Status'} />
+            <Head
+                title={
+                    isCompleted
+                        ? trans('checkout_success_page.meta_title.complete')
+                        : isProcessing
+                          ? trans('checkout_success_page.meta_title.processing')
+                          : trans('checkout_success_page.meta_title.status')
+                }
+            />
 
-            <section className="bg-gradient-to-b from-muted/50 to-background py-12 md:py-16">
-                <div className="container mx-auto px-4">
+            <section className="bg-mesh relative min-h-screen overflow-hidden py-12 md:py-16">
+                {/* Decorative blobs */}
+                <div className="animate-float absolute top-10 -left-32 h-96 w-96 rounded-full bg-primary-200/30 blur-3xl" />
+                <div className="animate-float-delayed absolute -right-32 bottom-20 h-96 w-96 rounded-full bg-accent-200/20 blur-3xl" />
+
+                <div className="relative z-10 container mx-auto px-4">
                     <div className="mx-auto max-w-3xl">
                         {/* Status Header */}
                         <div className="mb-8 text-center">
                             {isProcessing && (
                                 <>
-                                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50">
-                                        <Loader2 className="h-10 w-10 animate-spin text-blue-600 dark:text-blue-400" />
+                                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary-100">
+                                        <Loader2 className="h-10 w-10 animate-spin text-primary-600" />
                                     </div>
-                                    <Badge variant="secondary" className="mb-4">
+                                    <Badge
+                                        variant="secondary"
+                                        className="mb-4 bg-primary-100 text-primary-700"
+                                    >
                                         <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                                        Processing
+                                        {isAwaitingPayment
+                                            ? trans(
+                                                  'checkout_success_page.status.verifying',
+                                              )
+                                            : trans(
+                                                  'checkout_success_page.status.processing',
+                                              )}
                                     </Badge>
-                                    <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-                                        Preparing Your eSIM
+                                    <h1 className="text-3xl font-bold tracking-tight text-primary-900 md:text-4xl">
+                                        {isAwaitingPayment
+                                            ? trans(
+                                                  'checkout_success_page.status.confirming',
+                                              )
+                                            : trans(
+                                                  'checkout_success_page.status.preparing',
+                                              )}
                                     </h1>
-                                    <p className="mt-3 text-lg text-muted-foreground">
-                                        This usually takes less than a minute. Please don't close this page.
+                                    <p className="mt-3 text-lg text-primary-600">
+                                        {isAwaitingPayment
+                                            ? trans(
+                                                  'checkout_success_page.status.verifying_desc',
+                                              )
+                                            : trans(
+                                                  'checkout_success_page.status.preparing_desc',
+                                              )}
                                     </p>
                                 </>
                             )}
                             {isCompleted && (
                                 <>
-                                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50">
-                                        <CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />
+                                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-accent-100">
+                                        <CheckCircle2 className="h-10 w-10 text-accent-600" />
                                     </div>
-                                    <Badge className="mb-4 bg-green-600">
+                                    <Badge className="mb-4 bg-accent-500 text-accent-950">
                                         <CheckCircle2 className="mr-1 h-3 w-3" />
-                                        Complete
+                                        {trans(
+                                            'checkout_success_page.status.complete',
+                                        )}
                                     </Badge>
-                                    <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-                                        Your eSIM is Ready!
+                                    <h1 className="text-3xl font-bold tracking-tight text-primary-900 md:text-4xl">
+                                        {trans(
+                                            'checkout_success_page.status.ready',
+                                        )}
                                     </h1>
-                                    <p className="mt-3 text-lg text-muted-foreground">
-                                        Scan the QR code below to install your eSIM on your device.
+                                    <p className="mt-3 text-lg text-primary-600">
+                                        {trans(
+                                            'checkout_success_page.status.scan_qr',
+                                        )}
                                     </p>
                                 </>
                             )}
                             {isFailed && (
                                 <>
-                                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
-                                        <XCircle className="h-10 w-10 text-red-600 dark:text-red-400" />
+                                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
+                                        <XCircle className="h-10 w-10 text-red-600" />
                                     </div>
-                                    <Badge variant="destructive" className="mb-4">
+                                    <Badge
+                                        variant="destructive"
+                                        className="mb-4"
+                                    >
                                         <XCircle className="mr-1 h-3 w-3" />
-                                        Failed
+                                        {trans(
+                                            'checkout_success_page.status.failed',
+                                        )}
                                     </Badge>
-                                    <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-                                        Order Could Not Be Completed
+                                    <h1 className="text-3xl font-bold tracking-tight text-primary-900 md:text-4xl">
+                                        {trans(
+                                            'checkout_success_page.status.failed_title',
+                                        )}
                                     </h1>
-                                    <p className="mt-3 text-lg text-muted-foreground">
-                                        We were unable to process your order. Any payment has been refunded.
+                                    <p className="mt-3 text-lg text-primary-600">
+                                        {trans(
+                                            'checkout_success_page.status.failed_desc',
+                                        )}
                                     </p>
                                 </>
                             )}
@@ -131,45 +197,123 @@ export default function CheckoutSuccess({ order }: Props) {
                             <div className="mb-6">
                                 <EsimQrCard
                                     esim={order.esim}
-                                    title="Your eSIM"
-                                    description="Scan the QR code with your phone to install the eSIM"
+                                    title={trans(
+                                        'checkout_success_page.esim.title',
+                                    )}
+                                    description={trans(
+                                        'checkout_success_page.esim.description',
+                                    )}
                                 />
 
                                 {/* Installation Instructions */}
-                                <Card className="mt-4">
+                                <Card className="mt-4 border-primary-100 bg-white shadow-sm">
                                     <CardContent className="p-6">
-                                        <h3 className="font-semibold mb-4">How to Install</h3>
+                                        <h3 className="mb-4 font-semibold text-primary-900">
+                                            {trans(
+                                                'checkout_success_page.installation.title',
+                                            )}
+                                        </h3>
                                         <div className="space-y-3">
                                             <div className="flex items-start gap-3">
-                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-600 text-xs font-bold text-white">
                                                     1
                                                 </div>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Go to <strong>Settings → Cellular/Mobile Data</strong>
+                                                <p className="text-sm text-primary-600">
+                                                    {
+                                                        trans(
+                                                            'checkout_success_page.installation.step_1',
+                                                            {
+                                                                setting_path:
+                                                                    '',
+                                                            },
+                                                        ).split(
+                                                            ':setting_path',
+                                                        )[0]
+                                                    }
+                                                    <strong className="text-primary-800">
+                                                        {trans(
+                                                            'checkout_success_page.installation.step_1_path',
+                                                        )}
+                                                    </strong>
                                                 </p>
                                             </div>
                                             <div className="flex items-start gap-3">
-                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-600 text-xs font-bold text-white">
                                                     2
                                                 </div>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Tap <strong>Add eSIM</strong> or <strong>Add Cellular Plan</strong>
+                                                <p className="text-sm text-primary-600">
+                                                    {trans(
+                                                        'checkout_success_page.installation.step_2',
+                                                        {
+                                                            option_1:
+                                                                '__OPTION_1__',
+                                                            option_2:
+                                                                '__OPTION_2__',
+                                                        },
+                                                    )
+                                                        .split(
+                                                            '__OPTION_1__',
+                                                        )[0]
+                                                        .trim()}{' '}
+                                                    <strong className="text-primary-800">
+                                                        {trans(
+                                                            'checkout_success_page.installation.step_2_opt_1',
+                                                        )}
+                                                    </strong>{' '}
+                                                    {trans(
+                                                        'checkout_success_page.installation.step_2',
+                                                        {
+                                                            option_1:
+                                                                '__OPTION_1__',
+                                                            option_2:
+                                                                '__OPTION_2__',
+                                                        },
+                                                    )
+                                                        .split(
+                                                            '__OPTION_1__',
+                                                        )[1]
+                                                        .split(
+                                                            '__OPTION_2__',
+                                                        )[0]
+                                                        .trim()}{' '}
+                                                    <strong className="text-primary-800">
+                                                        {trans(
+                                                            'checkout_success_page.installation.step_2_opt_2',
+                                                        )}
+                                                    </strong>
                                                 </p>
                                             </div>
                                             <div className="flex items-start gap-3">
-                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-600 text-xs font-bold text-white">
                                                     3
                                                 </div>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Scan the QR code above with your phone camera
+                                                <p className="text-sm text-primary-600">
+                                                    {trans(
+                                                        'checkout_success_page.installation.step_3',
+                                                    )}
                                                 </p>
                                             </div>
                                             <div className="flex items-start gap-3">
-                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-600 text-xs font-bold text-white">
                                                     4
                                                 </div>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Follow the prompts and enable <strong>Data Roaming</strong>
+                                                <p className="text-sm text-primary-600">
+                                                    {
+                                                        trans(
+                                                            'checkout_success_page.installation.step_4',
+                                                            {
+                                                                feature:
+                                                                    '__FEATURE__',
+                                                            },
+                                                        ).split(
+                                                            '__FEATURE__',
+                                                        )[0]
+                                                    }
+                                                    <strong className="text-primary-800">
+                                                        {trans(
+                                                            'checkout_success_page.installation.step_4_feature',
+                                                        )}
+                                                    </strong>
                                                 </p>
                                             </div>
                                         </div>
@@ -180,16 +324,22 @@ export default function CheckoutSuccess({ order }: Props) {
 
                         {/* Processing State */}
                         {isProcessing && (
-                            <Card className="mb-6">
+                            <Card className="mb-6 border-primary-100 bg-white shadow-sm">
                                 <CardContent className="p-6">
                                     <div className="flex items-center gap-4">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50">
-                                            <Loader2 className="h-6 w-6 animate-spin text-blue-600 dark:text-blue-400" />
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100">
+                                            <Loader2 className="h-6 w-6 animate-spin text-primary-600" />
                                         </div>
                                         <div>
-                                            <h3 className="font-semibold">Setting up your eSIM...</h3>
-                                            <p className="text-sm text-muted-foreground">
-                                                We're provisioning your eSIM profile. This page will update automatically.
+                                            <h3 className="font-semibold text-primary-900">
+                                                {trans(
+                                                    'checkout_success_page.processing_card.title',
+                                                )}
+                                            </h3>
+                                            <p className="text-sm text-primary-600">
+                                                {trans(
+                                                    'checkout_success_page.processing_card.description',
+                                                )}
                                             </p>
                                         </div>
                                     </div>
@@ -199,34 +349,65 @@ export default function CheckoutSuccess({ order }: Props) {
 
                         {/* Actions */}
                         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-                            <Button asChild variant="outline" size="lg">
+                            <Button
+                                asChild
+                                variant="outline"
+                                size="lg"
+                                className="rounded-full border-primary-200 text-primary-700 hover:bg-white"
+                            >
                                 <Link href="/destinations">
-                                    Browse More Plans
+                                    {trans(
+                                        'checkout_success_page.actions.browse',
+                                    )}
                                 </Link>
                             </Button>
                             {isCompleted && (
-                                <Button asChild size="lg">
+                                <GoldButton asChild size="lg">
                                     <Link href={`/order/${order.uuid}/status`}>
-                                        View Order Details
+                                        {trans(
+                                            'checkout_success_page.actions.view_order',
+                                        )}
                                         <ChevronRight className="ml-1 h-4 w-4" />
                                     </Link>
-                                </Button>
+                                </GoldButton>
                             )}
                         </div>
 
                         {/* Help Section */}
-                        <div className="mt-8 rounded-xl bg-muted/50 p-6 text-center">
-                            <HelpCircle className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-                            <h3 className="font-semibold">Need Help?</h3>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                Having trouble installing your eSIM? Check our installation guide or contact support.
+                        <div className="mt-8 rounded-2xl border border-primary-100 bg-white p-6 text-center shadow-sm">
+                            <HelpCircle className="mx-auto mb-3 h-8 w-8 text-primary-400" />
+                            <h3 className="font-semibold text-primary-900">
+                                {trans('checkout_success_page.help.title')}
+                            </h3>
+                            <p className="mt-1 text-sm text-primary-600">
+                                {trans(
+                                    'checkout_success_page.help.description',
+                                )}
                             </p>
                             <div className="mt-4 flex justify-center gap-3">
-                                <Button variant="outline" size="sm" asChild>
-                                    <Link href="/how-it-works">Installation Guide</Link>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    asChild
+                                    className="rounded-full border-primary-200 text-primary-700 hover:bg-primary-50"
+                                >
+                                    <Link href="/how-it-works">
+                                        {trans(
+                                            'checkout_success_page.help.guide',
+                                        )}
+                                    </Link>
                                 </Button>
-                                <Button variant="outline" size="sm" asChild>
-                                    <Link href="/help">Contact Support</Link>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    asChild
+                                    className="rounded-full border-primary-200 text-primary-700 hover:bg-primary-50"
+                                >
+                                    <Link href="/help">
+                                        {trans(
+                                            'checkout_success_page.help.contact',
+                                        )}
+                                    </Link>
                                 </Button>
                             </div>
                         </div>

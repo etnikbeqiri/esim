@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { useTrans } from '@/hooks/use-trans';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
@@ -142,10 +143,11 @@ function getStatusBadgeClass(color: string): string {
 }
 
 export default function OrderShow({ order, defaultCurrency }: Props) {
+    const { trans } = useTrans();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Dashboard', href: '/dashboard' },
-        { title: 'Orders', href: '/admin/orders' },
+        { title: trans('admin.dashboard.title'), href: '/dashboard' },
+        { title: trans('admin.orders.title'), href: '/admin/orders' },
         { title: order.order_number, href: `/admin/orders/${order.uuid}` },
     ];
 
@@ -184,7 +186,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
     }
 
     function handleFail() {
-        if (!confirm('Are you sure you want to mark this order as failed? This action cannot be undone.')) {
+        if (!confirm(trans('admin.orders.actions.mark_failed_confirm'))) {
             return;
         }
         failForm.post(`/admin/orders/${order.uuid}/fail`, {
@@ -238,7 +240,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                 ) : (
                                     <Play className="mr-2 h-4 w-4" />
                                 )}
-                                Retry Now
+                                {trans('admin.orders.actions.retry_now')}
                             </Button>
                         )}
                         {canFail && (
@@ -253,7 +255,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                 ) : (
                                     <Ban className="mr-2 h-4 w-4" />
                                 )}
-                                Mark as Failed
+                                {trans('admin.orders.actions.mark_failed')}
                             </Button>
                         )}
                     </div>
@@ -267,11 +269,10 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                 <Clock className="h-5 w-5 text-yellow-500 mt-0.5" />
                                 <div className="flex-1">
                                     <h3 className="font-semibold text-yellow-800 dark:text-yellow-300">
-                                        Awaiting Payment
+                                        {trans('admin.orders.status_alert.awaiting_payment_title')}
                                     </h3>
                                     <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
-                                        This order is waiting for payment confirmation. If the customer abandons the checkout,
-                                        the order will automatically expire. You can also manually mark it as failed.
+                                        {trans('admin.orders.status_alert.awaiting_payment_desc')}
                                     </p>
                                 </div>
                             </div>
@@ -286,12 +287,12 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                 <RefreshCw className="h-5 w-5 text-orange-500 mt-0.5" />
                                 <div className="flex-1">
                                     <h3 className="font-semibold text-orange-800 dark:text-orange-300">
-                                        Order Pending Retry
+                                        {trans('admin.orders.status_alert.pending_retry_title')}
                                     </h3>
                                     {order.failure_reason && (
                                         <div className="mt-2 p-2 bg-orange-100 dark:bg-orange-900/50 rounded text-sm">
                                             <span className="font-medium text-orange-700 dark:text-orange-400">
-                                                Failure Reason:
+                                                {trans('admin.orders.failure_reason')}:
                                             </span>
                                             <p className="text-orange-800 dark:text-orange-300 mt-1">
                                                 {order.failure_reason}
@@ -301,11 +302,11 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                     <div className="mt-3">
                                         <div className="flex items-center justify-between text-sm mb-1">
                                             <span className="text-orange-700 dark:text-orange-400">
-                                                Retry attempt {order.retry_count} of {order.max_retries}
+                                                {trans('admin.orders.retry_info', { count: order.retry_count, max: order.max_retries })}
                                             </span>
                                             {order.next_retry_at && (
                                                 <span className="text-orange-600 dark:text-orange-500">
-                                                    Next retry: {order.next_retry_at}
+                                                    {trans('admin.orders.next_retry', { date: order.next_retry_at })}
                                                 </span>
                                             )}
                                         </div>
@@ -327,15 +328,15 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                 <XCircle className="h-5 w-5 text-red-500 mt-0.5" />
                                 <div className="flex-1">
                                     <h3 className="font-semibold text-red-800 dark:text-red-300">
-                                        Order Failed
+                                        {trans('admin.orders.status_alert.failed_title')}
                                     </h3>
                                     <p className="text-sm text-red-700 dark:text-red-400 mt-1">
-                                        This order has failed after {order.retry_count} retry attempts.
+                                        {trans('admin.orders.status_alert.failed_desc', { count: order.retry_count })}
                                     </p>
                                     {order.failure_reason && (
                                         <div className="mt-2 p-2 bg-red-100 dark:bg-red-900/50 rounded text-sm">
                                             <span className="font-medium text-red-700 dark:text-red-400">
-                                                Failure Reason:
+                                                {trans('admin.orders.failure_reason')}:
                                             </span>
                                             <p className="text-red-800 dark:text-red-300 mt-1 font-mono text-xs">
                                                 {order.failure_reason}
@@ -352,7 +353,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                 <div className="grid gap-4 md:grid-cols-4">
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Amount</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">{trans('admin.orders.stats.amount')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <p className="text-2xl font-bold">{currencySymbol}{amount.toFixed(2)}</p>
@@ -360,7 +361,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Cost</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">{trans('admin.orders.stats.cost')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <p className="text-2xl font-bold">{currencySymbol}{costPrice.toFixed(2)}</p>
@@ -368,7 +369,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Profit</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">{trans('admin.orders.stats.profit')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <p className={`text-2xl font-bold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -378,7 +379,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Retry Count</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">{trans('admin.orders.stats.retry_count')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <p className="text-2xl font-bold">
@@ -394,25 +395,25 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                     {/* Customer */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Customer</CardTitle>
+                            <CardTitle>{trans('admin.orders.details.customer_title')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Name</span>
+                                <span className="text-muted-foreground">{trans('admin.orders.customer.name')}</span>
                                 <span>{order.customer_name}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Email</span>
+                                <span className="text-muted-foreground">{trans('admin.orders.customer.email')}</span>
                                 <span>{order.customer_email}</span>
                             </div>
                             {order.customer && (
                                 <>
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Customer Type</span>
+                                        <span className="text-muted-foreground">{trans('admin.orders.customer.type')}</span>
                                         <Badge variant="outline">{order.customer.type.toUpperCase()}</Badge>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Customer ID</span>
+                                        <span className="text-muted-foreground">{trans('admin.orders.customer.id')}</span>
                                         <Link href={`/admin/customers/${order.customer.id}`} className="hover:underline text-primary">
                                             #{order.customer.id}
                                         </Link>
@@ -421,7 +422,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                             )}
                             {order.ip_address && (
                                 <div className="flex justify-between">
-                                    <span className="text-muted-foreground">IP Address</span>
+                                    <span className="text-muted-foreground">{trans('admin.orders.customer.ip_address')}</span>
                                     <span className="font-mono text-sm">{order.ip_address}</span>
                                 </div>
                             )}
@@ -431,36 +432,36 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                     {/* Package */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Package</CardTitle>
+                            <CardTitle>{trans('admin.orders.details.package_title')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
                             {order.package ? (
                                 <>
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Name</span>
+                                        <span className="text-muted-foreground">{trans('admin.orders.package.name')}</span>
                                         <Link href={`/admin/packages/${order.package.id}`} className="hover:underline text-primary">
                                             {order.package.name}
                                         </Link>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Data</span>
+                                        <span className="text-muted-foreground">{trans('admin.orders.package.data')}</span>
                                         <span>{order.package.data_mb >= 1024 ? `${(order.package.data_mb / 1024).toFixed(1)} GB` : `${order.package.data_mb} MB`}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Validity</span>
-                                        <span>{order.package.validity_days} days</span>
+                                        <span className="text-muted-foreground">{trans('admin.orders.package.validity')}</span>
+                                        <span>{trans('admin.orders.package.days', { days: order.package.validity_days })}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Provider</span>
+                                        <span className="text-muted-foreground">{trans('admin.orders.package.provider')}</span>
                                         <span>{order.package.provider?.name}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Country</span>
+                                        <span className="text-muted-foreground">{trans('admin.orders.package.country')}</span>
                                         <span>{order.package.country?.name}</span>
                                     </div>
                                 </>
                             ) : (
-                                <p className="text-muted-foreground">No package information</p>
+                                <p className="text-muted-foreground">{trans('admin.orders.package.no_info')}</p>
                             )}
                         </CardContent>
                     </Card>
@@ -470,10 +471,10 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                         <Card className="md:col-span-2">
                             <CardHeader className="flex flex-row items-center justify-between">
                                 <div>
-                                    <CardTitle>eSIM Profile</CardTitle>
+                                    <CardTitle>{trans('admin.orders.details.esim_profile_title')}</CardTitle>
                                     {order.esim_profile.last_usage_check_at && (
                                         <p className="text-xs text-muted-foreground mt-1">
-                                            Last synced: {order.esim_profile.last_usage_check_at}
+                                            {trans('admin.orders.esim.last_synced', { date: order.esim_profile.last_usage_check_at })}
                                         </p>
                                     )}
                                 </div>
@@ -490,7 +491,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                     ) : (
                                         <RefreshCw className="mr-2 h-4 w-4" />
                                     )}
-                                    {syncForm.processing ? 'Syncing...' : syncSuccess ? 'Synced!' : 'Sync'}
+                                    {syncForm.processing ? trans('admin.orders.esim.syncing') : syncSuccess ? trans('admin.orders.esim.synced') : trans('admin.orders.esim.sync_button')}
                                 </Button>
                             </CardHeader>
                             <CardContent className="space-y-6">
@@ -508,27 +509,27 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                             {order.esim_profile.is_activated ? (
                                                 <Badge className="bg-green-100 text-green-700 border-green-200">
                                                     <CheckCircle2 className="mr-1 h-3 w-3" />
-                                                    Activated
+                                                    {trans('admin.orders.esim.activated')}
                                                 </Badge>
                                             ) : (
                                                 <Badge variant="outline" className="text-muted-foreground">
-                                                    Not Activated
+                                                    {trans('admin.orders.esim.not_activated')}
                                                 </Badge>
                                             )}
                                             {order.esim_profile.topup_available && (
-                                                <Badge variant="outline" className="bg-blue-50 text-blue-700">Top-up</Badge>
+                                                <Badge variant="outline" className="bg-blue-50 text-blue-700">{trans('admin.orders.esim.top_up')}</Badge>
                                             )}
                                         </div>
                                         <div className="grid grid-cols-2 gap-3 text-sm">
                                             {order.esim_profile.activated_at && (
                                                 <div>
-                                                    <p className="text-muted-foreground text-xs">Activated</p>
+                                                    <p className="text-muted-foreground text-xs">{trans('admin.orders.esim.activated')}</p>
                                                     <p className="font-medium">{order.esim_profile.activated_at}</p>
                                                 </div>
                                             )}
                                             {order.esim_profile.expires_at && (
                                                 <div>
-                                                    <p className="text-muted-foreground text-xs">Expires</p>
+                                                    <p className="text-muted-foreground text-xs">{trans('admin.orders.esim.expires')}</p>
                                                     <p className="font-medium">{order.esim_profile.expires_at}</p>
                                                 </div>
                                             )}
@@ -538,15 +539,15 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                     {/* Data Usage */}
                                     <div className="p-4 bg-muted/50 rounded-lg">
                                         <div className="flex justify-between items-center mb-2">
-                                            <span className="text-sm font-medium">Data Usage</span>
+                                            <span className="text-sm font-medium">{trans('admin.orders.esim.data_usage')}</span>
                                             <span className="text-sm font-mono">
                                                 {order.esim_profile.data_used_mb.toFixed(1)} / {order.esim_profile.data_total_mb.toFixed(1)} MB
                                             </span>
                                         </div>
                                         <Progress value={order.esim_profile.data_usage_percentage} className="h-2" />
                                         <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                                            <span>{order.esim_profile.data_usage_percentage.toFixed(1)}% used</span>
-                                            <span>{(order.esim_profile.data_remaining_bytes / (1024 * 1024)).toFixed(1)} MB left</span>
+                                            <span>{trans('admin.orders.esim.used_percentage', { percent: order.esim_profile.data_usage_percentage.toFixed(1) })}</span>
+                                            <span>{trans('admin.orders.esim.left_mb', { amount: (order.esim_profile.data_remaining_bytes / (1024 * 1024)).toFixed(1) })}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -565,8 +566,8 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                             puk: order.esim_profile.puk,
                                             apn: order.esim_profile.apn,
                                         }}
-                                        title="Installation QR Code"
-                                        description="Scan to install on device"
+                                        title={trans('admin.orders.esim.installation_qr')}
+                                        description={trans('admin.orders.esim.scan_to_install')}
                                         compact
                                     />
                                 )}
@@ -577,7 +578,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                         <Separator />
                                         <details>
                                             <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
-                                                Raw Provider Data
+                                                {trans('admin.orders.esim.raw_data')}
                                             </summary>
                                             <pre className="mt-2 p-3 bg-muted rounded-lg text-xs overflow-auto max-h-48">
                                                 {JSON.stringify(order.esim_profile.provider_data, null, 2)}
@@ -592,28 +593,28 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                     {/* Payment & Timeline */}
                     <Card className="md:col-span-2">
                         <CardHeader>
-                            <CardTitle>Payment & Timeline</CardTitle>
+                            <CardTitle>{trans('admin.orders.details.payment_timeline_title')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="grid gap-6 md:grid-cols-2">
                                 {/* Payment Info */}
                                 <div className="space-y-3">
-                                    <h4 className="text-sm font-medium text-muted-foreground">Payment</h4>
+                                    <h4 className="text-sm font-medium text-muted-foreground">{trans('admin.orders.payment.title')}</h4>
                                     {order.payment ? (
                                         <div className="space-y-2">
                                             <div className="flex justify-between">
-                                                <span className="text-muted-foreground">Status</span>
+                                                <span className="text-muted-foreground">{trans('admin.orders.payment.status')}</span>
                                                 <Badge variant={order.payment.status === 'completed' ? 'default' : 'outline'}>
                                                     {order.payment.status}
                                                 </Badge>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span className="text-muted-foreground">Provider</span>
+                                                <span className="text-muted-foreground">{trans('admin.orders.payment.provider')}</span>
                                                 <span>{order.payment.provider}</span>
                                             </div>
                                             {order.payment.gateway_session_id && (
                                                 <div className="pt-2">
-                                                    <p className="text-muted-foreground text-xs mb-1">Gateway Session ID</p>
+                                                    <p className="text-muted-foreground text-xs mb-1">{trans('admin.orders.payment.gateway_session_id')}</p>
                                                     <p className="font-mono text-xs break-all bg-muted p-2 rounded">
                                                         {order.payment.gateway_session_id}
                                                     </p>
@@ -621,33 +622,33 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                             )}
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-muted-foreground">No payment record</p>
+                                        <p className="text-sm text-muted-foreground">{trans('admin.orders.payment.no_record')}</p>
                                     )}
                                 </div>
 
                                 {/* Timeline */}
                                 <div className="space-y-3">
-                                    <h4 className="text-sm font-medium text-muted-foreground">Timeline</h4>
+                                    <h4 className="text-sm font-medium text-muted-foreground">{trans('admin.orders.timeline.title')}</h4>
                                     <div className="space-y-2">
                                         <div className="flex justify-between text-sm">
-                                            <span className="text-muted-foreground">Created</span>
+                                            <span className="text-muted-foreground">{trans('admin.orders.timeline.created')}</span>
                                             <span>{order.created_at}</span>
                                         </div>
                                         {order.completed_at && (
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-muted-foreground">Completed</span>
+                                                <span className="text-muted-foreground">{trans('admin.orders.timeline.completed')}</span>
                                                 <span className="text-green-600">{order.completed_at}</span>
                                             </div>
                                         )}
                                         {order.next_retry_at && isPendingRetry && (
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-muted-foreground">Next Retry</span>
+                                                <span className="text-muted-foreground">{trans('admin.orders.timeline.next_retry')}</span>
                                                 <span className="text-orange-600">{order.next_retry_at}</span>
                                             </div>
                                         )}
                                         {order.provider_order_id && (
                                             <div className="pt-2">
-                                                <p className="text-muted-foreground text-xs mb-1">Provider Order ID</p>
+                                                <p className="text-muted-foreground text-xs mb-1">{trans('admin.orders.timeline.provider_order_id')}</p>
                                                 <p className="font-mono text-xs bg-muted p-2 rounded">{order.provider_order_id}</p>
                                             </div>
                                         )}
@@ -663,7 +664,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Receipt className="h-5 w-5" />
-                                    Invoice
+                                    {trans('admin.orders.details.invoice_title')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -674,7 +675,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                     </div>
                                     <Button variant="outline" size="sm" asChild>
                                         <Link href={`/admin/invoices/${order.invoice.uuid}`}>
-                                            View Invoice
+                                            {trans('admin.orders.invoice.view')}
                                         </Link>
                                     </Button>
                                 </div>

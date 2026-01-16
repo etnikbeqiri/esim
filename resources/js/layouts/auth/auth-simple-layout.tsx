@@ -1,7 +1,7 @@
 import AppLogoIcon from '@/components/app-logo-icon';
 import { home } from '@/routes';
 import { Link } from '@inertiajs/react';
-import { type PropsWithChildren } from 'react';
+import { type PropsWithChildren, useEffect } from 'react';
 
 interface AuthLayoutProps {
     name?: string;
@@ -14,6 +14,14 @@ export default function AuthSimpleLayout({
     title,
     description,
 }: PropsWithChildren<AuthLayoutProps>) {
+    // Apply neutral theme to html element for auth pages
+    useEffect(() => {
+        document.documentElement.classList.add('neutral-theme');
+        return () => {
+            document.documentElement.classList.remove('neutral-theme');
+        };
+    }, []);
+
     return (
         <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
             <div className="w-full max-w-sm">

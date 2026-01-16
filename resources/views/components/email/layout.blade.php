@@ -1,157 +1,122 @@
 @props(['title' => config('app.name')])
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="x-apple-disable-message-reformatting">
     <title>{{ $title }}</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+                <o:AllowPNG/>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            -webkit-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-        }
+        /* Base Reset */
+        body, table, td, p, a, li, h1, h2, h3, h4, h5, h6 { margin: 0; padding: 0; }
+        table, td { border-collapse: collapse; border-spacing: 0; }
+        img { border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; max-width: 100%; height: auto; }
+        a { text-decoration: none; color: inherit; }
+        body { margin: 0; padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        
+        /* Font Family - Geist / Inter approximation */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            font-size: 16px;
-            line-height: 1.6;
-            color: #1a1a1a;
-            background-color: #f4f4f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
         }
-        .email-wrapper {
-            width: 100%;
-            background-color: #f4f4f5;
-            padding: 40px 20px;
-        }
-        .email-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-        .email-header {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            padding: 32px 40px;
-            text-align: center;
-        }
-        .email-header .logo {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            color: #ffffff;
-            text-decoration: none;
-        }
-        .email-header .logo-icon {
-            width: 40px;
-            height: 40px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .email-header .logo-text {
-            font-size: 24px;
-            font-weight: 700;
-            color: #ffffff;
-        }
-        .email-body {
-            padding: 40px;
-        }
-        .email-body h1 {
-            margin: 0 0 16px 0;
-            font-size: 28px;
-            font-weight: 700;
-            color: #1a1a1a;
-        }
-        .email-body h2 {
-            margin: 24px 0 12px 0;
-            font-size: 20px;
-            font-weight: 600;
-            color: #1a1a1a;
-        }
-        .email-body p {
-            margin: 0 0 16px 0;
-            color: #4a4a4a;
-        }
-        .email-body a {
-            color: #6366f1;
-            text-decoration: none;
-        }
-        .email-body ul {
-            margin: 0 0 16px 0;
-            padding-left: 24px;
-            color: #4a4a4a;
-        }
-        .email-body li {
-            margin-bottom: 8px;
-        }
-        .email-footer {
-            background-color: #f8fafc;
-            padding: 32px 40px;
-            text-align: center;
-            border-top: 1px solid #e2e8f0;
-        }
-        .email-footer p {
-            margin: 0 0 8px 0;
-            color: #64748b;
-            font-size: 14px;
-        }
-        .email-footer a {
-            color: #6366f1;
-            text-decoration: none;
-        }
-        .text-center { text-align: center; }
-        .text-muted { color: #64748b; }
-        .text-small { font-size: 14px; }
-        .mt-4 { margin-top: 24px; }
-        .mb-4 { margin-bottom: 24px; }
-        @media only screen and (max-width: 600px) {
-            .email-wrapper { padding: 20px 10px; }
-            .email-header, .email-body, .email-footer { padding: 24px 20px; }
-            .email-body h1 { font-size: 24px; }
+
+        /* Utilities */
+        .w-full { width: 100%; }
+        .max-w-600 { max-width: 600px; }
+        .bg-background { background-color: #ffffff; }
+        .text-foreground { color: #09090b; }
+        .text-muted-foreground { color: #71717a; }
+        
+        /* Link styles */
+        a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
+        
+        /* Responsive */
+        @media screen and (max-width: 600px) {
+            .email-container { width: 100% !important; max-width: 100% !important; }
+            .p-4 { padding: 16px !important; }
+            .p-6 { padding: 24px !important; }
+            .px-6 { padding-left: 24px !important; padding-right: 24px !important; }
         }
     </style>
 </head>
-<body>
-    <div class="email-wrapper">
-        <div class="email-container">
-            <div class="email-header">
-                <a href="{{ config('app.url') }}" class="logo">
-                    <span class="logo-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2"/>
-                            <path d="M2 12H22M12 2C14.5 4.5 16 8 16 12C16 16 14.5 19.5 12 22C9.5 19.5 8 16 8 12C8 8 9.5 4.5 12 2Z" stroke="white" stroke-width="2"/>
-                        </svg>
-                    </span>
-                    <span class="logo-text">{{ config('app.name') }}</span>
-                </a>
-            </div>
-
-            <div class="email-body">
-                {{ $slot }}
-            </div>
-
-            <div class="email-footer">
-                <p>Need help? Contact us at <a href="mailto:{{ config('contact.support_email') }}">{{ config('contact.support_email') }}</a></p>
-                @if(config('contact.phone'))
-                    <p>Or call us at <a href="tel:{{ config('contact.phone') }}">{{ config('contact.phone') }}</a></p>
-                @endif
-                <x-email.divider />
-                <p class="text-small">&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
-                <p class="text-small text-muted">
-                    <a href="{{ config('app.url') }}/terms">Terms of Service</a> &bull;
-                    <a href="{{ config('app.url') }}/privacy">Privacy Policy</a>
-                </p>
-            </div>
-        </div>
+<body style="margin: 0; padding: 0; background-color: #ffffff; color: #09090b; font-size: 14px; line-height: 1.5;">
+    <!-- Preview text -->
+    <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+        {{ $slot }}&nbsp;&zwnj;&nbsp;&nbsp;
     </div>
+
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #ffffff;">
+        <tr>
+            <td align="center" style="padding: 40px 16px;">
+                <!-- Container -->
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 0 auto;">
+                    <!-- Logo/Header -->
+                    <tr>
+                        <td align="left" style="padding-bottom: 32px;">
+                            <a href="{{ config('app.url') }}" style="text-decoration: none; display: inline-block;">
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td style="vertical-align: middle; padding-right: 12px;">
+                                            <img src="{{ asset('logo.png') }}" alt="{{ config('app.name') }}" width="32" height="32" style="display: block; border-radius: 6px; width: 32px; height: 32px; object-fit: contain;">
+                                        </td>
+                                        <td style="vertical-align: middle;">
+                                            <span style="font-size: 16px; font-weight: 600; color: #09090b; letter-spacing: -0.025em;">
+                                                {{ config('app.name') }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="color: #09090b;">
+                            {{ $slot }}
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding-top: 32px; border-top: 1px solid #e4e4e7; margin-top: 32px;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td style="color: #71717a; font-size: 12px; line-height: 20px; text-align: center;">
+                                        <p style="margin: 0 0 16px 0;">
+                                            &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
+                                        </p>
+                                        <p style="margin: 0 0 16px 0;">
+                                            <a href="{{ config('app.url') }}/privacy" target="_blank" style="color: #71717a; text-decoration: none;">Privacy</a>
+                                            &nbsp;&nbsp;&middot;&nbsp;&nbsp;
+                                            <a href="{{ config('app.url') }}/terms" target="_blank" style="color: #71717a; text-decoration: none;">Terms</a>
+                                            &nbsp;&nbsp;&middot;&nbsp;&nbsp;
+                                            <a href="{{ config('app.url') }}/help" target="_blank" style="color: #71717a; text-decoration: none;">Contact Support</a>
+                                        </p>
+                                        <p style="margin: 0; font-size: 11px; color: #a1a1aa;">
+                                            You are receiving this email because it contains important updates regarding your {{ config('app.name') }} account. 
+                                            <br>
+                                            <a href="{{ config('app.url') }}/settings/profile" target="_blank" style="color: #71717a; text-decoration: underline;">Manage Notification Preferences</a>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

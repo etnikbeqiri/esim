@@ -1,40 +1,61 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { useTrans } from '@/hooks/use-trans';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { XCircle } from 'lucide-react';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Client', href: '/client' },
-    { title: 'Checkout Cancelled', href: '#' },
-];
-
 export default function CheckoutCancel() {
+    const { trans } = useTrans();
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Client', href: '/client' },
+        { title: trans('client_checkout_cancel.title'), href: '#' },
+    ];
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Checkout Cancelled" />
-            <div className="flex flex-col gap-6 p-4 max-w-lg mx-auto">
+            <Head title={trans('client_checkout_cancel.title')} />
+            <div className="mx-auto flex max-w-lg flex-col gap-6 p-4">
                 <Card>
                     <CardHeader className="text-center">
-                        <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
                             <XCircle className="h-10 w-10 text-gray-500" />
                         </div>
-                        <CardTitle>Checkout Cancelled</CardTitle>
+                        <CardTitle>
+                            {trans('client_checkout_cancel.title')}
+                        </CardTitle>
                         <CardDescription>
-                            Your payment was cancelled and no charges were made.
+                            {trans('client_checkout_cancel.description')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <p className="text-center text-muted-foreground">
-                            If you experienced any issues during checkout, please try again or contact our support team.
+                            {trans('client_checkout_cancel.message')}
                         </p>
                         <div className="flex gap-4">
-                            <Button variant="outline" className="flex-1" asChild>
-                                <Link href="/client/packages">Browse Packages</Link>
+                            <Button
+                                variant="outline"
+                                className="flex-1"
+                                asChild
+                            >
+                                <Link href="/client/packages">
+                                    {trans(
+                                        'client_checkout_cancel.browse_packages',
+                                    )}
+                                </Link>
                             </Button>
                             <Button className="flex-1" asChild>
-                                <Link href="/client">Go to Dashboard</Link>
+                                <Link href="/client">
+                                    {trans('client_checkout_cancel.dashboard')}
+                                </Link>
                             </Button>
                         </div>
                     </CardContent>

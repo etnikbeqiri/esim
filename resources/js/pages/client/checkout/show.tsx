@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/back-button';
 import { CountryFlag } from '@/components/country-flag';
 import { PaymentProviderSelect } from '@/components/payment-provider-select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -5,12 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { useTrans } from '@/hooks/use-trans';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
-    ArrowLeft,
     CheckCircle,
     CheckCircle2,
     CreditCard,
@@ -63,23 +64,31 @@ interface Props {
     defaultProvider: string;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Client', href: '/client' },
-    { title: 'Packages', href: '/client/packages' },
-    { title: 'Checkout', href: '#' },
-];
-
-export default function CheckoutShow({ package: pkg, customer, paymentProviders, defaultProvider }: Props) {
+export default function CheckoutShow({
+    package: pkg,
+    customer,
+    paymentProviders,
+    defaultProvider,
+}: Props) {
+    const { trans } = useTrans();
     const [processing, setProcessing] = useState(false);
     const [selectedProvider, setSelectedProvider] = useState(defaultProvider);
     const { flash } = usePage().props as any;
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Client', href: '/client' },
+        { title: trans('client_packages.title'), href: '/client/packages' },
+        { title: trans('client_checkout_show.title'), href: '#' },
+    ];
 
     function handleCheckout() {
         setProcessing(true);
         router.post(
             `/client/checkout/${pkg.id}`,
             {
-                payment_provider: customer.is_b2b ? undefined : selectedProvider,
+                payment_provider: customer.is_b2b
+                    ? undefined
+                    : selectedProvider,
             },
             {
                 onFinish: () => setProcessing(false),
@@ -88,22 +97,26 @@ export default function CheckoutShow({ package: pkg, customer, paymentProviders,
     }
 
     const price = Number(pkg.price);
-    const canProceed = customer.is_b2b ? customer.can_afford : paymentProviders.length > 0;
+    const canProceed = customer.is_b2b
+        ? customer.can_afford
+        : paymentProviders.length > 0;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Checkout" />
+            <Head title={trans('client_checkout_show.title')} />
             <div className="p-4 md:p-6">
                 {/* Back Button */}
-                <Button variant="ghost" size="sm" asChild className="mb-6">
-                    <Link href="/client/packages">
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Packages
-                    </Link>
-                </Button>
+                <BackButton
+                    href="/client/packages"
+                    label={trans('client_checkout_show.back_to_packages')}
+                    variant="ghost"
+                    className="mb-6"
+                />
 
                 <div className="mx-auto max-w-5xl">
-                    <h1 className="mb-6 text-2xl font-semibold md:text-3xl">Checkout</h1>
+                    <h1 className="mb-6 text-2xl font-semibold md:text-3xl">
+                        {trans('client_checkout_show.title')}
+                    </h1>
 
                     {/* Error Alert */}
                     {flash?.error && (
@@ -118,7 +131,11 @@ export default function CheckoutShow({ package: pkg, customer, paymentProviders,
                         <div className="lg:col-span-3">
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Payment Method</CardTitle>
+                                    <CardTitle>
+                                        {trans(
+                                            'client_checkout_show.payment_method',
+                                        )}
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     {customer.is_b2b ? (
@@ -134,11 +151,21 @@ export default function CheckoutShow({ package: pkg, customer, paymentProviders,
                                                 <Wallet className="h-6 w-6 text-primary" />
                                             </div>
                                             <div className="flex-1">
-                                                <p className="font-medium">Pay with Account Balance</p>
+                                                <p className="font-medium">
+                                                    {trans(
+                                                        'client_checkout_show.pay_with_balance',
+                                                    )}
+                                                </p>
                                                 <p className="text-sm text-muted-foreground">
-                                                    Available balance:{' '}
+                                                    {trans(
+                                                        'client_checkout_show.available_balance',
+                                                    )}{' '}
                                                     <span className="font-semibold text-foreground">
-                                                        €{Number(customer.balance || 0).toFixed(2)}
+                                                        €
+                                                        {Number(
+                                                            customer.balance ||
+                                                                0,
+                                                        ).toFixed(2)}
                                                     </span>
                                                 </p>
                                             </div>
@@ -155,13 +182,17 @@ export default function CheckoutShow({ package: pkg, customer, paymentProviders,
                                                 <PaymentProviderSelect
                                                     providers={paymentProviders}
                                                     value={selectedProvider}
-                                                    onChange={setSelectedProvider}
+                                                    onChange={
+                                                        setSelectedProvider
+                                                    }
                                                 />
                                             ) : (
                                                 <Alert variant="destructive">
                                                     <AlertCircle className="h-4 w-4" />
                                                     <AlertDescription>
-                                                        No payment methods are currently available. Please try again later.
+                                                        {trans(
+                                                            'client_checkout_show.no_payment_methods',
+                                                        )}
                                                     </AlertDescription>
                                                 </Alert>
                                             )}
@@ -169,35 +200,57 @@ export default function CheckoutShow({ package: pkg, customer, paymentProviders,
                                     )}
 
                                     {/* Insufficient Balance Warning */}
-                                    {customer.is_b2b && !customer.can_afford && (
-                                        <Alert variant="destructive">
-                                            <AlertCircle className="h-4 w-4" />
-                                            <AlertDescription>
-                                                Insufficient balance. You need €{price.toFixed(2)} but only have €
-                                                {Number(customer.balance || 0).toFixed(2)}. Please contact support to top up
-                                                your account.
-                                            </AlertDescription>
-                                        </Alert>
-                                    )}
+                                    {customer.is_b2b &&
+                                        !customer.can_afford && (
+                                            <Alert variant="destructive">
+                                                <AlertCircle className="h-4 w-4" />
+                                                <AlertDescription>
+                                                    {trans(
+                                                        'client_checkout_show.insufficient_balance',
+                                                        {
+                                                            amount: `€${price.toFixed(2)}`,
+                                                            balance: `€${Number(customer.balance || 0).toFixed(2)}`,
+                                                        },
+                                                    )}
+                                                </AlertDescription>
+                                            </Alert>
+                                        )}
 
                                     <Separator />
 
                                     {/* Submit Button */}
-                                    <Button className="w-full" size="lg" onClick={handleCheckout} disabled={processing || !canProceed}>
+                                    <Button
+                                        className="w-full"
+                                        size="lg"
+                                        onClick={handleCheckout}
+                                        disabled={processing || !canProceed}
+                                    >
                                         {processing ? (
                                             <>
                                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Processing...
+                                                {trans(
+                                                    'client_checkout_show.processing',
+                                                )}
                                             </>
                                         ) : customer.is_b2b ? (
                                             <>
                                                 <Wallet className="mr-2 h-4 w-4" />
-                                                Pay €{price.toFixed(2)} with Balance
+                                                {trans(
+                                                    'client_checkout_show.pay_with_balance_btn',
+                                                    {
+                                                        amount: `€${price.toFixed(2)}`,
+                                                    },
+                                                )}
                                             </>
                                         ) : (
                                             <>
                                                 <CreditCard className="mr-2 h-4 w-4" />
-                                                Pay €{price.toFixed(2)}
+                                                {trans(
+                                                    'client_checkout_show.pay',
+                                                    {
+                                                        amount: `€${price.toFixed(2)}`,
+                                                    },
+                                                )}
                                             </>
                                         )}
                                     </Button>
@@ -206,18 +259,33 @@ export default function CheckoutShow({ package: pkg, customer, paymentProviders,
                                     <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
                                         <div className="flex items-center gap-1">
                                             <Lock className="h-3 w-3" />
-                                            <span>Secure checkout</span>
+                                            <span>
+                                                {trans(
+                                                    'client_checkout_show.secure_checkout',
+                                                )}
+                                            </span>
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <Shield className="h-3 w-3" />
-                                            <span>SSL encrypted</span>
+                                            <span>
+                                                {trans(
+                                                    'client_checkout_show.ssl_encrypted',
+                                                )}
+                                            </span>
                                         </div>
                                     </div>
 
                                     <p className="text-center text-xs text-muted-foreground">
-                                        By completing this purchase, you agree to our{' '}
-                                        <Link href="/terms" className="text-primary underline">
-                                            terms of service
+                                        {trans(
+                                            'client_checkout_show.terms_agreement',
+                                        )}{' '}
+                                        <Link
+                                            href="/terms"
+                                            className="text-primary underline"
+                                        >
+                                            {trans(
+                                                'client_checkout_show.terms_link',
+                                            )}
                                         </Link>
                                         .
                                     </p>
@@ -229,15 +297,30 @@ export default function CheckoutShow({ package: pkg, customer, paymentProviders,
                         <div className="lg:col-span-2">
                             <Card className="sticky top-24">
                                 <CardHeader>
-                                    <CardTitle className="text-base">Order Summary</CardTitle>
+                                    <CardTitle className="text-base">
+                                        {trans(
+                                            'client_checkout_show.order_summary',
+                                        )}
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     {/* Package Info with Flag */}
                                     <div className="flex items-start gap-3">
-                                        {pkg.country_iso && <CountryFlag countryCode={pkg.country_iso} size="lg" />}
+                                        {pkg.country_iso && (
+                                            <CountryFlag
+                                                countryCode={pkg.country_iso}
+                                                size="lg"
+                                            />
+                                        )}
                                         <div className="flex-1">
-                                            <h3 className="font-medium">{pkg.name}</h3>
-                                            {pkg.country && <p className="text-sm text-muted-foreground">{pkg.country}</p>}
+                                            <h3 className="font-medium">
+                                                {pkg.name}
+                                            </h3>
+                                            {pkg.country && (
+                                                <p className="text-sm text-muted-foreground">
+                                                    {pkg.country}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
 
@@ -259,8 +342,17 @@ export default function CheckoutShow({ package: pkg, customer, paymentProviders,
                                     {pkg.has_discount && (
                                         <>
                                             <Separator />
-                                            <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                                {pkg.discount_percentage}% B2B Discount Applied
+                                            <Badge
+                                                variant="secondary"
+                                                className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                                            >
+                                                {trans(
+                                                    'client_checkout_show.b2b_discount_applied',
+                                                    {
+                                                        percentage:
+                                                            pkg.discount_percentage,
+                                                    },
+                                                )}
                                             </Badge>
                                         </>
                                     )}
@@ -271,15 +363,28 @@ export default function CheckoutShow({ package: pkg, customer, paymentProviders,
                                     <div className="space-y-2">
                                         {pkg.has_discount && (
                                             <div className="flex items-center justify-between text-sm">
-                                                <span className="text-muted-foreground">Original price</span>
+                                                <span className="text-muted-foreground">
+                                                    {trans(
+                                                        'client_checkout_show.original_price',
+                                                    )}
+                                                </span>
                                                 <span className="text-muted-foreground line-through">
-                                                    €{Number(pkg.original_price).toFixed(2)}
+                                                    €
+                                                    {Number(
+                                                        pkg.original_price,
+                                                    ).toFixed(2)}
                                                 </span>
                                             </div>
                                         )}
                                         <div className="flex items-center justify-between">
-                                            <span className="font-medium">Total</span>
-                                            <span className="text-2xl font-bold">€{price.toFixed(2)}</span>
+                                            <span className="font-medium">
+                                                {trans(
+                                                    'client_checkout_show.total',
+                                                )}
+                                            </span>
+                                            <span className="text-2xl font-bold">
+                                                €{price.toFixed(2)}
+                                            </span>
                                         </div>
                                     </div>
 
@@ -287,15 +392,27 @@ export default function CheckoutShow({ package: pkg, customer, paymentProviders,
                                     <div className="space-y-2 rounded-lg bg-muted/50 p-3 text-xs">
                                         <div className="flex items-center gap-2">
                                             <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                                            <span>Instant eSIM delivery</span>
+                                            <span>
+                                                {trans(
+                                                    'client_checkout_show.benefits.instant',
+                                                )}
+                                            </span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                                            <span>Easy QR code installation</span>
+                                            <span>
+                                                {trans(
+                                                    'client_checkout_show.benefits.qr',
+                                                )}
+                                            </span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                                            <span>24/7 customer support</span>
+                                            <span>
+                                                {trans(
+                                                    'client_checkout_show.benefits.support',
+                                                )}
+                                            </span>
                                         </div>
                                     </div>
                                 </CardContent>

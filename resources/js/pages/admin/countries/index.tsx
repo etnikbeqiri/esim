@@ -2,7 +2,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -54,16 +60,26 @@ export default function CountriesIndex({ countries, regions, filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
-    const allSelected = countries.data.length > 0 && selectedIds.length === countries.data.length;
-    const someSelected = selectedIds.length > 0 && selectedIds.length < countries.data.length;
+    const allSelected =
+        countries.data.length > 0 &&
+        selectedIds.length === countries.data.length;
+    const someSelected =
+        selectedIds.length > 0 && selectedIds.length < countries.data.length;
 
     function handleSearch(e: FormEvent) {
         e.preventDefault();
-        router.get('/admin/countries', { ...filters, search }, { preserveState: true });
+        router.get(
+            '/admin/countries',
+            { ...filters, search },
+            { preserveState: true },
+        );
     }
 
     function handleFilterChange(key: string, value: string) {
-        const newFilters = { ...filters, [key]: value === 'all' ? undefined : value };
+        const newFilters = {
+            ...filters,
+            [key]: value === 'all' ? undefined : value,
+        };
         router.get('/admin/countries', newFilters, { preserveState: true });
     }
 
@@ -77,24 +93,32 @@ export default function CountriesIndex({ countries, regions, filters }: Props) {
 
     function toggleSelect(id: number) {
         setSelectedIds((prev) =>
-            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
         );
     }
 
     function handleBulkActivate() {
         if (selectedIds.length === 0) return;
-        router.post('/admin/countries/bulk-activate', { ids: selectedIds }, {
-            preserveState: true,
-            onSuccess: () => setSelectedIds([]),
-        });
+        router.post(
+            '/admin/countries/bulk-activate',
+            { ids: selectedIds },
+            {
+                preserveState: true,
+                onSuccess: () => setSelectedIds([]),
+            },
+        );
     }
 
     function handleBulkDeactivate() {
         if (selectedIds.length === 0) return;
-        router.post('/admin/countries/bulk-deactivate', { ids: selectedIds }, {
-            preserveState: true,
-            onSuccess: () => setSelectedIds([]),
-        });
+        router.post(
+            '/admin/countries/bulk-deactivate',
+            { ids: selectedIds },
+            {
+                preserveState: true,
+                onSuccess: () => setSelectedIds([]),
+            },
+        );
     }
 
     return (
@@ -104,11 +128,15 @@ export default function CountriesIndex({ countries, regions, filters }: Props) {
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">Countries</h1>
                     <div className="flex items-center gap-4">
-                        <span className="text-muted-foreground">{countries.total} countries</span>
+                        <span className="text-muted-foreground">
+                            {countries.total} countries
+                        </span>
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => router.post('/admin/countries/sync-disabled')}
+                            onClick={() =>
+                                router.post('/admin/countries/sync-disabled')
+                            }
                         >
                             <RefreshCw className="mr-2 h-4 w-4" />
                             Sync Disabled Countries
@@ -119,31 +147,43 @@ export default function CountriesIndex({ countries, regions, filters }: Props) {
                 <div className="flex flex-wrap gap-2">
                     <form onSubmit={handleSearch} className="flex gap-2">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                                 type="search"
                                 placeholder="Search countries..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="pl-9 w-[200px]"
+                                className="w-[200px] pl-9"
                             />
                         </div>
-                        <Button type="submit" variant="secondary">Search</Button>
+                        <Button type="submit" variant="secondary">
+                            Search
+                        </Button>
                     </form>
 
-                    <Select value={filters.region || 'all'} onValueChange={(v) => handleFilterChange('region', v)}>
+                    <Select
+                        value={filters.region || 'all'}
+                        onValueChange={(v) => handleFilterChange('region', v)}
+                    >
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="All regions" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All regions</SelectItem>
                             {regions.map((r) => (
-                                <SelectItem key={r} value={r}>{r}</SelectItem>
+                                <SelectItem key={r} value={r}>
+                                    {r}
+                                </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
 
-                    <Select value={filters.is_active ?? 'all'} onValueChange={(v) => handleFilterChange('is_active', v)}>
+                    <Select
+                        value={filters.is_active ?? 'all'}
+                        onValueChange={(v) =>
+                            handleFilterChange('is_active', v)
+                        }
+                    >
                         <SelectTrigger className="w-[120px]">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
@@ -157,15 +197,29 @@ export default function CountriesIndex({ countries, regions, filters }: Props) {
 
                 {selectedIds.length > 0 && (
                     <div className="flex items-center gap-2 rounded-lg border bg-muted/50 p-2">
-                        <span className="text-sm font-medium">{selectedIds.length} selected</span>
+                        <span className="text-sm font-medium">
+                            {selectedIds.length} selected
+                        </span>
                         <div className="ml-auto flex gap-2">
-                            <Button size="sm" variant="outline" onClick={handleBulkActivate}>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={handleBulkActivate}
+                            >
                                 Enable Selected
                             </Button>
-                            <Button size="sm" variant="outline" onClick={handleBulkDeactivate}>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={handleBulkDeactivate}
+                            >
                                 Disable Selected
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])}>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setSelectedIds([])}
+                            >
                                 Clear Selection
                             </Button>
                         </div>
@@ -180,7 +234,9 @@ export default function CountriesIndex({ countries, regions, filters }: Props) {
                                     <Checkbox
                                         checked={allSelected}
                                         ref={(el) => {
-                                            if (el) (el as any).indeterminate = someSelected;
+                                            if (el)
+                                                (el as any).indeterminate =
+                                                    someSelected;
                                         }}
                                         onCheckedChange={toggleSelectAll}
                                     />
@@ -196,45 +252,86 @@ export default function CountriesIndex({ countries, regions, filters }: Props) {
                         <TableBody>
                             {countries.data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                                    <TableCell
+                                        colSpan={7}
+                                        className="py-8 text-center text-muted-foreground"
+                                    >
                                         No countries found
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 countries.data.map((country) => (
-                                    <TableRow key={country.id} className={selectedIds.includes(country.id) ? 'bg-muted/50' : ''}>
+                                    <TableRow
+                                        key={country.id}
+                                        className={
+                                            selectedIds.includes(country.id)
+                                                ? 'bg-muted/50'
+                                                : ''
+                                        }
+                                    >
                                         <TableCell>
                                             <Checkbox
-                                                checked={selectedIds.includes(country.id)}
-                                                onCheckedChange={() => toggleSelect(country.id)}
+                                                checked={selectedIds.includes(
+                                                    country.id,
+                                                )}
+                                                onCheckedChange={() =>
+                                                    toggleSelect(country.id)
+                                                }
                                             />
                                         </TableCell>
                                         <TableCell className="font-medium">
                                             <div className="flex items-center gap-2">
-                                                {country.flag_emoji && <span>{country.flag_emoji}</span>}
+                                                {country.flag_emoji && (
+                                                    <span>
+                                                        {country.flag_emoji}
+                                                    </span>
+                                                )}
                                                 {country.name}
                                                 {country.is_region && (
-                                                    <Badge variant="outline" className="text-xs">Region</Badge>
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="text-xs"
+                                                    >
+                                                        Region
+                                                    </Badge>
                                                 )}
                                             </div>
                                         </TableCell>
                                         <TableCell className="font-mono text-sm">
-                                            {country.iso_code} / {country.iso_code_3}
+                                            {country.iso_code} /{' '}
+                                            {country.iso_code_3}
                                         </TableCell>
-                                        <TableCell>{country.region || '-'}</TableCell>
                                         <TableCell>
-                                            <Badge variant={country.is_active ? 'default' : 'secondary'}>
-                                                {country.is_active ? 'Enabled' : 'Disabled'}
+                                            {country.region || '-'}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge
+                                                variant={
+                                                    country.is_active
+                                                        ? 'default'
+                                                        : 'secondary'
+                                                }
+                                            >
+                                                {country.is_active
+                                                    ? 'Enabled'
+                                                    : 'Disabled'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
                                             <span className="text-muted-foreground">
-                                                {country.active_packages_count} / {country.packages_count}
+                                                {country.active_packages_count}{' '}
+                                                / {country.packages_count}
                                             </span>
                                         </TableCell>
                                         <TableCell>
-                                            <Button variant="ghost" size="icon" asChild>
-                                                <Link href={`/admin/countries/${country.id}`}>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                asChild
+                                            >
+                                                <Link
+                                                    href={`/admin/countries/${country.id}`}
+                                                >
                                                     <Eye className="h-4 w-4" />
                                                 </Link>
                                             </Button>
@@ -248,12 +345,24 @@ export default function CountriesIndex({ countries, regions, filters }: Props) {
 
                 {countries.last_page > 1 && (
                     <div className="flex justify-center gap-2">
-                        {Array.from({ length: Math.min(countries.last_page, 10) }, (_, i) => i + 1).map((page) => (
+                        {Array.from(
+                            { length: Math.min(countries.last_page, 10) },
+                            (_, i) => i + 1,
+                        ).map((page) => (
                             <Button
                                 key={page}
-                                variant={page === countries.current_page ? 'default' : 'outline'}
+                                variant={
+                                    page === countries.current_page
+                                        ? 'default'
+                                        : 'outline'
+                                }
                                 size="sm"
-                                onClick={() => router.get('/admin/countries', { ...filters, page })}
+                                onClick={() =>
+                                    router.get('/admin/countries', {
+                                        ...filters,
+                                        page,
+                                    })
+                                }
                             >
                                 {page}
                             </Button>

@@ -1,6 +1,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import {
     Table,
     TableBody,
@@ -41,15 +47,22 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Currencies', href: '/admin/currencies' },
 ];
 
-export default function CurrenciesIndex({ currencies, defaultCurrency }: Props) {
+export default function CurrenciesIndex({
+    currencies,
+    defaultCurrency,
+}: Props) {
     const [updatingRates, setUpdatingRates] = useState(false);
     const { flash } = usePage().props as { flash?: Flash };
 
     function handleUpdateRates() {
         setUpdatingRates(true);
-        router.post('/admin/currencies/update-rates', {}, {
-            onFinish: () => setUpdatingRates(false),
-        });
+        router.post(
+            '/admin/currencies/update-rates',
+            {},
+            {
+                onFinish: () => setUpdatingRates(false),
+            },
+        );
     }
 
     function handleToggle(currency: Currency) {
@@ -80,19 +93,23 @@ export default function CurrenciesIndex({ currencies, defaultCurrency }: Props) 
                         onClick={handleUpdateRates}
                         disabled={updatingRates}
                     >
-                        <RefreshCw className={`h-4 w-4 mr-2 ${updatingRates ? 'animate-spin' : ''}`} />
-                        {updatingRates ? 'Updating...' : 'Update Exchange Rates'}
+                        <RefreshCw
+                            className={`mr-2 h-4 w-4 ${updatingRates ? 'animate-spin' : ''}`}
+                        />
+                        {updatingRates
+                            ? 'Updating...'
+                            : 'Update Exchange Rates'}
                     </Button>
                 </div>
 
                 {flash?.success && (
-                    <div className="bg-green-50 border border-green-200 text-green-800 rounded-md p-3">
+                    <div className="rounded-md border border-green-200 bg-green-50 p-3 text-green-800">
                         {flash.success}
                     </div>
                 )}
 
                 {flash?.error && (
-                    <div className="bg-red-50 border border-red-200 text-red-800 rounded-md p-3">
+                    <div className="rounded-md border border-red-200 bg-red-50 p-3 text-red-800">
                         {flash.error}
                     </div>
                 )}
@@ -106,9 +123,12 @@ export default function CurrenciesIndex({ currencies, defaultCurrency }: Props) 
                         </CardHeader>
                         <CardContent>
                             <p className="text-2xl font-bold">
-                                {defaultCurrency?.symbol}{defaultCurrency?.code}
+                                {defaultCurrency?.symbol}
+                                {defaultCurrency?.code}
                             </p>
-                            <p className="text-sm text-muted-foreground">{defaultCurrency?.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                                {defaultCurrency?.name}
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -119,9 +139,11 @@ export default function CurrenciesIndex({ currencies, defaultCurrency }: Props) 
                         </CardHeader>
                         <CardContent>
                             <p className="text-2xl font-bold">
-                                {currencies.filter(c => c.is_active).length}
+                                {currencies.filter((c) => c.is_active).length}
                             </p>
-                            <p className="text-sm text-muted-foreground">of {currencies.length} total</p>
+                            <p className="text-sm text-muted-foreground">
+                                of {currencies.length} total
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -134,7 +156,9 @@ export default function CurrenciesIndex({ currencies, defaultCurrency }: Props) 
                             <p className="text-lg font-bold">
                                 {formatDate(currencies[0]?.rate_updated_at)}
                             </p>
-                            <p className="text-sm text-muted-foreground">via Frankfurter API</p>
+                            <p className="text-sm text-muted-foreground">
+                                via Frankfurter API
+                            </p>
                         </CardContent>
                     </Card>
                 </div>
@@ -143,7 +167,8 @@ export default function CurrenciesIndex({ currencies, defaultCurrency }: Props) 
                     <CardHeader>
                         <CardTitle>Exchange Rates</CardTitle>
                         <CardDescription>
-                            All rates are relative to the system default currency ({defaultCurrency?.code})
+                            All rates are relative to the system default
+                            currency ({defaultCurrency?.code})
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -152,10 +177,14 @@ export default function CurrenciesIndex({ currencies, defaultCurrency }: Props) 
                                 <TableRow>
                                     <TableHead>Currency</TableHead>
                                     <TableHead>Symbol</TableHead>
-                                    <TableHead>Exchange Rate to {defaultCurrency?.code}</TableHead>
+                                    <TableHead>
+                                        Exchange Rate to {defaultCurrency?.code}
+                                    </TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Last Updated</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                                    <TableHead className="text-right">
+                                        Actions
+                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -163,11 +192,18 @@ export default function CurrenciesIndex({ currencies, defaultCurrency }: Props) 
                                     <TableRow key={currency.id}>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
-                                                <span className="font-medium">{currency.code}</span>
-                                                <span className="text-muted-foreground">{currency.name}</span>
+                                                <span className="font-medium">
+                                                    {currency.code}
+                                                </span>
+                                                <span className="text-muted-foreground">
+                                                    {currency.name}
+                                                </span>
                                                 {currency.is_default && (
-                                                    <Badge variant="secondary" className="text-xs">
-                                                        <Star className="h-3 w-3 mr-1" />
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="text-xs"
+                                                    >
+                                                        <Star className="mr-1 h-3 w-3" />
                                                         Default
                                                     </Badge>
                                                 )}
@@ -177,15 +213,27 @@ export default function CurrenciesIndex({ currencies, defaultCurrency }: Props) 
                                             {currency.symbol}
                                         </TableCell>
                                         <TableCell className="font-mono">
-                                            {Number(currency.exchange_rate_to_eur).toFixed(6)}
+                                            {Number(
+                                                currency.exchange_rate_to_eur,
+                                            ).toFixed(6)}
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant={currency.is_active ? 'default' : 'secondary'}>
-                                                {currency.is_active ? 'Active' : 'Inactive'}
+                                            <Badge
+                                                variant={
+                                                    currency.is_active
+                                                        ? 'default'
+                                                        : 'secondary'
+                                                }
+                                            >
+                                                {currency.is_active
+                                                    ? 'Active'
+                                                    : 'Inactive'}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="text-muted-foreground text-sm">
-                                            {formatDate(currency.rate_updated_at)}
+                                        <TableCell className="text-sm text-muted-foreground">
+                                            {formatDate(
+                                                currency.rate_updated_at,
+                                            )}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
@@ -194,7 +242,11 @@ export default function CurrenciesIndex({ currencies, defaultCurrency }: Props) 
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
-                                                            onClick={() => handleToggle(currency)}
+                                                            onClick={() =>
+                                                                handleToggle(
+                                                                    currency,
+                                                                )
+                                                            }
                                                         >
                                                             {currency.is_active ? (
                                                                 <ToggleRight className="h-4 w-4" />
@@ -205,7 +257,11 @@ export default function CurrenciesIndex({ currencies, defaultCurrency }: Props) 
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
-                                                            onClick={() => handleSetDefault(currency)}
+                                                            onClick={() =>
+                                                                handleSetDefault(
+                                                                    currency,
+                                                                )
+                                                            }
                                                         >
                                                             <Star className="h-4 w-4" />
                                                         </Button>
