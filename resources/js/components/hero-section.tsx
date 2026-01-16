@@ -39,7 +39,7 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({
-    badge = 'Instant Activation',
+    badge,
     title,
     titleHighlight,
     description,
@@ -52,6 +52,9 @@ export function HeroSection({
 }: HeroSectionProps) {
     const { name } = usePage<SharedData>().props;
     const { trans } = useTrans();
+
+    // Use provided badge or fall back to translation
+    const displayBadge = badge || trans('hero.badge');
     const [internalQuery, setInternalQuery] = useState('');
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -169,7 +172,7 @@ export function HeroSection({
     }
 
     return (
-        <section className="bg-mesh relative overflow-x-clip pt-8 pb-12 md:pt-24 md:pb-28">
+        <section className="bg-mesh relative overflow-x-clip pt-6 pb-28 md:pt-12 md:pb-32">
             {/* Abstract Background Shapes */}
             <div className="animate-float absolute top-20 -left-20 h-64 w-64 rounded-full bg-primary-200/30 blur-3xl filter md:h-96 md:w-96" />
             <div className="animate-float-delayed absolute -right-20 bottom-20 h-64 w-64 rounded-full bg-accent-200/30 blur-3xl filter md:h-96 md:w-96" />
@@ -182,7 +185,7 @@ export function HeroSection({
                     >
                         <Sparkles className="mr-1.5 h-3.5 w-3.5 text-accent-500 md:mr-2 md:h-4 md:w-4" />
                         <span className="bg-gradient-to-r from-primary-800 to-primary-600 bg-clip-text text-transparent">
-                            {badge}
+                            {displayBadge}
                         </span>
                     </Badge>
 
@@ -410,8 +413,8 @@ export function HeroSection({
                 </div>
             </div>
 
-            {/* Scroll Indicator - hidden on mobile */}
-            <div className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 opacity-50 md:flex">
+            {/* Scroll Indicator */}
+            <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 opacity-50">
                 <span className="text-xs font-medium tracking-widest text-primary-400 uppercase">
                     {trans('common.scroll')}
                 </span>
