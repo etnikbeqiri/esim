@@ -4,13 +4,15 @@ use App\Http\Controllers\EmailPreviewController;
 use App\Http\Controllers\Public\ArticleController;
 use App\Http\Controllers\Public\DeviceController;
 use App\Http\Controllers\Public\HomeController;
+use App\Http\Controllers\Public\SitemapController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use Laravel\Fortify\Features;
 
 // Email Preview Routes - Only accessible in local/staging or by admin users
 Route::get('/preview-email', [EmailPreviewController::class, 'index'])->name('emails.preview');
 Route::get('/preview-email/{template}', [EmailPreviewController::class, 'preview'])->name('emails.preview.template');
+
+// Sitemap
+Route::get('/sitemap.xml', [SitemapController::class, '__invoke'])->name('sitemap');
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
