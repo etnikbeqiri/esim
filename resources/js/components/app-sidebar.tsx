@@ -29,6 +29,7 @@ import {
     Tag,
     Users,
     Wallet,
+    Monitor,
 } from 'lucide-react';
 import { useMemo } from 'react';
 import AppLogo from './app-logo';
@@ -144,6 +145,11 @@ export function AppSidebar() {
                       title: 'Brands',
                       href: '/admin/brands',
                       icon: Tag,
+                  },
+                  {
+                      title: 'Settings',
+                      href: '/admin/settings',
+                      icon: Monitor,
                   },
               ]
             : [];

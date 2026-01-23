@@ -140,4 +140,44 @@ enum EmailTemplate: string
     {
         return 'emails.' . str_replace('_', '-', $this->value);
     }
+
+    /**
+     * Get the setting key that controls whether this email type is enabled.
+     */
+    public function settingKey(): string
+    {
+        return match ($this) {
+            // Customer emails
+            self::OrderConfirmation => 'emails.order_confirmation',
+            self::PaymentReceipt => 'emails.payment_succeeded',
+            self::PaymentFailed => 'emails.payment_failed',
+            self::EsimDelivery => 'emails.esim_qr_code',
+            self::BalanceTopUp => 'emails.balance_topup',
+            self::TicketCreated => 'emails.ticket_created',
+            self::TicketReply => 'emails.ticket_reply',
+            self::EmailVerification => 'emails.email_verification',
+            self::PasswordReset => 'emails.password_reset',
+            self::Welcome => 'emails.registration_welcome',
+            self::OrderFailed => 'emails.order_confirmation',
+            self::RefundNotification => 'emails.payment_succeeded',
+            self::LowBalance => 'emails.balance_topup',
+            // Admin emails
+            self::AdminNewOrder => 'emails.admin_new_order',
+            self::AdminOrderFailed => 'emails.admin_order_failed',
+            self::AdminPaymentFailed => 'emails.admin_payment_failed',
+            self::AdminLowStock => 'emails.admin_low_stock',
+            self::AdminNewB2BCustomer => 'emails.admin_new_b2b_customer',
+            self::AdminBalanceTopUp => 'emails.admin_balance_topup',
+            self::AdminTicketCreated => 'emails.admin_ticket_created',
+            self::AdminTicketReply => 'emails.admin_ticket_reply',
+        };
+    }
+
+    /**
+     * Check if this email type is enabled in settings.
+     */
+    public function isEnabled(): bool
+    {
+        return setting_enabled($this->settingKey(), true);
+    }
 }

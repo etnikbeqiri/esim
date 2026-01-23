@@ -75,6 +75,11 @@ class EmailQueue extends Model
         return $query->where('status', 'failed');
     }
 
+    public function scopeSkipped($query)
+    {
+        return $query->where('status', 'skipped');
+    }
+
     public function scopeRetryable($query)
     {
         return $query->failed()
@@ -153,6 +158,14 @@ class EmailQueue extends Model
     {
         $this->update([
             'opened_at' => now(),
+        ]);
+    }
+
+    public function markAsSkipped(string $reason = 'Email type disabled in settings'): void
+    {
+        $this->update([
+            'status' => 'skipped',
+            'error_message' => $reason,
         ]);
     }
 }

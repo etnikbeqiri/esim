@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\SystemSettingController;
 use App\Http\Controllers\Settings\LanguageController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
@@ -31,5 +32,14 @@ Route::middleware('auth')->group(function () {
     Route::patch('settings/language', [LanguageController::class, 'update'])->name('language.update');
 });
 
-// Public locale route (for guest and authenticated users)
 Route::post('locale', [LanguageController::class, 'setLocale'])->name('locale.set');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+        Route::get('settings', [SystemSettingController::class, 'index'])->name('settings.index');
+        Route::post('settings', [SystemSettingController::class, 'update'])->name('settings.update');
+        Route::post('settings/reset', [SystemSettingController::class, 'reset'])->name('settings.reset');
+        Route::post('settings/clear-cache', [SystemSettingController::class, 'clearCache'])->name('settings.clear-cache');
+        Route::post('settings/warm-cache', [SystemSettingController::class, 'warmCache'])->name('settings.warm-cache');
+    });
+});

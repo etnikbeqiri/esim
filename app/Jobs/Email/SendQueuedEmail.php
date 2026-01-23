@@ -39,6 +39,20 @@ class SendQueuedEmail implements ShouldQueue
             return;
         }
 
+        // Check if this email type is enabled in settings
+        if (!$emailQueue->template->isEnabled()) {
+            Log::info('SendQueuedEmail: Email skipped - disabled in settings', [
+                'id' => $this->emailQueueId,
+                'template' => $emailQueue->template->value,
+                'setting_key' => $emailQueue->template->settingKey(),
+                'to' => $emailQueue->to_email,
+            ]);
+
+            $emailQueue->markAsSkipped();
+
+            return;
+        }
+
         $emailQueue->markAsSending();
 
         try {
