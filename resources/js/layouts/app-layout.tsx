@@ -1,4 +1,5 @@
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
+import { AnalyticsProvider } from '@/lib/analytics';
 import { type BreadcrumbItem } from '@/types';
 import { type ReactNode } from 'react';
 
@@ -8,7 +9,9 @@ interface AppLayoutProps {
 }
 
 export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => (
-    <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
-        {children}
-    </AppLayoutTemplate>
+    <AnalyticsProvider>
+        <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
+            {children}
+        </AppLayoutTemplate>
+    </AnalyticsProvider>
 );

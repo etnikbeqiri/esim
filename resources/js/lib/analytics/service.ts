@@ -30,7 +30,6 @@ class AnalyticsService {
     private initialized = false;
     private queue: Array<() => void> = [];
     private userProperties: UserProperties = {};
-    private debugMode = false;
 
     initialize(config: AnalyticsConfig): void {
         if (this.initialized) return;
@@ -64,12 +63,8 @@ class AnalyticsService {
         }
     }
 
-    setDebugMode(enabled: boolean): void {
-        this.debugMode = enabled;
-    }
-
     private log(message: string, data?: unknown): void {
-        if (this.debugMode || (typeof window !== 'undefined' && window.location.hostname === 'localhost')) {
+        if (this.config?.debugLogging) {
             console.log(`[Analytics] ${message}`, data ?? '');
         }
     }

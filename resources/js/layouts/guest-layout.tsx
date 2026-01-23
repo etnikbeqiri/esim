@@ -3,6 +3,7 @@ import { PayseraTrustBadge } from '@/components/paysera-trust-badge';
 import { Button } from '@/components/ui/button';
 import { GoldButton } from '@/components/ui/gold-button';
 import { useTrans } from '@/hooks/use-trans';
+import { AnalyticsProvider } from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { Menu, User, X } from 'lucide-react';
@@ -18,6 +19,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
+        <AnalyticsProvider>
         <div className="min-h-screen bg-primary-50">
             {/* Header */}
             <header className="sticky top-0 z-50 w-full border-b border-primary-100 bg-white/80 backdrop-blur-lg">
@@ -356,5 +358,6 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                 </div>
             </footer>
         </div>
+        </AnalyticsProvider>
     );
 }

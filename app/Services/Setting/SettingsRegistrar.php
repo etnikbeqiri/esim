@@ -338,5 +338,14 @@ class SettingsRegistrar
             type: SettingType::String,
             default: ''
         );
+
+        $this->register(
+            key: 'analytics.debug_logging',
+            label: 'Debug Logging',
+            description: 'Log analytics events to browser console for debugging',
+            group: SettingGroup::Analytics,
+            type: SettingType::Boolean,
+            default: false
+        );
     }
 }

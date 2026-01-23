@@ -4,6 +4,7 @@ export interface AnalyticsConfig {
     firebaseApiKey: string;
     firebaseProjectId: string;
     firebaseAppId: string;
+    debugLogging: boolean;
 }
 
 export interface EcommerceItem {

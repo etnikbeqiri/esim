@@ -1,46 +1,15 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { usePage } from '@inertiajs/react';
 import analytics from './service';
 import type {
     PageType,
     SearchParams,
-    ViewItemParams,
-    SelectItemParams,
-    BeginCheckoutParams,
-    AddPaymentInfoParams,
-    PurchaseParams,
-    FormInteractionParams,
-    FilterParams,
-    DeviceDetectedParams,
-    NetworkCoverageParams,
-    InstallationStepParams,
-    SupportContactParams,
     ContentEngagementParams,
-    ErrorParams,
     EcommerceItem,
     PaymentMethod,
     ContactMethod,
 } from './types';
 
-interface SharedData {
-    auth?: {
-        user?: {
-            id: number;
-            is_admin: boolean;
-            is_b2b: boolean;
-        };
-    };
-    analyticsConfig?: {
-        enabled: boolean;
-        measurementId: string;
-        firebaseApiKey: string;
-        firebaseProjectId: string;
-        firebaseAppId: string;
-    };
-}
-
 export function useAnalytics() {
-    const { props } = usePage<SharedData>();
 
     const pageView = useCallback((pageType: PageType, title: string, extra?: Record<string, string>) => {
         analytics.pageView({

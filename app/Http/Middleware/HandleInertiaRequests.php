@@ -123,6 +123,7 @@ class HandleInertiaRequests extends Middleware
                 'firebaseApiKey' => setting('analytics.firebase_api_key', ''),
                 'firebaseProjectId' => setting('analytics.firebase_project_id', ''),
                 'firebaseAppId' => setting('analytics.firebase_app_id', ''),
+                'debugLogging' => setting_enabled('analytics.debug_logging', false),
             ],
         ];
     }
