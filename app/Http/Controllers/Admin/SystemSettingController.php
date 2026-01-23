@@ -37,7 +37,7 @@ class SystemSettingController extends Controller
     {
         $validated = $request->validate([
             'settings' => ['required', 'array'],
-            'settings.*' => ['required'],
+            'settings.*' => ['present'],
         ]);
 
         $this->settings->setMultiple($validated['settings']);
