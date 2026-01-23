@@ -5,17 +5,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useTrans } from '@/hooks/use-trans';
+import { useAnalytics, usePageViewTracking } from '@/lib/analytics';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     Calendar,
     CheckCircle2,
     Clock,
+    HelpCircle,
     Loader2,
     RefreshCw,
     XCircle,
 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 interface Order {
     uuid: string;
@@ -78,6 +80,14 @@ function getStatusBadgeClass(color: string): string {
 
 export default function OrderStatus({ order }: Props) {
     const { trans } = useTrans();
+    const {
+        installationStep,
+        supportContact,
+        contentView,
+        contentShare,
+        pageView,
+    } = useAnalytics();
+
     const isProcessing = [
         'processing',
         'pending',
@@ -87,11 +97,36 @@ export default function OrderStatus({ order }: Props) {
     const isCompleted = order.status === 'completed';
     const isFailed = order.status === 'failed';
 
+    usePageViewTracking('order_status', 'Order Status', {
+        order_id: order.uuid,
+        order_status: order.status,
+    });
+
+    const refreshCountRef = useRef(0);
+    const hasTrackedCompletionRef = useRef(false);
+    const hasTrackedInstallationViewRef = useRef(false);
+
+    useEffect(() => {
+        if (isCompleted && order.esim && !hasTrackedInstallationViewRef.current) {
+            hasTrackedInstallationViewRef.current = true;
+            installationStep(1, 'view_qr_code', order.uuid);
+            contentView('esim_activation', order.uuid, 'eSIM Installation Instructions');
+        }
+    }, [isCompleted, order.esim, order.uuid, installationStep, contentView]);
+
     // Poll for updates while processing
     useEffect(() => {
         if (!isProcessing) return;
 
         const interval = setInterval(() => {
+            refreshCountRef.current += 1;
+            if (refreshCountRef.current % 5 === 0) {
+                pageView('order_status', 'Order Status - Refresh', {
+                    order_id: order.uuid,
+                    order_status: order.status,
+                    refresh_count: String(refreshCountRef.current),
+                });
+            }
             router.reload({
                 only: ['order'],
                 preserveUrl: true,
@@ -99,7 +134,29 @@ export default function OrderStatus({ order }: Props) {
         }, 3000);
 
         return () => clearInterval(interval);
-    }, [isProcessing, order.status]);
+    }, [isProcessing, order.status, order.uuid, pageView]);
+
+    useEffect(() => {
+        if (isCompleted && !hasTrackedCompletionRef.current) {
+            hasTrackedCompletionRef.current = true;
+            contentView('guide', order.uuid, 'Order Completed');
+        }
+    }, [isCompleted, order.uuid, contentView]);
+
+    const handleCopyData = useCallback(
+        (field: string) => {
+            contentShare('esim_activation', order.uuid, `eSIM Data - ${field}`, 'copy');
+            installationStep(2, `copy_${field}`, order.uuid);
+        },
+        [order.uuid, contentShare, installationStep],
+    );
+
+    const handleSupportClick = useCallback(
+        (method: 'email' | 'phone' | 'whatsapp' | 'ticket') => {
+            supportContact(method, 'order_status');
+        },
+        [supportContact],
+    );
 
     return (
         <GuestLayout>
@@ -191,6 +248,7 @@ export default function OrderStatus({ order }: Props) {
                                 description={trans(
                                     'order_status_page.esim.description',
                                 )}
+                                onCopy={handleCopyData}
                             />
                         )}
 
@@ -267,6 +325,43 @@ export default function OrderStatus({ order }: Props) {
                                 </Link>
                             </Button>
                         </div>
+
+                        {/* Help Section */}
+                        <Card className="mt-8 border-primary-100 bg-white text-center shadow-sm">
+                            <CardContent className="py-6">
+                                <HelpCircle className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+                                <h3 className="font-semibold">
+                                    {trans('order_status_page.help.title')}
+                                </h3>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    {trans('order_status_page.help.description')}
+                                </p>
+                                <div className="mt-4 flex justify-center gap-3">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        asChild
+                                        onClick={() => {
+                                            contentView('guide', 'how-it-works', 'How It Works Guide');
+                                        }}
+                                    >
+                                        <Link href="/how-it-works">
+                                            {trans('order_status_page.help.guide')}
+                                        </Link>
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        asChild
+                                        onClick={() => handleSupportClick('ticket')}
+                                    >
+                                        <Link href="/help">
+                                            {trans('order_status_page.help.contact')}
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
             </section>

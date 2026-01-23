@@ -15,6 +15,7 @@ interface FAQSectionProps {
     showBackground?: boolean;
     viewAllLink?: string;
     viewAllText?: string;
+    onItemToggle?: (index: number, question: string, isOpen: boolean) => void;
 }
 
 export function FAQSection({
@@ -24,8 +25,16 @@ export function FAQSection({
     showBackground = true,
     viewAllLink,
     viewAllText = 'View All FAQs',
+    onItemToggle,
 }: FAQSectionProps) {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+    const handleToggle = (index: number, question: string) => {
+        const isCurrentlyOpen = openIndex === index;
+        const newIsOpen = !isCurrentlyOpen;
+        setOpenIndex(newIsOpen ? index : null);
+        onItemToggle?.(index, question, newIsOpen);
+    };
 
     return (
         <section className="relative bg-white py-16 md:py-24">
@@ -59,9 +68,7 @@ export function FAQSection({
                                         ? 'border-accent-400 bg-white shadow-lg shadow-accent-500/20'
                                         : 'border-primary-100 bg-white hover:border-primary-200 hover:shadow-md'
                                 }`}
-                                onClick={() =>
-                                    setOpenIndex(isOpen ? null : index)
-                                }
+                                onClick={() => handleToggle(index, faq.question)}
                             >
                                 <button className="flex w-full items-center justify-between p-5 text-left md:p-6">
                                     <span className="flex items-center gap-3 pr-4">

@@ -29,6 +29,7 @@ interface EsimQrCardProps {
     description?: string;
     showDetails?: boolean;
     compact?: boolean;
+    onCopy?: (field: string) => void;
 }
 
 export function EsimQrCard({
@@ -37,6 +38,7 @@ export function EsimQrCard({
     description,
     showDetails = true,
     compact = false,
+    onCopy,
 }: EsimQrCardProps) {
     const { trans } = useTrans();
     const [copied, setCopied] = useState<string | null>(null);
@@ -48,6 +50,7 @@ export function EsimQrCard({
         navigator.clipboard.writeText(text);
         setCopied(field);
         setTimeout(() => setCopied(null), 2000);
+        onCopy?.(field);
     }
 
     const qrValue = esim.lpa_string || esim.qr_code_data;

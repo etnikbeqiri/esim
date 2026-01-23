@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
+import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
 import { Head, Link } from '@inertiajs/react';
 import {
     ArrowRight,
@@ -33,7 +34,7 @@ import {
     Wifi,
     Zap,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface NetworkOperator {
     name: string;
@@ -85,9 +86,11 @@ type SortOption = 'data' | 'price-asc' | 'price-desc' | 'validity';
 function NetworkCoverageDialog({
     networks,
     isFeatured,
+    onOpen,
 }: {
     networks: NetworkData;
     isFeatured: boolean;
+    onOpen?: () => void;
 }) {
     const { trans } = useTrans();
     const [searchQuery, setSearchQuery] = useState('');
@@ -115,7 +118,7 @@ function NetworkCoverageDialog({
     }, [networks, searchQuery, isGrouped]);
 
     return (
-        <Dialog>
+        <Dialog onOpenChange={(open) => open && onOpen?.()}>
             <DialogTrigger asChild>
                 <button
                     className={`mt-2 flex w-full items-center justify-center gap-1.5 rounded-md py-1.5 text-[10px] font-semibold transition-colors md:mt-4 md:gap-2 md:rounded-lg md:py-2 md:text-xs ${
@@ -240,6 +243,59 @@ function NetworkCoverageDialog({
 export default function CountryPage({ country, packages }: Props) {
     const { trans } = useTrans();
     const [sortBy, setSortBy] = useState<SortOption>('data');
+    const { viewItemList, selectItem, filterApplied, createItem, viewNetworkCoverage } = useAnalytics();
+
+    usePageViewTracking('country', country.name, { country_code: country.iso_code });
+
+    useScrollTracking('guide', `country-${country.iso_code}`, country.name);
+
+    // Create analytics items from packages
+    const createAnalyticsItem = useCallback(
+        (pkg: Package, index?: number) =>
+            createItem({
+                id: String(pkg.id),
+                name: pkg.name,
+                category: 'eSIM Package',
+                category2: country.name,
+                brand: 'eSIM',
+                price: Number(pkg.retail_price),
+                currency: 'EUR',
+                index,
+            }),
+        [createItem, country.name],
+    );
+
+    useEffect(() => {
+        if (packages.length > 0) {
+            const items = packages.map((pkg, index) => createAnalyticsItem(pkg, index));
+            viewItemList(`country_${country.iso_code}`, `${country.name} eSIM Packages`, items);
+        }
+    }, [packages, country.iso_code, country.name, viewItemList, createAnalyticsItem]);
+
+    const handleSortChange = useCallback(
+        (value: string) => {
+            const sortOption = value as SortOption;
+            setSortBy(sortOption);
+            filterApplied('sort', sortOption, 'country');
+        },
+        [filterApplied],
+    );
+
+    const handleSelectPlan = useCallback(
+        (pkg: Package, index: number) => {
+            const item = createAnalyticsItem(pkg, index);
+            selectItem(item, `country_${country.iso_code}`, `${country.name} eSIM Packages`);
+        },
+        [createAnalyticsItem, selectItem, country.iso_code, country.name],
+    );
+
+    const handleViewNetworkCoverage = useCallback(
+        (pkg: Package) => {
+            const operatorsCount = pkg.networks?.length ?? 0;
+            viewNetworkCoverage(country.iso_code, String(pkg.id), operatorsCount);
+        },
+        [viewNetworkCoverage, country.iso_code],
+    );
 
     const sortedPackages = useMemo(() => {
         const sorted = [...packages];
@@ -416,9 +472,7 @@ export default function CountryPage({ country, packages }: Props) {
                                     </span>
                                     <Select
                                         value={sortBy}
-                                        onValueChange={(v) =>
-                                            setSortBy(v as SortOption)
-                                        }
+                                        onValueChange={handleSortChange}
                                     >
                                         <SelectTrigger className="h-8 w-[115px] border-primary-200 bg-white text-xs text-primary-900 focus:ring-primary-400 md:h-10 md:w-[160px] md:text-sm">
                                             <SelectValue />
@@ -463,7 +517,7 @@ export default function CountryPage({ country, packages }: Props) {
 
                             {/* Package Grid */}
                             <div className="grid gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-                                {sortedPackages.map((pkg) => (
+                                {sortedPackages.map((pkg, index) => (
                                     <div
                                         key={pkg.id}
                                         className={`group relative flex flex-col overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:rounded-2xl ${
@@ -609,6 +663,11 @@ export default function CountryPage({ country, packages }: Props) {
                                                         isFeatured={
                                                             pkg.is_featured
                                                         }
+                                                        onOpen={() =>
+                                                            handleViewNetworkCoverage(
+                                                                pkg,
+                                                            )
+                                                        }
                                                     />
                                                 )}
                                         </div>
@@ -621,6 +680,12 @@ export default function CountryPage({ country, packages }: Props) {
                                                 >
                                                     <Link
                                                         href={`/checkout/${pkg.id}`}
+                                                        onClick={() =>
+                                                            handleSelectPlan(
+                                                                pkg,
+                                                                index,
+                                                            )
+                                                        }
                                                     >
                                                         {trans(
                                                             'country_page.select_plan',
@@ -635,6 +700,12 @@ export default function CountryPage({ country, packages }: Props) {
                                                 >
                                                     <Link
                                                         href={`/checkout/${pkg.id}`}
+                                                        onClick={() =>
+                                                            handleSelectPlan(
+                                                                pkg,
+                                                                index,
+                                                            )
+                                                        }
                                                     >
                                                         {trans(
                                                             'country_page.select_plan',

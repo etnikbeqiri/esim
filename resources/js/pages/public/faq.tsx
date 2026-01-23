@@ -3,12 +3,29 @@ import { FAQSection, type FAQItem } from '@/components/faq-section';
 import { HeroSection } from '@/components/hero-section';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
+import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
+import { useCallback } from 'react';
 
 export default function FAQ() {
     const { name } = usePage<SharedData>().props;
     const { trans } = useTrans();
+    const { trackContentEngagement } = useAnalytics();
+
+    usePageViewTracking('faq', 'FAQ');
+
+    useScrollTracking('faq', 'faq-page', 'FAQ Page');
+
+    const handleFaqToggle = useCallback((
+        sectionId: string,
+        index: number,
+        question: string,
+        isOpen: boolean
+    ) => {
+        const faqId = `${sectionId}-${index}`;
+        trackContentEngagement('faq', faqId, isOpen ? 'expand' : 'collapse', { question });
+    }, [trackContentEngagement]);
 
     const generalFaqs: FAQItem[] = [
         {
@@ -160,12 +177,18 @@ export default function FAQ() {
                 subtitle={trans('faq_page.sections.general.subtitle')}
                 items={generalFaqs}
                 showBackground={false}
+                onItemToggle={(index, question, isOpen) =>
+                    handleFaqToggle('general', index, question, isOpen)
+                }
             />
 
             <FAQSection
                 title={trans('faq_page.sections.purchase.title')}
                 subtitle={trans('faq_page.sections.purchase.subtitle')}
                 items={purchaseFaqs}
+                onItemToggle={(index, question, isOpen) =>
+                    handleFaqToggle('purchase', index, question, isOpen)
+                }
             />
 
             <FAQSection
@@ -173,12 +196,18 @@ export default function FAQ() {
                 subtitle={trans('faq_page.sections.usage.subtitle')}
                 items={usageFaqs}
                 showBackground={false}
+                onItemToggle={(index, question, isOpen) =>
+                    handleFaqToggle('usage', index, question, isOpen)
+                }
             />
 
             <FAQSection
                 title={trans('faq_page.sections.troubleshooting.title')}
                 subtitle={trans('faq_page.sections.troubleshooting.subtitle')}
                 items={troubleshootingFaqs}
+                onItemToggle={(index, question, isOpen) =>
+                    handleFaqToggle('troubleshooting', index, question, isOpen)
+                }
             />
 
             <CTASection />

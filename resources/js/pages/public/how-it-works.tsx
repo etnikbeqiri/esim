@@ -4,9 +4,11 @@ import { HeroSection } from '@/components/hero-section';
 import { StepsSection } from '@/components/steps-section';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
+import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { CreditCard, QrCode, Search, Settings, Wifi } from 'lucide-react';
+import { useCallback, useEffect, useRef } from 'react';
 
 interface Props {
     totalCountries: number;
@@ -20,6 +22,57 @@ interface FAQItem {
 export default function HowItWorks({ totalCountries }: Props) {
     const { name } = usePage<SharedData>().props;
     const { trans } = useTrans();
+    const { contentView } = useAnalytics();
+    const viewedSteps = useRef<Set<string>>(new Set());
+
+    usePageViewTracking('how_it_works', 'How It Works');
+
+    useScrollTracking('guide', 'how_it_works', 'How It Works');
+
+    const trackInstallationStepView = useCallback(
+        (platform: 'iphone' | 'android') => {
+            if (!viewedSteps.current.has(platform)) {
+                viewedSteps.current.add(platform);
+                contentView('guide', `setup_${platform}`, `${platform === 'iphone' ? 'iPhone' : 'Android'} Setup Guide`);
+            }
+        },
+        [contentView],
+    );
+
+    const handleFAQToggle = useCallback(
+        (index: number, question: string, isOpen: boolean) => {
+            if (isOpen) {
+                contentView('faq', `hiw_faq_${index}`, question);
+            }
+        },
+        [contentView],
+    );
+
+    const handleCTAClick = useCallback(() => {
+        contentView('guide', 'hiw_cta_browse_plans', 'Browse Plans CTA');
+    }, [contentView]);
+
+    useEffect(() => {
+        const iphoneSection = document.getElementById('setup-iphone');
+        const androidSection = document.getElementById('setup-android');
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const platform = entry.target.id === 'setup-iphone' ? 'iphone' : 'android';
+                        trackInstallationStepView(platform as 'iphone' | 'android');
+                    }
+                });
+            },
+            { threshold: 0.5 },
+        );
+
+        if (iphoneSection) observer.observe(iphoneSection);
+        if (androidSection) observer.observe(androidSection);
+
+        return () => observer.disconnect();
+    }, [trackInstallationStepView]);
 
     const faqs: FAQItem[] = [
         {
@@ -148,7 +201,10 @@ export default function HowItWorks({ totalCountries }: Props) {
                     </div>
 
                     <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
-                        <div className="group overflow-hidden rounded-2xl border border-primary-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
+                        <div
+                            id="setup-iphone"
+                            className="group overflow-hidden rounded-2xl border border-primary-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                        >
                             <div className="mb-5 flex items-center gap-3">
                                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent-300 transition-colors group-hover:bg-accent-400">
                                     <Settings className="h-5 w-5 text-accent-950" />
@@ -179,7 +235,10 @@ export default function HowItWorks({ totalCountries }: Props) {
                             </ol>
                         </div>
 
-                        <div className="group overflow-hidden rounded-2xl border border-primary-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
+                        <div
+                            id="setup-android"
+                            className="group overflow-hidden rounded-2xl border border-primary-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                        >
                             <div className="mb-5 flex items-center gap-3">
                                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent-300 transition-colors group-hover:bg-accent-400">
                                     <Settings className="h-5 w-5 text-accent-950" />
@@ -219,9 +278,10 @@ export default function HowItWorks({ totalCountries }: Props) {
                 items={faqs}
                 viewAllLink="/faq"
                 viewAllText={trans('faq.view_all')}
+                onItemToggle={handleFAQToggle}
             />
 
-            <CTASection />
+            <CTASection onButtonClick={handleCTAClick} />
         </GuestLayout>
     );
 }

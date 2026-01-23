@@ -4,10 +4,11 @@ import { Card } from '@/components/ui/card';
 import { HeroSection } from '@/components/hero-section';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
+import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { Check, Smartphone, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface Brand {
     id: number;
@@ -171,6 +172,18 @@ export default function DevicesIndex({ brands, devices, userAgent, meta }: Props
     const [showDetectionAlert, setShowDetectionAlert] = useState(false);
     const [isCompatible, setIsCompatible] = useState<boolean | null>(null);
 
+    // Analytics hooks
+    const { search, filterApplied, deviceDetected, viewItemList, selectItem, createItem } = useAnalytics();
+    usePageViewTracking('devices', 'Compatible Devices');
+    useScrollTracking('guide', 'devices-page', 'Compatible Devices');
+
+    const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const lastTrackedSearch = useRef<string>('');
+
+    const handleDeviceCheck = useCallback((deviceName: string, brandName: string, isDeviceCompatible: boolean) => {
+        deviceDetected(brandName, deviceName, isDeviceCompatible, 'auto');
+    }, [deviceDetected]);
+
     // Detect user's device on mount
     useEffect(() => {
         const detected = detectUserDevice(userAgent, devices);
@@ -178,12 +191,14 @@ export default function DevicesIndex({ brands, devices, userAgent, meta }: Props
             setDetectedDevice(detected);
             setIsCompatible(true);
             setShowDetectionAlert(true);
+            handleDeviceCheck(detected.name, detected.brand?.name || 'Unknown', true);
         } else if (userAgent && (userAgent.toLowerCase().includes('mobile') || userAgent.toLowerCase().includes('android'))) {
             // Mobile device detected but not in our list
             setIsCompatible(false);
             setShowDetectionAlert(true);
+            handleDeviceCheck('Unknown', 'Unknown', false);
         }
-    }, [userAgent, devices]);
+    }, [userAgent, devices, handleDeviceCheck]);
 
     // Separate main brands and "other" brands
     const mainBrands = brands.filter((b) => MAIN_BRANDS.includes(b.name));
@@ -219,6 +234,62 @@ export default function DevicesIndex({ brands, devices, userAgent, meta }: Props
 
         return result;
     }, [devices, searchQuery, selectedBrand, otherBrands]);
+
+    useEffect(() => {
+        if (searchQuery.trim() && searchQuery !== lastTrackedSearch.current) {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+            searchTimeoutRef.current = setTimeout(() => {
+                search(searchQuery, 'device', filteredDevices.length);
+                lastTrackedSearch.current = searchQuery;
+            }, 500);
+        }
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+        };
+    }, [searchQuery, filteredDevices.length, search]);
+
+    const lastTrackedListRef = useRef<string>('');
+    useEffect(() => {
+        const listKey = `${selectedBrand}-${searchQuery}-${filteredDevices.length}`;
+        if (filteredDevices.length > 0 && listKey !== lastTrackedListRef.current) {
+            lastTrackedListRef.current = listKey;
+            const itemsToTrack = filteredDevices.slice(0, 20).map((device, index) =>
+                createItem({
+                    item_id: device.id.toString(),
+                    item_name: device.name,
+                    item_brand: device.brand?.name,
+                    item_category: 'Device',
+                    item_category2: device.esim_supported ? 'eSIM Compatible' : 'Not Compatible',
+                    index,
+                })
+            );
+            viewItemList(
+                `devices-${selectedBrand}`,
+                `Compatible Devices - ${selectedBrand === 'all' ? 'All Brands' : selectedBrand}`,
+                itemsToTrack
+            );
+        }
+    }, [filteredDevices, selectedBrand, searchQuery, viewItemList, createItem]);
+
+    const handleBrandSelect = useCallback((brand: string) => {
+        setSelectedBrand(brand);
+        filterApplied('brand', brand, 'devices');
+    }, [filterApplied]);
+
+    const handleDeviceClick = useCallback((device: Device) => {
+        const item = createItem({
+            item_id: device.id.toString(),
+            item_name: device.name,
+            item_brand: device.brand?.name,
+            item_category: 'Device',
+            item_category2: device.esim_supported ? 'eSIM Compatible' : 'Not Compatible',
+        });
+        selectItem(item, `devices-${selectedBrand}`, `Compatible Devices - ${selectedBrand === 'all' ? 'All Brands' : selectedBrand}`);
+    }, [createItem, selectItem, selectedBrand]);
 
     return (
         <GuestLayout>
@@ -283,7 +354,7 @@ export default function DevicesIndex({ brands, devices, userAgent, meta }: Props
                         <Button
                             variant={selectedBrand === 'all' ? 'default' : 'outline'}
                             size="sm"
-                            onClick={() => setSelectedBrand('all')}
+                            onClick={() => handleBrandSelect('all')}
                             className={selectedBrand === 'all' ? '' : 'border-primary-200 text-primary-700 hover:bg-primary-50'}
                         >
                             {trans('devices_page.all_brands')}
@@ -293,7 +364,7 @@ export default function DevicesIndex({ brands, devices, userAgent, meta }: Props
                                 key={brand.id}
                                 variant={selectedBrand === brand.name ? 'default' : 'outline'}
                                 size="sm"
-                                onClick={() => setSelectedBrand(brand.name)}
+                                onClick={() => handleBrandSelect(brand.name)}
                                 className={selectedBrand === brand.name ? '' : 'border-primary-200 text-primary-700 hover:bg-primary-50'}
                             >
                                 {brand.name}
@@ -303,7 +374,7 @@ export default function DevicesIndex({ brands, devices, userAgent, meta }: Props
                             <Button
                                 variant={selectedBrand === 'other' ? 'default' : 'outline'}
                                 size="sm"
-                                onClick={() => setSelectedBrand('other')}
+                                onClick={() => handleBrandSelect('other')}
                                 className={selectedBrand === 'other' ? '' : 'border-primary-200 text-primary-700 hover:bg-primary-50'}
                             >
                                 {trans('devices_page.other_brands')}
@@ -349,7 +420,8 @@ export default function DevicesIndex({ brands, devices, userAgent, meta }: Props
                                 {filteredDevices.map((device) => (
                                     <Card
                                         key={device.id}
-                                        className="p-4 bg-white border-primary-100 hover:border-primary-300 transition-colors"
+                                        className="p-4 bg-white border-primary-100 hover:border-primary-300 transition-colors cursor-pointer"
+                                        onClick={() => handleDeviceClick(device)}
                                     >
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="min-w-0 flex-1">

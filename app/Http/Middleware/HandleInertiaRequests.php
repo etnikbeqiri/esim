@@ -115,12 +115,15 @@ class HandleInertiaRequests extends Middleware
             ],
             'translations' => function () {
                 $locale = app()->getLocale();
-                // Load only the necessary files or all of them. 
-                // For a small app, all might be fine. For larger, split it.
-                // We return 'messages' file content merged at the root level so the frontend hook works as expected.
-                // If you need more files, use array_merge(trans('messages'), trans('auth'), ...);
                 return trans('messages');
             },
+            'analyticsConfig' => fn () => [
+                'enabled' => setting_enabled('analytics.enabled', false),
+                'measurementId' => setting('analytics.measurement_id', ''),
+                'firebaseApiKey' => setting('analytics.firebase_api_key', ''),
+                'firebaseProjectId' => setting('analytics.firebase_project_id', ''),
+                'firebaseAppId' => setting('analytics.firebase_app_id', ''),
+            ],
         ];
     }
 }

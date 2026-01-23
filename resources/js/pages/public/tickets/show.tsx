@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { useSse } from '@/hooks/use-sse';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
+import { useAnalytics, usePageViewTracking, useFormTracking } from '@/lib/analytics';
 import { Head, usePage } from '@inertiajs/react';
 import { ArrowLeft, Loader2, Wifi, WifiOff } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -54,11 +55,17 @@ interface SseUpdateData {
 export default function TicketShow() {
     const { trans } = useTrans();
     const { ticket: initialTicket, messages: initialMessages, customer_email } = usePage<{ props: TicketShowProps }>().props as unknown as TicketShowProps;
+    const { supportContact, contentView, filterApplied } = useAnalytics();
+
+    usePageViewTracking('ticket_detail', `Ticket #${initialTicket.reference}`);
+
+    const { trackFocus, trackComplete, trackSubmit, trackError } = useFormTracking('ticket_reply', 'Ticket Reply');
 
     // Local state for real-time updates
     const [messages, setMessages] = useState<MessageData[]>(initialMessages);
     const [ticket, setTicket] = useState<TicketData>(initialTicket);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const previousStatus = useRef<string>(initialTicket.status);
 
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
@@ -78,8 +85,11 @@ export default function TicketShow() {
             });
         }
 
-        // Update ticket status
         if (update.ticket) {
+            if (update.ticket.status !== previousStatus.current) {
+                filterApplied('sort', update.ticket.status, 'ticket_detail');
+                previousStatus.current = update.ticket.status;
+            }
             setTicket(prev => ({
                 ...prev,
                 status: update.ticket.status,
@@ -88,7 +98,7 @@ export default function TicketShow() {
                 can_add_message: update.ticket.can_add_message,
             }));
         }
-    }, []);
+    }, [filterApplied]);
 
     // SSE connection URL
     const streamUrl = useMemo(
@@ -244,6 +254,10 @@ export default function TicketShow() {
                                     ticketUuid={ticket.uuid}
                                     email={customer_email}
                                     replyRoute={replyRoute}
+                                    onTrackFocus={trackFocus}
+                                    onTrackComplete={trackComplete}
+                                    onTrackSubmit={trackSubmit}
+                                    onTrackError={trackError}
                                 />
                             </div>
                         )}

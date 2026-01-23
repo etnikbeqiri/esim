@@ -7,6 +7,7 @@ interface HelpCardProps {
     description: string;
     icon: LucideIcon;
     href: string;
+    onClick?: () => void;
 }
 
 export function HelpCard({
@@ -14,9 +15,10 @@ export function HelpCard({
     description,
     icon: Icon,
     href,
+    onClick,
 }: HelpCardProps) {
     return (
-        <Link href={href}>
+        <Link href={href} onClick={onClick}>
             <Card className="group h-full cursor-pointer transition-all hover:border-primary/50 hover:shadow-md">
                 <CardContent className="p-6">
                     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">

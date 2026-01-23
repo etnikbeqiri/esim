@@ -4,6 +4,7 @@ import { HelpCard } from '@/components/help-card';
 import { HeroSection } from '@/components/hero-section';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
+import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
 import { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -16,10 +17,29 @@ import {
     Smartphone,
     Wifi,
 } from 'lucide-react';
+import { useCallback } from 'react';
 
 export default function Help() {
     const { name, contact } = usePage<SharedData>().props;
     const { trans } = useTrans();
+    const { supportContact, contentView, filterApplied } = useAnalytics();
+
+    usePageViewTracking('help', 'Help Center');
+
+    useScrollTracking('help', 'help-page', 'Help Center');
+
+    const handleContactClick = useCallback((method: 'email' | 'phone' | 'whatsapp' | 'ticket') => {
+        supportContact(method, 'help');
+    }, [supportContact]);
+
+    const handleCategoryClick = useCallback((categoryId: string, categoryTitle: string) => {
+        filterApplied('region', categoryId, 'help');
+        contentView('help', categoryId, categoryTitle);
+    }, [filterApplied, contentView]);
+
+    const handleFaqLinkClick = useCallback(() => {
+        contentView('faq', 'view-all-faqs', 'View All FAQs');
+    }, [contentView]);
 
     const quickFaqs: FAQItem[] = [
         {
@@ -82,6 +102,7 @@ export default function Help() {
                             )}
                             icon={BookOpen}
                             href="/how-it-works"
+                            onClick={() => handleCategoryClick('getting-started', 'Getting Started')}
                         />
                         <HelpCard
                             title={trans(
@@ -92,6 +113,7 @@ export default function Help() {
                             )}
                             icon={QrCode}
                             href="/how-it-works"
+                            onClick={() => handleCategoryClick('installation', 'Installation Guide')}
                         />
                         <HelpCard
                             title={trans(
@@ -102,6 +124,7 @@ export default function Help() {
                             )}
                             icon={Smartphone}
                             href="/how-it-works"
+                            onClick={() => handleCategoryClick('compatibility', 'Device Compatibility')}
                         />
                         <HelpCard
                             title={trans(
@@ -112,6 +135,7 @@ export default function Help() {
                             )}
                             icon={Settings}
                             href="/faq"
+                            onClick={() => handleCategoryClick('troubleshooting', 'Troubleshooting')}
                         />
                         <HelpCard
                             title={trans('help_page.categories.faqs.title')}
@@ -120,6 +144,7 @@ export default function Help() {
                             )}
                             icon={HelpCircle}
                             href="/faq"
+                            onClick={() => handleCategoryClick('faqs', 'FAQs')}
                         />
                         <HelpCard
                             title={trans('help_page.categories.coverage.title')}
@@ -128,6 +153,7 @@ export default function Help() {
                             )}
                             icon={Wifi}
                             href="/destinations"
+                            onClick={() => handleCategoryClick('coverage', 'Network Coverage')}
                         />
                     </div>
                 </div>
@@ -153,6 +179,7 @@ export default function Help() {
                         {/* Email Support Card */}
                         <a
                             href={`mailto:${contact.supportEmail}`}
+                            onClick={() => handleContactClick('email')}
                             className="group flex items-center gap-3 rounded-xl border border-primary-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:rounded-2xl md:p-6"
                         >
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-300 transition-colors group-hover:bg-accent-400 md:h-12 md:w-12 md:rounded-xl">
@@ -174,6 +201,7 @@ export default function Help() {
                         {/* FAQ Card */}
                         <Link
                             href="/faq"
+                            onClick={handleFaqLinkClick}
                             className="group flex items-center gap-3 rounded-xl border border-primary-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:rounded-2xl md:p-6"
                         >
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100 transition-colors group-hover:bg-primary-200 md:h-12 md:w-12 md:rounded-xl">

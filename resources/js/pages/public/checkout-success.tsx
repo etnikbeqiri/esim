@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
 import { useTrans } from '@/hooks/use-trans';
+import { useAnalytics, usePageViewTracking } from '@/lib/analytics';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link, router } from '@inertiajs/react';
 import {
@@ -14,7 +15,7 @@ import {
     Loader2,
     XCircle,
 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 interface Order {
     uuid: string;
@@ -36,6 +37,16 @@ interface Order {
         activation_code: string | null;
     } | null;
     customer_email: string;
+    analytics: {
+        transaction_id: string;
+        value: number;
+        currency: string;
+        item: {
+            id: string;
+            name: string | null;
+            category: string | null;
+        };
+    };
 }
 
 interface Props {
@@ -44,6 +55,9 @@ interface Props {
 
 export default function CheckoutSuccess({ order }: Props) {
     const { trans } = useTrans();
+    const { purchase, createItem, installationStep, contentShare } = useAnalytics();
+    const purchaseTracked = useRef(false);
+    const installationStepsViewed = useRef<Set<number>>(new Set());
 
     const isProcessing = [
         'processing',
@@ -54,6 +68,52 @@ export default function CheckoutSuccess({ order }: Props) {
     const isAwaitingPayment = order.status === 'awaiting_payment';
     const isCompleted = order.status === 'completed';
     const isFailed = order.status === 'failed';
+
+    usePageViewTracking('checkout_success', 'Purchase Complete', {
+        order_id: order.uuid,
+        order_status: order.status,
+    });
+
+    useEffect(() => {
+        if (order?.analytics && !purchaseTracked.current) {
+            purchaseTracked.current = true;
+            const { analytics } = order;
+            const item = createItem({
+                id: analytics.item.id,
+                name: analytics.item.name || 'eSIM Package',
+                category: analytics.item.category || 'eSIM',
+                price: analytics.value,
+                currency: analytics.currency,
+            });
+            purchase(analytics.transaction_id, analytics.currency, analytics.value, [item]);
+        }
+    }, [order, purchase, createItem]);
+
+    const trackInstallationStep = useCallback(
+        (step: 1 | 2 | 3 | 4, stepName: string) => {
+            if (!installationStepsViewed.current.has(step)) {
+                installationStepsViewed.current.add(step);
+                installationStep(step, stepName, order.uuid);
+            }
+        },
+        [installationStep, order.uuid]
+    );
+
+    useEffect(() => {
+        if (isCompleted && order.esim) {
+            trackInstallationStep(1, 'View QR Code');
+        }
+    }, [isCompleted, order.esim, trackInstallationStep]);
+
+    const handleCopyTracking = useCallback(
+        (field: string) => {
+            contentShare('esim_activation', order.uuid, `Copy ${field}`, 'copy');
+            if (field === 'smdp_address' || field === 'activation_code') {
+                trackInstallationStep(2, 'Copy Activation Details');
+            }
+        },
+        [contentShare, order.uuid, trackInstallationStep]
+    );
 
     // Poll for updates while processing
     useEffect(() => {
@@ -203,6 +263,7 @@ export default function CheckoutSuccess({ order }: Props) {
                                     description={trans(
                                         'checkout_success_page.esim.description',
                                     )}
+                                    onCopy={handleCopyTracking}
                                 />
 
                                 {/* Installation Instructions */}

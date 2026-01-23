@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { GoldButton } from '@/components/ui/gold-button';
 import { useTrans } from '@/hooks/use-trans';
+import { useAnalytics } from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ArrowRight, CheckCircle2, Globe } from 'lucide-react';
@@ -10,6 +11,7 @@ interface CTASectionProps {
     description?: string;
     buttonText?: string;
     buttonHref?: string;
+    onButtonClick?: () => void;
 }
 
 export function CTASection({
@@ -17,9 +19,12 @@ export function CTASection({
     description,
     buttonText,
     buttonHref = '/destinations',
+    onButtonClick,
 }: CTASectionProps) {
     const { totalCountries, totalPackages } = usePage<SharedData>().props;
     const { trans } = useTrans();
+
+    const { contentView } = useAnalytics();
 
     const displayTitle = title || trans('cta.title');
     const displayButtonText = buttonText || trans('cta.button');
@@ -29,6 +34,11 @@ export function CTASection({
             packages: String(totalPackages || 50),
             countries: String(totalCountries || 4),
         });
+
+    const handleCtaClick = () => {
+        contentView('guide', 'cta_section', displayTitle);
+        onButtonClick?.();
+    };
 
     return (
         <section className="relative overflow-hidden py-20 md:py-28">
@@ -64,6 +74,7 @@ export function CTASection({
                         size="lg"
                         asChild
                         className="h-14 min-w-[220px] px-8 text-base"
+                        onClick={handleCtaClick}
                     >
                         <Link href={buttonHref}>
                             {displayButtonText}

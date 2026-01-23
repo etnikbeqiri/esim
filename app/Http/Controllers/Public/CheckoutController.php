@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Package;
 use App\Services\CheckoutService;
+use App\Services\CurrencyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -213,6 +214,16 @@ class CheckoutController extends Controller
                 'activation_code' => $order->esimProfile->activation_code,
             ] : null,
             'customer_email' => $order->customer_email,
+            'analytics' => [
+                'transaction_id' => (string) $order->id,
+                'value' => (float) $order->amount,
+                'currency' => app(CurrencyService::class)->getDefaultCurrency()->code,
+                'item' => [
+                    'id' => (string) $order->package_id,
+                    'name' => $order->package?->name,
+                    'category' => $order->package?->country?->name,
+                ],
+            ],
         ];
 
         if ($includeStatus) {

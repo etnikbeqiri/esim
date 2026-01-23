@@ -3,10 +3,12 @@ import { HeroSection } from '@/components/hero-section';
 import { StepsSection } from '@/components/steps-section';
 import { TrustSection } from '@/components/trust-section';
 import { useTrans } from '@/hooks/use-trans';
+import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
 import GuestLayout from '@/layouts/guest-layout';
 import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { QrCode, Search, Smartphone } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
 interface Country {
     id: number;
@@ -29,6 +31,29 @@ export default function Welcome({
 }: Props) {
     const { name } = usePage<SharedData>().props;
     const { trans } = useTrans();
+    const { viewItemList, createItem } = useAnalytics();
+    const itemListTracked = useRef(false);
+
+    usePageViewTracking('home', 'Home');
+
+    useScrollTracking('guide', 'home', 'Home Page');
+
+    useEffect(() => {
+        if (featuredCountries.length > 0 && !itemListTracked.current) {
+            itemListTracked.current = true;
+            const featuredItems = featuredCountries.map((country, index) =>
+                createItem({
+                    id: `country-${country.id}`,
+                    name: country.name,
+                    category: 'Destination',
+                    category2: country.iso_code,
+                    price: country.min_price ?? undefined,
+                    index,
+                })
+            );
+            viewItemList('featured_destinations', 'Featured Destinations', featuredItems);
+        }
+    }, [featuredCountries, createItem, viewItemList]);
 
     return (
         <GuestLayout>

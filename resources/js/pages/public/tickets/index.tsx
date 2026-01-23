@@ -13,8 +13,10 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
+import { useAnalytics, usePageViewTracking, useFormTracking } from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useCallback, useEffect } from 'react';
 import {
     CheckCircle,
     ChevronRight,
@@ -55,6 +57,43 @@ interface TicketsPageProps extends SharedData {
 export default function TicketsIndex() {
     const { name, contact, flash, prefill, userTickets } = usePage<TicketsPageProps>().props;
     const { trans } = useTrans();
+    const { viewItemList, selectItem, supportContact, filterApplied, createItem } = useAnalytics();
+
+    usePageViewTracking('tickets', 'Support Tickets');
+
+    const { trackFocus, trackComplete, trackSubmit, trackError } = useFormTracking('create_ticket', 'Create Ticket');
+
+    useEffect(() => {
+        if (userTickets && userTickets.length > 0) {
+            const items = userTickets.map((ticket, index) => createItem({
+                item_id: ticket.uuid,
+                item_name: ticket.subject,
+                item_category: 'support_ticket',
+                item_category2: ticket.status,
+                index,
+            }));
+            viewItemList('user_tickets', 'User Support Tickets', items);
+        }
+    }, [userTickets, viewItemList, createItem]);
+
+    const handleTicketClick = useCallback((ticket: UserTicket, index: number) => {
+        const item = createItem({
+            item_id: ticket.uuid,
+            item_name: ticket.subject,
+            item_category: 'support_ticket',
+            item_category2: ticket.status,
+            index,
+        });
+        selectItem(item, 'user_tickets', 'User Support Tickets');
+    }, [selectItem, createItem]);
+
+    const handlePriorityChange = useCallback((priority: string) => {
+        filterApplied('sort', priority, 'tickets');
+    }, [filterApplied]);
+
+    const handleSupportContactClick = useCallback((method: 'email' | 'phone' | 'whatsapp') => {
+        supportContact(method, 'tickets');
+    }, [supportContact]);
 
     // Ticket creation form - prefill with logged in user data
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -73,9 +112,18 @@ export default function TicketsIndex() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        trackSubmit();
+        supportContact('ticket', 'tickets', {
+            ticket_priority: data.priority as 'low' | 'medium' | 'high' | 'urgent',
+            ticket_subject: data.subject,
+        });
         post('/tickets', {
             onSuccess: () => {
                 reset();
+            },
+            onError: (errors) => {
+                const errorMessages = Object.values(errors).join(', ');
+                trackError(errorMessages);
             },
         });
     };
@@ -160,11 +208,12 @@ export default function TicketsIndex() {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    {userTickets.map((ticket) => (
+                                    {userTickets.map((ticket, index) => (
                                         <Link
                                             key={ticket.uuid}
                                             href={`/tickets/${ticket.uuid}/${prefill?.email}`}
                                             className="flex items-center justify-between rounded-xl border border-primary-100 bg-primary-50/50 p-4 transition-all hover:border-primary-200 hover:bg-primary-50"
+                                            onClick={() => handleTicketClick(ticket, index)}
                                         >
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex items-center gap-2">
@@ -298,6 +347,8 @@ export default function TicketsIndex() {
                                             id="name"
                                             value={data.name}
                                             onChange={(e) => setData('name', e.target.value)}
+                                            onFocus={() => trackFocus('name')}
+                                            onBlur={() => data.name && trackComplete('name')}
                                             placeholder={trans('ticket.field_name_placeholder')}
                                             className={errors.name ? 'border-red-500' : ''}
                                             required
@@ -316,6 +367,8 @@ export default function TicketsIndex() {
                                             type="email"
                                             value={data.email}
                                             onChange={(e) => setData('email', e.target.value)}
+                                            onFocus={() => trackFocus('email')}
+                                            onBlur={() => data.email && trackComplete('email')}
                                             placeholder={trans('ticket.field_email_placeholder')}
                                             className={errors.email ? 'border-red-500' : ''}
                                             required
@@ -336,6 +389,8 @@ export default function TicketsIndex() {
                                             id="subject"
                                             value={data.subject}
                                             onChange={(e) => setData('subject', e.target.value)}
+                                            onFocus={() => trackFocus('subject')}
+                                            onBlur={() => data.subject && trackComplete('subject')}
                                             placeholder={trans('ticket.field_subject_placeholder')}
                                             className={errors.subject ? 'border-red-500' : ''}
                                             required
@@ -351,7 +406,11 @@ export default function TicketsIndex() {
                                         </Label>
                                         <Select
                                             value={data.priority}
-                                            onValueChange={(value) => setData('priority', value)}
+                                            onValueChange={(value) => {
+                                                setData('priority', value);
+                                                handlePriorityChange(value);
+                                                trackComplete('priority');
+                                            }}
                                         >
                                             <SelectTrigger id="priority">
                                                 <SelectValue />
@@ -384,6 +443,8 @@ export default function TicketsIndex() {
                                         rows={6}
                                         value={data.message}
                                         onChange={(e) => setData('message', e.target.value)}
+                                        onFocus={() => trackFocus('message')}
+                                        onBlur={() => data.message && trackComplete('message')}
                                         placeholder={trans('ticket.field_message_placeholder')}
                                         className={errors.message ? 'border-red-500' : ''}
                                         required
@@ -441,6 +502,7 @@ export default function TicketsIndex() {
                         <a
                             href={`mailto:${contact?.supportEmail || ''}`}
                             className="group flex items-center gap-3 rounded-xl border border-primary-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:flex-col md:rounded-2xl md:p-6 md:text-center"
+                            onClick={() => handleSupportContactClick('email')}
                         >
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-300 transition-colors group-hover:bg-accent-400 md:mb-4 md:h-12 md:w-12 md:rounded-xl">
                                 <Mail className="h-5 w-5 text-accent-950 md:h-6 md:w-6" />
@@ -463,6 +525,7 @@ export default function TicketsIndex() {
                             <a
                                 href={`tel:${contact.phone}`}
                                 className="group flex items-center gap-3 rounded-xl border border-primary-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:flex-col md:rounded-2xl md:p-6 md:text-center"
+                                onClick={() => handleSupportContactClick('phone')}
                             >
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100 transition-colors group-hover:bg-primary-200 md:mb-4 md:h-12 md:w-12 md:rounded-xl">
                                     <Phone className="h-5 w-5 text-primary-600 md:h-6 md:w-6" />
@@ -488,6 +551,7 @@ export default function TicketsIndex() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="group flex items-center gap-3 rounded-xl border border-primary-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:flex-col md:rounded-2xl md:p-6 md:text-center"
+                                onClick={() => handleSupportContactClick('whatsapp')}
                             >
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-100 transition-colors group-hover:bg-green-200 md:mb-4 md:h-12 md:w-12 md:rounded-xl">
                                     <MessageSquare className="h-5 w-5 text-green-600 md:h-6 md:w-6" />

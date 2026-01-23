@@ -8,6 +8,8 @@ import { GoldButton } from '@/components/ui/gold-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTrans } from '@/hooks/use-trans';
+import { useAnalytics, useFormTracking } from '@/lib/analytics';
+import type { PaymentMethod } from '@/lib/analytics';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -25,7 +27,7 @@ import {
     User,
     Zap,
 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface Package {
     id: number;
@@ -81,6 +83,29 @@ export default function Checkout({
         payment_provider: defaultProvider,
     });
 
+    const { beginCheckout, addPaymentInfo, createItem, trackError, pageView } = useAnalytics();
+    const { trackFocus, trackComplete, trackSubmit, trackError: trackFormError } = useFormTracking('checkout', 'Checkout Form');
+    const analyticsTracked = useRef(false);
+
+    const packageItem = createItem({
+        id: String(pkg.id),
+        name: pkg.name,
+        category: pkg.country?.name ?? 'Global',
+        price: Number(pkg.retail_price),
+        currency: 'EUR',
+    });
+
+    useEffect(() => {
+        if (!analyticsTracked.current) {
+            analyticsTracked.current = true;
+            pageView('checkout', `Checkout - ${pkg.name}`, {
+                package_id: String(pkg.id),
+                country_code: pkg.country?.iso_code ?? '',
+            });
+            beginCheckout('EUR', Number(pkg.retail_price), [packageItem]);
+        }
+    }, []);
+
     useEffect(() => {
         if (prefill) {
             if (prefill.email && !data.email) setData('email', prefill.email);
@@ -91,9 +116,21 @@ export default function Checkout({
 
     const { auth } = usePage().props as any;
 
+    function handlePaymentProviderChange(value: string) {
+        setData('payment_provider', value);
+        addPaymentInfo('EUR', Number(pkg.retail_price), value as PaymentMethod, [packageItem]);
+    }
+
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        post(`/checkout/${pkg.id}`);
+        trackSubmit();
+        post(`/checkout/${pkg.id}`, {
+            onError: (errors) => {
+                const errorMessages = Object.values(errors).flat().join(', ');
+                trackFormError(errorMessages);
+                trackError('form', errorMessages, 'checkout');
+            },
+        });
     }
 
     return (
@@ -217,6 +254,8 @@ export default function Checkout({
                                                             e.target.value,
                                                         )
                                                     }
+                                                    onFocus={() => trackFocus('email')}
+                                                    onBlur={() => data.email && trackComplete('email')}
                                                     required
                                                 />
                                             </div>
@@ -261,6 +300,8 @@ export default function Checkout({
                                                             e.target.value,
                                                         )
                                                     }
+                                                    onFocus={() => trackFocus('name')}
+                                                    onBlur={() => data.name && trackComplete('name')}
                                                     required
                                                 />
                                             </div>
@@ -302,6 +343,8 @@ export default function Checkout({
                                                             e.target.value,
                                                         )
                                                     }
+                                                    onFocus={() => trackFocus('phone')}
+                                                    onBlur={() => data.phone && trackComplete('phone')}
                                                 />
                                             </div>
                                             {errors.phone && (
@@ -339,12 +382,7 @@ export default function Checkout({
                                         <PaymentProviderSelect
                                             providers={paymentProviders}
                                             value={data.payment_provider}
-                                            onChange={(value) =>
-                                                setData(
-                                                    'payment_provider',
-                                                    value,
-                                                )
-                                            }
+                                            onChange={handlePaymentProviderChange}
                                         />
                                     </div>
                                 </div>

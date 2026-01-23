@@ -2,6 +2,7 @@ import { CountryFlag } from '@/components/country-flag';
 import { Badge } from '@/components/ui/badge';
 import { GoldButton } from '@/components/ui/gold-button';
 import { useTrans } from '@/hooks/use-trans';
+import { useAnalytics } from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { router, usePage } from '@inertiajs/react';
 import {
@@ -52,6 +53,7 @@ export function HeroSection({
 }: HeroSectionProps) {
     const { name } = usePage<SharedData>().props;
     const { trans } = useTrans();
+    const { search: trackSearch, selectItem, createItem } = useAnalytics();
 
     // Use provided badge or fall back to translation
     const displayBadge = badge || trans('hero.badge');
@@ -97,14 +99,18 @@ export function HeroSection({
             setSearchResults(data);
             setShowDropdown(true);
             setHasSearched(true);
+
+            trackSearch(query, 'destination', data.length);
         } catch (error) {
             console.error('Search error:', error);
             setSearchResults([]);
             setHasSearched(true);
+
+            trackSearch(query, 'destination', 0);
         } finally {
             setIsSearching(false);
         }
-    }, []);
+    }, [trackSearch]);
 
     // Handle input change with debounce (only search API when not in controlled mode)
     const handleInputChange = useCallback(
@@ -165,10 +171,20 @@ export function HeroSection({
         }
     }
 
-    function handleSelectDestination(isoCode: string) {
+    function handleSelectDestination(result: SearchResult) {
         setShowDropdown(false);
         setSearchQuery('');
-        router.visit(`/destinations/${isoCode.toLowerCase()}`);
+
+        const item = createItem({
+            id: `country-${result.id}`,
+            name: result.name,
+            category: 'Destination',
+            category2: result.iso_code,
+            price: result.min_price ?? undefined,
+        });
+        selectItem(item, 'hero_search', 'Hero Search Results');
+
+        router.visit(`/destinations/${result.iso_code.toLowerCase()}`);
     }
 
     return (
@@ -302,7 +318,7 @@ export function HeroSection({
                                                         type="button"
                                                         onClick={() =>
                                                             handleSelectDestination(
-                                                                result.iso_code,
+                                                                result,
                                                             )
                                                         }
                                                         className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors hover:bg-accent-50 md:gap-3 md:rounded-xl md:px-3 md:py-2.5"

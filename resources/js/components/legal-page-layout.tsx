@@ -1,6 +1,6 @@
 import { type SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 
 interface LegalPageLayoutProps {
     title: string;
@@ -39,11 +39,36 @@ export function LegalPageLayout({
 interface SectionProps {
     title: string;
     children: ReactNode;
+    onVisible?: () => void;
 }
 
-export function LegalSection({ title, children }: SectionProps) {
+export function LegalSection({ title, children, onVisible }: SectionProps) {
+    const sectionRef = useRef<HTMLElement>(null);
+    const hasTracked = useRef(false);
+
+    useEffect(() => {
+        if (!onVisible || hasTracked.current || !sectionRef.current) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting && !hasTracked.current) {
+                        hasTracked.current = true;
+                        onVisible();
+                        observer.disconnect();
+                    }
+                });
+            },
+            { threshold: 0.5 }
+        );
+
+        observer.observe(sectionRef.current);
+
+        return () => observer.disconnect();
+    }, [onVisible]);
+
     return (
-        <section className="mb-8">
+        <section ref={sectionRef} className="mb-8">
             <h2 className="mb-4 text-xl font-semibold">{title}</h2>
             <div className="space-y-4 text-muted-foreground">{children}</div>
         </section>

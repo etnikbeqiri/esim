@@ -10,6 +10,11 @@ interface TicketReplyFormProps {
     email?: string;
     replyRoute: string;
     isInternal?: boolean;
+    onTrackFocus?: (fieldName: string) => void;
+    onTrackComplete?: (fieldName: string) => void;
+    onTrackSubmit?: () => void;
+    onTrackError?: (errorMessage: string) => void;
+    onTrackFileUpload?: (fileName: string, fileSize: number) => void;
 }
 
 export function TicketReplyForm({
@@ -17,6 +22,11 @@ export function TicketReplyForm({
     email,
     replyRoute,
     isInternal = false,
+    onTrackFocus,
+    onTrackComplete,
+    onTrackSubmit,
+    onTrackError,
+    onTrackFileUpload,
 }: TicketReplyFormProps) {
     const { trans } = useTrans();
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -26,9 +36,14 @@ export function TicketReplyForm({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        onTrackSubmit?.();
         post(replyRoute, {
             onSuccess: () => {
                 reset('message');
+            },
+            onError: (errors) => {
+                const errorMessages = Object.values(errors).join(', ');
+                onTrackError?.(errorMessages);
             },
         });
     };
@@ -40,6 +55,8 @@ export function TicketReplyForm({
                     rows={4}
                     value={data.message}
                     onChange={(e) => setData('message', e.target.value)}
+                    onFocus={() => onTrackFocus?.('message')}
+                    onBlur={() => data.message && onTrackComplete?.('message')}
                     placeholder={
                         isInternal
                             ? trans('ticket.messages.internal_placeholder')

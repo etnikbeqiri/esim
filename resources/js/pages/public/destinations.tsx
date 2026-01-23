@@ -3,10 +3,11 @@ import { HeroSection } from '@/components/hero-section';
 import { GoldButton } from '@/components/ui/gold-button';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
+import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { MapPin } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface Country {
     id: number;
@@ -32,6 +33,14 @@ export default function Destinations({ countries, regions, filters }: Props) {
     const [searchQuery, setSearchQuery] = useState(filters.search || '');
     const [activeRegion, setActiveRegion] = useState<string>('all');
 
+    // Analytics hooks
+    const { viewItemList, selectItem, search: trackSearch, filterApplied, createItem } = useAnalytics();
+    usePageViewTracking('destinations', 'Destinations');
+    useScrollTracking('guide', 'destinations-page', 'Destinations');
+
+    const hasTrackedInitialList = useRef(false);
+    const lastTrackedListKey = useRef<string>('');
+
     // Filter countries locally for instant feedback
     const filteredCountries = useMemo(() => {
         let result = countries;
@@ -53,6 +62,72 @@ export default function Destinations({ countries, regions, filters }: Props) {
 
         return result;
     }, [countries, searchQuery, activeRegion]);
+
+    useEffect(() => {
+        const listKey = `${activeRegion}-${searchQuery}-${filteredCountries.length}`;
+
+        if (!hasTrackedInitialList.current || lastTrackedListKey.current !== listKey) {
+            hasTrackedInitialList.current = true;
+            lastTrackedListKey.current = listKey;
+
+            if (filteredCountries.length > 0) {
+                const items = filteredCountries.slice(0, 20).map((country, index) =>
+                    createItem({
+                        id: `country-${country.id}`,
+                        name: country.name,
+                        category: 'destination',
+                        category2: country.region || undefined,
+                        price: country.min_price || undefined,
+                        index,
+                    })
+                );
+
+                const listId = activeRegion !== 'all' ? `destinations-${activeRegion}` : 'destinations-all';
+                const listName = activeRegion !== 'all' ? `Destinations - ${activeRegion}` : 'All Destinations';
+
+                viewItemList(listId, listName, items);
+            }
+        }
+    }, [filteredCountries, activeRegion, searchQuery, viewItemList, createItem]);
+
+    const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const lastTrackedSearch = useRef<string>('');
+
+    const handleSearchChange = useCallback((value: string) => {
+        setSearchQuery(value);
+
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+
+        if (value.trim() && value !== lastTrackedSearch.current) {
+            searchTimeoutRef.current = setTimeout(() => {
+                lastTrackedSearch.current = value;
+                trackSearch(value, 'destination', filteredCountries.length);
+            }, 500);
+        }
+    }, [trackSearch, filteredCountries.length]);
+
+    const handleRegionChange = useCallback((region: string) => {
+        setActiveRegion(region);
+        filterApplied('region', region, 'destinations');
+    }, [filterApplied]);
+
+    const handleDestinationClick = useCallback((country: Country, index: number) => {
+        const item = createItem({
+            id: `country-${country.id}`,
+            name: country.name,
+            category: 'destination',
+            category2: country.region || undefined,
+            price: country.min_price || undefined,
+            index,
+        });
+
+        const listId = activeRegion !== 'all' ? `destinations-${activeRegion}` : 'destinations-all';
+        const listName = activeRegion !== 'all' ? `Destinations - ${activeRegion}` : 'All Destinations';
+
+        selectItem(item, listId, listName);
+    }, [activeRegion, createItem, selectItem]);
 
     function clearFilters() {
         setSearchQuery('');
@@ -81,7 +156,7 @@ export default function Destinations({ countries, regions, filters }: Props) {
                 showStats={false}
                 totalCountries={countries.length}
                 searchValue={searchQuery}
-                onSearchChange={setSearchQuery}
+                onSearchChange={handleSearchChange}
                 searchPlaceholder={trans(
                     'destinations.hero.search_placeholder',
                 )}
@@ -94,13 +169,13 @@ export default function Destinations({ countries, regions, filters }: Props) {
                         {activeRegion === 'all' ? (
                             <GoldButton
                                 size="sm"
-                                onClick={() => setActiveRegion('all')}
+                                onClick={() => handleRegionChange('all')}
                             >
                                 {trans('destinations.tabs.all_regions')}
                             </GoldButton>
                         ) : (
                             <button
-                                onClick={() => setActiveRegion('all')}
+                                onClick={() => handleRegionChange('all')}
                                 className="shrink-0 rounded-full border border-transparent bg-primary-50 px-4 py-2 text-xs font-bold text-primary-600 transition-colors duration-200 hover:bg-primary-100"
                             >
                                 {trans('destinations.tabs.all_regions')}
@@ -111,7 +186,7 @@ export default function Destinations({ countries, regions, filters }: Props) {
                                 <GoldButton
                                     key={region}
                                     size="sm"
-                                    onClick={() => setActiveRegion(region)}
+                                    onClick={() => handleRegionChange(region)}
                                 >
                                     {trans(
                                         `destinations.tabs.${region.toLowerCase().replace(' ', '_')}` as any,
@@ -120,7 +195,7 @@ export default function Destinations({ countries, regions, filters }: Props) {
                             ) : (
                                 <button
                                     key={region}
-                                    onClick={() => setActiveRegion(region)}
+                                    onClick={() => handleRegionChange(region)}
                                     className="shrink-0 rounded-full border border-transparent bg-primary-50 px-4 py-2 text-xs font-bold text-primary-600 transition-colors duration-200 hover:bg-primary-100"
                                 >
                                     {trans(
@@ -170,7 +245,7 @@ export default function Destinations({ countries, regions, filters }: Props) {
                             </div>
 
                             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                {filteredCountries.map((country) => (
+                                {filteredCountries.map((country, index) => (
                                     <DestinationCard
                                         key={country.id}
                                         id={country.id}
@@ -178,6 +253,7 @@ export default function Destinations({ countries, regions, filters }: Props) {
                                         iso_code={country.iso_code}
                                         package_count={country.package_count}
                                         min_price={country.min_price}
+                                        onClick={() => handleDestinationClick(country, index)}
                                     />
                                 ))}
                             </div>

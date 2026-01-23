@@ -9,6 +9,7 @@ interface DestinationCardProps {
     iso_code: string;
     package_count: number;
     min_price: number | null;
+    onClick?: () => void;
 }
 
 export function DestinationCard({
@@ -16,11 +17,12 @@ export function DestinationCard({
     iso_code,
     package_count,
     min_price,
+    onClick,
 }: DestinationCardProps) {
     const { trans } = useTrans();
 
     return (
-        <Link href={`/destinations/${iso_code.toLowerCase()}`}>
+        <Link href={`/destinations/${iso_code.toLowerCase()}`} onClick={onClick}>
             <div className="group relative h-full cursor-pointer overflow-hidden rounded-2xl border border-primary-100 bg-white p-5 shadow-sm transition-all duration-300 before:absolute before:inset-0 before:left-[-100%] before:bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.4)_50%,transparent_100%)] before:transition-none hover:-translate-y-1 hover:border-accent-400 hover:shadow-[0px_4px_20px_rgba(212,175,55,0.35)] hover:before:animate-[btn-shimmer_1.5s_ease-in-out_infinite]">
                 {/* Flag & Country Name */}
                 <div className="relative z-10 mb-4 flex items-center gap-3">
