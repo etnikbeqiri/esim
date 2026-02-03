@@ -49,7 +49,6 @@ export function FeaturedPackagesSection({
             setCanScrollLeft(currentScroll > 10);
             setCanScrollRight(currentScroll < maxScroll - 10);
 
-            // Calculate active index based on scroll position
             const cardWidth = window.innerWidth < 768 ? 280 : 320;
             const gap = window.innerWidth < 768 ? 16 : 24;
             const itemWidth = cardWidth + gap;
@@ -58,15 +57,12 @@ export function FeaturedPackagesSection({
         }
     };
 
-    // Scroll to center card on load
     useEffect(() => {
         const container = scrollContainerRef.current;
         if (container && packages.length > 0) {
-            // Calculate middle card index
             const middleIndex = Math.floor(packages.length / 2);
             setActiveIndex(middleIndex);
 
-            // Calculate scroll position to center the middle card
             const cardWidth = window.innerWidth < 768 ? 280 : 320;
             const gap = window.innerWidth < 768 ? 16 : 24;
             const containerWidth = container.clientWidth;
@@ -94,11 +90,9 @@ export function FeaturedPackagesSection({
         }
     }, []);
 
-    // Check on resize
     useEffect(() => {
         const handleResize = () => {
             checkScrollButtons();
-            // Re-center on resize
             const container = scrollContainerRef.current;
             if (container && packages.length > 0) {
                 const cardWidth = window.innerWidth < 768 ? 280 : 320;
@@ -126,7 +120,6 @@ export function FeaturedPackagesSection({
             const gap = window.innerWidth < 768 ? 16 : 24;
             const itemWidth = cardWidth + gap;
 
-            // Calculate current position and snap to nearest card
             const currentScroll = container.scrollLeft;
             const currentIndex = Math.round(currentScroll / itemWidth);
             const newIndex =
@@ -134,7 +127,6 @@ export function FeaturedPackagesSection({
                     ? Math.max(0, currentIndex - 1)
                     : Math.min(packages.length - 1, currentIndex + 1);
 
-            // Scroll to exact card position (like finger scrolling)
             container.scrollTo({
                 left: newIndex * itemWidth,
                 behavior: 'smooth',
@@ -143,20 +135,12 @@ export function FeaturedPackagesSection({
     };
 
     const getPackageBadge = (pkg: Package, index: number) => {
-        // Badge label mapping with fallbacks
-        const badgeLabels: Record<string, string> = {
-            featured: 'Featured',
-            best_value: 'Best Value',
-            popular: 'Popular',
-            hot_deal: 'Hot Deal',
-        };
-
-        // Use custom badge label from settings if provided
         if (pkg.badge_label) {
             const labelKey = pkg.badge_label.toLowerCase().trim();
-            const translatedLabel = badgeLabels[labelKey] || pkg.badge_label;
+            const translatedLabel =
+                trans(`featured_packages.badges.${labelKey}`) ||
+                pkg.badge_label;
 
-            // Determine style based on label type
             if (labelKey === 'best_value') {
                 return {
                     text: translatedLabel,
@@ -181,7 +165,14 @@ export function FeaturedPackagesSection({
                     shadow: 'shadow-orange-500/25',
                 };
             }
-            // Default for 'featured' or any custom label
+            if (labelKey === 'featured') {
+                return {
+                    text: translatedLabel,
+                    icon: Sparkles,
+                    className: 'from-primary-400 to-primary-500 text-white',
+                    shadow: 'shadow-primary-500/25',
+                };
+            }
             return {
                 text: translatedLabel,
                 icon: Sparkles,
@@ -190,39 +181,15 @@ export function FeaturedPackagesSection({
             };
         }
 
-        // Fallback to index-based badges if no custom label
-        if (index === 0) {
-            return {
-                text: badgeLabels.best_value,
-                icon: Flame,
-                className: 'from-accent-400 to-accent-500 text-accent-950',
-                shadow: 'shadow-accent-500/25',
-            };
-        }
-        if (index === 1) {
-            return {
-                text: badgeLabels.popular,
-                icon: Sparkles,
-                className: 'from-primary-400 to-primary-500 text-white',
-                shadow: 'shadow-primary-500/25',
-            };
-        }
-        return {
-            text: badgeLabels.hot_deal,
-            icon: Zap,
-            className: 'from-orange-400 to-orange-500 text-white',
-            shadow: 'shadow-orange-500/25',
-        };
+        return null;
     };
 
     return (
         <section className="relative overflow-hidden bg-gradient-to-b from-primary-50/50 via-white to-white py-8 md:py-16">
-            {/* Background decorations */}
             <div className="pointer-events-none absolute top-0 right-0 h-64 w-64 rounded-full bg-accent-100/30 blur-3xl" />
             <div className="pointer-events-none absolute bottom-0 left-0 h-64 w-64 rounded-full bg-primary-100/30 blur-3xl" />
 
             <div className="relative z-10 container mx-auto px-4">
-                {/* Header */}
                 <div className="mb-6 flex items-center justify-between md:mb-8">
                     <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-400 to-accent-500 shadow-lg shadow-accent-500/20 md:h-12 md:w-12">
@@ -239,7 +206,6 @@ export function FeaturedPackagesSection({
                     </div>
 
                     <div className="flex items-center gap-2">
-                        {/* Navigation arrows - desktop only */}
                         <div className="hidden gap-2 md:flex">
                             <button
                                 onClick={() => scroll('left')}
@@ -275,34 +241,32 @@ export function FeaturedPackagesSection({
                     </div>
                 </div>
 
-                {/* Cards container - horizontal scroll on mobile, compact grid on desktop */}
                 <div className="relative overflow-visible">
                     <div
                         ref={scrollContainerRef}
-                        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-4 pt-6 pb-8 md:mx-auto md:grid md:max-w-4xl md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0 md:pb-4"
+                        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-4 pt-6 pb-8 md:flex md:justify-center md:gap-4 md:overflow-visible md:px-0 md:pb-4"
                     >
                         {packages.map((pkg, index) => {
                             const badge = getPackageBadge(pkg, index);
-                            const BadgeIcon = badge.icon;
 
                             const isActive = index === activeIndex;
 
                             return (
                                 <div
                                     key={pkg.id}
-                                    className={`group relative w-[280px] shrink-0 snap-center transition-transform duration-500 ease-out md:w-full ${
+                                    className={`group relative w-[280px] shrink-0 snap-center transition-transform duration-500 ease-out md:w-auto ${
                                         isActive ? 'scale-100' : 'scale-[0.92]'
                                     } md:scale-100 ${index === packages.length - 1 ? 'mr-4 md:mr-0' : ''}`}
                                 >
-                                    {/* Badge */}
-                                    <div
-                                        className={`absolute -top-3 left-4 z-20 flex items-center gap-1 rounded-full bg-gradient-to-r ${badge.className} ${badge.shadow} px-3 py-1.5 text-[10px] font-bold tracking-wider uppercase shadow-lg transition-transform duration-300 ease-out md:left-5 md:px-4 md:group-hover:-translate-y-1`}
-                                    >
-                                        <BadgeIcon className="h-3 w-3" />
-                                        {badge.text}
-                                    </div>
+                                    {badge && (
+                                        <div
+                                            className={`absolute -top-3 left-4 z-20 flex items-center gap-1 rounded-full bg-gradient-to-r ${badge.className} ${badge.shadow} px-3 py-1.5 text-[10px] font-bold tracking-wider uppercase shadow-lg transition-transform duration-300 ease-out md:left-5 md:px-4 md:group-hover:-translate-y-1`}
+                                        >
+                                            <badge.icon className="h-3 w-3" />
+                                            {badge.text}
+                                        </div>
+                                    )}
 
-                                    {/* Card */}
                                     <div
                                         className={`relative h-full overflow-hidden rounded-3xl border bg-white shadow-xl transition-all duration-300 ease-out md:hover:-translate-y-1 md:hover:border-accent-300 md:hover:shadow-accent-500/10 ${
                                             isActive
@@ -310,12 +274,10 @@ export function FeaturedPackagesSection({
                                                 : 'border-primary-100 shadow-primary-100/20'
                                         }`}
                                     >
-                                        {/* Decorative gradient blobs */}
                                         <div className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-accent-100/50 blur-2xl" />
                                         <div className="pointer-events-none absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-primary-100/50 blur-xl" />
 
                                         <div className="relative p-5 md:p-3 md:py-4 lg:p-4">
-                                            {/* Country info */}
                                             {pkg.country && (
                                                 <div className="mb-3 flex items-center gap-2 md:mb-2">
                                                     <CountryFlag
@@ -331,12 +293,10 @@ export function FeaturedPackagesSection({
                                                 </div>
                                             )}
 
-                                            {/* Package name */}
                                             <h3 className="mb-3 line-clamp-1 text-base font-bold text-primary-900 md:mb-2 md:text-sm">
                                                 {pkg.name}
                                             </h3>
 
-                                            {/* Data & Validity stats */}
                                             <div className="mb-4 grid grid-cols-2 gap-2 md:mb-3 md:gap-1.5">
                                                 <div className="rounded-xl bg-gradient-to-br from-primary-50 to-primary-100/50 p-2 text-center md:rounded-lg md:p-1.5">
                                                     <span className="mb-0.5 block text-[10px] font-bold tracking-wider text-primary-400 uppercase md:text-[9px]">
@@ -356,7 +316,6 @@ export function FeaturedPackagesSection({
                                                 </div>
                                             </div>
 
-                                            {/* Price and CTA */}
                                             <div className="flex items-center justify-between gap-2">
                                                 <div>
                                                     <span className="block text-[10px] font-medium tracking-wider text-primary-400 uppercase md:text-[9px]">
@@ -398,7 +357,6 @@ export function FeaturedPackagesSection({
                     </div>
                 </div>
 
-                {/* Mobile scroll indicator with navigation buttons */}
                 <div className="mt-4 flex items-center justify-center gap-4 md:hidden">
                     <button
                         onClick={() => scroll('left')}
