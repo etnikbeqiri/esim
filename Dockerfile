@@ -48,6 +48,7 @@ RUN apk del --no-cache \
 
 # Copy config files
 COPY docker/php/production.ini /usr/local/etc/php/conf.d/production.ini
+COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/nginx/default.conf /etc/nginx/http.d/default.conf
