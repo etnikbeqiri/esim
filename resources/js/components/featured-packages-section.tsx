@@ -263,10 +263,10 @@ export function FeaturedPackagesSection({
                 </div>
 
                 {/* Cards container - horizontal scroll on mobile, compact grid on desktop */}
-                <div className="relative">
+                <div className="relative overflow-visible">
                     <div
                         ref={scrollContainerRef}
-                        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-4 pt-6 pb-4 md:mx-auto md:grid md:max-w-4xl md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0"
+                        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-4 pt-6 pb-8 md:mx-auto md:grid md:max-w-4xl md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0 md:pb-4"
                     >
                         {packages.map((pkg, index) => {
                             const badge = getPackageBadge(pkg, index);
@@ -292,7 +292,13 @@ export function FeaturedPackagesSection({
                                     </div>
 
                                     {/* Card */}
-                                    <div className="relative h-full overflow-hidden rounded-3xl border border-primary-100 bg-white shadow-xl shadow-primary-100/20 transition-all duration-300 ease-out md:hover:-translate-y-1 md:hover:border-accent-300 md:hover:shadow-accent-500/10">
+                                    <div
+                                        className={`relative h-full overflow-hidden rounded-3xl border bg-white shadow-xl transition-all duration-300 ease-out md:hover:-translate-y-1 md:hover:border-accent-300 md:hover:shadow-accent-500/10 ${
+                                            isActive
+                                                ? 'border-accent-400 shadow-accent-500/30'
+                                                : 'border-primary-100 shadow-primary-100/20'
+                                        }`}
+                                    >
                                         {/* Decorative gradient blobs */}
                                         <div className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-accent-100/50 blur-2xl" />
                                         <div className="pointer-events-none absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-primary-100/50 blur-xl" />
