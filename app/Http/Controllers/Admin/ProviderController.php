@@ -44,6 +44,10 @@ class ProviderController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        $packages->getCollection()->transform(function ($package) {
+            return $package->makeVisible(['cost_price', 'custom_retail_price']);
+        });
+
         $stats = [
             'total_packages' => $provider->packages_count,
             'active_packages' => $provider->packages()->where('is_active', true)->count(),

@@ -179,72 +179,72 @@ export default function ProvidersIndex({ providers, filters }: Props) {
                 </div>
 
                 <div className="rounded-lg border">
-                        <Table>
-                            <TableHeader>
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="hover:bg-transparent">
+                                <SortableHeader column="name" label="Name" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
+                                <SortableHeader column="slug" label="Slug" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
+                                <SortableHeader column="is_active" label="Status" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
+                                <SortableHeader column="markup_percentage" label="Markup" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
+                                <SortableHeader column="rate_limit_ms" label="Rate Limit" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
+                                <SortableHeader column="packages_count" label="Packages" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
+                                <TableHead className="w-[100px] text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {providers.data.length === 0 ? (
                                 <TableRow className="hover:bg-transparent">
-                                    <SortableHeader column="name" label="Name" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
-                                    <SortableHeader column="slug" label="Slug" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
-                                    <SortableHeader column="is_active" label="Status" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
-                                    <SortableHeader column="markup_percentage" label="Markup" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
-                                    <SortableHeader column="rate_limit_ms" label="Rate Limit" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
-                                    <SortableHeader column="packages_count" label="Packages" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
-                                    <TableHead className="w-[100px] text-right">Actions</TableHead>
+                                    <TableCell colSpan={7} className="py-8 text-center text-sm text-muted-foreground">
+                                        No providers found
+                                    </TableCell>
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {providers.data.length === 0 ? (
-                                    <TableRow className="hover:bg-transparent">
-                                        <TableCell colSpan={7} className="py-8 text-center text-sm text-muted-foreground">
-                                            No providers found
+                            ) : (
+                                providers.data.map((provider) => (
+                                    <TableRow key={provider.id} className={`group ${!provider.is_active ? 'opacity-60' : ''}`}>
+                                        <TableCell>
+                                            <Link href={`/admin/providers/${provider.id}`} className="font-medium text-primary hover:underline">
+                                                {provider.name}
+                                            </Link>
+                                        </TableCell>
+                                        <TableCell>
+                                            <code className="text-xs">{provider.slug}</code>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={provider.is_active ? 'default' : 'secondary'}>
+                                                {provider.is_active ? 'Active' : 'Inactive'}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="tabular-nums">{provider.markup_percentage}%</TableCell>
+                                        <TableCell className="tabular-nums text-muted-foreground">{provider.rate_limit_ms}ms</TableCell>
+                                        <TableCell className="tabular-nums">{provider.packages_count}</TableCell>
+                                        <TableCell>
+                                            <div className="flex justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                                                    <Link href={`/admin/providers/${provider.id}`}>
+                                                        <Eye className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                                                    <Link href={`/admin/providers/${provider.id}/edit`}>
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    onClick={() => handleDelete(provider)}
+                                                >
+                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
-                                ) : (
-                                    providers.data.map((provider) => (
-                                        <TableRow key={provider.id} className={`group ${!provider.is_active ? 'opacity-60' : ''}`}>
-                                            <TableCell>
-                                                <Link href={`/admin/providers/${provider.id}`} className="font-medium text-primary hover:underline">
-                                                    {provider.name}
-                                                </Link>
-                                            </TableCell>
-                                            <TableCell>
-                                                <code className="text-xs">{provider.slug}</code>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge variant={provider.is_active ? 'default' : 'secondary'}>
-                                                    {provider.is_active ? 'Active' : 'Inactive'}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="tabular-nums">{provider.markup_percentage}%</TableCell>
-                                            <TableCell className="tabular-nums text-muted-foreground">{provider.rate_limit_ms}ms</TableCell>
-                                            <TableCell className="tabular-nums">{provider.packages_count}</TableCell>
-                                            <TableCell>
-                                                <div className="flex justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                                                        <Link href={`/admin/providers/${provider.id}`}>
-                                                            <Eye className="h-4 w-4" />
-                                                        </Link>
-                                                    </Button>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                                                        <Link href={`/admin/providers/${provider.id}/edit`}>
-                                                            <Pencil className="h-4 w-4" />
-                                                        </Link>
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8"
-                                                        onClick={() => handleDelete(provider)}
-                                                    >
-                                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                    </div>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
 
                 {providers.last_page > 1 && (
                     <div className="flex items-center justify-between">

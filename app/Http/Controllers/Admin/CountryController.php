@@ -43,6 +43,10 @@ class CountryController extends Controller
             ->orderBy('name')
             ->paginate(50);
 
+        $packages->getCollection()->transform(function ($package) {
+            return $package->makeVisible(['cost_price', 'custom_retail_price']);
+        });
+
         return Inertia::render('admin/countries/show', [
             'country' => $country,
             'packages' => $packages,
