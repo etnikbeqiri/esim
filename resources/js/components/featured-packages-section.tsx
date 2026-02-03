@@ -280,11 +280,9 @@ export function FeaturedPackagesSection({
                             return (
                                 <div
                                     key={pkg.id}
-                                    className={`group relative shrink-0 snap-center transition-transform duration-300 ease-out ${
-                                        isActive
-                                            ? 'w-[280px] scale-100 md:w-full md:scale-100'
-                                            : 'w-[260px] scale-[0.9] md:w-full md:scale-100'
-                                    } ${index === packages.length - 1 ? 'mr-4 md:mr-0' : ''}`}
+                                    className={`group relative w-[280px] shrink-0 snap-center transition-transform duration-500 ease-out md:w-full ${
+                                        isActive ? 'scale-100' : 'scale-[0.92]'
+                                    } md:scale-100 ${index === packages.length - 1 ? 'mr-4 md:mr-0' : ''}`}
                                 >
                                     {/* Badge */}
                                     <div
