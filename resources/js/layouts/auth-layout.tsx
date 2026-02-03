@@ -1,5 +1,5 @@
-import { AnalyticsProvider } from '@/lib/analytics';
 import AuthLayoutTemplate from '@/layouts/auth/auth-simple-layout';
+import { AnalyticsProvider } from '@/lib/analytics';
 
 export default function AuthLayout({
     children,
@@ -13,7 +13,11 @@ export default function AuthLayout({
 }) {
     return (
         <AnalyticsProvider>
-            <AuthLayoutTemplate title={title} description={description} {...props}>
+            <AuthLayoutTemplate
+                title={title}
+                description={description}
+                {...props}
+            >
                 {children}
             </AuthLayoutTemplate>
         </AnalyticsProvider>

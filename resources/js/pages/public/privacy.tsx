@@ -1,7 +1,11 @@
 import { LegalPageLayout, LegalSection } from '@/components/legal-page-layout';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
-import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
+import {
+    useAnalytics,
+    usePageViewTracking,
+    useScrollTracking,
+} from '@/lib/analytics';
 import { SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { useCallback } from 'react';
@@ -15,9 +19,14 @@ export default function Privacy() {
 
     useScrollTracking('guide', 'privacy-policy', 'Privacy Policy');
 
-    const handleSectionView = useCallback((sectionId: string, sectionTitle: string) => {
-        trackContentEngagement('guide', sectionId, 'view', { title: sectionTitle });
-    }, [trackContentEngagement]);
+    const handleSectionView = useCallback(
+        (sectionId: string, sectionTitle: string) => {
+            trackContentEngagement('guide', sectionId, 'view', {
+                title: sectionTitle,
+            });
+        },
+        [trackContentEngagement],
+    );
 
     const handleContactClick = useCallback(() => {
         supportContact('email', 'privacy');
@@ -44,7 +53,9 @@ export default function Privacy() {
             >
                 <LegalSection
                     title={trans('privacy_page.sections.introduction.title')}
-                    onVisible={() => handleSectionView('introduction', 'Introduction')}
+                    onVisible={() =>
+                        handleSectionView('introduction', 'Introduction')
+                    }
                 >
                     <p>
                         {trans('privacy_page.sections.introduction.content_1', {
@@ -58,7 +69,12 @@ export default function Privacy() {
 
                 <LegalSection
                     title={trans('privacy_page.sections.info_collect.title')}
-                    onVisible={() => handleSectionView('info-collect', 'Information We Collect')}
+                    onVisible={() =>
+                        handleSectionView(
+                            'info-collect',
+                            'Information We Collect',
+                        )
+                    }
                 >
                     <p>{trans('privacy_page.sections.info_collect.intro')}</p>
                     <ul className="list-disc space-y-2 pl-6">
@@ -172,14 +188,18 @@ export default function Privacy() {
 
                 <LegalSection
                     title={trans('privacy_page.sections.security.title')}
-                    onVisible={() => handleSectionView('data-security', 'Data Security')}
+                    onVisible={() =>
+                        handleSectionView('data-security', 'Data Security')
+                    }
                 >
                     <p>{trans('privacy_page.sections.security.content')}</p>
                 </LegalSection>
 
                 <LegalSection
                     title={trans('privacy_page.sections.rights.title')}
-                    onVisible={() => handleSectionView('your-rights', 'Your Rights')}
+                    onVisible={() =>
+                        handleSectionView('your-rights', 'Your Rights')
+                    }
                 >
                     <p>{trans('privacy_page.sections.rights.intro')}</p>
                     <ul className="list-disc space-y-2 pl-6">

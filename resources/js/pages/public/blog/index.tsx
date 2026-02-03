@@ -2,7 +2,11 @@ import { HeroSection } from '@/components/hero-section';
 import { Button } from '@/components/ui/button';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
-import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
+import {
+    useAnalytics,
+    usePageViewTracking,
+    useScrollTracking,
+} from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
@@ -80,7 +84,7 @@ export default function BlogIndex({ articles, meta }: Props) {
                     name: article.title,
                     category: 'Blog Post',
                     index,
-                })
+                }),
             );
             viewItemList('blog-posts', 'Blog Posts', items);
         }
@@ -97,15 +101,18 @@ export default function BlogIndex({ articles, meta }: Props) {
         }
     }, [searchQuery, filteredArticles.length, search]);
 
-    const handleArticleClick = useCallback((article: Article, index: number) => {
-        const item = createItem({
-            id: String(article.id),
-            name: article.title,
-            category: 'Blog Post',
-            index,
-        });
-        selectItem(item, 'blog-posts', 'Blog Posts');
-    }, [createItem, selectItem]);
+    const handleArticleClick = useCallback(
+        (article: Article, index: number) => {
+            const item = createItem({
+                id: String(article.id),
+                name: article.title,
+                category: 'Blog Post',
+                index,
+            });
+            selectItem(item, 'blog-posts', 'Blog Posts');
+        },
+        [createItem, selectItem],
+    );
 
     useEffect(() => {
         const structuredData = {
@@ -228,7 +235,9 @@ export default function BlogIndex({ articles, meta }: Props) {
                                         key={article.id}
                                         href={`/blog/${article.slug}`}
                                         className="group relative flex h-full flex-col"
-                                        onClick={() => handleArticleClick(article, index)}
+                                        onClick={() =>
+                                            handleArticleClick(article, index)
+                                        }
                                     >
                                         <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-accent-200 hover:shadow-2xl hover:shadow-primary-500/10">
                                             {/* Image */}

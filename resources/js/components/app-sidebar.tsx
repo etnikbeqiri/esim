@@ -19,6 +19,7 @@ import {
     Globe,
     LayoutGrid,
     LifeBuoy,
+    Monitor,
     Package,
     Receipt,
     RefreshCw,
@@ -30,7 +31,6 @@ import {
     Ticket,
     Users,
     Wallet,
-    Monitor,
 } from 'lucide-react';
 import { useMemo } from 'react';
 import AppLogo from './app-logo';

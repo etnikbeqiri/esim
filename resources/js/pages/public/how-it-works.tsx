@@ -4,7 +4,11 @@ import { HeroSection } from '@/components/hero-section';
 import { StepsSection } from '@/components/steps-section';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
-import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
+import {
+    useAnalytics,
+    usePageViewTracking,
+    useScrollTracking,
+} from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { CreditCard, QrCode, Search, Settings, Wifi } from 'lucide-react';
@@ -33,7 +37,11 @@ export default function HowItWorks({ totalCountries }: Props) {
         (platform: 'iphone' | 'android') => {
             if (!viewedSteps.current.has(platform)) {
                 viewedSteps.current.add(platform);
-                contentView('guide', `setup_${platform}`, `${platform === 'iphone' ? 'iPhone' : 'Android'} Setup Guide`);
+                contentView(
+                    'guide',
+                    `setup_${platform}`,
+                    `${platform === 'iphone' ? 'iPhone' : 'Android'} Setup Guide`,
+                );
             }
         },
         [contentView],
@@ -60,8 +68,13 @@ export default function HowItWorks({ totalCountries }: Props) {
             (entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
-                        const platform = entry.target.id === 'setup-iphone' ? 'iphone' : 'android';
-                        trackInstallationStepView(platform as 'iphone' | 'android');
+                        const platform =
+                            entry.target.id === 'setup-iphone'
+                                ? 'iphone'
+                                : 'android';
+                        trackInstallationStepView(
+                            platform as 'iphone' | 'android',
+                        );
                     }
                 });
             },

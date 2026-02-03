@@ -1,7 +1,11 @@
 import { LegalPageLayout, LegalSection } from '@/components/legal-page-layout';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
-import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
+import {
+    useAnalytics,
+    usePageViewTracking,
+    useScrollTracking,
+} from '@/lib/analytics';
 import { SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { useCallback } from 'react';
@@ -15,9 +19,14 @@ export default function Refund() {
 
     useScrollTracking('guide', 'refund-policy', 'Refund Policy');
 
-    const handleSectionView = useCallback((sectionId: string, sectionTitle: string) => {
-        trackContentEngagement('guide', sectionId, 'view', { title: sectionTitle });
-    }, [trackContentEngagement]);
+    const handleSectionView = useCallback(
+        (sectionId: string, sectionTitle: string) => {
+            trackContentEngagement('guide', sectionId, 'view', {
+                title: sectionTitle,
+            });
+        },
+        [trackContentEngagement],
+    );
 
     const handleContactClick = useCallback(() => {
         supportContact('email', 'refund');
@@ -56,12 +65,16 @@ export default function Refund() {
                 <LegalSection
                     title={trans('refund_page.sections.digital_nature.title')}
                 >
-                    <p>{trans('refund_page.sections.digital_nature.content')}</p>
+                    <p>
+                        {trans('refund_page.sections.digital_nature.content')}
+                    </p>
                 </LegalSection>
 
                 <LegalSection
                     title={trans('refund_page.sections.eligible.title')}
-                    onVisible={() => handleSectionView('eligible', 'Eligible for Refund')}
+                    onVisible={() =>
+                        handleSectionView('eligible', 'Eligible for Refund')
+                    }
                 >
                     <p>{trans('refund_page.sections.eligible.content')}</p>
                     <ul className="list-disc space-y-2 pl-6">
@@ -90,7 +103,12 @@ export default function Refund() {
 
                 <LegalSection
                     title={trans('refund_page.sections.not_eligible.title')}
-                    onVisible={() => handleSectionView('not-eligible', 'Not Eligible for Refund')}
+                    onVisible={() =>
+                        handleSectionView(
+                            'not-eligible',
+                            'Not Eligible for Refund',
+                        )
+                    }
                 >
                     <p>{trans('refund_page.sections.not_eligible.content')}</p>
                     <ul className="list-disc space-y-2 pl-6">
@@ -135,7 +153,9 @@ export default function Refund() {
 
                 <LegalSection
                     title={trans('refund_page.sections.process.title')}
-                    onVisible={() => handleSectionView('process', 'Refund Process')}
+                    onVisible={() =>
+                        handleSectionView('process', 'Refund Process')
+                    }
                 >
                     <p>{trans('refund_page.sections.process.content')}</p>
                     <ol className="list-decimal space-y-2 pl-6">
@@ -143,7 +163,9 @@ export default function Refund() {
                             {trans('refund_page.sections.process.steps.submit')}
                         </li>
                         <li>
-                            {trans('refund_page.sections.process.steps.provide')}
+                            {trans(
+                                'refund_page.sections.process.steps.provide',
+                            )}
                         </li>
                         <li>
                             {trans('refund_page.sections.process.steps.review')}

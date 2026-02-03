@@ -4,7 +4,11 @@ import { HelpCard } from '@/components/help-card';
 import { HeroSection } from '@/components/hero-section';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
-import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
+import {
+    useAnalytics,
+    usePageViewTracking,
+    useScrollTracking,
+} from '@/lib/analytics';
 import { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -28,14 +32,20 @@ export default function Help() {
 
     useScrollTracking('help', 'help-page', 'Help Center');
 
-    const handleContactClick = useCallback((method: 'email' | 'phone' | 'whatsapp' | 'ticket') => {
-        supportContact(method, 'help');
-    }, [supportContact]);
+    const handleContactClick = useCallback(
+        (method: 'email' | 'phone' | 'whatsapp' | 'ticket') => {
+            supportContact(method, 'help');
+        },
+        [supportContact],
+    );
 
-    const handleCategoryClick = useCallback((categoryId: string, categoryTitle: string) => {
-        filterApplied('region', categoryId, 'help');
-        contentView('help', categoryId, categoryTitle);
-    }, [filterApplied, contentView]);
+    const handleCategoryClick = useCallback(
+        (categoryId: string, categoryTitle: string) => {
+            filterApplied('region', categoryId, 'help');
+            contentView('help', categoryId, categoryTitle);
+        },
+        [filterApplied, contentView],
+    );
 
     const handleFaqLinkClick = useCallback(() => {
         contentView('faq', 'view-all-faqs', 'View All FAQs');
@@ -102,7 +112,12 @@ export default function Help() {
                             )}
                             icon={BookOpen}
                             href="/how-it-works"
-                            onClick={() => handleCategoryClick('getting-started', 'Getting Started')}
+                            onClick={() =>
+                                handleCategoryClick(
+                                    'getting-started',
+                                    'Getting Started',
+                                )
+                            }
                         />
                         <HelpCard
                             title={trans(
@@ -113,7 +128,12 @@ export default function Help() {
                             )}
                             icon={QrCode}
                             href="/how-it-works"
-                            onClick={() => handleCategoryClick('installation', 'Installation Guide')}
+                            onClick={() =>
+                                handleCategoryClick(
+                                    'installation',
+                                    'Installation Guide',
+                                )
+                            }
                         />
                         <HelpCard
                             title={trans(
@@ -124,7 +144,12 @@ export default function Help() {
                             )}
                             icon={Smartphone}
                             href="/how-it-works"
-                            onClick={() => handleCategoryClick('compatibility', 'Device Compatibility')}
+                            onClick={() =>
+                                handleCategoryClick(
+                                    'compatibility',
+                                    'Device Compatibility',
+                                )
+                            }
                         />
                         <HelpCard
                             title={trans(
@@ -135,7 +160,12 @@ export default function Help() {
                             )}
                             icon={Settings}
                             href="/faq"
-                            onClick={() => handleCategoryClick('troubleshooting', 'Troubleshooting')}
+                            onClick={() =>
+                                handleCategoryClick(
+                                    'troubleshooting',
+                                    'Troubleshooting',
+                                )
+                            }
                         />
                         <HelpCard
                             title={trans('help_page.categories.faqs.title')}
@@ -153,7 +183,12 @@ export default function Help() {
                             )}
                             icon={Wifi}
                             href="/destinations"
-                            onClick={() => handleCategoryClick('coverage', 'Network Coverage')}
+                            onClick={() =>
+                                handleCategoryClick(
+                                    'coverage',
+                                    'Network Coverage',
+                                )
+                            }
                         />
                     </div>
                 </div>
@@ -187,13 +222,17 @@ export default function Help() {
                             </div>
                             <div>
                                 <h3 className="text-sm font-bold text-primary-900 md:mb-1 md:text-base">
-                                    {trans('help_page.contact.email_support.title')}
+                                    {trans(
+                                        'help_page.contact.email_support.title',
+                                    )}
                                 </h3>
                                 <p className="text-xs text-primary-600 md:text-sm">
                                     {contact.supportEmail}
                                 </p>
                                 <p className="mt-1 text-[10px] text-primary-400 md:text-xs">
-                                    {trans('help_page.contact.email_support.response_time')}
+                                    {trans(
+                                        'help_page.contact.email_support.response_time',
+                                    )}
                                 </p>
                             </div>
                         </a>
@@ -209,13 +248,19 @@ export default function Help() {
                             </div>
                             <div>
                                 <h3 className="text-sm font-bold text-primary-900 md:mb-1 md:text-base">
-                                    {trans('help_page.contact.view_all_faqs.title')}
+                                    {trans(
+                                        'help_page.contact.view_all_faqs.title',
+                                    )}
                                 </h3>
                                 <p className="text-xs text-primary-600 md:text-sm">
-                                    {trans('help_page.contact.view_all_faqs.description')}
+                                    {trans(
+                                        'help_page.contact.view_all_faqs.description',
+                                    )}
                                 </p>
                                 <p className="mt-1 text-[10px] text-primary-400 md:text-xs">
-                                    {trans('help_page.contact.view_all_faqs.count')}
+                                    {trans(
+                                        'help_page.contact.view_all_faqs.count',
+                                    )}
                                 </p>
                             </div>
                         </Link>

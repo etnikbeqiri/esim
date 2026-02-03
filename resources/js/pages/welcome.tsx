@@ -1,10 +1,15 @@
 import { CTASection } from '@/components/cta-section';
+import { FeaturedPackagesSection } from '@/components/featured-packages-section';
 import { HeroSection } from '@/components/hero-section';
 import { StepsSection } from '@/components/steps-section';
 import { TrustSection } from '@/components/trust-section';
 import { useTrans } from '@/hooks/use-trans';
-import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
 import GuestLayout from '@/layouts/guest-layout';
+import {
+    useAnalytics,
+    usePageViewTracking,
+    useScrollTracking,
+} from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { QrCode, Search, Smartphone } from 'lucide-react';
@@ -18,14 +23,30 @@ interface Country {
     min_price: number | null;
 }
 
+interface FeaturedPackage {
+    id: number;
+    name: string;
+    data_mb: number;
+    data_label: string;
+    validity_days: number;
+    validity_label: string;
+    retail_price: number | string;
+    country: {
+        name: string;
+        iso_code: string;
+    } | null;
+}
+
 interface Props {
     featuredCountries: Country[];
+    featuredPackages: FeaturedPackage[];
     totalCountries: number;
     totalPackages: number;
 }
 
 export default function Welcome({
     featuredCountries = [],
+    featuredPackages = [],
     totalCountries = 0,
     totalPackages = 0,
 }: Props) {
@@ -49,9 +70,13 @@ export default function Welcome({
                     category2: country.iso_code,
                     price: country.min_price ?? undefined,
                     index,
-                })
+                }),
             );
-            viewItemList('featured_destinations', 'Featured Destinations', featuredItems);
+            viewItemList(
+                'featured_destinations',
+                'Featured Destinations',
+                featuredItems,
+            );
         }
     }, [featuredCountries, createItem, viewItemList]);
 
@@ -75,6 +100,8 @@ export default function Welcome({
                 showStats
                 totalCountries={totalCountries}
             />
+
+            <FeaturedPackagesSection packages={featuredPackages} />
 
             <StepsSection
                 title={trans('steps.title')}

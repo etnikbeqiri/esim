@@ -1,8 +1,12 @@
 import { BackButton } from '@/components/back-button';
 import { Button } from '@/components/ui/button';
 import { useTrans } from '@/hooks/use-trans';
-import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
 import GuestLayout from '@/layouts/guest-layout';
+import {
+    useAnalytics,
+    usePageViewTracking,
+    useScrollTracking,
+} from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -57,7 +61,8 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
     const canonicalUrl = `${siteUrl}/blog/${article.slug}`;
 
     // Analytics hooks
-    const { viewItem, selectItem, contentView, contentShare, createItem } = useAnalytics();
+    const { viewItem, selectItem, contentView, contentShare, createItem } =
+        useAnalytics();
     const pageStartTime = useRef<number>(Date.now());
     const viewItemTracked = useRef(false);
 
@@ -85,14 +90,19 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
 
     useEffect(() => {
         const handleBeforeUnload = () => {
-            const timeOnPage = Math.round((Date.now() - pageStartTime.current) / 1000);
+            const timeOnPage = Math.round(
+                (Date.now() - pageStartTime.current) / 1000,
+            );
         };
 
         window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+        return () =>
+            window.removeEventListener('beforeunload', handleBeforeUnload);
     }, []);
 
-    function trackShareClick(platform: 'twitter' | 'facebook' | 'linkedin' | 'copy') {
+    function trackShareClick(
+        platform: 'twitter' | 'facebook' | 'linkedin' | 'copy',
+    ) {
         contentShare('blog', String(article.id), article.title, platform);
     }
 
@@ -109,7 +119,10 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
     function trackCtaClick(ctaType: 'browse_plans' | 'learn_how') {
         const ctaItem = createItem({
             id: `cta_${ctaType}`,
-            name: ctaType === 'browse_plans' ? 'Browse Plans CTA' : 'Learn How CTA',
+            name:
+                ctaType === 'browse_plans'
+                    ? 'Browse Plans CTA'
+                    : 'Learn How CTA',
             category: 'CTA',
         });
         selectItem(ctaItem, 'blog_cta', 'Blog Post CTA');
@@ -456,7 +469,9 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                     key={related.id}
                                     href={`/blog/${related.slug}`}
                                     className="group"
-                                    onClick={() => trackRelatedArticleClick(related)}
+                                    onClick={() =>
+                                        trackRelatedArticleClick(related)
+                                    }
                                 >
                                     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-accent-200 hover:shadow-2xl hover:shadow-primary-500/10">
                                         <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-primary-100 to-primary-50">
@@ -566,7 +581,12 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                 className="btn-gold shadow-lg shadow-accent-500/25 transition-shadow hover:shadow-accent-500/40"
                                 asChild
                             >
-                                <Link href="/destinations" onClick={() => trackCtaClick('browse_plans')}>
+                                <Link
+                                    href="/destinations"
+                                    onClick={() =>
+                                        trackCtaClick('browse_plans')
+                                    }
+                                >
                                     <Sparkles className="mr-2 h-4 w-4" />
                                     {trans('cta_blog.browse_plans')}
                                 </Link>
@@ -577,7 +597,10 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                 className="border-primary-300 bg-white text-primary-700 shadow-sm transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-800 hover:shadow-md"
                                 asChild
                             >
-                                <Link href="/how-it-works" onClick={() => trackCtaClick('learn_how')}>
+                                <Link
+                                    href="/how-it-works"
+                                    onClick={() => trackCtaClick('learn_how')}
+                                >
                                     {trans('cta_blog.learn_how')}
                                 </Link>
                             </Button>

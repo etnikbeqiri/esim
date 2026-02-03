@@ -444,7 +444,8 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
                                         >
                                             {customer.user.email_verified_at
                                                 ? new Date(
-                                                      customer.user.email_verified_at,
+                                                      customer.user
+                                                          .email_verified_at,
                                                   ).toLocaleDateString()
                                                 : 'Not verified'}
                                         </span>

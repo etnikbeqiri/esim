@@ -61,7 +61,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function TicketShow() {
     const { trans } = useTrans();
-    const { ticket: initialTicket, messages: initialMessages } = usePage<{ props: Props }>().props as unknown as Props;
+    const { ticket: initialTicket, messages: initialMessages } = usePage<{
+        props: Props;
+    }>().props as unknown as Props;
 
     // Local state for real-time updates
     const [messages, setMessages] = useState<MessageData[]>(initialMessages);
@@ -79,16 +81,18 @@ export default function TicketShow() {
 
         // Add new messages
         if (update.messages && Array.isArray(update.messages)) {
-            setMessages(prev => {
-                const existingUuids = new Set(prev.map(m => m.uuid));
-                const newMessages = update.messages.filter(m => !existingUuids.has(m.uuid));
+            setMessages((prev) => {
+                const existingUuids = new Set(prev.map((m) => m.uuid));
+                const newMessages = update.messages.filter(
+                    (m) => !existingUuids.has(m.uuid),
+                );
                 return [...prev, ...newMessages];
             });
         }
 
         // Update ticket status
         if (update.ticket) {
-            setTicket(prev => ({
+            setTicket((prev) => ({
                 ...prev,
                 status: update.ticket.status,
                 status_label: update.ticket.status_label,
@@ -101,7 +105,7 @@ export default function TicketShow() {
     // SSE connection URL
     const streamUrl = useMemo(
         () => `/client/tickets/${ticket.uuid}/stream`,
-        [ticket.uuid]
+        [ticket.uuid],
     );
 
     // Connect to SSE stream
@@ -136,7 +140,9 @@ export default function TicketShow() {
                 return (
                     <div className="flex items-center gap-1.5 text-xs text-yellow-600">
                         <Loader2 className="h-3 w-3 animate-spin" />
-                        <span>{trans('ticket.connecting') || 'Connecting...'}</span>
+                        <span>
+                            {trans('ticket.connecting') || 'Connecting...'}
+                        </span>
                     </div>
                 );
             default:
@@ -151,7 +157,9 @@ export default function TicketShow() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`${trans('ticket.title') || 'Ticket'} - ${ticket.reference}`} />
+            <Head
+                title={`${trans('ticket.title') || 'Ticket'} - ${ticket.reference}`}
+            />
 
             <div className="flex flex-col gap-4 p-4">
                 {/* Header */}
@@ -170,7 +178,9 @@ export default function TicketShow() {
                                 {getConnectionIndicator()}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                                {ticket.reference} • {trans('ticket.created_at')}: {ticket.created_at}
+                                {ticket.reference} •{' '}
+                                {trans('ticket.created_at')}:{' '}
+                                {ticket.created_at}
                             </p>
                         </div>
                     </div>
@@ -180,14 +190,20 @@ export default function TicketShow() {
                 <div className="rounded-md border bg-card p-4">
                     <div className="flex flex-wrap items-center gap-4">
                         <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">{trans('ticket.status')}:</span>
-                            <Badge className={getStatusColor(ticket.status_color)}>
+                            <span className="text-sm text-muted-foreground">
+                                {trans('ticket.status')}:
+                            </span>
+                            <Badge
+                                className={getStatusColor(ticket.status_color)}
+                            >
                                 {ticket.status_label}
                             </Badge>
                         </div>
                         {ticket.priority !== 'medium' && (
                             <div className="flex items-center gap-2">
-                                <span className="text-sm text-muted-foreground">{trans('ticket.priority')}:</span>
+                                <span className="text-sm text-muted-foreground">
+                                    {trans('ticket.priority')}:
+                                </span>
                                 <Badge variant="outline" className="text-xs">
                                     {ticket.priority_label}
                                 </Badge>
@@ -195,8 +211,12 @@ export default function TicketShow() {
                         )}
                         {ticket.assigned_to && (
                             <div className="flex items-center gap-2">
-                                <span className="text-sm text-muted-foreground">{trans('ticket.assigned_to')}:</span>
-                                <span className="text-sm">{ticket.assigned_to}</span>
+                                <span className="text-sm text-muted-foreground">
+                                    {trans('ticket.assigned_to')}:
+                                </span>
+                                <span className="text-sm">
+                                    {ticket.assigned_to}
+                                </span>
                             </div>
                         )}
                     </div>
@@ -206,7 +226,8 @@ export default function TicketShow() {
                 <div className="rounded-md border">
                     <div className="border-b bg-muted px-4 py-3">
                         <h2 className="font-semibold">
-                            {trans('ticket.conversation') || 'Conversation'} ({messages.length})
+                            {trans('ticket.conversation') || 'Conversation'} (
+                            {messages.length})
                         </h2>
                     </div>
                     <div className="max-h-[500px] space-y-4 overflow-y-auto p-4">
@@ -225,19 +246,24 @@ export default function TicketShow() {
                         </h3>
                         <TicketReplyForm
                             ticketUuid={ticket.uuid}
-                            replyRoute={'/client/tickets/' + ticket.uuid + '/reply'}
+                            replyRoute={
+                                '/client/tickets/' + ticket.uuid + '/reply'
+                            }
                         />
                     </div>
                 )}
 
                 {!ticket.can_add_message && (
                     <div className="rounded-md border border-yellow-200 bg-yellow-50 p-4 text-center text-yellow-800">
-                        {trans('ticket.closed_message', { status: ticket.status_label }) ||
+                        {trans('ticket.closed_message', {
+                            status: ticket.status_label,
+                        }) ||
                             `This ticket is ${ticket.status_label}. No further messages can be added.`}
                         <div className="mt-4">
                             <Button asChild>
                                 <Link href="/client/tickets/create">
-                                    {trans('ticket.create_title') || 'Create New Ticket'}
+                                    {trans('ticket.create_title') ||
+                                        'Create New Ticket'}
                                 </Link>
                             </Button>
                         </div>

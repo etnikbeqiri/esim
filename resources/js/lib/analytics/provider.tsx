@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
 import analytics from './service';
 import type { AnalyticsConfig, UserProperties } from './types';
 
@@ -34,10 +34,10 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
             const userType = auth.user.is_admin
                 ? 'admin'
                 : auth.user.is_b2b
-                ? 'b2b'
-                : auth.user.has_customer
-                ? 'b2c'
-                : 'guest';
+                  ? 'b2b'
+                  : auth.user.has_customer
+                    ? 'b2c'
+                    : 'guest';
 
             const userProperties: UserProperties = {
                 user_id: String(auth.user.id),

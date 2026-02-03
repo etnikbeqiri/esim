@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
 import { useTrans } from '@/hooks/use-trans';
-import { useAnalytics, usePageViewTracking } from '@/lib/analytics';
 import GuestLayout from '@/layouts/guest-layout';
+import { useAnalytics, usePageViewTracking } from '@/lib/analytics';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     CheckCircle2,
@@ -55,7 +55,8 @@ interface Props {
 
 export default function CheckoutSuccess({ order }: Props) {
     const { trans } = useTrans();
-    const { purchase, createItem, installationStep, contentShare } = useAnalytics();
+    const { purchase, createItem, installationStep, contentShare } =
+        useAnalytics();
     const purchaseTracked = useRef(false);
     const installationStepsViewed = useRef<Set<number>>(new Set());
 
@@ -85,7 +86,12 @@ export default function CheckoutSuccess({ order }: Props) {
                 price: analytics.value,
                 currency: analytics.currency,
             });
-            purchase(analytics.transaction_id, analytics.currency, analytics.value, [item]);
+            purchase(
+                analytics.transaction_id,
+                analytics.currency,
+                analytics.value,
+                [item],
+            );
         }
     }, [order, purchase, createItem]);
 
@@ -96,7 +102,7 @@ export default function CheckoutSuccess({ order }: Props) {
                 installationStep(step, stepName, order.uuid);
             }
         },
-        [installationStep, order.uuid]
+        [installationStep, order.uuid],
     );
 
     useEffect(() => {
@@ -107,12 +113,17 @@ export default function CheckoutSuccess({ order }: Props) {
 
     const handleCopyTracking = useCallback(
         (field: string) => {
-            contentShare('esim_activation', order.uuid, `Copy ${field}`, 'copy');
+            contentShare(
+                'esim_activation',
+                order.uuid,
+                `Copy ${field}`,
+                'copy',
+            );
             if (field === 'smdp_address' || field === 'activation_code') {
                 trackInstallationStep(2, 'Copy Activation Details');
             }
         },
-        [contentShare, order.uuid, trackInstallationStep]
+        [contentShare, order.uuid, trackInstallationStep],
     );
 
     // Poll for updates while processing

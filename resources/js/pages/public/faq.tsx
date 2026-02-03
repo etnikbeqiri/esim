@@ -3,7 +3,11 @@ import { FAQSection, type FAQItem } from '@/components/faq-section';
 import { HeroSection } from '@/components/hero-section';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
-import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
+import {
+    useAnalytics,
+    usePageViewTracking,
+    useScrollTracking,
+} from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { useCallback } from 'react';
@@ -17,15 +21,23 @@ export default function FAQ() {
 
     useScrollTracking('faq', 'faq-page', 'FAQ Page');
 
-    const handleFaqToggle = useCallback((
-        sectionId: string,
-        index: number,
-        question: string,
-        isOpen: boolean
-    ) => {
-        const faqId = `${sectionId}-${index}`;
-        trackContentEngagement('faq', faqId, isOpen ? 'expand' : 'collapse', { question });
-    }, [trackContentEngagement]);
+    const handleFaqToggle = useCallback(
+        (
+            sectionId: string,
+            index: number,
+            question: string,
+            isOpen: boolean,
+        ) => {
+            const faqId = `${sectionId}-${index}`;
+            trackContentEngagement(
+                'faq',
+                faqId,
+                isOpen ? 'expand' : 'collapse',
+                { question },
+            );
+        },
+        [trackContentEngagement],
+    );
 
     const generalFaqs: FAQItem[] = [
         {

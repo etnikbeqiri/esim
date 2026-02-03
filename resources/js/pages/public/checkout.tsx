@@ -16,10 +16,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useTrans } from '@/hooks/use-trans';
-import { useAnalytics, useFormTracking } from '@/lib/analytics';
-import type { PaymentMethod } from '@/lib/analytics';
 import GuestLayout from '@/layouts/guest-layout';
-import type { CouponValidationResponse } from '@/types';
+import type { PaymentMethod } from '@/lib/analytics';
+import { useAnalytics, useFormTracking } from '@/lib/analytics';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
@@ -125,7 +124,9 @@ export default function Checkout({
             .then((res) => res.json())
             .then((geo) => {
                 if (geo.country_code) {
-                    const exists = billingCountries.some((c) => c.code === geo.country_code);
+                    const exists = billingCountries.some(
+                        (c) => c.code === geo.country_code,
+                    );
                     if (exists) {
                         setData('billing_country', geo.country_code);
                     }
@@ -148,7 +149,9 @@ export default function Checkout({
     const [finalPrice, setFinalPrice] = useState(Number(pkg.retail_price));
 
     // Get current VAT rate based on selected billing country
-    const selectedCountry = billingCountries.find(c => c.code === data.billing_country);
+    const selectedCountry = billingCountries.find(
+        (c) => c.code === data.billing_country,
+    );
     const currentVatRate = selectedCountry?.vat_rate ?? 0;
 
     // Calculate VAT for the current final price (inclusive VAT)
@@ -156,7 +159,7 @@ export default function Checkout({
         if (!vat.enabled || vatRate <= 0) {
             return { net: total, vatAmount: 0, rate: 0 };
         }
-        const vatMultiplier = 1 + (vatRate / 100);
+        const vatMultiplier = 1 + vatRate / 100;
         const net = Math.round((total / vatMultiplier) * 100) / 100;
         const vatAmount = Math.round((total - net) * 100) / 100;
         return { net, vatAmount, rate: vatRate };
@@ -164,15 +167,28 @@ export default function Checkout({
 
     const currentVat = calculateVat(finalPrice, currentVatRate);
 
-    const handleCouponsChanged = (coupons: AppliedCoupon[], discount: number, finalAmount: number) => {
+    const handleCouponsChanged = (
+        coupons: AppliedCoupon[],
+        discount: number,
+        finalAmount: number,
+    ) => {
         setAppliedCoupons(coupons);
         setTotalDiscount(discount);
         setFinalPrice(finalAmount);
-        setData('coupon_codes', coupons.map(c => c.code));
+        setData(
+            'coupon_codes',
+            coupons.map((c) => c.code),
+        );
     };
 
-    const { beginCheckout, addPaymentInfo, createItem, trackError, pageView } = useAnalytics();
-    const { trackFocus, trackComplete, trackSubmit, trackError: trackFormError } = useFormTracking('checkout', 'Checkout Form');
+    const { beginCheckout, addPaymentInfo, createItem, trackError, pageView } =
+        useAnalytics();
+    const {
+        trackFocus,
+        trackComplete,
+        trackSubmit,
+        trackError: trackFormError,
+    } = useFormTracking('checkout', 'Checkout Form');
     const analyticsTracked = useRef(false);
 
     const packageItem = createItem({
@@ -206,7 +222,12 @@ export default function Checkout({
 
     function handlePaymentProviderChange(value: string) {
         setData('payment_provider', value);
-        addPaymentInfo('EUR', Number(pkg.retail_price), value as PaymentMethod, [packageItem]);
+        addPaymentInfo(
+            'EUR',
+            Number(pkg.retail_price),
+            value as PaymentMethod,
+            [packageItem],
+        );
     }
 
     function handleSubmit(e: React.FormEvent) {
@@ -339,8 +360,13 @@ export default function Checkout({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    onFocus={() => trackFocus('email')}
-                                                    onBlur={() => data.email && trackComplete('email')}
+                                                    onFocus={() =>
+                                                        trackFocus('email')
+                                                    }
+                                                    onBlur={() =>
+                                                        data.email &&
+                                                        trackComplete('email')
+                                                    }
                                                     required
                                                 />
                                             </div>
@@ -385,8 +411,13 @@ export default function Checkout({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    onFocus={() => trackFocus('name')}
-                                                    onBlur={() => data.name && trackComplete('name')}
+                                                    onFocus={() =>
+                                                        trackFocus('name')
+                                                    }
+                                                    onBlur={() =>
+                                                        data.name &&
+                                                        trackComplete('name')
+                                                    }
                                                     required
                                                 />
                                             </div>
@@ -428,8 +459,13 @@ export default function Checkout({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    onFocus={() => trackFocus('phone')}
-                                                    onBlur={() => data.phone && trackComplete('phone')}
+                                                    onFocus={() =>
+                                                        trackFocus('phone')
+                                                    }
+                                                    onBlur={() =>
+                                                        data.phone &&
+                                                        trackComplete('phone')
+                                                    }
                                                 />
                                             </div>
                                             {errors.phone && (
@@ -457,7 +493,10 @@ export default function Checkout({
                                                 <Select
                                                     value={data.billing_country}
                                                     onValueChange={(value) =>
-                                                        setData('billing_country', value)
+                                                        setData(
+                                                            'billing_country',
+                                                            value,
+                                                        )
                                                     }
                                                 >
                                                     <SelectTrigger
@@ -471,14 +510,22 @@ export default function Checkout({
                                                         />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {billingCountries.map((country) => (
-                                                            <SelectItem
-                                                                key={country.code}
-                                                                value={country.code}
-                                                            >
-                                                                {country.name}
-                                                            </SelectItem>
-                                                        ))}
+                                                        {billingCountries.map(
+                                                            (country) => (
+                                                                <SelectItem
+                                                                    key={
+                                                                        country.code
+                                                                    }
+                                                                    value={
+                                                                        country.code
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        country.name
+                                                                    }
+                                                                </SelectItem>
+                                                            ),
+                                                        )}
                                                     </SelectContent>
                                                 </Select>
                                             </div>
@@ -500,10 +547,14 @@ export default function Checkout({
                                             </div>
                                             <div>
                                                 <h2 className="text-sm font-bold text-primary-900 md:text-base">
-                                                    {trans('checkout_page.form.coupon.title')}
+                                                    {trans(
+                                                        'checkout_page.form.coupon.title',
+                                                    )}
                                                 </h2>
                                                 <p className="text-xs text-primary-600 md:text-sm">
-                                                    {trans('checkout_page.form.coupon.subtitle')}
+                                                    {trans(
+                                                        'checkout_page.form.coupon.subtitle',
+                                                    )}
                                                 </p>
                                             </div>
                                         </div>
@@ -513,8 +564,12 @@ export default function Checkout({
                                         <CouponCodeInput
                                             packageId={pkg.id}
                                             email={data.email}
-                                            orderAmount={Number(pkg.retail_price)}
-                                            onCouponsChanged={handleCouponsChanged}
+                                            orderAmount={Number(
+                                                pkg.retail_price,
+                                            )}
+                                            onCouponsChanged={
+                                                handleCouponsChanged
+                                            }
                                         />
                                     </div>
                                 </div>
@@ -545,7 +600,9 @@ export default function Checkout({
                                         <PaymentProviderSelect
                                             providers={paymentProviders}
                                             value={data.payment_provider}
-                                            onChange={handlePaymentProviderChange}
+                                            onChange={
+                                                handlePaymentProviderChange
+                                            }
                                         />
                                     </div>
                                 </div>
@@ -722,25 +779,36 @@ export default function Checkout({
                                         {/* Subtotal (original price) */}
                                         <div className="flex items-center justify-between">
                                             <span className="text-xs text-primary-600 md:text-sm">
-                                                {trans('checkout_page.summary.subtotal')}
+                                                {trans(
+                                                    'checkout_page.summary.subtotal',
+                                                )}
                                             </span>
                                             <span className="text-sm font-medium text-primary-900 md:text-base">
-                                                €{Number(pkg.retail_price).toFixed(2)}
+                                                €
+                                                {Number(
+                                                    pkg.retail_price,
+                                                ).toFixed(2)}
                                             </span>
                                         </div>
 
                                         {/* Coupon Discounts */}
                                         {appliedCoupons.map((coupon) => (
-                                            <div key={coupon.code} className="flex items-center justify-between text-green-600">
+                                            <div
+                                                key={coupon.code}
+                                                className="flex items-center justify-between text-green-600"
+                                            >
                                                 <span className="flex items-center gap-1.5 text-xs md:text-sm">
                                                     <Tag className="h-3 w-3 md:h-3.5 md:w-3.5" />
-                                                    {trans('checkout_page.summary.discount')}
+                                                    {trans(
+                                                        'checkout_page.summary.discount',
+                                                    )}
                                                     <span className="font-mono text-[10px] md:text-xs">
                                                         ({coupon.code})
                                                     </span>
                                                 </span>
                                                 <span className="text-sm font-medium md:text-base">
-                                                    -€{coupon.discount.toFixed(2)}
+                                                    -€
+                                                    {coupon.discount.toFixed(2)}
                                                 </span>
                                             </div>
                                         ))}
@@ -751,18 +819,31 @@ export default function Checkout({
                                                 <div className="h-px bg-primary-100" />
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-xs text-primary-600 md:text-sm">
-                                                        {trans('checkout_page.summary.net_amount')}
+                                                        {trans(
+                                                            'checkout_page.summary.net_amount',
+                                                        )}
                                                     </span>
                                                     <span className="text-sm font-medium text-primary-900 md:text-base">
-                                                        €{currentVat.net.toFixed(2)}
+                                                        €
+                                                        {currentVat.net.toFixed(
+                                                            2,
+                                                        )}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-xs text-primary-600 md:text-sm">
-                                                        {trans('checkout_page.summary.vat', { rate: currentVatRate })}
+                                                        {trans(
+                                                            'checkout_page.summary.vat',
+                                                            {
+                                                                rate: currentVatRate,
+                                                            },
+                                                        )}
                                                     </span>
                                                     <span className="text-sm font-medium text-primary-900 md:text-base">
-                                                        €{currentVat.vatAmount.toFixed(2)}
+                                                        €
+                                                        {currentVat.vatAmount.toFixed(
+                                                            2,
+                                                        )}
                                                     </span>
                                                 </div>
                                             </>
@@ -774,17 +855,27 @@ export default function Checkout({
                                         {/* Total */}
                                         <div className="flex items-baseline justify-between">
                                             <span className="text-xs text-primary-600 md:text-sm">
-                                                {trans('checkout_page.summary.total')}
-                                                {vat.enabled && currentVatRate > 0 && (
-                                                    <span className="ml-1 text-[10px] text-primary-400 md:text-xs">
-                                                        ({trans('checkout_page.summary.incl_vat')})
-                                                    </span>
+                                                {trans(
+                                                    'checkout_page.summary.total',
                                                 )}
+                                                {vat.enabled &&
+                                                    currentVatRate > 0 && (
+                                                        <span className="ml-1 text-[10px] text-primary-400 md:text-xs">
+                                                            (
+                                                            {trans(
+                                                                'checkout_page.summary.incl_vat',
+                                                            )}
+                                                            )
+                                                        </span>
+                                                    )}
                                             </span>
                                             <div className="text-right">
                                                 {totalDiscount > 0 && (
                                                     <span className="mr-2 text-sm text-primary-400 line-through md:text-base">
-                                                        €{Number(pkg.retail_price).toFixed(2)}
+                                                        €
+                                                        {Number(
+                                                            pkg.retail_price,
+                                                        ).toFixed(2)}
                                                     </span>
                                                 )}
                                                 <span className="text-xl font-extrabold text-primary-900 md:text-3xl">

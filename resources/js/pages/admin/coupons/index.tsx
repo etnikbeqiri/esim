@@ -20,7 +20,20 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Coupon } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, Pencil, Plus, Power, RotateCcw, Search, Trash2 } from 'lucide-react';
+import {
+    ArrowUpDown,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    ChevronUp,
+    Eye,
+    Pencil,
+    Plus,
+    Power,
+    RotateCcw,
+    Search,
+    Trash2,
+} from 'lucide-react';
 import { FormEvent, useMemo, useState } from 'react';
 
 interface PaginatedCoupons {
@@ -86,25 +99,47 @@ export default function CouponsIndex({ coupons, filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
-    const allSelected = coupons.data.length > 0 && selectedIds.length === coupons.data.length;
-    const someSelected = selectedIds.length > 0 && selectedIds.length < coupons.data.length;
+    const allSelected =
+        coupons.data.length > 0 && selectedIds.length === coupons.data.length;
+    const someSelected =
+        selectedIds.length > 0 && selectedIds.length < coupons.data.length;
 
     const hasActiveFilters = useMemo(() => {
-        return !!(filters.search || filters.type || filters.is_active || filters.sort_by);
+        return !!(
+            filters.search ||
+            filters.type ||
+            filters.is_active ||
+            filters.sort_by
+        );
     }, [filters]);
 
     function handleSearch(e: FormEvent) {
         e.preventDefault();
-        router.get('/admin/coupons', { ...filters, search }, { preserveState: true });
+        router.get(
+            '/admin/coupons',
+            { ...filters, search },
+            { preserveState: true },
+        );
     }
 
     function handleFilterChange(key: string, value: string) {
-        router.get('/admin/coupons', { ...filters, [key]: value === 'all' ? undefined : value, page: 1 }, { preserveState: true });
+        router.get(
+            '/admin/coupons',
+            { ...filters, [key]: value === 'all' ? undefined : value, page: 1 },
+            { preserveState: true },
+        );
     }
 
     function handleSort(column: string) {
-        const newDir = filters.sort_by === column && filters.sort_dir === 'asc' ? 'desc' : 'asc';
-        router.get('/admin/coupons', { ...filters, sort_by: column, sort_dir: newDir }, { preserveState: true });
+        const newDir =
+            filters.sort_by === column && filters.sort_dir === 'asc'
+                ? 'desc'
+                : 'asc';
+        router.get(
+            '/admin/coupons',
+            { ...filters, sort_by: column, sort_dir: newDir },
+            { preserveState: true },
+        );
     }
 
     function resetFilters() {
@@ -123,27 +158,44 @@ export default function CouponsIndex({ coupons, filters }: Props) {
     }
 
     function toggleSelectAll() {
-        setSelectedIds(allSelected ? [] : coupons.data.map(c => c.id));
+        setSelectedIds(allSelected ? [] : coupons.data.map((c) => c.id));
     }
 
     function toggleSelect(id: number) {
-        setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+        setSelectedIds((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+        );
     }
 
     function handleBulkAction(action: 'activate' | 'deactivate' | 'delete') {
         if (selectedIds.length === 0) return;
-        if (confirm(`${action === 'delete' ? 'Delete' : action === 'activate' ? 'Activate' : 'Deactivate'} ${selectedIds.length} coupons?`)) {
-            router.post(`/admin/coupons/bulk-${action}`, { ids: selectedIds }, {
-                onSuccess: () => setSelectedIds([]),
-            });
+        if (
+            confirm(
+                `${action === 'delete' ? 'Delete' : action === 'activate' ? 'Activate' : 'Deactivate'} ${selectedIds.length} coupons?`,
+            )
+        ) {
+            router.post(
+                `/admin/coupons/bulk-${action}`,
+                { ids: selectedIds },
+                {
+                    onSuccess: () => setSelectedIds([]),
+                },
+            );
         }
     }
 
-    function getStatus(coupon: Coupon): { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' } {
-        if (!coupon.is_active) return { label: 'Inactive', variant: 'secondary' };
-        if (coupon.valid_until && new Date(coupon.valid_until) < new Date()) return { label: 'Expired', variant: 'destructive' };
-        if (coupon.valid_from && new Date(coupon.valid_from) > new Date()) return { label: 'Upcoming', variant: 'outline' };
-        if (coupon.usage_limit && coupon.usage_count >= coupon.usage_limit) return { label: 'Used Up', variant: 'secondary' };
+    function getStatus(coupon: Coupon): {
+        label: string;
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+    } {
+        if (!coupon.is_active)
+            return { label: 'Inactive', variant: 'secondary' };
+        if (coupon.valid_until && new Date(coupon.valid_until) < new Date())
+            return { label: 'Expired', variant: 'destructive' };
+        if (coupon.valid_from && new Date(coupon.valid_from) > new Date())
+            return { label: 'Upcoming', variant: 'outline' };
+        if (coupon.usage_limit && coupon.usage_count >= coupon.usage_limit)
+            return { label: 'Used Up', variant: 'secondary' };
         return { label: 'Active', variant: 'default' };
     }
 
@@ -154,11 +206,17 @@ export default function CouponsIndex({ coupons, filters }: Props) {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <h1 className="text-xl font-semibold">Coupons</h1>
-                        <Badge variant="secondary" className="font-normal">{coupons.total}</Badge>
+                        <Badge variant="secondary" className="font-normal">
+                            {coupons.total}
+                        </Badge>
                     </div>
                     <div className="flex items-center gap-2">
                         {hasActiveFilters && (
-                            <Button variant="ghost" size="sm" onClick={resetFilters}>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={resetFilters}
+                            >
                                 <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
                                 Reset
                             </Button>
@@ -185,17 +243,27 @@ export default function CouponsIndex({ coupons, filters }: Props) {
                             />
                         </div>
                     </form>
-                    <Select value={filters.type || 'all'} onValueChange={v => handleFilterChange('type', v)}>
+                    <Select
+                        value={filters.type || 'all'}
+                        onValueChange={(v) => handleFilterChange('type', v)}
+                    >
                         <SelectTrigger className="h-9 w-[140px]">
                             <SelectValue placeholder="Type" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Types</SelectItem>
-                            <SelectItem value="percentage">Percentage</SelectItem>
+                            <SelectItem value="percentage">
+                                Percentage
+                            </SelectItem>
                             <SelectItem value="fixed_amount">Fixed</SelectItem>
                         </SelectContent>
                     </Select>
-                    <Select value={filters.is_active || 'all'} onValueChange={v => handleFilterChange('is_active', v)}>
+                    <Select
+                        value={filters.is_active || 'all'}
+                        onValueChange={(v) =>
+                            handleFilterChange('is_active', v)
+                        }
+                    >
                         <SelectTrigger className="h-9 w-[120px]">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
@@ -213,20 +281,42 @@ export default function CouponsIndex({ coupons, filters }: Props) {
                             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
                                 {selectedIds.length}
                             </div>
-                            <span className="text-sm font-medium">selected</span>
+                            <span className="text-sm font-medium">
+                                selected
+                            </span>
                         </div>
                         <div className="ml-auto flex items-center gap-2">
-                            <Button size="sm" variant="outline" className="h-8" onClick={() => handleBulkAction('activate')}>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8"
+                                onClick={() => handleBulkAction('activate')}
+                            >
                                 Activate
                             </Button>
-                            <Button size="sm" variant="outline" className="h-8" onClick={() => handleBulkAction('deactivate')}>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8"
+                                onClick={() => handleBulkAction('deactivate')}
+                            >
                                 Deactivate
                             </Button>
-                            <Button size="sm" variant="destructive" className="h-8" onClick={() => handleBulkAction('delete')}>
+                            <Button
+                                size="sm"
+                                variant="destructive"
+                                className="h-8"
+                                onClick={() => handleBulkAction('delete')}
+                            >
                                 Delete
                             </Button>
                             <div className="mx-1 h-4 w-px bg-border" />
-                            <Button size="sm" variant="ghost" className="h-8" onClick={() => setSelectedIds([])}>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8"
+                                onClick={() => setSelectedIds([])}
+                            >
                                 Clear
                             </Button>
                         </div>
@@ -240,31 +330,84 @@ export default function CouponsIndex({ coupons, filters }: Props) {
                                 <TableHead className="w-[40px]">
                                     <Checkbox
                                         checked={allSelected}
-                                        ref={(el) => { if (el) (el as any).indeterminate = someSelected; }}
+                                        ref={(el) => {
+                                            if (el)
+                                                (el as any).indeterminate =
+                                                    someSelected;
+                                        }}
                                         onCheckedChange={toggleSelectAll}
                                     />
                                 </TableHead>
-                                <SortableHeader column="code" label="Code" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
-                                <SortableHeader column="name" label="Name" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
-                                <SortableHeader column="type" label="Type" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
-                                <SortableHeader column="value" label="Discount" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
-                                <SortableHeader column="usage_count" label="Usage" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
-                                <SortableHeader column="valid_from" label="Validity" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
-                                <SortableHeader column="is_active" label="Status" currentSort={filters.sort_by} currentDir={filters.sort_dir} onSort={handleSort} />
-                                <TableHead className="w-[100px] text-right">Actions</TableHead>
+                                <SortableHeader
+                                    column="code"
+                                    label="Code"
+                                    currentSort={filters.sort_by}
+                                    currentDir={filters.sort_dir}
+                                    onSort={handleSort}
+                                />
+                                <SortableHeader
+                                    column="name"
+                                    label="Name"
+                                    currentSort={filters.sort_by}
+                                    currentDir={filters.sort_dir}
+                                    onSort={handleSort}
+                                />
+                                <SortableHeader
+                                    column="type"
+                                    label="Type"
+                                    currentSort={filters.sort_by}
+                                    currentDir={filters.sort_dir}
+                                    onSort={handleSort}
+                                />
+                                <SortableHeader
+                                    column="value"
+                                    label="Discount"
+                                    currentSort={filters.sort_by}
+                                    currentDir={filters.sort_dir}
+                                    onSort={handleSort}
+                                />
+                                <SortableHeader
+                                    column="usage_count"
+                                    label="Usage"
+                                    currentSort={filters.sort_by}
+                                    currentDir={filters.sort_dir}
+                                    onSort={handleSort}
+                                />
+                                <SortableHeader
+                                    column="valid_from"
+                                    label="Validity"
+                                    currentSort={filters.sort_by}
+                                    currentDir={filters.sort_dir}
+                                    onSort={handleSort}
+                                />
+                                <SortableHeader
+                                    column="is_active"
+                                    label="Status"
+                                    currentSort={filters.sort_by}
+                                    currentDir={filters.sort_dir}
+                                    onSort={handleSort}
+                                />
+                                <TableHead className="w-[100px] text-right">
+                                    Actions
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {coupons.data.length === 0 ? (
                                 <TableRow className="hover:bg-transparent">
-                                    <TableCell colSpan={9} className="py-8 text-center text-sm text-muted-foreground">
+                                    <TableCell
+                                        colSpan={9}
+                                        className="py-8 text-center text-sm text-muted-foreground"
+                                    >
                                         No coupons found
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 coupons.data.map((coupon) => {
                                     const status = getStatus(coupon);
-                                    const isSelected = selectedIds.includes(coupon.id);
+                                    const isSelected = selectedIds.includes(
+                                        coupon.id,
+                                    );
                                     return (
                                         <TableRow
                                             key={coupon.id}
@@ -273,34 +416,70 @@ export default function CouponsIndex({ coupons, filters }: Props) {
                                             <TableCell>
                                                 <Checkbox
                                                     checked={isSelected}
-                                                    onCheckedChange={() => toggleSelect(coupon.id)}
+                                                    onCheckedChange={() =>
+                                                        toggleSelect(coupon.id)
+                                                    }
                                                 />
                                             </TableCell>
                                             <TableCell>
-                                                <Link href={`/admin/coupons/${coupon.id}`} className="font-mono font-medium text-primary hover:underline">
+                                                <Link
+                                                    href={`/admin/coupons/${coupon.id}`}
+                                                    className="font-mono font-medium text-primary hover:underline"
+                                                >
                                                     {coupon.code}
                                                 </Link>
                                             </TableCell>
-                                            <TableCell className="text-muted-foreground">{coupon.name}</TableCell>
+                                            <TableCell className="text-muted-foreground">
+                                                {coupon.name}
+                                            </TableCell>
                                             <TableCell>
-                                                <Badge variant="outline" className="text-xs">
-                                                    {coupon.type === 'percentage' ? '%' : '€'}
+                                                <Badge
+                                                    variant="outline"
+                                                    className="text-xs"
+                                                >
+                                                    {coupon.type ===
+                                                    'percentage'
+                                                        ? '%'
+                                                        : '€'}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="tabular-nums font-medium">
-                                                {coupon.type === 'percentage' ? `${coupon.value}%` : `€${coupon.value}`}
+                                            <TableCell className="font-medium tabular-nums">
+                                                {coupon.type === 'percentage'
+                                                    ? `${coupon.value}%`
+                                                    : `€${coupon.value}`}
                                             </TableCell>
-                                            <TableCell className="tabular-nums text-muted-foreground">
-                                                {coupon.usage_count}{coupon.usage_limit ? `/${coupon.usage_limit}` : ''}
+                                            <TableCell className="text-muted-foreground tabular-nums">
+                                                {coupon.usage_count}
+                                                {coupon.usage_limit
+                                                    ? `/${coupon.usage_limit}`
+                                                    : ''}
                                             </TableCell>
                                             <TableCell className="text-sm text-muted-foreground">
-                                                {coupon.valid_from && <span>{new Date(coupon.valid_from).toLocaleDateString()}</span>}
-                                                {coupon.valid_from && coupon.valid_until && ' → '}
-                                                {coupon.valid_until && <span>{new Date(coupon.valid_until).toLocaleDateString()}</span>}
-                                                {!coupon.valid_from && !coupon.valid_until && '—'}
+                                                {coupon.valid_from && (
+                                                    <span>
+                                                        {new Date(
+                                                            coupon.valid_from,
+                                                        ).toLocaleDateString()}
+                                                    </span>
+                                                )}
+                                                {coupon.valid_from &&
+                                                    coupon.valid_until &&
+                                                    ' → '}
+                                                {coupon.valid_until && (
+                                                    <span>
+                                                        {new Date(
+                                                            coupon.valid_until,
+                                                        ).toLocaleDateString()}
+                                                    </span>
+                                                )}
+                                                {!coupon.valid_from &&
+                                                    !coupon.valid_until &&
+                                                    '—'}
                                             </TableCell>
                                             <TableCell>
-                                                <Badge variant={status.variant}>{status.label}</Badge>
+                                                <Badge variant={status.variant}>
+                                                    {status.label}
+                                                </Badge>
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
@@ -308,17 +487,35 @@ export default function CouponsIndex({ coupons, filters }: Props) {
                                                         variant="ghost"
                                                         size="icon"
                                                         className="h-8 w-8"
-                                                        onClick={() => handleToggle(coupon)}
+                                                        onClick={() =>
+                                                            handleToggle(coupon)
+                                                        }
                                                     >
-                                                        <Power className={`h-4 w-4 ${coupon.is_active ? 'text-green-600' : ''}`} />
+                                                        <Power
+                                                            className={`h-4 w-4 ${coupon.is_active ? 'text-green-600' : ''}`}
+                                                        />
                                                     </Button>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                                                        <Link href={`/admin/coupons/${coupon.id}`}>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8"
+                                                        asChild
+                                                    >
+                                                        <Link
+                                                            href={`/admin/coupons/${coupon.id}`}
+                                                        >
                                                             <Eye className="h-4 w-4" />
                                                         </Link>
                                                     </Button>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                                                        <Link href={`/admin/coupons/${coupon.id}/edit`}>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8"
+                                                        asChild
+                                                    >
+                                                        <Link
+                                                            href={`/admin/coupons/${coupon.id}/edit`}
+                                                        >
                                                             <Pencil className="h-4 w-4" />
                                                         </Link>
                                                     </Button>
@@ -326,7 +523,9 @@ export default function CouponsIndex({ coupons, filters }: Props) {
                                                         variant="ghost"
                                                         size="icon"
                                                         className="h-8 w-8"
-                                                        onClick={() => handleDelete(coupon)}
+                                                        onClick={() =>
+                                                            handleDelete(coupon)
+                                                        }
                                                     >
                                                         <Trash2 className="h-4 w-4 text-destructive" />
                                                     </Button>
@@ -351,7 +550,12 @@ export default function CouponsIndex({ coupons, filters }: Props) {
                                 size="sm"
                                 className="h-8"
                                 disabled={coupons.current_page === 1}
-                                onClick={() => router.get('/admin/coupons', { ...filters, page: coupons.current_page - 1 })}
+                                onClick={() =>
+                                    router.get('/admin/coupons', {
+                                        ...filters,
+                                        page: coupons.current_page - 1,
+                                    })
+                                }
                             >
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
@@ -359,8 +563,15 @@ export default function CouponsIndex({ coupons, filters }: Props) {
                                 variant="outline"
                                 size="sm"
                                 className="h-8"
-                                disabled={coupons.current_page === coupons.last_page}
-                                onClick={() => router.get('/admin/coupons', { ...filters, page: coupons.current_page + 1 })}
+                                disabled={
+                                    coupons.current_page === coupons.last_page
+                                }
+                                onClick={() =>
+                                    router.get('/admin/coupons', {
+                                        ...filters,
+                                        page: coupons.current_page + 1,
+                                    })
+                                }
                             >
                                 <ChevronRight className="h-4 w-4" />
                             </Button>

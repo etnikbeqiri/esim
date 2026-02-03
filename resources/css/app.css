@@ -491,6 +491,29 @@
     .animate-pulse-slow {
         animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
+
+    /* Hide scrollbar for horizontal scroll containers */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    /* Snap scroll utilities */
+    .snap-x {
+        scroll-snap-type: x mandatory;
+    }
+
+    .snap-start {
+        scroll-snap-align: start;
+    }
+
+    .snap-center {
+        scroll-snap-align: center;
+    }
 }
 
 @keyframes float {

@@ -13,10 +13,13 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
-import { useAnalytics, usePageViewTracking, useFormTracking } from '@/lib/analytics';
+import {
+    useAnalytics,
+    useFormTracking,
+    usePageViewTracking,
+} from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { useCallback, useEffect } from 'react';
 import {
     CheckCircle,
     ChevronRight,
@@ -30,6 +33,7 @@ import {
     Ticket,
     XCircle,
 } from 'lucide-react';
+import { useCallback, useEffect } from 'react';
 
 interface UserTicket {
     uuid: string;
@@ -55,45 +59,64 @@ interface TicketsPageProps extends SharedData {
 }
 
 export default function TicketsIndex() {
-    const { name, contact, flash, prefill, userTickets } = usePage<TicketsPageProps>().props;
+    const { name, contact, flash, prefill, userTickets } =
+        usePage<TicketsPageProps>().props;
     const { trans } = useTrans();
-    const { viewItemList, selectItem, supportContact, filterApplied, createItem } = useAnalytics();
+    const {
+        viewItemList,
+        selectItem,
+        supportContact,
+        filterApplied,
+        createItem,
+    } = useAnalytics();
 
     usePageViewTracking('tickets', 'Support Tickets');
 
-    const { trackFocus, trackComplete, trackSubmit, trackError } = useFormTracking('create_ticket', 'Create Ticket');
+    const { trackFocus, trackComplete, trackSubmit, trackError } =
+        useFormTracking('create_ticket', 'Create Ticket');
 
     useEffect(() => {
         if (userTickets && userTickets.length > 0) {
-            const items = userTickets.map((ticket, index) => createItem({
+            const items = userTickets.map((ticket, index) =>
+                createItem({
+                    item_id: ticket.uuid,
+                    item_name: ticket.subject,
+                    item_category: 'support_ticket',
+                    item_category2: ticket.status,
+                    index,
+                }),
+            );
+            viewItemList('user_tickets', 'User Support Tickets', items);
+        }
+    }, [userTickets, viewItemList, createItem]);
+
+    const handleTicketClick = useCallback(
+        (ticket: UserTicket, index: number) => {
+            const item = createItem({
                 item_id: ticket.uuid,
                 item_name: ticket.subject,
                 item_category: 'support_ticket',
                 item_category2: ticket.status,
                 index,
-            }));
-            viewItemList('user_tickets', 'User Support Tickets', items);
-        }
-    }, [userTickets, viewItemList, createItem]);
+            });
+            selectItem(item, 'user_tickets', 'User Support Tickets');
+        },
+        [selectItem, createItem],
+    );
 
-    const handleTicketClick = useCallback((ticket: UserTicket, index: number) => {
-        const item = createItem({
-            item_id: ticket.uuid,
-            item_name: ticket.subject,
-            item_category: 'support_ticket',
-            item_category2: ticket.status,
-            index,
-        });
-        selectItem(item, 'user_tickets', 'User Support Tickets');
-    }, [selectItem, createItem]);
+    const handlePriorityChange = useCallback(
+        (priority: string) => {
+            filterApplied('sort', priority, 'tickets');
+        },
+        [filterApplied],
+    );
 
-    const handlePriorityChange = useCallback((priority: string) => {
-        filterApplied('sort', priority, 'tickets');
-    }, [filterApplied]);
-
-    const handleSupportContactClick = useCallback((method: 'email' | 'phone' | 'whatsapp') => {
-        supportContact(method, 'tickets');
-    }, [supportContact]);
+    const handleSupportContactClick = useCallback(
+        (method: 'email' | 'phone' | 'whatsapp') => {
+            supportContact(method, 'tickets');
+        },
+        [supportContact],
+    );
 
     // Ticket creation form - prefill with logged in user data
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -114,7 +137,11 @@ export default function TicketsIndex() {
         e.preventDefault();
         trackSubmit();
         supportContact('ticket', 'tickets', {
-            ticket_priority: data.priority as 'low' | 'medium' | 'high' | 'urgent',
+            ticket_priority: data.priority as
+                | 'low'
+                | 'medium'
+                | 'high'
+                | 'urgent',
             ticket_subject: data.subject,
         });
         post('/tickets', {
@@ -141,7 +168,9 @@ export default function TicketsIndex() {
             <Head title={trans('ticket.page_title', { app_name: name })}>
                 <meta
                     name="description"
-                    content={trans('ticket.page_description', { app_name: name })}
+                    content={trans('ticket.page_description', {
+                        app_name: name,
+                    })}
                 />
             </Head>
 
@@ -202,7 +231,10 @@ export default function TicketsIndex() {
                                                 Your Tickets
                                             </h3>
                                             <p className="text-sm text-primary-600">
-                                                {userTickets.length} ticket{userTickets.length !== 1 ? 's' : ''}
+                                                {userTickets.length} ticket
+                                                {userTickets.length !== 1
+                                                    ? 's'
+                                                    : ''}
                                             </p>
                                         </div>
                                     </div>
@@ -213,7 +245,9 @@ export default function TicketsIndex() {
                                             key={ticket.uuid}
                                             href={`/tickets/${ticket.uuid}/${prefill?.email}`}
                                             className="flex items-center justify-between rounded-xl border border-primary-100 bg-primary-50/50 p-4 transition-all hover:border-primary-200 hover:bg-primary-50"
-                                            onClick={() => handleTicketClick(ticket, index)}
+                                            onClick={() =>
+                                                handleTicketClick(ticket, index)
+                                            }
                                         >
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex items-center gap-2">
@@ -222,11 +256,14 @@ export default function TicketsIndex() {
                                                     </code>
                                                     <span
                                                         className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                                                            ticket.status === 'open'
+                                                            ticket.status ===
+                                                            'open'
                                                                 ? 'bg-green-100 text-green-700'
-                                                                : ticket.status === 'in_progress'
+                                                                : ticket.status ===
+                                                                    'in_progress'
                                                                   ? 'bg-blue-100 text-blue-700'
-                                                                  : ticket.status === 'waiting_on_customer'
+                                                                  : ticket.status ===
+                                                                      'waiting_on_customer'
                                                                     ? 'bg-yellow-100 text-yellow-700'
                                                                     : 'bg-gray-100 text-gray-700'
                                                         }`}
@@ -251,7 +288,8 @@ export default function TicketsIndex() {
                                 <div className="flex items-center gap-3 text-primary-600">
                                     <Ticket className="h-5 w-5" />
                                     <p className="text-sm">
-                                        You don't have any support tickets yet. Submit one below if you need help.
+                                        You don't have any support tickets yet.
+                                        Submit one below if you need help.
                                     </p>
                                 </div>
                             </div>
@@ -274,17 +312,34 @@ export default function TicketsIndex() {
                                         >
                                             <div className="space-y-3 md:flex md:gap-3 md:space-y-0">
                                                 <Input
-                                                    value={lookupForm.data.reference}
-                                                    onChange={(e) => lookupForm.setData('reference', e.target.value)}
+                                                    value={
+                                                        lookupForm.data
+                                                            .reference
+                                                    }
+                                                    onChange={(e) =>
+                                                        lookupForm.setData(
+                                                            'reference',
+                                                            e.target.value,
+                                                        )
+                                                    }
                                                     placeholder="TKT-XXXXXXXX"
                                                     required
                                                     className="h-11 flex-1 text-base md:h-10"
                                                 />
                                                 <Input
                                                     type="email"
-                                                    value={lookupForm.data.email}
-                                                    onChange={(e) => lookupForm.setData('email', e.target.value)}
-                                                    placeholder={trans('ticket.lookup_email_placeholder')}
+                                                    value={
+                                                        lookupForm.data.email
+                                                    }
+                                                    onChange={(e) =>
+                                                        lookupForm.setData(
+                                                            'email',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    placeholder={trans(
+                                                        'ticket.lookup_email_placeholder',
+                                                    )}
                                                     required
                                                     className="h-11 flex-1 text-base md:h-10"
                                                 />
@@ -300,10 +355,14 @@ export default function TicketsIndex() {
                                             </Button>
                                         </form>
                                         {lookupForm.errors.reference && (
-                                            <p className="mt-2 text-sm text-red-500">{lookupForm.errors.reference}</p>
+                                            <p className="mt-2 text-sm text-red-500">
+                                                {lookupForm.errors.reference}
+                                            </p>
                                         )}
                                         {lookupForm.errors.email && (
-                                            <p className="mt-2 text-sm text-red-500">{lookupForm.errors.email}</p>
+                                            <p className="mt-2 text-sm text-red-500">
+                                                {lookupForm.errors.email}
+                                            </p>
                                         )}
                                     </div>
                                 </div>
@@ -346,15 +405,28 @@ export default function TicketsIndex() {
                                         <Input
                                             id="name"
                                             value={data.name}
-                                            onChange={(e) => setData('name', e.target.value)}
+                                            onChange={(e) =>
+                                                setData('name', e.target.value)
+                                            }
                                             onFocus={() => trackFocus('name')}
-                                            onBlur={() => data.name && trackComplete('name')}
-                                            placeholder={trans('ticket.field_name_placeholder')}
-                                            className={errors.name ? 'border-red-500' : ''}
+                                            onBlur={() =>
+                                                data.name &&
+                                                trackComplete('name')
+                                            }
+                                            placeholder={trans(
+                                                'ticket.field_name_placeholder',
+                                            )}
+                                            className={
+                                                errors.name
+                                                    ? 'border-red-500'
+                                                    : ''
+                                            }
                                             required
                                         />
                                         {errors.name && (
-                                            <p className="text-sm text-red-500">{errors.name}</p>
+                                            <p className="text-sm text-red-500">
+                                                {errors.name}
+                                            </p>
                                         )}
                                     </div>
 
@@ -366,15 +438,28 @@ export default function TicketsIndex() {
                                             id="email"
                                             type="email"
                                             value={data.email}
-                                            onChange={(e) => setData('email', e.target.value)}
+                                            onChange={(e) =>
+                                                setData('email', e.target.value)
+                                            }
                                             onFocus={() => trackFocus('email')}
-                                            onBlur={() => data.email && trackComplete('email')}
-                                            placeholder={trans('ticket.field_email_placeholder')}
-                                            className={errors.email ? 'border-red-500' : ''}
+                                            onBlur={() =>
+                                                data.email &&
+                                                trackComplete('email')
+                                            }
+                                            placeholder={trans(
+                                                'ticket.field_email_placeholder',
+                                            )}
+                                            className={
+                                                errors.email
+                                                    ? 'border-red-500'
+                                                    : ''
+                                            }
                                             required
                                         />
                                         {errors.email && (
-                                            <p className="text-sm text-red-500">{errors.email}</p>
+                                            <p className="text-sm text-red-500">
+                                                {errors.email}
+                                            </p>
                                         )}
                                     </div>
                                 </div>
@@ -388,15 +473,33 @@ export default function TicketsIndex() {
                                         <Input
                                             id="subject"
                                             value={data.subject}
-                                            onChange={(e) => setData('subject', e.target.value)}
-                                            onFocus={() => trackFocus('subject')}
-                                            onBlur={() => data.subject && trackComplete('subject')}
-                                            placeholder={trans('ticket.field_subject_placeholder')}
-                                            className={errors.subject ? 'border-red-500' : ''}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'subject',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            onFocus={() =>
+                                                trackFocus('subject')
+                                            }
+                                            onBlur={() =>
+                                                data.subject &&
+                                                trackComplete('subject')
+                                            }
+                                            placeholder={trans(
+                                                'ticket.field_subject_placeholder',
+                                            )}
+                                            className={
+                                                errors.subject
+                                                    ? 'border-red-500'
+                                                    : ''
+                                            }
                                             required
                                         />
                                         {errors.subject && (
-                                            <p className="text-sm text-red-500">{errors.subject}</p>
+                                            <p className="text-sm text-red-500">
+                                                {errors.subject}
+                                            </p>
                                         )}
                                     </div>
 
@@ -417,16 +520,24 @@ export default function TicketsIndex() {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="low">
-                                                    {trans('ticket.priority_low')}
+                                                    {trans(
+                                                        'ticket.priority_low',
+                                                    )}
                                                 </SelectItem>
                                                 <SelectItem value="medium">
-                                                    {trans('ticket.priority_medium')}
+                                                    {trans(
+                                                        'ticket.priority_medium',
+                                                    )}
                                                 </SelectItem>
                                                 <SelectItem value="high">
-                                                    {trans('ticket.priority_high')}
+                                                    {trans(
+                                                        'ticket.priority_high',
+                                                    )}
                                                 </SelectItem>
                                                 <SelectItem value="urgent">
-                                                    {trans('ticket.priority_urgent')}
+                                                    {trans(
+                                                        'ticket.priority_urgent',
+                                                    )}
                                                 </SelectItem>
                                             </SelectContent>
                                         </Select>
@@ -442,15 +553,28 @@ export default function TicketsIndex() {
                                         id="message"
                                         rows={6}
                                         value={data.message}
-                                        onChange={(e) => setData('message', e.target.value)}
+                                        onChange={(e) =>
+                                            setData('message', e.target.value)
+                                        }
                                         onFocus={() => trackFocus('message')}
-                                        onBlur={() => data.message && trackComplete('message')}
-                                        placeholder={trans('ticket.field_message_placeholder')}
-                                        className={errors.message ? 'border-red-500' : ''}
+                                        onBlur={() =>
+                                            data.message &&
+                                            trackComplete('message')
+                                        }
+                                        placeholder={trans(
+                                            'ticket.field_message_placeholder',
+                                        )}
+                                        className={
+                                            errors.message
+                                                ? 'border-red-500'
+                                                : ''
+                                        }
                                         required
                                     />
                                     {errors.message && (
-                                        <p className="text-sm text-red-500">{errors.message}</p>
+                                        <p className="text-sm text-red-500">
+                                            {errors.message}
+                                        </p>
                                     )}
                                 </div>
 
@@ -525,7 +649,9 @@ export default function TicketsIndex() {
                             <a
                                 href={`tel:${contact.phone}`}
                                 className="group flex items-center gap-3 rounded-xl border border-primary-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:flex-col md:rounded-2xl md:p-6 md:text-center"
-                                onClick={() => handleSupportContactClick('phone')}
+                                onClick={() =>
+                                    handleSupportContactClick('phone')
+                                }
                             >
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100 transition-colors group-hover:bg-primary-200 md:mb-4 md:h-12 md:w-12 md:rounded-xl">
                                     <Phone className="h-5 w-5 text-primary-600 md:h-6 md:w-6" />
@@ -551,7 +677,9 @@ export default function TicketsIndex() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="group flex items-center gap-3 rounded-xl border border-primary-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:flex-col md:rounded-2xl md:p-6 md:text-center"
-                                onClick={() => handleSupportContactClick('whatsapp')}
+                                onClick={() =>
+                                    handleSupportContactClick('whatsapp')
+                                }
                             >
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-100 transition-colors group-hover:bg-green-200 md:mb-4 md:h-12 md:w-12 md:rounded-xl">
                                     <MessageSquare className="h-5 w-5 text-green-600 md:h-6 md:w-6" />
@@ -576,8 +704,18 @@ export default function TicketsIndex() {
                         <div className="mx-auto mt-6 max-w-2xl rounded-xl border border-primary-100 bg-white p-4 shadow-sm md:mt-10 md:rounded-2xl md:p-6">
                             <div className="flex items-start gap-3 md:gap-4">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100 md:h-12 md:w-12 md:rounded-xl">
-                                    <svg className="h-5 w-5 text-primary-600 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    <svg
+                                        className="h-5 w-5 text-primary-600 md:h-6 md:w-6"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth={2}
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                        />
                                     </svg>
                                 </div>
                                 <div className="flex-1">
@@ -587,19 +725,35 @@ export default function TicketsIndex() {
                                         </h3>
                                     )}
                                     <div className="text-xs text-primary-600 md:text-sm">
-                                        {contact?.companyAddress && <p>{contact.companyAddress}</p>}
-                                        {(contact?.companyPostalCode || contact?.companyCity) && (
-                                            <p>{contact?.companyPostalCode} {contact?.companyCity}</p>
+                                        {contact?.companyAddress && (
+                                            <p>{contact.companyAddress}</p>
                                         )}
-                                        {contact?.companyCountry && <p>{contact.companyCountry}</p>}
+                                        {(contact?.companyPostalCode ||
+                                            contact?.companyCity) && (
+                                            <p>
+                                                {contact?.companyPostalCode}{' '}
+                                                {contact?.companyCity}
+                                            </p>
+                                        )}
+                                        {contact?.companyCountry && (
+                                            <p>{contact.companyCountry}</p>
+                                        )}
                                     </div>
-                                    {(contact?.companyVat || contact?.companyRegistration) && (
+                                    {(contact?.companyVat ||
+                                        contact?.companyRegistration) && (
                                         <div className="mt-2 flex flex-wrap gap-2 text-[10px] text-primary-400 md:mt-3 md:gap-3 md:text-xs">
                                             {contact?.companyVat && (
-                                                <span>VAT: {contact.companyVat}</span>
+                                                <span>
+                                                    VAT: {contact.companyVat}
+                                                </span>
                                             )}
                                             {contact?.companyRegistration && (
-                                                <span>Reg: {contact.companyRegistration}</span>
+                                                <span>
+                                                    Reg:{' '}
+                                                    {
+                                                        contact.companyRegistration
+                                                    }
+                                                </span>
                                             )}
                                         </div>
                                     )}

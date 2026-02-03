@@ -39,7 +39,17 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, ArrowUpDown, ChevronDown, ChevronUp, Pencil, Plus, Power, Search, Trash2 } from 'lucide-react';
+import {
+    ArrowLeft,
+    ArrowUpDown,
+    ChevronDown,
+    ChevronUp,
+    Pencil,
+    Plus,
+    Power,
+    Search,
+    Trash2,
+} from 'lucide-react';
 import { FormEvent, useState } from 'react';
 
 interface Brand {
@@ -96,8 +106,10 @@ export default function BrandsIndex({ brands, filters }: Props) {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
-    const allSelected = brands.data.length > 0 && selectedIds.length === brands.data.length;
-    const someSelected = selectedIds.length > 0 && selectedIds.length < brands.data.length;
+    const allSelected =
+        brands.data.length > 0 && selectedIds.length === brands.data.length;
+    const someSelected =
+        selectedIds.length > 0 && selectedIds.length < brands.data.length;
 
     // Get brands that can be deleted (no devices)
     const deletableSelectedIds = selectedIds.filter((id) => {
@@ -115,31 +127,48 @@ export default function BrandsIndex({ brands, filters }: Props) {
 
     function toggleSelect(id: number) {
         setSelectedIds((prev) =>
-            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
         );
     }
 
     function handleSearch(e: FormEvent) {
         e.preventDefault();
-        router.get('/admin/brands', { ...filters, search }, { preserveState: true });
+        router.get(
+            '/admin/brands',
+            { ...filters, search },
+            { preserveState: true },
+        );
     }
 
     function handleSort(field: string) {
-        const newDirection = filters.sort === field && filters.direction === 'asc' ? 'desc' : 'asc';
-        router.get('/admin/brands', { ...filters, sort: field, direction: newDirection }, { preserveState: true });
+        const newDirection =
+            filters.sort === field && filters.direction === 'asc'
+                ? 'desc'
+                : 'asc';
+        router.get(
+            '/admin/brands',
+            { ...filters, sort: field, direction: newDirection },
+            { preserveState: true },
+        );
     }
 
     function SortIcon({ field }: { field: string }) {
         if (filters.sort !== field) {
             return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />;
         }
-        return filters.direction === 'asc'
-            ? <ChevronUp className="ml-1 h-3 w-3" />
-            : <ChevronDown className="ml-1 h-3 w-3" />;
+        return filters.direction === 'asc' ? (
+            <ChevronUp className="ml-1 h-3 w-3" />
+        ) : (
+            <ChevronDown className="ml-1 h-3 w-3" />
+        );
     }
 
     function handleToggleActive(brand: Brand) {
-        router.post(`/admin/brands/${brand.slug}/toggle`, {}, { preserveState: true });
+        router.post(
+            `/admin/brands/${brand.slug}/toggle`,
+            {},
+            { preserveState: true },
+        );
     }
 
     function handleDelete() {
@@ -151,20 +180,28 @@ export default function BrandsIndex({ brands, filters }: Props) {
     }
 
     function handleBulkDelete() {
-        router.post('/admin/brands/bulk-delete', { ids: deletableSelectedIds }, {
-            preserveState: true,
-            onSuccess: () => {
-                setSelectedIds([]);
-                setShowBulkDeleteConfirm(false);
+        router.post(
+            '/admin/brands/bulk-delete',
+            { ids: deletableSelectedIds },
+            {
+                preserveState: true,
+                onSuccess: () => {
+                    setSelectedIds([]);
+                    setShowBulkDeleteConfirm(false);
+                },
             },
-        });
+        );
     }
 
     function handleBulkToggle(isActive: boolean) {
-        router.post('/admin/brands/bulk-toggle', { ids: selectedIds, is_active: isActive }, {
-            preserveState: true,
-            onSuccess: () => setSelectedIds([]),
-        });
+        router.post(
+            '/admin/brands/bulk-toggle',
+            { ids: selectedIds, is_active: isActive },
+            {
+                preserveState: true,
+                onSuccess: () => setSelectedIds([]),
+            },
+        );
     }
 
     function openCreateDialog() {
@@ -225,7 +262,9 @@ export default function BrandsIndex({ brands, filters }: Props) {
                         </p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <span className="text-muted-foreground">{brands.total} brands</span>
+                        <span className="text-muted-foreground">
+                            {brands.total} brands
+                        </span>
                         <Button asChild variant="outline">
                             <Link href="/admin/devices">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
@@ -242,13 +281,13 @@ export default function BrandsIndex({ brands, filters }: Props) {
                 <div className="flex flex-wrap items-center gap-2">
                     <form onSubmit={handleSearch} className="flex gap-2">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                                 type="search"
                                 placeholder="Search brands..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="pl-9 w-[200px]"
+                                className="w-[200px] pl-9"
                             />
                         </div>
                         <Button type="submit" variant="secondary">
@@ -257,7 +296,7 @@ export default function BrandsIndex({ brands, filters }: Props) {
                     </form>
 
                     {selectedIds.length > 0 && (
-                        <div className="flex items-center gap-2 ml-auto">
+                        <div className="ml-auto flex items-center gap-2">
                             <span className="text-sm text-muted-foreground">
                                 {selectedIds.length} selected
                             </span>
@@ -269,22 +308,31 @@ export default function BrandsIndex({ brands, filters }: Props) {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => handleBulkToggle(true)}>
+                                    <DropdownMenuItem
+                                        onClick={() => handleBulkToggle(true)}
+                                    >
                                         <Power className="mr-2 h-4 w-4" />
                                         Activate Selected
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleBulkToggle(false)}>
+                                    <DropdownMenuItem
+                                        onClick={() => handleBulkToggle(false)}
+                                    >
                                         <Power className="mr-2 h-4 w-4" />
                                         Deactivate Selected
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
-                                        onClick={() => setShowBulkDeleteConfirm(true)}
+                                        onClick={() =>
+                                            setShowBulkDeleteConfirm(true)
+                                        }
                                         className="text-destructive focus:text-destructive"
-                                        disabled={deletableSelectedIds.length === 0}
+                                        disabled={
+                                            deletableSelectedIds.length === 0
+                                        }
                                     >
                                         <Trash2 className="mr-2 h-4 w-4" />
-                                        Delete Selected ({deletableSelectedIds.length})
+                                        Delete Selected (
+                                        {deletableSelectedIds.length})
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -308,7 +356,9 @@ export default function BrandsIndex({ brands, filters }: Props) {
                                         checked={allSelected}
                                         onCheckedChange={toggleSelectAll}
                                         aria-label="Select all"
-                                        className={someSelected ? 'opacity-50' : ''}
+                                        className={
+                                            someSelected ? 'opacity-50' : ''
+                                        }
                                     />
                                 </TableHead>
                                 <TableHead
@@ -364,7 +414,7 @@ export default function BrandsIndex({ brands, filters }: Props) {
                                 <TableRow>
                                     <TableCell
                                         colSpan={7}
-                                        className="text-center py-8 text-muted-foreground"
+                                        className="py-8 text-center text-muted-foreground"
                                     >
                                         No brands found
                                     </TableCell>
@@ -373,28 +423,50 @@ export default function BrandsIndex({ brands, filters }: Props) {
                                 brands.data.map((brand) => (
                                     <TableRow
                                         key={brand.id}
-                                        className={selectedIds.includes(brand.id) ? 'bg-muted/50' : ''}
+                                        className={
+                                            selectedIds.includes(brand.id)
+                                                ? 'bg-muted/50'
+                                                : ''
+                                        }
                                     >
                                         <TableCell>
                                             <Checkbox
-                                                checked={selectedIds.includes(brand.id)}
-                                                onCheckedChange={() => toggleSelect(brand.id)}
+                                                checked={selectedIds.includes(
+                                                    brand.id,
+                                                )}
+                                                onCheckedChange={() =>
+                                                    toggleSelect(brand.id)
+                                                }
                                                 aria-label={`Select ${brand.name}`}
                                             />
                                         </TableCell>
-                                        <TableCell className="font-medium">{brand.name}</TableCell>
+                                        <TableCell className="font-medium">
+                                            {brand.name}
+                                        </TableCell>
                                         <TableCell className="text-muted-foreground">
                                             {brand.slug}
                                         </TableCell>
-                                        <TableCell>{brand.devices_count}</TableCell>
-                                        <TableCell>{brand.sort_order}</TableCell>
+                                        <TableCell>
+                                            {brand.devices_count}
+                                        </TableCell>
+                                        <TableCell>
+                                            {brand.sort_order}
+                                        </TableCell>
                                         <TableCell>
                                             <Badge
-                                                variant={brand.is_active ? 'default' : 'secondary'}
+                                                variant={
+                                                    brand.is_active
+                                                        ? 'default'
+                                                        : 'secondary'
+                                                }
                                                 className="cursor-pointer"
-                                                onClick={() => handleToggleActive(brand)}
+                                                onClick={() =>
+                                                    handleToggleActive(brand)
+                                                }
                                             >
-                                                {brand.is_active ? 'Active' : 'Inactive'}
+                                                {brand.is_active
+                                                    ? 'Active'
+                                                    : 'Inactive'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
@@ -402,15 +474,21 @@ export default function BrandsIndex({ brands, filters }: Props) {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => openEditDialog(brand)}
+                                                    onClick={() =>
+                                                        openEditDialog(brand)
+                                                    }
                                                 >
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => setDeleteBrand(brand)}
-                                                    disabled={brand.devices_count > 0}
+                                                    onClick={() =>
+                                                        setDeleteBrand(brand)
+                                                    }
+                                                    disabled={
+                                                        brand.devices_count > 0
+                                                    }
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -427,13 +505,22 @@ export default function BrandsIndex({ brands, filters }: Props) {
                     <div className="flex justify-center gap-2">
                         {Array.from(
                             { length: Math.min(brands.last_page, 10) },
-                            (_, i) => i + 1
+                            (_, i) => i + 1,
                         ).map((page) => (
                             <Button
                                 key={page}
-                                variant={page === brands.current_page ? 'default' : 'outline'}
+                                variant={
+                                    page === brands.current_page
+                                        ? 'default'
+                                        : 'outline'
+                                }
                                 size="sm"
-                                onClick={() => router.get('/admin/brands', { ...filters, page })}
+                                onClick={() =>
+                                    router.get('/admin/brands', {
+                                        ...filters,
+                                        page,
+                                    })
+                                }
                             >
                                 {page}
                             </Button>
@@ -446,7 +533,9 @@ export default function BrandsIndex({ brands, filters }: Props) {
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{editBrand ? 'Edit Brand' : 'Add Brand'}</DialogTitle>
+                        <DialogTitle>
+                            {editBrand ? 'Edit Brand' : 'Add Brand'}
+                        </DialogTitle>
                         <DialogDescription>
                             {editBrand
                                 ? 'Update the brand information below.'
@@ -461,18 +550,26 @@ export default function BrandsIndex({ brands, filters }: Props) {
                                     id="name"
                                     value={formData.name}
                                     onChange={(e) =>
-                                        setFormData({ ...formData, name: e.target.value })
+                                        setFormData({
+                                            ...formData,
+                                            name: e.target.value,
+                                        })
                                     }
                                     placeholder="e.g., Apple"
                                 />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="logo_url">Logo URL (optional)</Label>
+                                <Label htmlFor="logo_url">
+                                    Logo URL (optional)
+                                </Label>
                                 <Input
                                     id="logo_url"
                                     value={formData.logo_url}
                                     onChange={(e) =>
-                                        setFormData({ ...formData, logo_url: e.target.value })
+                                        setFormData({
+                                            ...formData,
+                                            logo_url: e.target.value,
+                                        })
                                     }
                                     placeholder="https://..."
                                 />
@@ -484,7 +581,10 @@ export default function BrandsIndex({ brands, filters }: Props) {
                                     type="number"
                                     value={formData.sort_order}
                                     onChange={(e) =>
-                                        setFormData({ ...formData, sort_order: e.target.value })
+                                        setFormData({
+                                            ...formData,
+                                            sort_order: e.target.value,
+                                        })
                                     }
                                     placeholder="0"
                                 />
@@ -492,7 +592,7 @@ export default function BrandsIndex({ brands, filters }: Props) {
                                     Lower numbers appear first
                                 </p>
                             </div>
-                            <label className="flex items-center gap-2 cursor-pointer">
+                            <label className="flex cursor-pointer items-center gap-2">
                                 <input
                                     type="checkbox"
                                     checked={formData.is_active}
@@ -536,16 +636,19 @@ export default function BrandsIndex({ brands, filters }: Props) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete Brand</AlertDialogTitle>
                         <AlertDialogDescription>
-                            {deleteBrand?.devices_count && deleteBrand.devices_count > 0 ? (
+                            {deleteBrand?.devices_count &&
+                            deleteBrand.devices_count > 0 ? (
                                 <>
-                                    Cannot delete "{deleteBrand?.name}" because it has{' '}
-                                    {deleteBrand.devices_count} associated device(s). Remove all
-                                    devices first.
+                                    Cannot delete "{deleteBrand?.name}" because
+                                    it has {deleteBrand.devices_count}{' '}
+                                    associated device(s). Remove all devices
+                                    first.
                                 </>
                             ) : (
                                 <>
-                                    Are you sure you want to delete "{deleteBrand?.name}"? This
-                                    action cannot be undone.
+                                    Are you sure you want to delete "
+                                    {deleteBrand?.name}"? This action cannot be
+                                    undone.
                                 </>
                             )}
                         </AlertDialogDescription>
@@ -571,17 +674,22 @@ export default function BrandsIndex({ brands, filters }: Props) {
             >
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Delete {deletableSelectedIds.length} Brands</AlertDialogTitle>
+                        <AlertDialogTitle>
+                            Delete {deletableSelectedIds.length} Brands
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                            {deletableSelectedIds.length < selectedIds.length ? (
+                            {deletableSelectedIds.length <
+                            selectedIds.length ? (
                                 <>
-                                    Only {deletableSelectedIds.length} of {selectedIds.length} selected
-                                    brands can be deleted (brands with devices cannot be deleted).
-                                    Are you sure you want to proceed?
+                                    Only {deletableSelectedIds.length} of{' '}
+                                    {selectedIds.length} selected brands can be
+                                    deleted (brands with devices cannot be
+                                    deleted). Are you sure you want to proceed?
                                 </>
                             ) : (
                                 <>
-                                    Are you sure you want to delete {deletableSelectedIds.length} selected
+                                    Are you sure you want to delete{' '}
+                                    {deletableSelectedIds.length} selected
                                     brand(s)? This action cannot be undone.
                                 </>
                             )}

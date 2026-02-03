@@ -35,7 +35,18 @@ return [
             'payment' => 'Payment',
             'secure' => 'Secure',
             'instant' => 'Instant',
-        ]
+        ],
+    ],
+    'featured_packages' => [
+        'title' => 'Popular Plans',
+        'view_all' => 'View All',
+        'buy_now' => 'Buy Now',
+        'badges' => [
+            'featured' => 'Featured',
+            'best_value' => 'Best Value',
+            'popular' => 'Popular',
+            'hot_deal' => 'Hot Deal',
+        ],
     ],
     'steps' => [
         'title' => 'How It Works',
@@ -86,7 +97,7 @@ return [
             'instant' => 'Instant Delivery',
             'support' => '24/7 Support',
             'secure' => 'Secure Payment',
-        ]
+        ],
     ],
     'footer' => [
         'brand_description' => 'Stay connected anywhere in the world with instant eSIM activation. No roaming fees, just freedom.',
@@ -1716,4 +1727,3 @@ return [
         ],
     ],
 ];
-

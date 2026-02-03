@@ -1,7 +1,11 @@
 import { LegalPageLayout, LegalSection } from '@/components/legal-page-layout';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
-import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
+import {
+    useAnalytics,
+    usePageViewTracking,
+    useScrollTracking,
+} from '@/lib/analytics';
 import { SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { useCallback } from 'react';
@@ -15,9 +19,14 @@ export default function Terms() {
 
     useScrollTracking('guide', 'terms-of-service', 'Terms of Service');
 
-    const handleSectionView = useCallback((sectionId: string, sectionTitle: string) => {
-        trackContentEngagement('guide', sectionId, 'view', { title: sectionTitle });
-    }, [trackContentEngagement]);
+    const handleSectionView = useCallback(
+        (sectionId: string, sectionTitle: string) => {
+            trackContentEngagement('guide', sectionId, 'view', {
+                title: sectionTitle,
+            });
+        },
+        [trackContentEngagement],
+    );
 
     const handleContactClick = useCallback(() => {
         supportContact('email', 'terms');
@@ -44,7 +53,9 @@ export default function Terms() {
             >
                 <LegalSection
                     title={trans('terms_page.sections.agreement.title')}
-                    onVisible={() => handleSectionView('agreement', 'Agreement to Terms')}
+                    onVisible={() =>
+                        handleSectionView('agreement', 'Agreement to Terms')
+                    }
                 >
                     <p>
                         {trans('terms_page.sections.agreement.content', {
@@ -86,7 +97,9 @@ export default function Terms() {
 
                 <LegalSection
                     title={trans('terms_page.sections.purchases.title')}
-                    onVisible={() => handleSectionView('purchases', 'Purchases and Payment')}
+                    onVisible={() =>
+                        handleSectionView('purchases', 'Purchases and Payment')
+                    }
                 >
                     <p>{trans('terms_page.sections.purchases.content')}</p>
                     <ul className="list-disc space-y-2 pl-6">
@@ -203,7 +216,12 @@ export default function Terms() {
 
                 <LegalSection
                     title={trans('terms_page.sections.liability.title')}
-                    onVisible={() => handleSectionView('liability', 'Limitation of Liability')}
+                    onVisible={() =>
+                        handleSectionView(
+                            'liability',
+                            'Limitation of Liability',
+                        )
+                    }
                 >
                     <p>
                         {trans('terms_page.sections.liability.content_1', {

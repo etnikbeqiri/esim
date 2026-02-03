@@ -27,7 +27,6 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     Building2,
-    CheckCircle2,
     ChevronLeft,
     ChevronRight,
     Eye,
@@ -37,7 +36,6 @@ import {
     Search,
     User,
     Wallet,
-    XCircle,
 } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 
@@ -88,11 +86,19 @@ export default function CustomersIndex({ customers, filters }: Props) {
 
     function handleSearch(e: FormEvent) {
         e.preventDefault();
-        router.get('/admin/customers', { ...filters, search, page: 1 }, { preserveState: true });
+        router.get(
+            '/admin/customers',
+            { ...filters, search, page: 1 },
+            { preserveState: true },
+        );
     }
 
     function handleFilterChange(key: string, value: string) {
-        const newFilters = { ...filters, [key]: value === 'all' ? undefined : value, page: 1 };
+        const newFilters = {
+            ...filters,
+            [key]: value === 'all' ? undefined : value,
+            page: 1,
+        };
         router.get('/admin/customers', newFilters, { preserveState: true });
     }
 
@@ -102,7 +108,9 @@ export default function CustomersIndex({ customers, filters }: Props) {
             <div className="flex flex-col gap-4 p-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-xl font-semibold">Customers</h1>
-                    <span className="text-sm text-muted-foreground">{customers.total} customers</span>
+                    <span className="text-sm text-muted-foreground">
+                        {customers.total} customers
+                    </span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -152,7 +160,13 @@ export default function CustomersIndex({ customers, filters }: Props) {
                             variant="ghost"
                             size="sm"
                             className="h-9"
-                            onClick={() => router.get('/admin/customers', {}, { preserveState: true })}
+                            onClick={() =>
+                                router.get(
+                                    '/admin/customers',
+                                    {},
+                                    { preserveState: true },
+                                )
+                            }
                         >
                             Clear
                         </Button>
@@ -166,9 +180,15 @@ export default function CustomersIndex({ customers, filters }: Props) {
                                 <TableHead>Customer</TableHead>
                                 <TableHead>Type</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Orders</TableHead>
-                                <TableHead className="text-right">Total Spent</TableHead>
-                                <TableHead className="text-right">Balance</TableHead>
+                                <TableHead className="text-right">
+                                    Orders
+                                </TableHead>
+                                <TableHead className="text-right">
+                                    Total Spent
+                                </TableHead>
+                                <TableHead className="text-right">
+                                    Balance
+                                </TableHead>
                                 <TableHead>Discount</TableHead>
                                 <TableHead>Joined</TableHead>
                                 <TableHead className="w-[80px]"></TableHead>
@@ -177,13 +197,19 @@ export default function CustomersIndex({ customers, filters }: Props) {
                         <TableBody>
                             {customers.data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
+                                    <TableCell
+                                        colSpan={9}
+                                        className="py-8 text-center text-muted-foreground"
+                                    >
                                         No customers found
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 customers.data.map((customer) => (
-                                    <TableRow key={customer.id} className={`group ${!customer.is_active ? 'opacity-60' : ''}`}>
+                                    <TableRow
+                                        key={customer.id}
+                                        className={`group ${!customer.is_active ? 'opacity-60' : ''}`}
+                                    >
                                         <TableCell>
                                             {customer.user ? (
                                                 <div className="flex items-start gap-2">
@@ -193,28 +219,45 @@ export default function CustomersIndex({ customers, filters }: Props) {
                                                                 href={`/admin/customers/${customer.id}`}
                                                                 className="font-medium hover:underline"
                                                             >
-                                                                {customer.user.name}
+                                                                {
+                                                                    customer
+                                                                        .user
+                                                                        .name
+                                                                }
                                                             </Link>
                                                             <TooltipProvider>
                                                                 <Tooltip>
                                                                     <TooltipTrigger>
-                                                                        {customer.user.email_verified ? (
+                                                                        {customer
+                                                                            .user
+                                                                            .email_verified ? (
                                                                             <Mail className="h-3.5 w-3.5 text-green-500" />
                                                                         ) : (
                                                                             <MailX className="h-3.5 w-3.5 text-yellow-500" />
                                                                         )}
                                                                     </TooltipTrigger>
                                                                     <TooltipContent>
-                                                                        {customer.user.email_verified ? 'Email verified' : 'Email not verified'}
+                                                                        {customer
+                                                                            .user
+                                                                            .email_verified
+                                                                            ? 'Email verified'
+                                                                            : 'Email not verified'}
                                                                     </TooltipContent>
                                                                 </Tooltip>
                                                             </TooltipProvider>
                                                         </div>
-                                                        <div className="text-xs text-muted-foreground">{customer.user.email}</div>
+                                                        <div className="text-xs text-muted-foreground">
+                                                            {
+                                                                customer.user
+                                                                    .email
+                                                            }
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <span className="text-muted-foreground">No user</span>
+                                                <span className="text-muted-foreground">
+                                                    No user
+                                                </span>
                                             )}
                                         </TableCell>
                                         <TableCell>
@@ -236,53 +279,99 @@ export default function CustomersIndex({ customers, filters }: Props) {
                                         </TableCell>
                                         <TableCell>
                                             {customer.is_active ? (
-                                                <Badge variant="default">Active</Badge>
+                                                <Badge variant="default">
+                                                    Active
+                                                </Badge>
                                             ) : (
-                                                <Badge variant="secondary">Inactive</Badge>
+                                                <Badge variant="secondary">
+                                                    Inactive
+                                                </Badge>
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-right tabular-nums">{customer.orders_count}</TableCell>
+                                        <TableCell className="text-right tabular-nums">
+                                            {customer.orders_count}
+                                        </TableCell>
                                         <TableCell className="text-right font-medium tabular-nums">
-                                            €{Number(customer.total_spent).toFixed(2)}
+                                            €
+                                            {Number(
+                                                customer.total_spent,
+                                            ).toFixed(2)}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            {customer.type === 'b2b' && customer.balance ? (
+                                            {customer.type === 'b2b' &&
+                                            customer.balance ? (
                                                 <TooltipProvider>
                                                     <Tooltip>
                                                         <TooltipTrigger className="flex items-center justify-end gap-1">
                                                             <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
-                                                            <span className="font-medium tabular-nums text-green-600">
-                                                                €{Number(customer.balance.available).toFixed(2)}
+                                                            <span className="font-medium text-green-600 tabular-nums">
+                                                                €
+                                                                {Number(
+                                                                    customer
+                                                                        .balance
+                                                                        .available,
+                                                                ).toFixed(2)}
                                                             </span>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
-                                                            Total: €{Number(customer.balance.balance).toFixed(2)}
+                                                            Total: €
+                                                            {Number(
+                                                                customer.balance
+                                                                    .balance,
+                                                            ).toFixed(2)}
                                                         </TooltipContent>
                                                     </Tooltip>
                                                 </TooltipProvider>
                                             ) : (
-                                                <span className="text-muted-foreground">—</span>
+                                                <span className="text-muted-foreground">
+                                                    —
+                                                </span>
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            {Number(customer.discount_percentage) > 0 ? (
-                                                <Badge variant="secondary">{customer.discount_percentage}%</Badge>
+                                            {Number(
+                                                customer.discount_percentage,
+                                            ) > 0 ? (
+                                                <Badge variant="secondary">
+                                                    {
+                                                        customer.discount_percentage
+                                                    }
+                                                    %
+                                                </Badge>
                                             ) : (
-                                                <span className="text-sm text-muted-foreground">—</span>
+                                                <span className="text-sm text-muted-foreground">
+                                                    —
+                                                </span>
                                             )}
                                         </TableCell>
                                         <TableCell className="text-sm text-muted-foreground">
-                                            {new Date(customer.created_at).toLocaleDateString()}
+                                            {new Date(
+                                                customer.created_at,
+                                            ).toLocaleDateString()}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex gap-1 opacity-0 group-hover:opacity-100">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                                                    <Link href={`/admin/customers/${customer.id}`}>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    asChild
+                                                >
+                                                    <Link
+                                                        href={`/admin/customers/${customer.id}`}
+                                                    >
                                                         <Eye className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                                                    <Link href={`/admin/customers/${customer.id}/edit`}>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    asChild
+                                                >
+                                                    <Link
+                                                        href={`/admin/customers/${customer.id}/edit`}
+                                                    >
                                                         <Pencil className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
@@ -298,7 +387,8 @@ export default function CustomersIndex({ customers, filters }: Props) {
                 {customers.last_page > 1 && (
                     <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">
-                            Page {customers.current_page} of {customers.last_page}
+                            Page {customers.current_page} of{' '}
+                            {customers.last_page}
                         </span>
                         <div className="flex items-center gap-1">
                             <Button
@@ -306,7 +396,19 @@ export default function CustomersIndex({ customers, filters }: Props) {
                                 size="sm"
                                 className="h-8"
                                 disabled={customers.current_page === 1}
-                                onClick={() => router.get('/admin/customers', { ...filters, page: customers.current_page - 1 }, { preserveState: true, preserveScroll: true })}
+                                onClick={() =>
+                                    router.get(
+                                        '/admin/customers',
+                                        {
+                                            ...filters,
+                                            page: customers.current_page - 1,
+                                        },
+                                        {
+                                            preserveState: true,
+                                            preserveScroll: true,
+                                        },
+                                    )
+                                }
                             >
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
@@ -314,8 +416,23 @@ export default function CustomersIndex({ customers, filters }: Props) {
                                 variant="outline"
                                 size="sm"
                                 className="h-8"
-                                disabled={customers.current_page === customers.last_page}
-                                onClick={() => router.get('/admin/customers', { ...filters, page: customers.current_page + 1 }, { preserveState: true, preserveScroll: true })}
+                                disabled={
+                                    customers.current_page ===
+                                    customers.last_page
+                                }
+                                onClick={() =>
+                                    router.get(
+                                        '/admin/customers',
+                                        {
+                                            ...filters,
+                                            page: customers.current_page + 1,
+                                        },
+                                        {
+                                            preserveState: true,
+                                            preserveScroll: true,
+                                        },
+                                    )
+                                }
                             >
                                 <ChevronRight className="h-4 w-4" />
                             </Button>

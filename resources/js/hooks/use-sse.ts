@@ -38,7 +38,10 @@ interface UseSseReturn {
  * });
  * ```
  */
-export function useSse(url: string | null, options: SseOptions = {}): UseSseReturn {
+export function useSse(
+    url: string | null,
+    options: SseOptions = {},
+): UseSseReturn {
     const {
         autoReconnect = true,
         reconnectDelay = 3000,
@@ -53,10 +56,13 @@ export function useSse(url: string | null, options: SseOptions = {}): UseSseRetu
     const reconnectAttempts = useRef(0);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const updateStatus = useCallback((newStatus: SseStatus) => {
-        setStatus(newStatus);
-        onStatusChange?.(newStatus);
-    }, [onStatusChange]);
+    const updateStatus = useCallback(
+        (newStatus: SseStatus) => {
+            setStatus(newStatus);
+            onStatusChange?.(newStatus);
+        },
+        [onStatusChange],
+    );
 
     const disconnect = useCallback(() => {
         if (reconnectTimeoutRef.current) {
@@ -99,7 +105,10 @@ export function useSse(url: string | null, options: SseOptions = {}): UseSseRetu
                 updateStatus('disconnected');
 
                 // Attempt reconnection
-                if (autoReconnect && reconnectAttempts.current < maxReconnects) {
+                if (
+                    autoReconnect &&
+                    reconnectAttempts.current < maxReconnects
+                ) {
                     reconnectAttempts.current++;
                     reconnectTimeoutRef.current = setTimeout(() => {
                         connect();
@@ -132,8 +141,16 @@ export function useSse(url: string | null, options: SseOptions = {}): UseSseRetu
                 }, 100); // Quick reconnect on server timeout
             }
         });
-
-    }, [url, autoReconnect, reconnectDelay, maxReconnects, onEvent, onError, updateStatus, disconnect]);
+    }, [
+        url,
+        autoReconnect,
+        reconnectDelay,
+        maxReconnects,
+        onEvent,
+        onError,
+        updateStatus,
+        disconnect,
+    ]);
 
     // Auto-connect on mount and cleanup on unmount
     useEffect(() => {

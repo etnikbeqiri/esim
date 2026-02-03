@@ -4,7 +4,11 @@ import { Badge } from '@/components/ui/badge';
 import { useSse } from '@/hooks/use-sse';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
-import { useAnalytics, usePageViewTracking, useFormTracking } from '@/lib/analytics';
+import {
+    useAnalytics,
+    useFormTracking,
+    usePageViewTracking,
+} from '@/lib/analytics';
 import { Head, usePage } from '@inertiajs/react';
 import { ArrowLeft, Loader2, Wifi, WifiOff } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -54,12 +58,18 @@ interface SseUpdateData {
 
 export default function TicketShow() {
     const { trans } = useTrans();
-    const { ticket: initialTicket, messages: initialMessages, customer_email } = usePage<{ props: TicketShowProps }>().props as unknown as TicketShowProps;
+    const {
+        ticket: initialTicket,
+        messages: initialMessages,
+        customer_email,
+    } = usePage<{ props: TicketShowProps }>()
+        .props as unknown as TicketShowProps;
     const { supportContact, contentView, filterApplied } = useAnalytics();
 
     usePageViewTracking('ticket_detail', `Ticket #${initialTicket.reference}`);
 
-    const { trackFocus, trackComplete, trackSubmit, trackError } = useFormTracking('ticket_reply', 'Ticket Reply');
+    const { trackFocus, trackComplete, trackSubmit, trackError } =
+        useFormTracking('ticket_reply', 'Ticket Reply');
 
     // Local state for real-time updates
     const [messages, setMessages] = useState<MessageData[]>(initialMessages);
@@ -73,37 +83,46 @@ export default function TicketShow() {
     }, [messages]);
 
     // Handle incoming SSE updates
-    const handleMessagesUpdate = useCallback((data: unknown) => {
-        const update = data as SseUpdateData;
+    const handleMessagesUpdate = useCallback(
+        (data: unknown) => {
+            const update = data as SseUpdateData;
 
-        // Add new messages
-        if (update.messages && Array.isArray(update.messages)) {
-            setMessages(prev => {
-                const existingUuids = new Set(prev.map(m => m.uuid));
-                const newMessages = update.messages.filter(m => !existingUuids.has(m.uuid));
-                return [...prev, ...newMessages];
-            });
-        }
-
-        if (update.ticket) {
-            if (update.ticket.status !== previousStatus.current) {
-                filterApplied('sort', update.ticket.status, 'ticket_detail');
-                previousStatus.current = update.ticket.status;
+            // Add new messages
+            if (update.messages && Array.isArray(update.messages)) {
+                setMessages((prev) => {
+                    const existingUuids = new Set(prev.map((m) => m.uuid));
+                    const newMessages = update.messages.filter(
+                        (m) => !existingUuids.has(m.uuid),
+                    );
+                    return [...prev, ...newMessages];
+                });
             }
-            setTicket(prev => ({
-                ...prev,
-                status: update.ticket.status,
-                status_label: update.ticket.status_label,
-                status_color: update.ticket.status_color,
-                can_add_message: update.ticket.can_add_message,
-            }));
-        }
-    }, [filterApplied]);
+
+            if (update.ticket) {
+                if (update.ticket.status !== previousStatus.current) {
+                    filterApplied(
+                        'sort',
+                        update.ticket.status,
+                        'ticket_detail',
+                    );
+                    previousStatus.current = update.ticket.status;
+                }
+                setTicket((prev) => ({
+                    ...prev,
+                    status: update.ticket.status,
+                    status_label: update.ticket.status_label,
+                    status_color: update.ticket.status_color,
+                    can_add_message: update.ticket.can_add_message,
+                }));
+            }
+        },
+        [filterApplied],
+    );
 
     // SSE connection URL
     const streamUrl = useMemo(
         () => `/tickets/${ticket.uuid}/${customer_email}/stream`,
-        [ticket.uuid, customer_email]
+        [ticket.uuid, customer_email],
     );
 
     // Connect to SSE stream
@@ -195,7 +214,11 @@ export default function TicketShow() {
                                             <span className="font-medium">
                                                 {trans('ticket.status')}:
                                             </span>
-                                            <Badge className={getStatusColor(ticket.status_color)}>
+                                            <Badge
+                                                className={getStatusColor(
+                                                    ticket.status_color,
+                                                )}
+                                            >
                                                 {ticket.status_label}
                                             </Badge>
                                         </div>
@@ -230,7 +253,9 @@ export default function TicketShow() {
 
                             <div className="mt-4 border-t border-primary-100 pt-4">
                                 <p className="text-sm text-primary-600">
-                                    <span className="font-medium">{ticket.name}</span>{' '}
+                                    <span className="font-medium">
+                                        {ticket.name}
+                                    </span>{' '}
                                     ({ticket.email})
                                 </p>
                             </div>
@@ -265,7 +290,9 @@ export default function TicketShow() {
                         {!ticket.can_add_message && (
                             <div className="rounded-2xl border border-yellow-200 bg-yellow-50 p-6 text-center">
                                 <p className="text-yellow-800">
-                                    {trans('ticket.closed_message', { status: ticket.status_label })}
+                                    {trans('ticket.closed_message', {
+                                        status: ticket.status_label,
+                                    })}
                                 </p>
                             </div>
                         )}

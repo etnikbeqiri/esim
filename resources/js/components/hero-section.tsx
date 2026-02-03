@@ -71,45 +71,48 @@ export function HeroSection({
     const setSearchQuery = isControlled ? onSearchChange : setInternalQuery;
 
     // Debounced search function with minimum loading time
-    const searchDestinations = useCallback(async (query: string) => {
-        if (query.length < 2) {
-            setSearchResults([]);
-            setShowDropdown(false);
+    const searchDestinations = useCallback(
+        async (query: string) => {
+            if (query.length < 2) {
+                setSearchResults([]);
+                setShowDropdown(false);
+                setHasSearched(false);
+                return;
+            }
+
+            setIsSearching(true);
             setHasSearched(false);
-            return;
-        }
 
-        setIsSearching(true);
-        setHasSearched(false);
+            // Minimum loading time of 500ms for better UX
+            const minLoadingTime = new Promise((resolve) =>
+                setTimeout(resolve, 500),
+            );
 
-        // Minimum loading time of 500ms for better UX
-        const minLoadingTime = new Promise((resolve) =>
-            setTimeout(resolve, 500),
-        );
+            try {
+                const [response] = await Promise.all([
+                    fetch(
+                        `/api/destinations/search?q=${encodeURIComponent(query)}`,
+                    ),
+                    minLoadingTime,
+                ]);
+                const data = await response.json();
+                setSearchResults(data);
+                setShowDropdown(true);
+                setHasSearched(true);
 
-        try {
-            const [response] = await Promise.all([
-                fetch(
-                    `/api/destinations/search?q=${encodeURIComponent(query)}`,
-                ),
-                minLoadingTime,
-            ]);
-            const data = await response.json();
-            setSearchResults(data);
-            setShowDropdown(true);
-            setHasSearched(true);
+                trackSearch(query, 'destination', data.length);
+            } catch (error) {
+                console.error('Search error:', error);
+                setSearchResults([]);
+                setHasSearched(true);
 
-            trackSearch(query, 'destination', data.length);
-        } catch (error) {
-            console.error('Search error:', error);
-            setSearchResults([]);
-            setHasSearched(true);
-
-            trackSearch(query, 'destination', 0);
-        } finally {
-            setIsSearching(false);
-        }
-    }, [trackSearch]);
+                trackSearch(query, 'destination', 0);
+            } finally {
+                setIsSearching(false);
+            }
+        },
+        [trackSearch],
+    );
 
     // Handle input change with debounce (only search API when not in controlled mode)
     const handleInputChange = useCallback(
@@ -264,12 +267,23 @@ export function HeroSection({
                                                 setSearchResults([]);
                                                 setShowDropdown(false);
                                                 setHasSearched(false);
-                                                if (isControlled && window.location.search) {
-                                                    router.get(window.location.pathname, {}, {
-                                                        replace: true,
-                                                        preserveScroll: true,
-                                                        only: ['countries', 'filters'],
-                                                    });
+                                                if (
+                                                    isControlled &&
+                                                    window.location.search
+                                                ) {
+                                                    router.get(
+                                                        window.location
+                                                            .pathname,
+                                                        {},
+                                                        {
+                                                            replace: true,
+                                                            preserveScroll: true,
+                                                            only: [
+                                                                'countries',
+                                                                'filters',
+                                                            ],
+                                                        },
+                                                    );
                                                 }
                                             }}
                                             className="shrink-0 rounded-full p-1.5 text-primary-400 transition-colors hover:bg-primary-50 hover:text-primary-600"
@@ -436,7 +450,7 @@ export function HeroSection({
             </div>
 
             {/* Scroll Indicator */}
-            <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 opacity-50">
+            <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 opacity-50 md:bottom-4">
                 <span className="text-xs font-medium tracking-widest text-primary-400 uppercase">
                     {trans('common.scroll')}
                 </span>

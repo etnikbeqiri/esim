@@ -3,7 +3,11 @@ import { HeroSection } from '@/components/hero-section';
 import { GoldButton } from '@/components/ui/gold-button';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
-import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
+import {
+    useAnalytics,
+    usePageViewTracking,
+    useScrollTracking,
+} from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { MapPin } from 'lucide-react';
@@ -34,7 +38,13 @@ export default function Destinations({ countries, regions, filters }: Props) {
     const [activeRegion, setActiveRegion] = useState<string>('all');
 
     // Analytics hooks
-    const { viewItemList, selectItem, search: trackSearch, filterApplied, createItem } = useAnalytics();
+    const {
+        viewItemList,
+        selectItem,
+        search: trackSearch,
+        filterApplied,
+        createItem,
+    } = useAnalytics();
     usePageViewTracking('destinations', 'Destinations');
     useScrollTracking('guide', 'destinations-page', 'Destinations');
 
@@ -66,68 +76,100 @@ export default function Destinations({ countries, regions, filters }: Props) {
     useEffect(() => {
         const listKey = `${activeRegion}-${searchQuery}-${filteredCountries.length}`;
 
-        if (!hasTrackedInitialList.current || lastTrackedListKey.current !== listKey) {
+        if (
+            !hasTrackedInitialList.current ||
+            lastTrackedListKey.current !== listKey
+        ) {
             hasTrackedInitialList.current = true;
             lastTrackedListKey.current = listKey;
 
             if (filteredCountries.length > 0) {
-                const items = filteredCountries.slice(0, 20).map((country, index) =>
-                    createItem({
-                        id: `country-${country.id}`,
-                        name: country.name,
-                        category: 'destination',
-                        category2: country.region || undefined,
-                        price: country.min_price || undefined,
-                        index,
-                    })
-                );
+                const items = filteredCountries
+                    .slice(0, 20)
+                    .map((country, index) =>
+                        createItem({
+                            id: `country-${country.id}`,
+                            name: country.name,
+                            category: 'destination',
+                            category2: country.region || undefined,
+                            price: country.min_price || undefined,
+                            index,
+                        }),
+                    );
 
-                const listId = activeRegion !== 'all' ? `destinations-${activeRegion}` : 'destinations-all';
-                const listName = activeRegion !== 'all' ? `Destinations - ${activeRegion}` : 'All Destinations';
+                const listId =
+                    activeRegion !== 'all'
+                        ? `destinations-${activeRegion}`
+                        : 'destinations-all';
+                const listName =
+                    activeRegion !== 'all'
+                        ? `Destinations - ${activeRegion}`
+                        : 'All Destinations';
 
                 viewItemList(listId, listName, items);
             }
         }
-    }, [filteredCountries, activeRegion, searchQuery, viewItemList, createItem]);
+    }, [
+        filteredCountries,
+        activeRegion,
+        searchQuery,
+        viewItemList,
+        createItem,
+    ]);
 
     const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const lastTrackedSearch = useRef<string>('');
 
-    const handleSearchChange = useCallback((value: string) => {
-        setSearchQuery(value);
+    const handleSearchChange = useCallback(
+        (value: string) => {
+            setSearchQuery(value);
 
-        if (searchTimeoutRef.current) {
-            clearTimeout(searchTimeoutRef.current);
-        }
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
 
-        if (value.trim() && value !== lastTrackedSearch.current) {
-            searchTimeoutRef.current = setTimeout(() => {
-                lastTrackedSearch.current = value;
-                trackSearch(value, 'destination', filteredCountries.length);
-            }, 500);
-        }
-    }, [trackSearch, filteredCountries.length]);
+            if (value.trim() && value !== lastTrackedSearch.current) {
+                searchTimeoutRef.current = setTimeout(() => {
+                    lastTrackedSearch.current = value;
+                    trackSearch(value, 'destination', filteredCountries.length);
+                }, 500);
+            }
+        },
+        [trackSearch, filteredCountries.length],
+    );
 
-    const handleRegionChange = useCallback((region: string) => {
-        setActiveRegion(region);
-        filterApplied('region', region, 'destinations');
-    }, [filterApplied]);
+    const handleRegionChange = useCallback(
+        (region: string) => {
+            setActiveRegion(region);
+            filterApplied('region', region, 'destinations');
+        },
+        [filterApplied],
+    );
 
-    const handleDestinationClick = useCallback((country: Country, index: number) => {
-        const item = createItem({
-            id: `country-${country.id}`,
-            name: country.name,
-            category: 'destination',
-            category2: country.region || undefined,
-            price: country.min_price || undefined,
-            index,
-        });
+    const handleDestinationClick = useCallback(
+        (country: Country, index: number) => {
+            const item = createItem({
+                id: `country-${country.id}`,
+                name: country.name,
+                category: 'destination',
+                category2: country.region || undefined,
+                price: country.min_price || undefined,
+                index,
+            });
 
-        const listId = activeRegion !== 'all' ? `destinations-${activeRegion}` : 'destinations-all';
-        const listName = activeRegion !== 'all' ? `Destinations - ${activeRegion}` : 'All Destinations';
+            const listId =
+                activeRegion !== 'all'
+                    ? `destinations-${activeRegion}`
+                    : 'destinations-all';
+            const listName =
+                activeRegion !== 'all'
+                    ? `Destinations - ${activeRegion}`
+                    : 'All Destinations';
 
-        selectItem(item, listId, listName);
-    }, [activeRegion, createItem, selectItem]);
+            selectItem(item, listId, listName);
+        },
+        [activeRegion, createItem, selectItem],
+    );
 
     function clearFilters() {
         setSearchQuery('');
@@ -253,7 +295,12 @@ export default function Destinations({ countries, regions, filters }: Props) {
                                         iso_code={country.iso_code}
                                         package_count={country.package_count}
                                         min_price={country.min_price}
-                                        onClick={() => handleDestinationClick(country, index)}
+                                        onClick={() =>
+                                            handleDestinationClick(
+                                                country,
+                                                index,
+                                            )
+                                        }
                                     />
                                 ))}
                             </div>

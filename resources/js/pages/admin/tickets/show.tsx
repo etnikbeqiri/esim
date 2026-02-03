@@ -114,7 +114,11 @@ function getStatusBadgeClass(color: string): string {
     return colors[color] || colors.gray;
 }
 
-export default function TicketShow({ ticket: initialTicket, messages: initialMessages, adminUsers }: Props) {
+export default function TicketShow({
+    ticket: initialTicket,
+    messages: initialMessages,
+    adminUsers,
+}: Props) {
     const { data, setData, post, processing } = useForm({
         message: '',
         is_internal: false,
@@ -141,16 +145,18 @@ export default function TicketShow({ ticket: initialTicket, messages: initialMes
 
         // Add new messages
         if (update.messages && Array.isArray(update.messages)) {
-            setMessages(prev => {
-                const existingUuids = new Set(prev.map(m => m.uuid));
-                const newMessages = update.messages.filter(m => !existingUuids.has(m.uuid));
+            setMessages((prev) => {
+                const existingUuids = new Set(prev.map((m) => m.uuid));
+                const newMessages = update.messages.filter(
+                    (m) => !existingUuids.has(m.uuid),
+                );
                 return [...prev, ...newMessages];
             });
         }
 
         // Update ticket status
         if (update.ticket) {
-            setTicket(prev => ({
+            setTicket((prev) => ({
                 ...prev,
                 status: update.ticket.status,
                 status_label: update.ticket.status_label,
@@ -164,7 +170,7 @@ export default function TicketShow({ ticket: initialTicket, messages: initialMes
     // SSE connection URL
     const streamUrl = useMemo(
         () => `/admin/tickets/${ticket.uuid}/stream`,
-        [ticket.uuid]
+        [ticket.uuid],
     );
 
     // Connect to SSE stream

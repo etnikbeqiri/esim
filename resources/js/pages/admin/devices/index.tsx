@@ -46,7 +46,20 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowDown, ArrowUp, ArrowUpDown, Check, ChevronDown, Pencil, Plus, Power, Search, Smartphone, Trash2, X } from 'lucide-react';
+import {
+    ArrowDown,
+    ArrowUp,
+    ArrowUpDown,
+    Check,
+    ChevronDown,
+    Pencil,
+    Plus,
+    Power,
+    Search,
+    Smartphone,
+    Trash2,
+    X,
+} from 'lucide-react';
 import { FormEvent, useState } from 'react';
 
 interface Brand {
@@ -116,8 +129,10 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
-    const allSelected = devices.data.length > 0 && selectedIds.length === devices.data.length;
-    const someSelected = selectedIds.length > 0 && selectedIds.length < devices.data.length;
+    const allSelected =
+        devices.data.length > 0 && selectedIds.length === devices.data.length;
+    const someSelected =
+        selectedIds.length > 0 && selectedIds.length < devices.data.length;
 
     function toggleSelectAll() {
         if (allSelected) {
@@ -129,22 +144,33 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
 
     function toggleSelect(id: number) {
         setSelectedIds((prev) =>
-            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
         );
     }
 
     function handleSearch(e: FormEvent) {
         e.preventDefault();
-        router.get('/admin/devices', { ...filters, search }, { preserveState: true });
+        router.get(
+            '/admin/devices',
+            { ...filters, search },
+            { preserveState: true },
+        );
     }
 
     function handleFilterChange(key: string, value: string) {
-        const newFilters = { ...filters, [key]: value === 'all' ? undefined : value };
+        const newFilters = {
+            ...filters,
+            [key]: value === 'all' ? undefined : value,
+        };
         router.get('/admin/devices', newFilters, { preserveState: true });
     }
 
     function handleToggleActive(device: Device) {
-        router.post(`/admin/devices/${device.slug}/toggle`, {}, { preserveState: true });
+        router.post(
+            `/admin/devices/${device.slug}/toggle`,
+            {},
+            { preserveState: true },
+        );
     }
 
     function handleDelete() {
@@ -156,20 +182,28 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
     }
 
     function handleBulkDelete() {
-        router.post('/admin/devices/bulk-delete', { ids: selectedIds }, {
-            preserveState: true,
-            onSuccess: () => {
-                setSelectedIds([]);
-                setShowBulkDeleteConfirm(false);
+        router.post(
+            '/admin/devices/bulk-delete',
+            { ids: selectedIds },
+            {
+                preserveState: true,
+                onSuccess: () => {
+                    setSelectedIds([]);
+                    setShowBulkDeleteConfirm(false);
+                },
             },
-        });
+        );
     }
 
     function handleBulkToggle(isActive: boolean) {
-        router.post('/admin/devices/bulk-toggle', { ids: selectedIds, is_active: isActive }, {
-            preserveState: true,
-            onSuccess: () => setSelectedIds([]),
-        });
+        router.post(
+            '/admin/devices/bulk-toggle',
+            { ids: selectedIds, is_active: isActive },
+            {
+                preserveState: true,
+                onSuccess: () => setSelectedIds([]),
+            },
+        );
     }
 
     function handleSort(field: string) {
@@ -181,7 +215,11 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
             newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
         }
 
-        router.get('/admin/devices', { ...filters, sort: field, direction: newDirection }, { preserveState: true });
+        router.get(
+            '/admin/devices',
+            { ...filters, sort: field, direction: newDirection },
+            { preserveState: true },
+        );
     }
 
     function SortIcon({ field }: { field: string }) {
@@ -189,11 +227,15 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
         const currentDirection = filters.direction || 'asc';
 
         if (currentSort !== field) {
-            return <ArrowUpDown className="ml-1 h-4 w-4 text-muted-foreground/50" />;
+            return (
+                <ArrowUpDown className="ml-1 h-4 w-4 text-muted-foreground/50" />
+            );
         }
-        return currentDirection === 'asc'
-            ? <ArrowUp className="ml-1 h-4 w-4" />
-            : <ArrowDown className="ml-1 h-4 w-4" />;
+        return currentDirection === 'asc' ? (
+            <ArrowUp className="ml-1 h-4 w-4" />
+        ) : (
+            <ArrowDown className="ml-1 h-4 w-4" />
+        );
     }
 
     function openCreateDialog() {
@@ -222,9 +264,14 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
         const data = {
             brand_id: parseInt(formData.brand_id),
             name: formData.name,
-            release_year: formData.release_year ? parseInt(formData.release_year) : null,
+            release_year: formData.release_year
+                ? parseInt(formData.release_year)
+                : null,
             model_identifiers: formData.model_identifiers
-                ? formData.model_identifiers.split(',').map((s) => s.trim()).filter(Boolean)
+                ? formData.model_identifiers
+                      .split(',')
+                      .map((s) => s.trim())
+                      .filter(Boolean)
                 : null,
             esim_supported: formData.esim_supported,
             is_active: formData.is_active,
@@ -260,7 +307,9 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                         </p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <span className="text-muted-foreground">{devices.total} devices</span>
+                        <span className="text-muted-foreground">
+                            {devices.total} devices
+                        </span>
                         <Button asChild variant="outline">
                             <Link href="/admin/brands">
                                 <Smartphone className="mr-2 h-4 w-4" />
@@ -277,13 +326,13 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                 <div className="flex flex-wrap items-center gap-2">
                     <form onSubmit={handleSearch} className="flex gap-2">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                                 type="search"
                                 placeholder="Search devices..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="pl-9 w-[200px]"
+                                className="w-[200px] pl-9"
                             />
                         </div>
                         <Button type="submit" variant="secondary">
@@ -301,7 +350,10 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                         <SelectContent>
                             <SelectItem value="all">All Brands</SelectItem>
                             {brands.map((brand) => (
-                                <SelectItem key={brand.id} value={brand.id.toString()}>
+                                <SelectItem
+                                    key={brand.id}
+                                    value={brand.id.toString()}
+                                >
                                     {brand.name}
                                 </SelectItem>
                             ))}
@@ -309,7 +361,7 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                     </Select>
 
                     {selectedIds.length > 0 && (
-                        <div className="flex items-center gap-2 ml-auto">
+                        <div className="ml-auto flex items-center gap-2">
                             <span className="text-sm text-muted-foreground">
                                 {selectedIds.length} selected
                             </span>
@@ -321,17 +373,23 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => handleBulkToggle(true)}>
+                                    <DropdownMenuItem
+                                        onClick={() => handleBulkToggle(true)}
+                                    >
                                         <Power className="mr-2 h-4 w-4" />
                                         Activate Selected
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleBulkToggle(false)}>
+                                    <DropdownMenuItem
+                                        onClick={() => handleBulkToggle(false)}
+                                    >
                                         <Power className="mr-2 h-4 w-4" />
                                         Deactivate Selected
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
-                                        onClick={() => setShowBulkDeleteConfirm(true)}
+                                        onClick={() =>
+                                            setShowBulkDeleteConfirm(true)
+                                        }
                                         className="text-destructive focus:text-destructive"
                                     >
                                         <Trash2 className="mr-2 h-4 w-4" />
@@ -359,7 +417,9 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                                         checked={allSelected}
                                         onCheckedChange={toggleSelectAll}
                                         aria-label="Select all"
-                                        className={someSelected ? 'opacity-50' : ''}
+                                        className={
+                                            someSelected ? 'opacity-50' : ''
+                                        }
                                     />
                                 </TableHead>
                                 <TableHead>
@@ -382,7 +442,9 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                                 </TableHead>
                                 <TableHead>
                                     <button
-                                        onClick={() => handleSort('release_year')}
+                                        onClick={() =>
+                                            handleSort('release_year')
+                                        }
                                         className="flex items-center font-medium hover:text-foreground"
                                     >
                                         Year
@@ -407,7 +469,7 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                                 <TableRow>
                                     <TableCell
                                         colSpan={7}
-                                        className="text-center py-8 text-muted-foreground"
+                                        className="py-8 text-center text-muted-foreground"
                                     >
                                         No devices found
                                     </TableCell>
@@ -416,18 +478,32 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                                 devices.data.map((device) => (
                                     <TableRow
                                         key={device.id}
-                                        className={selectedIds.includes(device.id) ? 'bg-muted/50' : ''}
+                                        className={
+                                            selectedIds.includes(device.id)
+                                                ? 'bg-muted/50'
+                                                : ''
+                                        }
                                     >
                                         <TableCell>
                                             <Checkbox
-                                                checked={selectedIds.includes(device.id)}
-                                                onCheckedChange={() => toggleSelect(device.id)}
+                                                checked={selectedIds.includes(
+                                                    device.id,
+                                                )}
+                                                onCheckedChange={() =>
+                                                    toggleSelect(device.id)
+                                                }
                                                 aria-label={`Select ${device.name}`}
                                             />
                                         </TableCell>
-                                        <TableCell>{device.brand?.name}</TableCell>
-                                        <TableCell className="font-medium">{device.name}</TableCell>
-                                        <TableCell>{device.release_year || '-'}</TableCell>
+                                        <TableCell>
+                                            {device.brand?.name}
+                                        </TableCell>
+                                        <TableCell className="font-medium">
+                                            {device.name}
+                                        </TableCell>
+                                        <TableCell>
+                                            {device.release_year || '-'}
+                                        </TableCell>
                                         <TableCell>
                                             {device.esim_supported ? (
                                                 <Check className="h-4 w-4 text-green-500" />
@@ -437,11 +513,19 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                                         </TableCell>
                                         <TableCell>
                                             <Badge
-                                                variant={device.is_active ? 'default' : 'secondary'}
+                                                variant={
+                                                    device.is_active
+                                                        ? 'default'
+                                                        : 'secondary'
+                                                }
                                                 className="cursor-pointer"
-                                                onClick={() => handleToggleActive(device)}
+                                                onClick={() =>
+                                                    handleToggleActive(device)
+                                                }
                                             >
-                                                {device.is_active ? 'Active' : 'Inactive'}
+                                                {device.is_active
+                                                    ? 'Active'
+                                                    : 'Inactive'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
@@ -449,14 +533,18 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => openEditDialog(device)}
+                                                    onClick={() =>
+                                                        openEditDialog(device)
+                                                    }
                                                 >
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => setDeleteDevice(device)}
+                                                    onClick={() =>
+                                                        setDeleteDevice(device)
+                                                    }
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -473,13 +561,22 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                     <div className="flex justify-center gap-2">
                         {Array.from(
                             { length: Math.min(devices.last_page, 10) },
-                            (_, i) => i + 1
+                            (_, i) => i + 1,
                         ).map((page) => (
                             <Button
                                 key={page}
-                                variant={page === devices.current_page ? 'default' : 'outline'}
+                                variant={
+                                    page === devices.current_page
+                                        ? 'default'
+                                        : 'outline'
+                                }
                                 size="sm"
-                                onClick={() => router.get('/admin/devices', { ...filters, page })}
+                                onClick={() =>
+                                    router.get('/admin/devices', {
+                                        ...filters,
+                                        page,
+                                    })
+                                }
                             >
                                 {page}
                             </Button>
@@ -492,7 +589,9 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{editDevice ? 'Edit Device' : 'Add Device'}</DialogTitle>
+                        <DialogTitle>
+                            {editDevice ? 'Edit Device' : 'Add Device'}
+                        </DialogTitle>
                         <DialogDescription>
                             {editDevice
                                 ? 'Update the device information below.'
@@ -506,7 +605,10 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                                 <Select
                                     value={formData.brand_id}
                                     onValueChange={(v) =>
-                                        setFormData({ ...formData, brand_id: v })
+                                        setFormData({
+                                            ...formData,
+                                            brand_id: v,
+                                        })
                                     }
                                 >
                                     <SelectTrigger>
@@ -514,7 +616,10 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                                     </SelectTrigger>
                                     <SelectContent>
                                         {brands.map((brand) => (
-                                            <SelectItem key={brand.id} value={brand.id.toString()}>
+                                            <SelectItem
+                                                key={brand.id}
+                                                value={brand.id.toString()}
+                                            >
                                                 {brand.name}
                                             </SelectItem>
                                         ))}
@@ -527,19 +632,27 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                                     id="name"
                                     value={formData.name}
                                     onChange={(e) =>
-                                        setFormData({ ...formData, name: e.target.value })
+                                        setFormData({
+                                            ...formData,
+                                            name: e.target.value,
+                                        })
                                     }
                                     placeholder="e.g., iPhone 15 Pro Max"
                                 />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="release_year">Release Year</Label>
+                                <Label htmlFor="release_year">
+                                    Release Year
+                                </Label>
                                 <Input
                                     id="release_year"
                                     type="number"
                                     value={formData.release_year}
                                     onChange={(e) =>
-                                        setFormData({ ...formData, release_year: e.target.value })
+                                        setFormData({
+                                            ...formData,
+                                            release_year: e.target.value,
+                                        })
                                     }
                                     placeholder="e.g., 2023"
                                 />
@@ -560,25 +673,29 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                                     placeholder="e.g., iPhone16,1, iPhone16,2"
                                 />
                                 <p className="text-xs text-muted-foreground">
-                                    Used for auto-detecting user's device via User Agent
+                                    Used for auto-detecting user's device via
+                                    User Agent
                                 </p>
                             </div>
                             <div className="flex items-center gap-4">
-                                <label className="flex items-center gap-2 cursor-pointer">
+                                <label className="flex cursor-pointer items-center gap-2">
                                     <input
                                         type="checkbox"
                                         checked={formData.esim_supported}
                                         onChange={(e) =>
                                             setFormData({
                                                 ...formData,
-                                                esim_supported: e.target.checked,
+                                                esim_supported:
+                                                    e.target.checked,
                                             })
                                         }
                                         className="rounded"
                                     />
-                                    <span className="text-sm">eSIM Supported</span>
+                                    <span className="text-sm">
+                                        eSIM Supported
+                                    </span>
                                 </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
+                                <label className="flex cursor-pointer items-center gap-2">
                                     <input
                                         type="checkbox"
                                         checked={formData.is_active}
@@ -623,8 +740,9 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete Device</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to delete "{deleteDevice?.brand?.name}{' '}
-                            {deleteDevice?.name}"? This action cannot be undone.
+                            Are you sure you want to delete "
+                            {deleteDevice?.brand?.name} {deleteDevice?.name}"?
+                            This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -646,10 +764,12 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
             >
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Delete {selectedIds.length} Devices</AlertDialogTitle>
+                        <AlertDialogTitle>
+                            Delete {selectedIds.length} Devices
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to delete {selectedIds.length} selected device(s)?
-                            This action cannot be undone.
+                            Are you sure you want to delete {selectedIds.length}{' '}
+                            selected device(s)? This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

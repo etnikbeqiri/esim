@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useTrans } from '@/hooks/use-trans';
-import { useAnalytics, usePageViewTracking } from '@/lib/analytics';
 import GuestLayout from '@/layouts/guest-layout';
+import { useAnalytics, usePageViewTracking } from '@/lib/analytics';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     Calendar,
@@ -116,10 +116,18 @@ export default function OrderStatus({ order }: Props) {
     const hasTrackedInstallationViewRef = useRef(false);
 
     useEffect(() => {
-        if (isCompleted && order.esim && !hasTrackedInstallationViewRef.current) {
+        if (
+            isCompleted &&
+            order.esim &&
+            !hasTrackedInstallationViewRef.current
+        ) {
             hasTrackedInstallationViewRef.current = true;
             installationStep(1, 'view_qr_code', order.uuid);
-            contentView('esim_activation', order.uuid, 'eSIM Installation Instructions');
+            contentView(
+                'esim_activation',
+                order.uuid,
+                'eSIM Installation Instructions',
+            );
         }
     }, [isCompleted, order.esim, order.uuid, installationStep, contentView]);
 
@@ -154,7 +162,12 @@ export default function OrderStatus({ order }: Props) {
 
     const handleCopyData = useCallback(
         (field: string) => {
-            contentShare('esim_activation', order.uuid, `eSIM Data - ${field}`, 'copy');
+            contentShare(
+                'esim_activation',
+                order.uuid,
+                `eSIM Data - ${field}`,
+                'copy',
+            );
             installationStep(2, `copy_${field}`, order.uuid);
         },
         [order.uuid, contentShare, installationStep],
@@ -315,42 +328,73 @@ export default function OrderStatus({ order }: Props) {
                                 <Separator />
 
                                 {/* Coupon Discount */}
-                                {order.coupon && Number(order.coupon_discount) > 0 && (
-                                    <div className="flex justify-between text-sm text-green-600">
-                                        <span className="flex items-center gap-1">
-                                            {trans('order_status_page.payment.discount', { fallback: 'Discount' })}
-                                            <Badge variant="outline" className="text-xs text-green-600 border-green-300">
-                                                {order.coupon.code}
-                                            </Badge>
-                                        </span>
-                                        <span className="font-medium">
-                                            -€{Number(order.coupon_discount).toFixed(2)}
-                                        </span>
-                                    </div>
-                                )}
+                                {order.coupon &&
+                                    Number(order.coupon_discount) > 0 && (
+                                        <div className="flex justify-between text-sm text-green-600">
+                                            <span className="flex items-center gap-1">
+                                                {trans(
+                                                    'order_status_page.payment.discount',
+                                                    { fallback: 'Discount' },
+                                                )}
+                                                <Badge
+                                                    variant="outline"
+                                                    className="border-green-300 text-xs text-green-600"
+                                                >
+                                                    {order.coupon.code}
+                                                </Badge>
+                                            </span>
+                                            <span className="font-medium">
+                                                -€
+                                                {Number(
+                                                    order.coupon_discount,
+                                                ).toFixed(2)}
+                                            </span>
+                                        </div>
+                                    )}
 
                                 {/* VAT Breakdown */}
-                                {Number(order.vat_rate) > 0 && order.net_amount && (
-                                    <>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-muted-foreground">
-                                                {trans('order_status_page.payment.net_amount', { fallback: 'Net Amount' })}
-                                            </span>
-                                            <span className="font-medium">
-                                                €{Number(order.net_amount).toFixed(2)}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-muted-foreground">
-                                                {trans('order_status_page.payment.vat', { rate: Number(order.vat_rate), fallback: `VAT (${Number(order.vat_rate)}%)` })}
-                                            </span>
-                                            <span className="font-medium">
-                                                €{Number(order.vat_amount).toFixed(2)}
-                                            </span>
-                                        </div>
-                                        <Separator />
-                                    </>
-                                )}
+                                {Number(order.vat_rate) > 0 &&
+                                    order.net_amount && (
+                                        <>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-muted-foreground">
+                                                    {trans(
+                                                        'order_status_page.payment.net_amount',
+                                                        {
+                                                            fallback:
+                                                                'Net Amount',
+                                                        },
+                                                    )}
+                                                </span>
+                                                <span className="font-medium">
+                                                    €
+                                                    {Number(
+                                                        order.net_amount,
+                                                    ).toFixed(2)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-muted-foreground">
+                                                    {trans(
+                                                        'order_status_page.payment.vat',
+                                                        {
+                                                            rate: Number(
+                                                                order.vat_rate,
+                                                            ),
+                                                            fallback: `VAT (${Number(order.vat_rate)}%)`,
+                                                        },
+                                                    )}
+                                                </span>
+                                                <span className="font-medium">
+                                                    €
+                                                    {Number(
+                                                        order.vat_amount,
+                                                    ).toFixed(2)}
+                                                </span>
+                                            </div>
+                                            <Separator />
+                                        </>
+                                    )}
 
                                 <div className="flex items-center justify-between pt-1">
                                     <span className="font-medium">
@@ -358,8 +402,13 @@ export default function OrderStatus({ order }: Props) {
                                             'order_status_page.payment.total',
                                         )}
                                         {Number(order.vat_rate) > 0 && (
-                                            <span className="ml-1 text-xs text-muted-foreground font-normal">
-                                                ({trans('order_status_page.payment.incl_vat', { fallback: 'incl. VAT' })})
+                                            <span className="ml-1 text-xs font-normal text-muted-foreground">
+                                                (
+                                                {trans(
+                                                    'order_status_page.payment.incl_vat',
+                                                    { fallback: 'incl. VAT' },
+                                                )}
+                                                )
                                             </span>
                                         )}
                                     </span>
@@ -387,7 +436,9 @@ export default function OrderStatus({ order }: Props) {
                                     {trans('order_status_page.help.title')}
                                 </h3>
                                 <p className="mt-1 text-sm text-muted-foreground">
-                                    {trans('order_status_page.help.description')}
+                                    {trans(
+                                        'order_status_page.help.description',
+                                    )}
                                 </p>
                                 <div className="mt-4 flex justify-center gap-3">
                                     <Button
@@ -395,21 +446,31 @@ export default function OrderStatus({ order }: Props) {
                                         size="sm"
                                         asChild
                                         onClick={() => {
-                                            contentView('guide', 'how-it-works', 'How It Works Guide');
+                                            contentView(
+                                                'guide',
+                                                'how-it-works',
+                                                'How It Works Guide',
+                                            );
                                         }}
                                     >
                                         <Link href="/how-it-works">
-                                            {trans('order_status_page.help.guide')}
+                                            {trans(
+                                                'order_status_page.help.guide',
+                                            )}
                                         </Link>
                                     </Button>
                                     <Button
                                         variant="outline"
                                         size="sm"
                                         asChild
-                                        onClick={() => handleSupportClick('ticket')}
+                                        onClick={() =>
+                                            handleSupportClick('ticket')
+                                        }
                                     >
                                         <Link href="/help">
-                                            {trans('order_status_page.help.contact')}
+                                            {trans(
+                                                'order_status_page.help.contact',
+                                            )}
                                         </Link>
                                     </Button>
                                 </div>

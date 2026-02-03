@@ -59,7 +59,7 @@ export function LegalSection({ title, children, onVisible }: SectionProps) {
                     }
                 });
             },
-            { threshold: 0.5 }
+            { threshold: 0.5 },
         );
 
         observer.observe(sectionRef.current);

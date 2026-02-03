@@ -68,7 +68,9 @@ export function FAQSection({
                                         ? 'border-accent-400 bg-white shadow-lg shadow-accent-500/20'
                                         : 'border-primary-100 bg-white hover:border-primary-200 hover:shadow-md'
                                 }`}
-                                onClick={() => handleToggle(index, faq.question)}
+                                onClick={() =>
+                                    handleToggle(index, faq.question)
+                                }
                             >
                                 <button className="flex w-full items-center justify-between p-5 text-left md:p-6">
                                     <span className="flex items-center gap-3 pr-4">

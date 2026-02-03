@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import {
     AlertCircle,
     Archive,
@@ -325,7 +325,8 @@ export default function TicketsIndex({
                                                 variant="outline"
                                                 className={`${getPriorityClass(ticket.priority)}`}
                                             >
-                                                {ticket.priority === 'urgent' && (
+                                                {ticket.priority ===
+                                                    'urgent' && (
                                                     <AlertCircle className="mr-1 h-3 w-3" />
                                                 )}
                                                 {ticket.priority_label}
@@ -360,10 +361,7 @@ export default function TicketsIndex({
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={(e) =>
-                                                    deleteTicket(
-                                                        e,
-                                                        ticket.uuid,
-                                                    )
+                                                    deleteTicket(e, ticket.uuid)
                                                 }
                                                 className="h-8 w-8 text-muted-foreground hover:text-red-600"
                                             >

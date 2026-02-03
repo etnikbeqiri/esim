@@ -1,26 +1,32 @@
-import { initializeApp, FirebaseApp } from 'firebase/app';
-import { getAnalytics, logEvent, setUserId, setUserProperties, Analytics } from 'firebase/analytics';
+import {
+    Analytics,
+    getAnalytics,
+    logEvent,
+    setUserId,
+    setUserProperties,
+} from 'firebase/analytics';
+import { FirebaseApp, initializeApp } from 'firebase/app';
 import type {
+    AddPaymentInfoParams,
     AnalyticsConfig,
     AnalyticsEvents,
-    UserProperties,
+    BeginCheckoutParams,
+    ContentEngagementParams,
+    DeviceDetectedParams,
     EcommerceItem,
+    ErrorParams,
+    FilterParams,
+    FormInteractionParams,
+    InstallationStepParams,
+    NetworkCoverageParams,
     PageViewParams,
+    PurchaseParams,
     SearchParams,
+    SelectItemParams,
+    SupportContactParams,
+    UserProperties,
     ViewItemListParams,
     ViewItemParams,
-    SelectItemParams,
-    BeginCheckoutParams,
-    AddPaymentInfoParams,
-    PurchaseParams,
-    FormInteractionParams,
-    FilterParams,
-    DeviceDetectedParams,
-    NetworkCoverageParams,
-    InstallationStepParams,
-    SupportContactParams,
-    ContentEngagementParams,
-    ErrorParams,
 } from './types';
 
 class AnalyticsService {
@@ -76,10 +82,16 @@ class AnalyticsService {
         }
     }
 
-    private track<K extends keyof AnalyticsEvents>(eventName: K, params: AnalyticsEvents[K]): void {
+    private track<K extends keyof AnalyticsEvents>(
+        eventName: K,
+        params: AnalyticsEvents[K],
+    ): void {
         const execute = () => {
             if (!this.analytics || !this.config?.enabled) {
-                this.log(`Event queued (analytics not ready): ${eventName}`, params);
+                this.log(
+                    `Event queued (analytics not ready): ${eventName}`,
+                    params,
+                );
                 return;
             }
 
@@ -89,7 +101,11 @@ class AnalyticsService {
                 ...this.userProperties,
             };
 
-            logEvent(this.analytics, eventName as string, enrichedParams as Record<string, unknown>);
+            logEvent(
+                this.analytics,
+                eventName as string,
+                enrichedParams as Record<string, unknown>,
+            );
             this.log(`Event tracked: ${eventName}`, enrichedParams);
         };
 
@@ -105,7 +121,10 @@ class AnalyticsService {
 
         if (this.analytics && properties.user_id) {
             setUserId(this.analytics, properties.user_id);
-            setUserProperties(this.analytics, properties as Record<string, unknown>);
+            setUserProperties(
+                this.analytics,
+                properties as Record<string, unknown>,
+            );
             this.log('User properties set', properties);
         }
     }

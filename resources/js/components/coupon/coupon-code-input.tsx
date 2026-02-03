@@ -2,8 +2,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTrans } from '@/hooks/use-trans';
 import { type CouponValidationResponse } from '@/types';
-import { Check, X, Loader2, Ticket, AlertCircle, Info, Plus } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import {
+    AlertCircle,
+    Check,
+    Info,
+    Loader2,
+    Plus,
+    Ticket,
+    X,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface AppliedCoupon {
     code: string;
@@ -18,7 +26,11 @@ interface CouponCodeInputProps {
     packageId: number;
     email: string;
     orderAmount: number;
-    onCouponsChanged: (coupons: AppliedCoupon[], totalDiscount: number, finalAmount: number) => void;
+    onCouponsChanged: (
+        coupons: AppliedCoupon[],
+        totalDiscount: number,
+        finalAmount: number,
+    ) => void;
     className?: string;
 }
 
@@ -35,18 +47,27 @@ export function CouponCodeInput({
     const [appliedCoupons, setAppliedCoupons] = useState<AppliedCoupon[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [showInput, setShowInput] = useState(true);
-    const [lastValidatedEmail, setLastValidatedEmail] = useState<string | null>(null);
+    const [lastValidatedEmail, setLastValidatedEmail] = useState<string | null>(
+        null,
+    );
 
     // Calculate totals whenever coupons change
     useEffect(() => {
-        const totalDiscount = appliedCoupons.reduce((sum, c) => sum + c.discount, 0);
+        const totalDiscount = appliedCoupons.reduce(
+            (sum, c) => sum + c.discount,
+            0,
+        );
         const finalAmount = Math.max(0, orderAmount - totalDiscount);
         onCouponsChanged(appliedCoupons, totalDiscount, finalAmount);
     }, [appliedCoupons, orderAmount]);
 
     // Re-validate coupons when email changes
     useEffect(() => {
-        if (appliedCoupons.length > 0 && lastValidatedEmail && lastValidatedEmail !== email) {
+        if (
+            appliedCoupons.length > 0 &&
+            lastValidatedEmail &&
+            lastValidatedEmail !== email
+        ) {
             if (email && isValidEmail(email)) {
                 revalidateAllCoupons();
             } else {
@@ -68,7 +89,10 @@ export function CouponCodeInput({
 
     // Calculate current amount after existing discounts
     const getCurrentAmount = (): number => {
-        const totalDiscount = appliedCoupons.reduce((sum, c) => sum + c.discount, 0);
+        const totalDiscount = appliedCoupons.reduce(
+            (sum, c) => sum + c.discount,
+            0,
+        );
         return Math.max(0, orderAmount - totalDiscount);
     };
 
@@ -80,7 +104,11 @@ export function CouponCodeInput({
         }
 
         // Check if coupon is already applied
-        if (appliedCoupons.some(c => c.code.toUpperCase() === code.trim().toUpperCase())) {
+        if (
+            appliedCoupons.some(
+                (c) => c.code.toUpperCase() === code.trim().toUpperCase(),
+            )
+        ) {
             setError(trans('coupon_input.already_applied'));
             return;
         }
@@ -90,13 +118,13 @@ export function CouponCodeInput({
 
         try {
             const currentAmount = getCurrentAmount();
-            const appliedCodes = appliedCoupons.map(c => c.code);
+            const appliedCodes = appliedCoupons.map((c) => c.code);
 
             const response = await fetch('/api/v1/coupons/validate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
+                    Accept: 'application/json',
                     'X-XSRF-TOKEN': getCsrfToken(),
                 },
                 credentials: 'same-origin',
@@ -109,7 +137,8 @@ export function CouponCodeInput({
                 }),
             });
 
-            const data: CouponValidationResponse & { is_stackable?: boolean } = await response.json();
+            const data: CouponValidationResponse & { is_stackable?: boolean } =
+                await response.json();
 
             if (data.valid && data.coupon) {
                 const newCoupon: AppliedCoupon = {
@@ -121,12 +150,14 @@ export function CouponCodeInput({
                     isStackable: data.is_stackable ?? true,
                 };
 
-                setAppliedCoupons(prev => [...prev, newCoupon]);
+                setAppliedCoupons((prev) => [...prev, newCoupon]);
                 setLastValidatedEmail(email);
                 setCode('');
 
                 // Check if we can add more coupons
-                const canAddMore = newCoupon.isStackable && appliedCoupons.every(c => c.isStackable);
+                const canAddMore =
+                    newCoupon.isStackable &&
+                    appliedCoupons.every((c) => c.isStackable);
                 setShowInput(canAddMore);
             } else {
                 setError(data.error || trans('coupon_input.invalid_code'));
@@ -151,7 +182,7 @@ export function CouponCodeInput({
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json',
+                        Accept: 'application/json',
                         'X-XSRF-TOKEN': getCsrfToken(),
                     },
                     credentials: 'same-origin',
@@ -160,11 +191,13 @@ export function CouponCodeInput({
                         package_id: packageId,
                         email: email,
                         order_amount: currentAmount,
-                        applied_coupons: validCoupons.map(c => c.code),
+                        applied_coupons: validCoupons.map((c) => c.code),
                     }),
                 });
 
-                const data: CouponValidationResponse & { is_stackable?: boolean } = await response.json();
+                const data: CouponValidationResponse & {
+                    is_stackable?: boolean;
+                } = await response.json();
 
                 if (data.valid && data.coupon) {
                     const validCoupon: AppliedCoupon = {
@@ -176,7 +209,10 @@ export function CouponCodeInput({
                         isStackable: data.is_stackable ?? true,
                     };
                     validCoupons.push(validCoupon);
-                    currentAmount = Math.max(0, currentAmount - validCoupon.discount);
+                    currentAmount = Math.max(
+                        0,
+                        currentAmount - validCoupon.discount,
+                    );
                 }
             } catch (err) {
                 // Skip invalid coupons
@@ -187,14 +223,18 @@ export function CouponCodeInput({
         setLastValidatedEmail(email);
 
         // Update show input based on remaining valid coupons
-        const canAddMore = validCoupons.length === 0 || validCoupons.every(c => c.isStackable);
+        const canAddMore =
+            validCoupons.length === 0 ||
+            validCoupons.every((c) => c.isStackable);
         setShowInput(canAddMore);
 
         setIsValidating(false);
     };
 
     const removeCoupon = (codeToRemove: string) => {
-        setAppliedCoupons(prev => prev.filter(c => c.code !== codeToRemove));
+        setAppliedCoupons((prev) =>
+            prev.filter((c) => c.code !== codeToRemove),
+        );
         setShowInput(true);
         setError(null);
     };
@@ -206,15 +246,24 @@ export function CouponCodeInput({
     const isEmailValid = email && isValidEmail(email);
 
     // Determine error type for styling
-    const getErrorType = (errorMsg: string): 'invalid' | 'restriction' | 'limit' | 'expired' | 'stacking' => {
+    const getErrorType = (
+        errorMsg: string,
+    ): 'invalid' | 'restriction' | 'limit' | 'expired' | 'stacking' => {
         const lowerError = errorMsg.toLowerCase();
-        if (lowerError.includes('expired') || lowerError.includes('not yet valid')) {
+        if (
+            lowerError.includes('expired') ||
+            lowerError.includes('not yet valid')
+        ) {
             return 'expired';
         }
         if (lowerError.includes('limit') || lowerError.includes('maximum')) {
             return 'limit';
         }
-        if (lowerError.includes('not available') || lowerError.includes('cannot be used') || lowerError.includes('not valid for')) {
+        if (
+            lowerError.includes('not available') ||
+            lowerError.includes('cannot be used') ||
+            lowerError.includes('not valid for')
+        ) {
             return 'restriction';
         }
         if (lowerError.includes('stack') || lowerError.includes('combine')) {
@@ -238,7 +287,8 @@ export function CouponCodeInput({
         switch (type) {
             case 'restriction':
                 return {
-                    container: 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50',
+                    container:
+                        'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50',
                     icon: 'text-amber-500 dark:text-amber-400',
                     text: 'text-amber-800 dark:text-amber-200',
                     subtext: 'text-amber-600 dark:text-amber-400',
@@ -246,21 +296,24 @@ export function CouponCodeInput({
             case 'limit':
             case 'stacking':
                 return {
-                    container: 'border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950/50',
+                    container:
+                        'border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950/50',
                     icon: 'text-orange-500 dark:text-orange-400',
                     text: 'text-orange-800 dark:text-orange-200',
                     subtext: 'text-orange-600 dark:text-orange-400',
                 };
             case 'expired':
                 return {
-                    container: 'border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/50',
+                    container:
+                        'border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/50',
                     icon: 'text-slate-500 dark:text-slate-400',
                     text: 'text-slate-700 dark:text-slate-200',
                     subtext: 'text-slate-500 dark:text-slate-400',
                 };
             default:
                 return {
-                    container: 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/50',
+                    container:
+                        'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/50',
                     icon: 'text-red-500 dark:text-red-400',
                     text: 'text-red-800 dark:text-red-200',
                     subtext: 'text-red-600 dark:text-red-400',
@@ -283,17 +336,20 @@ export function CouponCodeInput({
         }
     };
 
-    const totalDiscount = appliedCoupons.reduce((sum, c) => sum + c.discount, 0);
+    const totalDiscount = appliedCoupons.reduce(
+        (sum, c) => sum + c.discount,
+        0,
+    );
 
     return (
         <div className={className}>
             {/* Applied Coupons List */}
             {appliedCoupons.length > 0 && (
-                <div className="space-y-2 mb-3">
+                <div className="mb-3 space-y-2">
                     {appliedCoupons.map((coupon, index) => (
                         <div
                             key={coupon.code}
-                            className="rounded-lg border border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800 p-3"
+                            className="rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950"
                         >
                             <div className="flex items-start justify-between">
                                 <div className="flex items-start gap-2.5">
@@ -302,7 +358,7 @@ export function CouponCodeInput({
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <span className="font-semibold text-sm text-green-800 dark:text-green-200">
+                                            <span className="text-sm font-semibold text-green-800 dark:text-green-200">
                                                 {coupon.code}
                                             </span>
                                             <span className="text-xs text-green-600 dark:text-green-400">
@@ -310,10 +366,14 @@ export function CouponCodeInput({
                                             </span>
                                         </div>
                                         <div className="text-xs text-green-700 dark:text-green-300">
-                                            {coupon.type === 'percentage' ? `${coupon.value}%` : `€${coupon.value}`}
-                                            {' '}{trans('coupon_input.off')}
+                                            {coupon.type === 'percentage'
+                                                ? `${coupon.value}%`
+                                                : `€${coupon.value}`}{' '}
+                                            {trans('coupon_input.off')}
                                             {' • '}
-                                            <span className="font-medium">-€{coupon.discount.toFixed(2)}</span>
+                                            <span className="font-medium">
+                                                -€{coupon.discount.toFixed(2)}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -321,7 +381,7 @@ export function CouponCodeInput({
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => removeCoupon(coupon.code)}
-                                    className="h-6 w-6 p-0 text-green-700 hover:text-green-900 hover:bg-green-100 dark:text-green-300 dark:hover:bg-green-900"
+                                    className="h-6 w-6 p-0 text-green-700 hover:bg-green-100 hover:text-green-900 dark:text-green-300 dark:hover:bg-green-900"
                                 >
                                     <X className="h-3.5 w-3.5" />
                                 </Button>
@@ -331,8 +391,9 @@ export function CouponCodeInput({
 
                     {/* Total Savings */}
                     {appliedCoupons.length > 1 && (
-                        <div className="text-sm font-medium text-green-700 dark:text-green-300 pl-1">
-                            {trans('coupon_input.total_savings')}: €{totalDiscount.toFixed(2)}
+                        <div className="pl-1 text-sm font-medium text-green-700 dark:text-green-300">
+                            {trans('coupon_input.total_savings')}: €
+                            {totalDiscount.toFixed(2)}
                         </div>
                     )}
                 </div>
@@ -343,25 +404,35 @@ export function CouponCodeInput({
                 <div className="space-y-3">
                     <div className="flex gap-2">
                         <div className="relative flex-1">
-                            <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Ticket className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                                 type="text"
-                                placeholder={appliedCoupons.length > 0
-                                    ? trans('coupon_input.placeholder_another')
-                                    : trans('coupon_input.placeholder')}
+                                placeholder={
+                                    appliedCoupons.length > 0
+                                        ? trans(
+                                              'coupon_input.placeholder_another',
+                                          )
+                                        : trans('coupon_input.placeholder')
+                                }
                                 value={code}
                                 onChange={(e) => {
                                     setCode(e.target.value.toUpperCase());
                                     if (error) clearError();
                                 }}
-                                onKeyDown={(e) => e.key === 'Enter' && isEmailValid && validateCoupon()}
+                                onKeyDown={(e) =>
+                                    e.key === 'Enter' &&
+                                    isEmailValid &&
+                                    validateCoupon()
+                                }
                                 className={`pl-10 font-mono ${error ? 'border-red-300 focus:border-red-400 focus:ring-red-200' : ''}`}
                                 disabled={isValidating || !isEmailValid}
                             />
                         </div>
                         <Button
                             onClick={validateCoupon}
-                            disabled={!code.trim() || isValidating || !isEmailValid}
+                            disabled={
+                                !code.trim() || isValidating || !isEmailValid
+                            }
                             variant="secondary"
                         >
                             {isValidating ? (
@@ -375,60 +446,71 @@ export function CouponCodeInput({
                     </div>
 
                     {!isEmailValid && !error && (
-                        <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                             <Info className="h-3 w-3" />
                             {trans('coupon_input.enter_email_first')}
                         </p>
                     )}
 
-                    {error && (() => {
-                        const errorType = getErrorType(error);
-                        const styles = getErrorStyles(errorType);
-                        const hint = getErrorHint(errorType);
+                    {error &&
+                        (() => {
+                            const errorType = getErrorType(error);
+                            const styles = getErrorStyles(errorType);
+                            const hint = getErrorHint(errorType);
 
-                        return (
-                            <div className={`rounded-lg border p-3 ${styles.container}`}>
-                                <div className="flex items-start gap-2.5">
-                                    <div className={`mt-0.5 ${styles.icon}`}>
-                                        {getErrorIcon(errorType)}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className={`text-sm font-medium ${styles.text}`}>
-                                            {error}
-                                        </p>
-                                        {hint && (
-                                            <p className={`text-xs mt-1 ${styles.subtext}`}>
-                                                {hint}
+                            return (
+                                <div
+                                    className={`rounded-lg border p-3 ${styles.container}`}
+                                >
+                                    <div className="flex items-start gap-2.5">
+                                        <div
+                                            className={`mt-0.5 ${styles.icon}`}
+                                        >
+                                            {getErrorIcon(errorType)}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p
+                                                className={`text-sm font-medium ${styles.text}`}
+                                            >
+                                                {error}
                                             </p>
-                                        )}
+                                            {hint && (
+                                                <p
+                                                    className={`mt-1 text-xs ${styles.subtext}`}
+                                                >
+                                                    {hint}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={clearError}
+                                            className={`h-6 w-6 p-0 ${styles.icon} opacity-60 hover:bg-transparent hover:opacity-100`}
+                                        >
+                                            <X className="h-3.5 w-3.5" />
+                                        </Button>
                                     </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={clearError}
-                                        className={`h-6 w-6 p-0 ${styles.icon} hover:bg-transparent opacity-60 hover:opacity-100`}
-                                    >
-                                        <X className="h-3.5 w-3.5" />
-                                    </Button>
                                 </div>
-                            </div>
-                        );
-                    })()}
+                            );
+                        })()}
                 </div>
             )}
 
             {/* Show "Add Another" button when input is hidden but coupons are stackable */}
-            {!showInput && appliedCoupons.length > 0 && appliedCoupons.every(c => c.isStackable) && (
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowInput(true)}
-                    className="text-primary-600 hover:text-primary-700 mt-2"
-                >
-                    <Plus className="h-3.5 w-3.5 mr-1" />
-                    {trans('coupon_input.add_another')}
-                </Button>
-            )}
+            {!showInput &&
+                appliedCoupons.length > 0 &&
+                appliedCoupons.every((c) => c.isStackable) && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowInput(true)}
+                        className="mt-2 text-primary-600 hover:text-primary-700"
+                    >
+                        <Plus className="mr-1 h-3.5 w-3.5" />
+                        {trans('coupon_input.add_another')}
+                    </Button>
+                )}
         </div>
     );
 }

@@ -32,7 +32,18 @@ return [
             'payment' => 'Pagesë',
             'secure' => 'E Sigurt',
             'instant' => 'I Menjëhershëm',
-        ]
+        ],
+    ],
+    'featured_packages' => [
+        'title' => 'Planet Popullorë',
+        'view_all' => 'Shiko të Gjitha',
+        'buy_now' => 'Bli Tani',
+        'badges' => [
+            'featured' => 'I Veçuar',
+            'best_value' => 'Vlera Më e Mirë',
+            'popular' => 'Popullor',
+            'hot_deal' => 'Ofertë',
+        ],
     ],
     'steps' => [
         'title' => 'Si Punon',
@@ -83,7 +94,7 @@ return [
             'instant' => 'Dorëzim i Menjëhershëm',
             'support' => 'Mbështetje 24/7',
             'secure' => 'Pagesë e Sigurt',
-        ]
+        ],
     ],
     'footer' => [
         'brand_description' => 'Qëndroni të lidhur kudo në botë me aktivizimin e menjëhershëm të eSIM. Pa tarifa roaming, vetëm liri.',
@@ -413,7 +424,7 @@ return [
             'forgot_password' => 'Keni harruar fjalëkalimin?',
             'remember_me' => 'Më mbaj mend',
             'submit' => 'Kyçu',
-            'no_account' => "Nuk keni llogari?",
+            'no_account' => 'Nuk keni llogari?',
             'sign_up' => 'Regjistrohuni',
         ],
         'register' => [
@@ -960,8 +971,8 @@ return [
             'processing' => 'Duke Procesuar',
             'confirming' => 'Duke Konfirmuar Pagesën...',
             'preparing' => 'Duke Përgatitur eSIM-in Tuaj',
-            'verifying_desc' => "Po verifikojmë statusin e pagesës suaj. Kjo duhet të zgjasë vetëm një moment.",
-            'preparing_desc' => "Kjo zakonisht zgjat më pak se një minutë. Ju lutemi mos e mbyllni këtë faqe.",
+            'verifying_desc' => 'Po verifikojmë statusin e pagesës suaj. Kjo duhet të zgjasë vetëm një moment.',
+            'preparing_desc' => 'Kjo zakonisht zgjat më pak se një minutë. Ju lutemi mos e mbyllni këtë faqe.',
             'complete' => 'E Përfunduar',
             'ready' => 'eSIM-i Juaj është Gati!',
             'scan_qr' => 'Skanoni kodin QR më poshtë për të instaluar eSIM-in në pajisjen tuaj.',
@@ -986,7 +997,7 @@ return [
         ],
         'processing_card' => [
             'title' => 'Duke konfiguruar eSIM-in tuaj...',
-            'description' => "Po provizionojmë profilin tuaj eSIM. Kjo faqe do të përditësohet automatikisht.",
+            'description' => 'Po provizionojmë profilin tuaj eSIM. Kjo faqe do të përditësohet automatikisht.',
         ],
         'actions' => [
             'browse' => 'Shiko Më Shumë Plane',

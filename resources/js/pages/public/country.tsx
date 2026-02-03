@@ -20,7 +20,11 @@ import {
 } from '@/components/ui/select';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
-import { useAnalytics, usePageViewTracking, useScrollTracking } from '@/lib/analytics';
+import {
+    useAnalytics,
+    usePageViewTracking,
+    useScrollTracking,
+} from '@/lib/analytics';
 import { Head, Link } from '@inertiajs/react';
 import {
     ArrowRight,
@@ -243,9 +247,17 @@ function NetworkCoverageDialog({
 export default function CountryPage({ country, packages }: Props) {
     const { trans } = useTrans();
     const [sortBy, setSortBy] = useState<SortOption>('data');
-    const { viewItemList, selectItem, filterApplied, createItem, viewNetworkCoverage } = useAnalytics();
+    const {
+        viewItemList,
+        selectItem,
+        filterApplied,
+        createItem,
+        viewNetworkCoverage,
+    } = useAnalytics();
 
-    usePageViewTracking('country', country.name, { country_code: country.iso_code });
+    usePageViewTracking('country', country.name, {
+        country_code: country.iso_code,
+    });
 
     useScrollTracking('guide', `country-${country.iso_code}`, country.name);
 
@@ -267,10 +279,22 @@ export default function CountryPage({ country, packages }: Props) {
 
     useEffect(() => {
         if (packages.length > 0) {
-            const items = packages.map((pkg, index) => createAnalyticsItem(pkg, index));
-            viewItemList(`country_${country.iso_code}`, `${country.name} eSIM Packages`, items);
+            const items = packages.map((pkg, index) =>
+                createAnalyticsItem(pkg, index),
+            );
+            viewItemList(
+                `country_${country.iso_code}`,
+                `${country.name} eSIM Packages`,
+                items,
+            );
         }
-    }, [packages, country.iso_code, country.name, viewItemList, createAnalyticsItem]);
+    }, [
+        packages,
+        country.iso_code,
+        country.name,
+        viewItemList,
+        createAnalyticsItem,
+    ]);
 
     const handleSortChange = useCallback(
         (value: string) => {
@@ -284,7 +308,11 @@ export default function CountryPage({ country, packages }: Props) {
     const handleSelectPlan = useCallback(
         (pkg: Package, index: number) => {
             const item = createAnalyticsItem(pkg, index);
-            selectItem(item, `country_${country.iso_code}`, `${country.name} eSIM Packages`);
+            selectItem(
+                item,
+                `country_${country.iso_code}`,
+                `${country.name} eSIM Packages`,
+            );
         },
         [createAnalyticsItem, selectItem, country.iso_code, country.name],
     );
@@ -292,7 +320,11 @@ export default function CountryPage({ country, packages }: Props) {
     const handleViewNetworkCoverage = useCallback(
         (pkg: Package) => {
             const operatorsCount = pkg.networks?.length ?? 0;
-            viewNetworkCoverage(country.iso_code, String(pkg.id), operatorsCount);
+            viewNetworkCoverage(
+                country.iso_code,
+                String(pkg.id),
+                operatorsCount,
+            );
         },
         [viewNetworkCoverage, country.iso_code],
     );

@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Country;
 use App\Models\Package;
+use App\Services\Setting\SettingsManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,6 +15,8 @@ class HomeController extends Controller
 {
     public function index(): Response
     {
+        $featuredPackages = $this->getFeaturedPackages();
+
         // Get featured countries with package counts
         $featuredCountries = Country::query()
             ->where('is_active', true)
@@ -47,9 +49,66 @@ class HomeController extends Controller
 
         return Inertia::render('welcome', [
             'featuredCountries' => $featuredCountries,
+            'featuredPackages' => $featuredPackages,
             'totalCountries' => $totalCountries,
             'totalPackages' => $totalPackages,
         ]);
+    }
+
+    private function getFeaturedPackages(): array
+    {
+        $settings = app(SettingsManager::class);
+
+        if (! $settings->enabled('homepage.show_featured_packages', true)) {
+            return [];
+        }
+
+        $packageIdsString = $settings->get('homepage.featured_package_ids', '');
+        if (empty($packageIdsString)) {
+            return [];
+        }
+
+        // Parse package IDs with optional labels (format: ID|label or just ID)
+        $packageEntries = array_filter(array_map('trim', explode(',', $packageIdsString)));
+        $packageIds = [];
+        $packageLabels = [];
+
+        foreach ($packageEntries as $entry) {
+            if (str_contains($entry, '|')) {
+                [$id, $label] = explode('|', $entry, 2);
+                $packageIds[] = (int) $id;
+                $packageLabels[(int) $id] = $label;
+            } else {
+                $packageIds[] = (int) $entry;
+            }
+        }
+
+        if (empty($packageIds)) {
+            return [];
+        }
+
+        return Package::query()
+            ->whereIn('id', $packageIds)
+            ->where('is_active', true)
+            ->with('country:id,name,iso_code')
+            ->get()
+            ->sortBy(fn ($pkg) => array_search($pkg->id, $packageIds))
+            ->values()
+            ->map(fn ($pkg) => [
+                'id' => $pkg->id,
+                'name' => $pkg->name,
+                'data_mb' => $pkg->data_mb,
+                'data_label' => $pkg->data_label,
+                'validity_days' => $pkg->validity_days,
+                'validity_label' => $pkg->validity_label,
+                'retail_price' => $pkg->effective_retail_price,
+                'country' => $pkg->country ? [
+                    'name' => $pkg->country->name,
+                    'iso_code' => $pkg->country->iso_code,
+                ] : null,
+                'badge_label' => $packageLabels[$pkg->id] ?? null,
+            ])
+            ->toArray();
     }
 
     public function destinations(Request $request): Response
@@ -144,7 +203,7 @@ class HomeController extends Controller
 
     public function package(Package $package): Response
     {
-        if (!$package->is_active) {
+        if (! $package->is_active) {
             abort(404);
         }
 
@@ -192,10 +251,10 @@ class HomeController extends Controller
             ->whereHas('packages', fn ($q) => $q->where('is_active', true))
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
-                  ->orWhere('iso_code', 'like', "%{$query}%");
+                    ->orWhere('iso_code', 'like', "%{$query}%");
             })
             ->withCount(['packages' => fn ($q) => $q->where('is_active', true)])
-            ->orderByRaw("CASE WHEN name LIKE ? THEN 0 ELSE 1 END", ["{$query}%"])
+            ->orderByRaw('CASE WHEN name LIKE ? THEN 0 ELSE 1 END', ["{$query}%"])
             ->orderBy('name')
             ->limit(6)
             ->get()

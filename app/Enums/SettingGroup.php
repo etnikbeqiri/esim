@@ -7,6 +7,7 @@ enum SettingGroup: string
     case Emails = 'emails';
     case Analytics = 'analytics';
     case Invoices = 'invoices';
+    case Homepage = 'homepage';
 
     public function label(): string
     {
@@ -14,6 +15,7 @@ enum SettingGroup: string
             self::Emails => 'Email Notifications',
             self::Analytics => 'Analytics',
             self::Invoices => 'Invoices & VAT',
+            self::Homepage => 'Homepage',
         };
     }
 
@@ -23,6 +25,7 @@ enum SettingGroup: string
             self::Emails => 'Mail',
             self::Analytics => 'BarChart3',
             self::Invoices => 'Receipt',
+            self::Homepage => 'Home',
         };
     }
 }

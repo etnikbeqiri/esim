@@ -35,7 +35,18 @@ return [
             'payment' => 'Zahlung',
             'secure' => 'Sicher',
             'instant' => 'Sofort',
-        ]
+        ],
+    ],
+    'featured_packages' => [
+        'title' => 'Beliebte Tarife',
+        'view_all' => 'Alle anzeigen',
+        'buy_now' => 'Jetzt kaufen',
+        'badges' => [
+            'featured' => 'Empfohlen',
+            'best_value' => 'Bester Wert',
+            'popular' => 'Beliebt',
+            'hot_deal' => 'Angebot',
+        ],
     ],
     'steps' => [
         'title' => 'So funktioniert\'s',
@@ -86,7 +97,7 @@ return [
             'instant' => 'Sofortige Lieferung',
             'support' => '24/7 Support',
             'secure' => 'Sichere Zahlung',
-        ]
+        ],
     ],
     'footer' => [
         'brand_description' => 'Bleiben Sie weltweit verbunden mit sofortiger eSIM-Aktivierung. Keine Roaming-Gebühren, nur Freiheit.',
@@ -416,7 +427,7 @@ return [
             'forgot_password' => 'Passwort vergessen?',
             'remember_me' => 'Angemeldet bleiben',
             'submit' => 'Anmelden',
-            'no_account' => "Sie haben kein Konto?",
+            'no_account' => 'Sie haben kein Konto?',
             'sign_up' => 'Registrieren',
         ],
         'register' => [
@@ -990,8 +1001,8 @@ return [
             'processing' => 'Verarbeitung',
             'confirming' => 'Zahlung wird bestätigt...',
             'preparing' => 'Ihre eSIM wird vorbereitet',
-            'verifying_desc' => "Wir überprüfen Ihren Zahlungsstatus. Dies sollte nur einen Moment dauern.",
-            'preparing_desc' => "Dies dauert normalerweise weniger als eine Minute. Bitte schließen Sie diese Seite nicht.",
+            'verifying_desc' => 'Wir überprüfen Ihren Zahlungsstatus. Dies sollte nur einen Moment dauern.',
+            'preparing_desc' => 'Dies dauert normalerweise weniger als eine Minute. Bitte schließen Sie diese Seite nicht.',
             'complete' => 'Abgeschlossen',
             'ready' => 'Ihre eSIM ist bereit!',
             'scan_qr' => 'Scannen Sie den QR-Code unten, um Ihre eSIM auf Ihrem Gerät zu installieren.',
@@ -1016,7 +1027,7 @@ return [
         ],
         'processing_card' => [
             'title' => 'Ihre eSIM wird eingerichtet...',
-            'description' => "Wir stellen Ihr eSIM-Profil bereit. Diese Seite wird automatisch aktualisiert.",
+            'description' => 'Wir stellen Ihr eSIM-Profil bereit. Diese Seite wird automatisch aktualisiert.',
         ],
         'actions' => [
             'browse' => 'Weitere Pläne durchsuchen',
@@ -1716,4 +1727,3 @@ return [
         ],
     ],
 ];
-

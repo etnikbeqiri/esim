@@ -12,7 +12,12 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type Country, type Package, type Provider } from '@/types';
+import {
+    type BreadcrumbItem,
+    type Country,
+    type Package,
+    type Provider,
+} from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save } from 'lucide-react';
 
@@ -28,7 +33,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Create Coupon', href: '/admin/coupons/create' },
 ];
 
-export default function CreateCoupon({ countries, providers, packages }: Props) {
+export default function CreateCoupon({
+    countries,
+    providers,
+    packages,
+}: Props) {
     const { data, setData, post, processing, errors } = useForm({
         code: '',
         name: '',
@@ -56,13 +65,15 @@ export default function CreateCoupon({ countries, providers, packages }: Props) 
     }
 
     function toggleArray<T>(array: T[], item: T): T[] {
-        return array.includes(item) ? array.filter(x => x !== item) : [...array, item];
+        return array.includes(item)
+            ? array.filter((x) => x !== item)
+            : [...array, item];
     }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Coupon" />
-            <div className="flex flex-col gap-4 p-4 max-w-4xl mx-auto">
+            <div className="mx-auto flex max-w-4xl flex-col gap-4 p-4">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="icon" asChild>
                         <Link href="/admin/coupons">
@@ -75,18 +86,31 @@ export default function CreateCoupon({ countries, providers, packages }: Props) 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                     {/* Basic Information */}
                     <div className="rounded-lg border p-4">
-                        <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
+                        <h2 className="mb-4 text-lg font-semibold">
+                            Basic Information
+                        </h2>
                         <div className="grid gap-4">
                             <div className="grid gap-2">
                                 <Label htmlFor="code">Coupon Code *</Label>
                                 <Input
                                     id="code"
                                     value={data.code}
-                                    onChange={e => setData('code', e.target.value.toUpperCase().replace(/\s/g, ''))}
+                                    onChange={(e) =>
+                                        setData(
+                                            'code',
+                                            e.target.value
+                                                .toUpperCase()
+                                                .replace(/\s/g, ''),
+                                        )
+                                    }
                                     placeholder="SUMMER2025"
                                     className="font-mono"
                                 />
-                                {errors.code && <p className="text-sm text-destructive">{errors.code}</p>}
+                                {errors.code && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.code}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="grid gap-2">
@@ -94,10 +118,16 @@ export default function CreateCoupon({ countries, providers, packages }: Props) 
                                 <Input
                                     id="name"
                                     value={data.name}
-                                    onChange={e => setData('name', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('name', e.target.value)
+                                    }
                                     placeholder="Summer Sale 2025"
                                 />
-                                {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
+                                {errors.name && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.name}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="grid gap-2">
@@ -105,34 +135,52 @@ export default function CreateCoupon({ countries, providers, packages }: Props) 
                                 <Textarea
                                     id="description"
                                     value={data.description}
-                                    onChange={e => setData('description', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('description', e.target.value)
+                                    }
                                     placeholder="Optional description for the coupon..."
                                     rows={3}
                                 />
-                                {errors.description && <p className="text-sm text-destructive">{errors.description}</p>}
+                                {errors.description && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.description}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
 
                     {/* Discount Settings */}
                     <div className="rounded-lg border p-4">
-                        <h2 className="text-lg font-semibold mb-4">Discount Settings</h2>
+                        <h2 className="mb-4 text-lg font-semibold">
+                            Discount Settings
+                        </h2>
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label htmlFor="type">Discount Type *</Label>
                                 <Select
                                     value={data.type}
-                                    onValueChange={(v: 'percentage' | 'fixed_amount') => setData('type', v)}
+                                    onValueChange={(
+                                        v: 'percentage' | 'fixed_amount',
+                                    ) => setData('type', v)}
                                 >
                                     <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="percentage">Percentage (%)</SelectItem>
-                                        <SelectItem value="fixed_amount">Fixed Amount (€)</SelectItem>
+                                        <SelectItem value="percentage">
+                                            Percentage (%)
+                                        </SelectItem>
+                                        <SelectItem value="fixed_amount">
+                                            Fixed Amount (€)
+                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
-                                {errors.type && <p className="text-sm text-destructive">{errors.type}</p>}
+                                {errors.type && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.type}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="grid gap-2">
@@ -144,19 +192,31 @@ export default function CreateCoupon({ countries, providers, packages }: Props) 
                                         step="0.01"
                                         min="0"
                                         value={data.value}
-                                        onChange={e => setData('value', e.target.value)}
-                                        placeholder={data.type === 'percentage' ? '10' : '5.00'}
+                                        onChange={(e) =>
+                                            setData('value', e.target.value)
+                                        }
+                                        placeholder={
+                                            data.type === 'percentage'
+                                                ? '10'
+                                                : '5.00'
+                                        }
                                         className="pl-8"
                                     />
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
                                         {data.type === 'percentage' ? '%' : '€'}
                                     </span>
                                 </div>
-                                {errors.value && <p className="text-sm text-destructive">{errors.value}</p>}
+                                {errors.value && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.value}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="min_order_amount">Minimum Order Amount</Label>
+                                <Label htmlFor="min_order_amount">
+                                    Minimum Order Amount
+                                </Label>
                                 <div className="relative">
                                     <Input
                                         id="min_order_amount"
@@ -164,45 +224,77 @@ export default function CreateCoupon({ countries, providers, packages }: Props) 
                                         step="0.01"
                                         min="0"
                                         value={data.min_order_amount}
-                                        onChange={e => setData('min_order_amount', e.target.value)}
+                                        onChange={(e) =>
+                                            setData(
+                                                'min_order_amount',
+                                                e.target.value,
+                                            )
+                                        }
                                         placeholder="0.00"
                                         className="pl-8"
                                     />
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">€</span>
+                                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
+                                        €
+                                    </span>
                                 </div>
-                                {errors.min_order_amount && <p className="text-sm text-destructive">{errors.min_order_amount}</p>}
+                                {errors.min_order_amount && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.min_order_amount}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="usage_limit">Total Usage Limit</Label>
+                                <Label htmlFor="usage_limit">
+                                    Total Usage Limit
+                                </Label>
                                 <Input
                                     id="usage_limit"
                                     type="number"
                                     min="1"
                                     value={data.usage_limit}
-                                    onChange={e => setData('usage_limit', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('usage_limit', e.target.value)
+                                    }
                                     placeholder="Leave empty for unlimited"
                                 />
-                                {errors.usage_limit && <p className="text-sm text-destructive">{errors.usage_limit}</p>}
+                                {errors.usage_limit && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.usage_limit}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="per_customer_limit">Per Customer Limit *</Label>
+                                <Label htmlFor="per_customer_limit">
+                                    Per Customer Limit *
+                                </Label>
                                 <Input
                                     id="per_customer_limit"
                                     type="number"
                                     min="1"
                                     value={data.per_customer_limit}
-                                    onChange={e => setData('per_customer_limit', e.target.value)}
+                                    onChange={(e) =>
+                                        setData(
+                                            'per_customer_limit',
+                                            e.target.value,
+                                        )
+                                    }
                                 />
-                                {errors.per_customer_limit && <p className="text-sm text-destructive">{errors.per_customer_limit}</p>}
+                                {errors.per_customer_limit && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.per_customer_limit}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
 
                     {/* Validity Period */}
                     <div className="rounded-lg border p-4">
-                        <h2 className="text-lg font-semibold mb-4">Validity Period</h2>
+                        <h2 className="mb-4 text-lg font-semibold">
+                            Validity Period
+                        </h2>
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label htmlFor="valid_from">Valid From</Label>
@@ -210,9 +302,15 @@ export default function CreateCoupon({ countries, providers, packages }: Props) 
                                     id="valid_from"
                                     type="datetime-local"
                                     value={data.valid_from}
-                                    onChange={e => setData('valid_from', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('valid_from', e.target.value)
+                                    }
                                 />
-                                {errors.valid_from && <p className="text-sm text-destructive">{errors.valid_from}</p>}
+                                {errors.valid_from && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.valid_from}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="grid gap-2">
@@ -221,32 +319,60 @@ export default function CreateCoupon({ countries, providers, packages }: Props) 
                                     id="valid_until"
                                     type="datetime-local"
                                     value={data.valid_until}
-                                    onChange={e => setData('valid_until', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('valid_until', e.target.value)
+                                    }
                                 />
-                                {errors.valid_until && <p className="text-sm text-destructive">{errors.valid_until}</p>}
+                                {errors.valid_until && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.valid_until}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
 
                     {/* Targeting */}
                     <div className="rounded-lg border p-4">
-                        <h2 className="text-lg font-semibold mb-4">Targeting (Optional)</h2>
+                        <h2 className="mb-4 text-lg font-semibold">
+                            Targeting (Optional)
+                        </h2>
 
                         <div className="grid gap-4">
                             <div className="grid gap-2">
                                 <Label>Customer Types</Label>
                                 <div className="flex gap-4">
-                                    <label className="flex items-center gap-2 cursor-pointer">
+                                    <label className="flex cursor-pointer items-center gap-2">
                                         <Checkbox
-                                            checked={data.allowed_customer_types.includes('b2b')}
-                                            onCheckedChange={() => setData('allowed_customer_types', toggleArray(data.allowed_customer_types, 'b2b'))}
+                                            checked={data.allowed_customer_types.includes(
+                                                'b2b',
+                                            )}
+                                            onCheckedChange={() =>
+                                                setData(
+                                                    'allowed_customer_types',
+                                                    toggleArray(
+                                                        data.allowed_customer_types,
+                                                        'b2b',
+                                                    ),
+                                                )
+                                            }
                                         />
                                         <span>B2B (Business)</span>
                                     </label>
-                                    <label className="flex items-center gap-2 cursor-pointer">
+                                    <label className="flex cursor-pointer items-center gap-2">
                                         <Checkbox
-                                            checked={data.allowed_customer_types.includes('b2c')}
-                                            onCheckedChange={() => setData('allowed_customer_types', toggleArray(data.allowed_customer_types, 'b2c'))}
+                                            checked={data.allowed_customer_types.includes(
+                                                'b2c',
+                                            )}
+                                            onCheckedChange={() =>
+                                                setData(
+                                                    'allowed_customer_types',
+                                                    toggleArray(
+                                                        data.allowed_customer_types,
+                                                        'b2c',
+                                                    ),
+                                                )
+                                            }
                                         />
                                         <span>B2C (Consumer)</span>
                                     </label>
@@ -255,18 +381,35 @@ export default function CreateCoupon({ countries, providers, packages }: Props) 
 
                             <div className="grid gap-2">
                                 <Label>Allowed Countries</Label>
-                                <div className="border rounded-md p-3 max-h-40 overflow-y-auto">
+                                <div className="max-h-40 overflow-y-auto rounded-md border p-3">
                                     {countries.length === 0 ? (
-                                        <p className="text-sm text-muted-foreground">No countries available</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            No countries available
+                                        </p>
                                     ) : (
-                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                            {countries.map(country => (
-                                                <label key={country.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                                        <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+                                            {countries.map((country) => (
+                                                <label
+                                                    key={country.id}
+                                                    className="flex cursor-pointer items-center gap-2 text-sm"
+                                                >
                                                     <Checkbox
-                                                        checked={data.allowed_countries.includes(country.id)}
-                                                        onCheckedChange={() => setData('allowed_countries', toggleArray(data.allowed_countries, country.id))}
+                                                        checked={data.allowed_countries.includes(
+                                                            country.id,
+                                                        )}
+                                                        onCheckedChange={() =>
+                                                            setData(
+                                                                'allowed_countries',
+                                                                toggleArray(
+                                                                    data.allowed_countries,
+                                                                    country.id,
+                                                                ),
+                                                            )
+                                                        }
                                                     />
-                                                    <span className="truncate">{country.name}</span>
+                                                    <span className="truncate">
+                                                        {country.name}
+                                                    </span>
                                                 </label>
                                             ))}
                                         </div>
@@ -276,17 +419,33 @@ export default function CreateCoupon({ countries, providers, packages }: Props) 
 
                             <div className="grid gap-2">
                                 <Label>Allowed Providers</Label>
-                                <div className="border rounded-md p-3 max-h-40 overflow-y-auto">
+                                <div className="max-h-40 overflow-y-auto rounded-md border p-3">
                                     {providers.length === 0 ? (
-                                        <p className="text-sm text-muted-foreground">No providers available</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            No providers available
+                                        </p>
                                     ) : (
                                         <div className="flex flex-wrap gap-2">
-                                            {providers.map(provider => (
+                                            {providers.map((provider) => (
                                                 <Badge
                                                     key={provider.id}
-                                                    variant={data.allowed_providers.includes(provider.id) ? 'default' : 'outline'}
+                                                    variant={
+                                                        data.allowed_providers.includes(
+                                                            provider.id,
+                                                        )
+                                                            ? 'default'
+                                                            : 'outline'
+                                                    }
                                                     className="cursor-pointer"
-                                                    onClick={() => setData('allowed_providers', toggleArray(data.allowed_providers, provider.id))}
+                                                    onClick={() =>
+                                                        setData(
+                                                            'allowed_providers',
+                                                            toggleArray(
+                                                                data.allowed_providers,
+                                                                provider.id,
+                                                            ),
+                                                        )
+                                                    }
                                                 >
                                                     {provider.name}
                                                 </Badge>
@@ -300,38 +459,52 @@ export default function CreateCoupon({ countries, providers, packages }: Props) 
 
                     {/* Options */}
                     <div className="rounded-lg border p-4">
-                        <h2 className="text-lg font-semibold mb-4">Options</h2>
+                        <h2 className="mb-4 text-lg font-semibold">Options</h2>
                         <div className="space-y-3">
-                            <label className="flex items-center gap-3 cursor-pointer">
+                            <label className="flex cursor-pointer items-center gap-3">
                                 <Checkbox
                                     checked={data.is_active}
-                                    onCheckedChange={c => setData('is_active', !!c)}
+                                    onCheckedChange={(c) =>
+                                        setData('is_active', !!c)
+                                    }
                                 />
                                 <div>
                                     <div className="font-medium">Active</div>
-                                    <div className="text-sm text-muted-foreground">Coupon can be used immediately</div>
+                                    <div className="text-sm text-muted-foreground">
+                                        Coupon can be used immediately
+                                    </div>
                                 </div>
                             </label>
 
-                            <label className="flex items-center gap-3 cursor-pointer">
+                            <label className="flex cursor-pointer items-center gap-3">
                                 <Checkbox
                                     checked={data.is_stackable}
-                                    onCheckedChange={c => setData('is_stackable', !!c)}
+                                    onCheckedChange={(c) =>
+                                        setData('is_stackable', !!c)
+                                    }
                                 />
                                 <div>
                                     <div className="font-medium">Stackable</div>
-                                    <div className="text-sm text-muted-foreground">Can be combined with other coupons</div>
+                                    <div className="text-sm text-muted-foreground">
+                                        Can be combined with other coupons
+                                    </div>
                                 </div>
                             </label>
 
-                            <label className="flex items-center gap-3 cursor-pointer">
+                            <label className="flex cursor-pointer items-center gap-3">
                                 <Checkbox
                                     checked={data.first_time_only}
-                                    onCheckedChange={c => setData('first_time_only', !!c)}
+                                    onCheckedChange={(c) =>
+                                        setData('first_time_only', !!c)
+                                    }
                                 />
                                 <div>
-                                    <div className="font-medium">First Time Only</div>
-                                    <div className="text-sm text-muted-foreground">Only for first-time customers</div>
+                                    <div className="font-medium">
+                                        First Time Only
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                        Only for first-time customers
+                                    </div>
                                 </div>
                             </label>
                         </div>
