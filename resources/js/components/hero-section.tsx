@@ -33,7 +33,6 @@ interface HeroSectionProps {
     showSearch?: boolean;
     showStats?: boolean;
     totalCountries?: number;
-    // Controlled search props for local filtering
     searchValue?: string;
     onSearchChange?: (value: string) => void;
     searchPlaceholder?: string;
@@ -188,7 +187,7 @@ export function HeroSection({
     }
 
     return (
-        <section className="bg-mesh relative overflow-x-clip pt-6 pb-28 md:pt-12 md:pb-32">
+        <section className="bg-mesh relative overflow-x-clip pt-4 pb-20 md:pt-8 md:pb-24">
             {/* Abstract Background Shapes */}
             <div className="animate-float absolute top-20 -left-20 h-64 w-64 rounded-full bg-primary-200/30 blur-3xl filter md:h-96 md:w-96" />
             <div className="animate-float-delayed absolute -right-20 bottom-20 h-64 w-64 rounded-full bg-accent-200/30 blur-3xl filter md:h-96 md:w-96" />
@@ -265,6 +264,13 @@ export function HeroSection({
                                                 setSearchResults([]);
                                                 setShowDropdown(false);
                                                 setHasSearched(false);
+                                                if (isControlled && window.location.search) {
+                                                    router.get(window.location.pathname, {}, {
+                                                        replace: true,
+                                                        preserveScroll: true,
+                                                        only: ['countries', 'filters'],
+                                                    });
+                                                }
                                             }}
                                             className="shrink-0 rounded-full p-1.5 text-primary-400 transition-colors hover:bg-primary-50 hover:text-primary-600"
                                         >

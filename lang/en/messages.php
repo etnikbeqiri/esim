@@ -127,6 +127,7 @@ return [
             'carribeans' => 'Caribbean',
             'central_america' => 'Central America',
             'regional' => 'Regional',
+            'region' => 'Regional',
             'virtuals' => 'Virtual',
             'local' => 'Local',
         ],

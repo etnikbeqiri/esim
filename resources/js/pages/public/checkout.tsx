@@ -225,13 +225,11 @@ export default function Checkout({
         <GuestLayout>
             <Head title={trans('checkout_page.meta_title')} />
 
-            <section className="bg-mesh relative min-h-screen py-6 md:py-16">
-                {/* Abstract Background Shapes - same as hero */}
+            <section className="bg-mesh relative min-h-screen pt-4 pb-6 md:py-10">
                 <div className="animate-float absolute top-20 -left-20 h-64 w-64 rounded-full bg-primary-200/30 blur-3xl filter md:h-96 md:w-96" />
                 <div className="animate-float-delayed absolute -right-20 bottom-20 h-64 w-64 rounded-full bg-accent-200/30 blur-3xl filter md:h-96 md:w-96" />
 
                 <div className="relative z-10 container mx-auto max-w-6xl px-4">
-                    {/* Back Button */}
                     <BackButton
                         href={
                             pkg.country
@@ -239,11 +237,10 @@ export default function Checkout({
                                 : '/destinations'
                         }
                         label={trans('checkout_page.back')}
-                        className="mb-4 md:mb-8"
+                        className="mb-3 md:mb-6"
                     />
 
-                    {/* Page Header - centered like hero */}
-                    <div className="mb-6 text-center md:mb-12">
+                    <div className="mb-4 text-center md:mb-8">
                         <Badge
                             variant="outline"
                             className="mb-3 inline-flex rounded-full border border-primary-100 bg-white/50 px-4 py-1.5 text-xs font-medium shadow-sm backdrop-blur-md md:mb-6 md:px-6 md:py-2 md:text-sm"

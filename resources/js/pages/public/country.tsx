@@ -337,17 +337,15 @@ export default function CountryPage({ country, packages }: Props) {
             </Head>
 
             {/* Hero Header */}
-            <section className="bg-mesh relative overflow-hidden py-8 md:py-20">
-                {/* Decorative blobs */}
+            <section className="bg-mesh relative overflow-hidden pt-4 pb-6 md:pt-8 md:pb-12">
                 <div className="animate-float absolute top-10 -left-20 h-48 w-48 rounded-full bg-primary-200/40 blur-3xl md:h-80 md:w-80" />
                 <div className="animate-float-delayed absolute -right-20 bottom-10 h-48 w-48 rounded-full bg-accent-200/30 blur-3xl md:h-80 md:w-80" />
 
                 <div className="relative z-10 container mx-auto px-4">
-                    {/* Back Link */}
                     <BackButton
                         href="/destinations"
                         label={trans('country_page.back_to_destinations')}
-                        className="mb-4 md:mb-8"
+                        className="mb-3 md:mb-6"
                     />
 
                     {/* Country Info */}
