@@ -37,6 +37,10 @@ Route::prefix('v1')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
 
+        Route::post('coupons/validate', [\App\Http\Controllers\Public\CouponController::class, 'validate'])->name('coupons.validate');
+        Route::get('coupons/applicable', [\App\Http\Controllers\Public\CouponController::class, 'applicable'])->name('coupons.applicable');
+        Route::post('coupons/apply', [\App\Http\Controllers\Public\CouponController::class, 'apply'])->name('coupons.apply');
+
         Route::post('checkout', [CheckoutController::class, 'store']);
         Route::get('checkout/{orderUuid}/verify', [CheckoutController::class, 'verify']);
         Route::get('checkout/{orderUuid}/status', [CheckoutController::class, 'status']);

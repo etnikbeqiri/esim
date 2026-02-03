@@ -1,0 +1,436 @@
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useTrans } from '@/hooks/use-trans';
+import { type CouponValidationResponse } from '@/types';
+import { Check, X, Loader2, Ticket, AlertCircle, Info, Plus } from 'lucide-react';
+import { useState, useEffect } from 'react';
+
+interface AppliedCoupon {
+    code: string;
+    name: string;
+    type: string;
+    value: number;
+    discount: number;
+    isStackable: boolean;
+}
+
+interface CouponCodeInputProps {
+    packageId: number;
+    email: string;
+    orderAmount: number;
+    onCouponsChanged: (coupons: AppliedCoupon[], totalDiscount: number, finalAmount: number) => void;
+    className?: string;
+}
+
+export function CouponCodeInput({
+    packageId,
+    email,
+    orderAmount,
+    onCouponsChanged,
+    className = '',
+}: CouponCodeInputProps) {
+    const { trans } = useTrans();
+    const [code, setCode] = useState('');
+    const [isValidating, setIsValidating] = useState(false);
+    const [appliedCoupons, setAppliedCoupons] = useState<AppliedCoupon[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const [showInput, setShowInput] = useState(true);
+    const [lastValidatedEmail, setLastValidatedEmail] = useState<string | null>(null);
+
+    // Calculate totals whenever coupons change
+    useEffect(() => {
+        const totalDiscount = appliedCoupons.reduce((sum, c) => sum + c.discount, 0);
+        const finalAmount = Math.max(0, orderAmount - totalDiscount);
+        onCouponsChanged(appliedCoupons, totalDiscount, finalAmount);
+    }, [appliedCoupons, orderAmount]);
+
+    // Re-validate coupons when email changes
+    useEffect(() => {
+        if (appliedCoupons.length > 0 && lastValidatedEmail && lastValidatedEmail !== email) {
+            if (email && isValidEmail(email)) {
+                revalidateAllCoupons();
+            } else {
+                // Email is now invalid - remove all coupons
+                setAppliedCoupons([]);
+                setLastValidatedEmail(null);
+            }
+        }
+    }, [email]);
+
+    const isValidEmail = (emailStr: string): boolean => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr);
+    };
+
+    const getCsrfToken = (): string => {
+        const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : '';
+    };
+
+    // Calculate current amount after existing discounts
+    const getCurrentAmount = (): number => {
+        const totalDiscount = appliedCoupons.reduce((sum, c) => sum + c.discount, 0);
+        return Math.max(0, orderAmount - totalDiscount);
+    };
+
+    const validateCoupon = async () => {
+        if (!code.trim()) return;
+        if (!email || !isValidEmail(email)) {
+            setError(trans('coupon_input.email_required'));
+            return;
+        }
+
+        // Check if coupon is already applied
+        if (appliedCoupons.some(c => c.code.toUpperCase() === code.trim().toUpperCase())) {
+            setError(trans('coupon_input.already_applied'));
+            return;
+        }
+
+        setIsValidating(true);
+        setError(null);
+
+        try {
+            const currentAmount = getCurrentAmount();
+            const appliedCodes = appliedCoupons.map(c => c.code);
+
+            const response = await fetch('/api/v1/coupons/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-XSRF-TOKEN': getCsrfToken(),
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    code: code.trim(),
+                    package_id: packageId,
+                    email: email,
+                    order_amount: currentAmount,
+                    applied_coupons: appliedCodes,
+                }),
+            });
+
+            const data: CouponValidationResponse & { is_stackable?: boolean } = await response.json();
+
+            if (data.valid && data.coupon) {
+                const newCoupon: AppliedCoupon = {
+                    code: data.coupon.code,
+                    name: data.coupon.name,
+                    type: data.coupon.type,
+                    value: data.coupon.value,
+                    discount: data.discount || 0,
+                    isStackable: data.is_stackable ?? true,
+                };
+
+                setAppliedCoupons(prev => [...prev, newCoupon]);
+                setLastValidatedEmail(email);
+                setCode('');
+
+                // Check if we can add more coupons
+                const canAddMore = newCoupon.isStackable && appliedCoupons.every(c => c.isStackable);
+                setShowInput(canAddMore);
+            } else {
+                setError(data.error || trans('coupon_input.invalid_code'));
+            }
+        } catch (err) {
+            setError(trans('coupon_input.validation_failed'));
+        } finally {
+            setIsValidating(false);
+        }
+    };
+
+    const revalidateAllCoupons = async () => {
+        if (appliedCoupons.length === 0) return;
+
+        setIsValidating(true);
+        const validCoupons: AppliedCoupon[] = [];
+        let currentAmount = orderAmount;
+
+        for (const coupon of appliedCoupons) {
+            try {
+                const response = await fetch('/api/v1/coupons/validate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-XSRF-TOKEN': getCsrfToken(),
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        code: coupon.code,
+                        package_id: packageId,
+                        email: email,
+                        order_amount: currentAmount,
+                        applied_coupons: validCoupons.map(c => c.code),
+                    }),
+                });
+
+                const data: CouponValidationResponse & { is_stackable?: boolean } = await response.json();
+
+                if (data.valid && data.coupon) {
+                    const validCoupon: AppliedCoupon = {
+                        code: data.coupon.code,
+                        name: data.coupon.name,
+                        type: data.coupon.type,
+                        value: data.coupon.value,
+                        discount: data.discount || 0,
+                        isStackable: data.is_stackable ?? true,
+                    };
+                    validCoupons.push(validCoupon);
+                    currentAmount = Math.max(0, currentAmount - validCoupon.discount);
+                }
+            } catch (err) {
+                // Skip invalid coupons
+            }
+        }
+
+        setAppliedCoupons(validCoupons);
+        setLastValidatedEmail(email);
+
+        // Update show input based on remaining valid coupons
+        const canAddMore = validCoupons.length === 0 || validCoupons.every(c => c.isStackable);
+        setShowInput(canAddMore);
+
+        setIsValidating(false);
+    };
+
+    const removeCoupon = (codeToRemove: string) => {
+        setAppliedCoupons(prev => prev.filter(c => c.code !== codeToRemove));
+        setShowInput(true);
+        setError(null);
+    };
+
+    const clearError = () => {
+        setError(null);
+    };
+
+    const isEmailValid = email && isValidEmail(email);
+
+    // Determine error type for styling
+    const getErrorType = (errorMsg: string): 'invalid' | 'restriction' | 'limit' | 'expired' | 'stacking' => {
+        const lowerError = errorMsg.toLowerCase();
+        if (lowerError.includes('expired') || lowerError.includes('not yet valid')) {
+            return 'expired';
+        }
+        if (lowerError.includes('limit') || lowerError.includes('maximum')) {
+            return 'limit';
+        }
+        if (lowerError.includes('not available') || lowerError.includes('cannot be used') || lowerError.includes('not valid for')) {
+            return 'restriction';
+        }
+        if (lowerError.includes('stack') || lowerError.includes('combine')) {
+            return 'stacking';
+        }
+        return 'invalid';
+    };
+
+    const getErrorIcon = (type: string) => {
+        switch (type) {
+            case 'restriction':
+            case 'limit':
+            case 'stacking':
+                return <Info className="h-4 w-4 shrink-0" />;
+            default:
+                return <AlertCircle className="h-4 w-4 shrink-0" />;
+        }
+    };
+
+    const getErrorStyles = (type: string) => {
+        switch (type) {
+            case 'restriction':
+                return {
+                    container: 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50',
+                    icon: 'text-amber-500 dark:text-amber-400',
+                    text: 'text-amber-800 dark:text-amber-200',
+                    subtext: 'text-amber-600 dark:text-amber-400',
+                };
+            case 'limit':
+            case 'stacking':
+                return {
+                    container: 'border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950/50',
+                    icon: 'text-orange-500 dark:text-orange-400',
+                    text: 'text-orange-800 dark:text-orange-200',
+                    subtext: 'text-orange-600 dark:text-orange-400',
+                };
+            case 'expired':
+                return {
+                    container: 'border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/50',
+                    icon: 'text-slate-500 dark:text-slate-400',
+                    text: 'text-slate-700 dark:text-slate-200',
+                    subtext: 'text-slate-500 dark:text-slate-400',
+                };
+            default:
+                return {
+                    container: 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/50',
+                    icon: 'text-red-500 dark:text-red-400',
+                    text: 'text-red-800 dark:text-red-200',
+                    subtext: 'text-red-600 dark:text-red-400',
+                };
+        }
+    };
+
+    const getErrorHint = (type: string): string | null => {
+        switch (type) {
+            case 'restriction':
+                return trans('coupon_input.hint_try_another');
+            case 'limit':
+                return trans('coupon_input.hint_limit_reached');
+            case 'expired':
+                return trans('coupon_input.hint_expired');
+            case 'stacking':
+                return trans('coupon_input.hint_not_stackable');
+            default:
+                return trans('coupon_input.hint_check_code');
+        }
+    };
+
+    const totalDiscount = appliedCoupons.reduce((sum, c) => sum + c.discount, 0);
+
+    return (
+        <div className={className}>
+            {/* Applied Coupons List */}
+            {appliedCoupons.length > 0 && (
+                <div className="space-y-2 mb-3">
+                    {appliedCoupons.map((coupon, index) => (
+                        <div
+                            key={coupon.code}
+                            className="rounded-lg border border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800 p-3"
+                        >
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-start gap-2.5">
+                                    <div className="mt-0.5 rounded-full bg-green-500 p-1">
+                                        <Check className="h-2.5 w-2.5 text-white" />
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-semibold text-sm text-green-800 dark:text-green-200">
+                                                {coupon.code}
+                                            </span>
+                                            <span className="text-xs text-green-600 dark:text-green-400">
+                                                ({coupon.name})
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-green-700 dark:text-green-300">
+                                            {coupon.type === 'percentage' ? `${coupon.value}%` : `€${coupon.value}`}
+                                            {' '}{trans('coupon_input.off')}
+                                            {' • '}
+                                            <span className="font-medium">-€{coupon.discount.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeCoupon(coupon.code)}
+                                    className="h-6 w-6 p-0 text-green-700 hover:text-green-900 hover:bg-green-100 dark:text-green-300 dark:hover:bg-green-900"
+                                >
+                                    <X className="h-3.5 w-3.5" />
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
+
+                    {/* Total Savings */}
+                    {appliedCoupons.length > 1 && (
+                        <div className="text-sm font-medium text-green-700 dark:text-green-300 pl-1">
+                            {trans('coupon_input.total_savings')}: €{totalDiscount.toFixed(2)}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Add Coupon Input */}
+            {showInput && (
+                <div className="space-y-3">
+                    <div className="flex gap-2">
+                        <div className="relative flex-1">
+                            <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                type="text"
+                                placeholder={appliedCoupons.length > 0
+                                    ? trans('coupon_input.placeholder_another')
+                                    : trans('coupon_input.placeholder')}
+                                value={code}
+                                onChange={(e) => {
+                                    setCode(e.target.value.toUpperCase());
+                                    if (error) clearError();
+                                }}
+                                onKeyDown={(e) => e.key === 'Enter' && isEmailValid && validateCoupon()}
+                                className={`pl-10 font-mono ${error ? 'border-red-300 focus:border-red-400 focus:ring-red-200' : ''}`}
+                                disabled={isValidating || !isEmailValid}
+                            />
+                        </div>
+                        <Button
+                            onClick={validateCoupon}
+                            disabled={!code.trim() || isValidating || !isEmailValid}
+                            variant="secondary"
+                        >
+                            {isValidating ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : appliedCoupons.length > 0 ? (
+                                <Plus className="h-4 w-4" />
+                            ) : (
+                                trans('coupon_input.apply')
+                            )}
+                        </Button>
+                    </div>
+
+                    {!isEmailValid && !error && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                            <Info className="h-3 w-3" />
+                            {trans('coupon_input.enter_email_first')}
+                        </p>
+                    )}
+
+                    {error && (() => {
+                        const errorType = getErrorType(error);
+                        const styles = getErrorStyles(errorType);
+                        const hint = getErrorHint(errorType);
+
+                        return (
+                            <div className={`rounded-lg border p-3 ${styles.container}`}>
+                                <div className="flex items-start gap-2.5">
+                                    <div className={`mt-0.5 ${styles.icon}`}>
+                                        {getErrorIcon(errorType)}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className={`text-sm font-medium ${styles.text}`}>
+                                            {error}
+                                        </p>
+                                        {hint && (
+                                            <p className={`text-xs mt-1 ${styles.subtext}`}>
+                                                {hint}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={clearError}
+                                        className={`h-6 w-6 p-0 ${styles.icon} hover:bg-transparent opacity-60 hover:opacity-100`}
+                                    >
+                                        <X className="h-3.5 w-3.5" />
+                                    </Button>
+                                </div>
+                            </div>
+                        );
+                    })()}
+                </div>
+            )}
+
+            {/* Show "Add Another" button when input is hidden but coupons are stackable */}
+            {!showInput && appliedCoupons.length > 0 && appliedCoupons.every(c => c.isStackable) && (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowInput(true)}
+                    className="text-primary-600 hover:text-primary-700 mt-2"
+                >
+                    <Plus className="h-3.5 w-3.5 mr-1" />
+                    {trans('coupon_input.add_another')}
+                </Button>
+            )}
+        </div>
+    );
+}
+
+export default CouponCodeInput;

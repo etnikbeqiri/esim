@@ -347,5 +347,78 @@ class SettingsRegistrar
             type: SettingType::Boolean,
             default: false
         );
+
+        // Invoice & VAT Settings
+        $this->register(
+            key: 'invoices.vat_enabled',
+            label: 'Enable VAT',
+            description: 'Enable VAT calculation on invoices',
+            group: SettingGroup::Invoices,
+            type: SettingType::Boolean,
+            default: true
+        );
+
+        $this->register(
+            key: 'invoices.vat_rate',
+            label: 'VAT Rate (%)',
+            description: 'VAT percentage rate (e.g., 18 for Kosovo)',
+            group: SettingGroup::Invoices,
+            type: SettingType::Float,
+            default: 18
+        );
+
+        $this->register(
+            key: 'invoices.vat_inclusive',
+            label: 'Prices Include VAT',
+            description: 'If enabled, displayed prices already include VAT (VAT is extracted from total). If disabled, VAT is added on top.',
+            group: SettingGroup::Invoices,
+            type: SettingType::Boolean,
+            default: true
+        );
+
+        $this->register(
+            key: 'invoices.vat_country',
+            label: 'VAT Country',
+            description: 'Country for VAT registration (displayed on invoices)',
+            group: SettingGroup::Invoices,
+            type: SettingType::String,
+            default: 'Kosovo'
+        );
+
+        $this->register(
+            key: 'invoices.company_name',
+            label: 'Company Name',
+            description: 'Company name displayed on invoices',
+            group: SettingGroup::Invoices,
+            type: SettingType::String,
+            default: ''
+        );
+
+        $this->register(
+            key: 'invoices.company_address',
+            label: 'Company Address',
+            description: 'Full company address for invoices',
+            group: SettingGroup::Invoices,
+            type: SettingType::String,
+            default: ''
+        );
+
+        $this->register(
+            key: 'invoices.vat_number',
+            label: 'VAT Number',
+            description: 'Company VAT registration number',
+            group: SettingGroup::Invoices,
+            type: SettingType::String,
+            default: ''
+        );
+
+        $this->register(
+            key: 'invoices.registration_number',
+            label: 'Business Registration Number',
+            description: 'Company registration/business number',
+            group: SettingGroup::Invoices,
+            type: SettingType::String,
+            default: ''
+        );
     }
 }

@@ -219,3 +219,137 @@ export interface UninvoicedTransaction {
     payment_method: string | null;
     created_at: string;
 }
+
+// Coupon Types
+export type CouponType = 'percentage' | 'fixed_amount';
+export type CouponStatus = 'active' | 'expired' | 'upcoming';
+
+export interface Coupon {
+    id: number;
+    code: string;
+    name: string;
+    description: string | null;
+    type: CouponType;
+    value: number;
+    min_order_amount: number;
+    usage_limit: number | null;
+    usage_count: number;
+    per_customer_limit: number;
+    valid_from: string | null;
+    valid_until: string | null;
+    is_active: boolean;
+    is_stackable: boolean;
+    first_time_only: boolean;
+    allowed_countries: number[] | null;
+    allowed_providers: number[] | null;
+    allowed_packages: number[] | null;
+    exclude_packages: number[] | null;
+    allowed_customer_types: ('b2b' | 'b2c')[] | null;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    // Computed properties
+    discount_display?: string;
+    remaining_usages?: number | null;
+    usage_percentage?: number;
+}
+
+export interface CouponUsage {
+    id: number;
+    coupon_id: number;
+    order_id: number;
+    customer_id: number;
+    original_amount: number;
+    discount_amount: number;
+    final_amount: number;
+    created_at: string;
+    updated_at: string;
+    // Relations
+    coupon?: Coupon;
+    order?: {
+        id: number;
+        uuid: string;
+        order_number: string;
+        amount_eur: number;
+    };
+    customer?: {
+        id: number;
+        company_name: string | null;
+        user?: {
+            name: string;
+            email: string;
+        };
+    };
+}
+
+export interface CouponAnalytics {
+    total_usages: number;
+    unique_customers: number;
+    total_discount_given: number;
+    total_revenue_generated: number;
+    total_original_value: number;
+    average_order_value: number;
+    average_discount: number;
+    remaining_usages: number | null;
+    usage_percentage: number;
+    recent_usages_7days: number;
+    top_customers: Array<{
+        customer_id: number;
+        usage_count: number;
+        total_discount: number;
+        customer?: {
+            id: number;
+            company_name: string | null;
+            user?: {
+                name: string;
+                email: string;
+            };
+        };
+    }>;
+    is_active: boolean;
+    is_expired: boolean;
+    is_upcoming: boolean;
+}
+
+export interface CouponValidationRequest {
+    code: string;
+    package_id: number;
+    order_amount?: number;
+}
+
+export interface CouponValidationResponse {
+    valid: boolean;
+    coupon?: {
+        id: number;
+        code: string;
+        name: string;
+        description: string | null;
+        type: CouponType;
+        value: number;
+        discount_display: string;
+    };
+    discount?: number;
+    original_amount?: number;
+    final_amount?: number;
+    error?: string;
+}
+
+export interface Country {
+    id: number;
+    name: string;
+    iso_code: string;
+}
+
+export interface Provider {
+    id: number;
+    name: string;
+}
+
+export interface Package {
+    id: number;
+    name: string;
+    country?: {
+        id: number;
+        name: string;
+    };
+}

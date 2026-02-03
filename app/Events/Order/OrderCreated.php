@@ -26,7 +26,13 @@ class OrderCreated extends Event
         public ?string $customer_email = null,
         public ?string $customer_name = null,
         public ?string $ip_address = null,
+        public ?string $billing_country = null,
         public ?string $user_agent = null,
+        public ?int $coupon_id = null,
+        public float $coupon_discount_amount = 0,
+        public float $vat_rate = 0,
+        public float $vat_amount = 0,
+        public ?float $net_amount = null,
     ) {
         $this->order_id = snowflake_id();
     }
@@ -45,6 +51,12 @@ class OrderCreated extends Event
         $state->amount = $this->amount;
         $state->cost_price = $this->cost_price;
         $state->profit = round($this->amount - $this->cost_price, 2);
+        $state->coupon_id = $this->coupon_id;
+        $state->coupon_discount_amount = $this->coupon_discount_amount;
+        $state->vat_rate = $this->vat_rate;
+        $state->vat_amount = $this->vat_amount;
+        $state->net_amount = $this->net_amount;
+        $state->billing_country = $this->billing_country;
     }
 
     public function handle(OrderState $state): Order
@@ -65,7 +77,13 @@ class OrderCreated extends Event
             'customer_email' => $this->customer_email,
             'customer_name' => $this->customer_name,
             'ip_address' => $this->ip_address,
+            'billing_country' => $this->billing_country,
             'user_agent' => $this->user_agent,
+            'coupon_id' => $this->coupon_id,
+            'coupon_discount_amount' => $this->coupon_discount_amount,
+            'vat_rate' => $this->vat_rate,
+            'vat_amount' => $this->vat_amount,
+            'net_amount' => $this->net_amount,
         ]);
     }
 }

@@ -61,6 +61,11 @@ class Customer extends Model
         return $this->hasMany(BalanceTransaction::class);
     }
 
+    public function couponUsages(): HasMany
+    {
+        return $this->hasMany(CouponUsage::class);
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

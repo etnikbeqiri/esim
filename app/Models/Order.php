@@ -44,12 +44,20 @@ class Order extends Model
         'customer_id',
         'package_id',
         'provider_id',
+        'currency_id',
         'type',
         'status',
         'payment_status',
         'amount',
+        'original_amount',
         'cost_price',
         'profit',
+        'exchange_rate_used',
+        'coupon_id',
+        'coupon_discount_amount',
+        'vat_rate',
+        'vat_amount',
+        'net_amount',
         'provider_order_id',
         'retry_count',
         'max_retries',
@@ -59,6 +67,7 @@ class Order extends Model
         'customer_email',
         'customer_name',
         'ip_address',
+        'billing_country',
         'user_agent',
         'paid_at',
         'completed_at',
@@ -72,8 +81,14 @@ class Order extends Model
             'status' => OrderStatus::class,
             'payment_status' => PaymentStatus::class,
             'amount' => 'decimal:2',
+            'original_amount' => 'decimal:2',
             'cost_price' => 'decimal:2',
             'profit' => 'decimal:2',
+            'exchange_rate_used' => 'decimal:6',
+            'coupon_discount_amount' => 'decimal:2',
+            'vat_rate' => 'decimal:2',
+            'vat_amount' => 'decimal:2',
+            'net_amount' => 'decimal:2',
             'retry_count' => 'integer',
             'max_retries' => 'integer',
             'next_retry_at' => 'datetime',
@@ -116,6 +131,11 @@ class Order extends Model
     public function provider(): BelongsTo
     {
         return $this->belongsTo(Provider::class);
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     public function esimProfile(): HasOne
@@ -169,6 +189,21 @@ class Order extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
+    }
+
+    public function couponUsage(): HasOne
+    {
+        return $this->hasOne(CouponUsage::class);
+    }
+
+    public function couponUsages(): HasMany
+    {
+        return $this->hasMany(CouponUsage::class);
     }
 
     public function scopeByStatus($query, OrderStatus $status)

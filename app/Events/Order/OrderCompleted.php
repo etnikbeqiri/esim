@@ -63,18 +63,16 @@ class OrderCompleted extends Event
             // Send admin notification for new completed order
             $emailService->notifyAdminNewOrder($order);
 
-            // Generate invoice for B2B orders
-            if ($order->isB2B() && $order->customer) {
-                $invoiceService = app(InvoiceService::class);
+            // Generate invoice for all completed orders
+            $invoiceService = app(InvoiceService::class);
 
-                // Prevent duplicate invoices
-                if (! $invoiceService->hasOrderInvoice($order)) {
-                    $invoiceService->createPurchaseInvoice(
-                        $order->customer,
-                        $order,
-                        $order->payment
-                    );
-                }
+            // Prevent duplicate invoices
+            if (! $invoiceService->hasOrderInvoice($order)) {
+                $invoiceService->createPurchaseInvoice(
+                    $order->customer,
+                    $order,
+                    $order->payment
+                );
             }
         });
     }

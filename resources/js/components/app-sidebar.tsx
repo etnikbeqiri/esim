@@ -27,6 +27,7 @@ import {
     ShoppingCart,
     Smartphone,
     Tag,
+    Ticket,
     Users,
     Wallet,
     Monitor,
@@ -100,6 +101,11 @@ export function AppSidebar() {
                       title: 'Packages',
                       href: '/admin/packages',
                       icon: Package,
+                  },
+                  {
+                      title: 'Coupons',
+                      href: '/admin/coupons',
+                      icon: Ticket,
                   },
                   {
                       title: 'Orders',

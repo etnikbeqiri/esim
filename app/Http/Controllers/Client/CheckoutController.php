@@ -96,7 +96,18 @@ class CheckoutController extends Controller
                 : null;
         }
 
-        // Use callback URLs - payment gateway will append payment_id and status
+        $validated = $request->validate([
+            'coupon_code' => 'nullable|string|max:50',
+            'billing_country' => 'nullable|string|max:5',
+        ]);
+
+        $couponCode = $validated['coupon_code'] ?? null;
+        if ($couponCode) {
+            $couponCode = strtoupper(str_replace(' ', '', $couponCode));
+        }
+
+        $billingCountry = $validated['billing_country'] ?? $customer->country ?? 'XK';
+
         $successUrl = route('checkout.callback');
         $cancelUrl = route('checkout.cancel');
         $failUrl = route('checkout.cancel') . '?status=failed';
@@ -110,10 +121,17 @@ class CheckoutController extends Controller
             customerEmail: $user->email,
             customerIp: $request->ip(),
             paymentProvider: $paymentProvider,
+            couponCode: $couponCode,
+            billingCountry: $billingCountry,
         );
 
         if (!$result->success) {
-            return back()->with('error', $result->errorMessage ?? 'Checkout failed');
+            $error = $result->errorMessage ?? 'Checkout failed';
+            // Check if it's a coupon-related error
+            if ($couponCode && str_contains(strtolower($error), 'coupon')) {
+                return back()->with('error', "Coupon error: {$error}")->withInput();
+            }
+            return back()->with('error', $error);
         }
 
         // For B2B (balance), redirect to success page directly
@@ -165,6 +183,12 @@ class CheckoutController extends Controller
                 'status' => $orderModel->status->value,
                 'status_label' => $orderModel->status->label(),
                 'amount' => $orderModel->amount,
+                'coupon_discount' => $orderModel->coupon_discount_amount,
+                'coupon' => $orderModel->coupon ? [
+                    'code' => $orderModel->coupon->code,
+                    'name' => $orderModel->coupon->name,
+                    'discount_display' => $orderModel->coupon->discount_display,
+                ] : null,
                 'package' => $orderModel->package ? [
                     'name' => $orderModel->package->name,
                     'country' => $orderModel->package->country?->name,

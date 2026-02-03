@@ -41,6 +41,15 @@ interface Order {
     } | null;
     customer_email: string;
     amount: string | number;
+    net_amount: string | number | null;
+    vat_rate: string | number | null;
+    vat_amount: string | number | null;
+    coupon_discount: string | number | null;
+    coupon: {
+        code: string;
+        name: string;
+        discount_display: string;
+    } | null;
     payment_method: string;
     created_at: string;
     paid_at: string | null;
@@ -304,10 +313,54 @@ export default function OrderStatus({ order }: Props) {
                                     </div>
                                 )}
                                 <Separator />
+
+                                {/* Coupon Discount */}
+                                {order.coupon && Number(order.coupon_discount) > 0 && (
+                                    <div className="flex justify-between text-sm text-green-600">
+                                        <span className="flex items-center gap-1">
+                                            {trans('order_status_page.payment.discount', { fallback: 'Discount' })}
+                                            <Badge variant="outline" className="text-xs text-green-600 border-green-300">
+                                                {order.coupon.code}
+                                            </Badge>
+                                        </span>
+                                        <span className="font-medium">
+                                            -€{Number(order.coupon_discount).toFixed(2)}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* VAT Breakdown */}
+                                {Number(order.vat_rate) > 0 && order.net_amount && (
+                                    <>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-muted-foreground">
+                                                {trans('order_status_page.payment.net_amount', { fallback: 'Net Amount' })}
+                                            </span>
+                                            <span className="font-medium">
+                                                €{Number(order.net_amount).toFixed(2)}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-muted-foreground">
+                                                {trans('order_status_page.payment.vat', { rate: Number(order.vat_rate), fallback: `VAT (${Number(order.vat_rate)}%)` })}
+                                            </span>
+                                            <span className="font-medium">
+                                                €{Number(order.vat_amount).toFixed(2)}
+                                            </span>
+                                        </div>
+                                        <Separator />
+                                    </>
+                                )}
+
                                 <div className="flex items-center justify-between pt-1">
                                     <span className="font-medium">
                                         {trans(
                                             'order_status_page.payment.total',
+                                        )}
+                                        {Number(order.vat_rate) > 0 && (
+                                            <span className="ml-1 text-xs text-muted-foreground font-normal">
+                                                ({trans('order_status_page.payment.incl_vat', { fallback: 'incl. VAT' })})
+                                            </span>
                                         )}
                                     </span>
                                     <span className="text-xl font-bold">

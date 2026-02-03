@@ -1,5 +1,6 @@
 import { BackButton } from '@/components/back-button';
 import { CountryFlag } from '@/components/country-flag';
+import { CouponCodeInput } from '@/components/coupon/coupon-code-input';
 import { PaymentProviderSelect } from '@/components/payment-provider-select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -7,15 +8,24 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { useTrans } from '@/hooks/use-trans';
 import { useAnalytics, useFormTracking } from '@/lib/analytics';
 import type { PaymentMethod } from '@/lib/analytics';
 import GuestLayout from '@/layouts/guest-layout';
+import type { CouponValidationResponse } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
     CheckCircle2,
     CreditCard,
+    Globe,
     HardDrive,
     Loader2,
     Lock,
@@ -23,11 +33,12 @@ import {
     Phone,
     Shield,
     Sparkles,
+    Tag,
     Timer,
     User,
     Zap,
 } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Package {
     id: number;
@@ -61,11 +72,28 @@ interface Prefill {
     phone: string | null;
 }
 
+interface VatInfo {
+    enabled: boolean;
+    rate: number;
+    amount: number;
+    net: number;
+    total: number;
+    country: string;
+}
+
+interface BillingCountry {
+    code: string;
+    name: string;
+    vat_rate: number;
+}
+
 interface Props {
     package: Package;
     paymentProviders: PaymentProvider[];
     defaultProvider: string;
     prefill: Prefill | null;
+    billingCountries: BillingCountry[];
+    vat: VatInfo;
 }
 
 export default function Checkout({
@@ -73,15 +101,75 @@ export default function Checkout({
     paymentProviders,
     defaultProvider,
     prefill,
+    billingCountries,
+    vat,
 }: Props) {
     const { trans } = useTrans();
     const { data, setData, post, processing, errors } = useForm({
         email: prefill?.email || '',
         name: prefill?.name || '',
         phone: prefill?.phone || '',
+        billing_country: 'XK',
         accept_terms: false,
         payment_provider: defaultProvider,
+        coupon_codes: [] as string[],
     });
+
+    const geoDetected = useRef(false);
+
+    useEffect(() => {
+        if (geoDetected.current) return;
+        geoDetected.current = true;
+
+        fetch('/api/v1/geo/detect')
+            .then((res) => res.json())
+            .then((geo) => {
+                if (geo.country_code) {
+                    const exists = billingCountries.some((c) => c.code === geo.country_code);
+                    if (exists) {
+                        setData('billing_country', geo.country_code);
+                    }
+                }
+            })
+            .catch(() => {});
+    }, []);
+
+    interface AppliedCoupon {
+        code: string;
+        name: string;
+        type: string;
+        value: number;
+        discount: number;
+        isStackable: boolean;
+    }
+
+    const [appliedCoupons, setAppliedCoupons] = useState<AppliedCoupon[]>([]);
+    const [totalDiscount, setTotalDiscount] = useState(0);
+    const [finalPrice, setFinalPrice] = useState(Number(pkg.retail_price));
+
+    // Get current VAT rate based on selected billing country
+    const selectedCountry = billingCountries.find(c => c.code === data.billing_country);
+    const currentVatRate = selectedCountry?.vat_rate ?? 0;
+
+    // Calculate VAT for the current final price (inclusive VAT)
+    const calculateVat = (total: number, vatRate: number) => {
+        if (!vat.enabled || vatRate <= 0) {
+            return { net: total, vatAmount: 0, rate: 0 };
+        }
+        const vatMultiplier = 1 + (vatRate / 100);
+        const net = Math.round((total / vatMultiplier) * 100) / 100;
+        const vatAmount = Math.round((total - net) * 100) / 100;
+        return { net, vatAmount, rate: vatRate };
+    };
+
+    const currentVat = calculateVat(finalPrice, currentVatRate);
+
+    const handleCouponsChanged = (coupons: AppliedCoupon[], discount: number, finalAmount: number) => {
+        setAppliedCoupons(coupons);
+        setTotalDiscount(discount);
+        setFinalPrice(finalAmount);
+        setData('coupon_codes', coupons.map(c => c.code));
+    };
 
     const { beginCheckout, addPaymentInfo, createItem, trackError, pageView } = useAnalytics();
     const { trackFocus, trackComplete, trackSubmit, trackError: trackFormError } = useFormTracking('checkout', 'Checkout Form');
@@ -353,6 +441,84 @@ export default function Checkout({
                                                 </p>
                                             )}
                                         </div>
+
+                                        {/* Billing Country */}
+                                        <div className="space-y-1.5 md:space-y-2">
+                                            <Label
+                                                htmlFor="billing_country"
+                                                className="text-xs font-semibold text-primary-800 md:text-sm"
+                                            >
+                                                {trans(
+                                                    'checkout_page.form.country.label',
+                                                )}
+                                                <span className="ml-1 text-red-500">
+                                                    *
+                                                </span>
+                                            </Label>
+                                            <div className="group relative">
+                                                <Globe className="pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2 text-primary-400" />
+                                                <Select
+                                                    value={data.billing_country}
+                                                    onValueChange={(value) =>
+                                                        setData('billing_country', value)
+                                                    }
+                                                >
+                                                    <SelectTrigger
+                                                        id="billing_country"
+                                                        className="h-10 rounded-lg border-primary-200 bg-white pl-10 text-base text-gray-950 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 md:h-12 md:rounded-xl md:pl-11"
+                                                    >
+                                                        <SelectValue
+                                                            placeholder={trans(
+                                                                'checkout_page.form.country.placeholder',
+                                                            )}
+                                                        />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {billingCountries.map((country) => (
+                                                            <SelectItem
+                                                                key={country.code}
+                                                                value={country.code}
+                                                            >
+                                                                {country.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            {errors.billing_country && (
+                                                <p className="text-xs font-medium text-red-600 md:text-sm">
+                                                    {errors.billing_country}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Coupon Code Section */}
+                                <div className="overflow-hidden rounded-xl border border-primary-100 bg-white shadow-sm md:rounded-2xl">
+                                    <div className="border-b border-primary-100 bg-primary-50/50 px-4 py-3 md:px-6 md:py-4">
+                                        <div className="flex items-center gap-2.5 md:gap-3">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-primary-500 shadow-md ring-1 ring-primary-100 md:h-10 md:w-10 md:rounded-xl">
+                                                <Tag className="h-4 w-4 md:h-5 md:w-5" />
+                                            </div>
+                                            <div>
+                                                <h2 className="text-sm font-bold text-primary-900 md:text-base">
+                                                    {trans('checkout_page.form.coupon.title')}
+                                                </h2>
+                                                <p className="text-xs text-primary-600 md:text-sm">
+                                                    {trans('checkout_page.form.coupon.subtitle')}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-4 md:p-6">
+                                        <CouponCodeInput
+                                            packageId={pkg.id}
+                                            email={data.email}
+                                            orderAmount={Number(pkg.retail_price)}
+                                            onCouponsChanged={handleCouponsChanged}
+                                        />
                                     </div>
                                 </div>
 
@@ -456,7 +622,7 @@ export default function Checkout({
                                                 {trans(
                                                     'checkout_page.form.submit.pay',
                                                     {
-                                                        amount: `€${Number(pkg.retail_price).toFixed(2)}`,
+                                                        amount: `€${finalPrice.toFixed(2)}`,
                                                     },
                                                 )}
                                             </>
@@ -554,19 +720,81 @@ export default function Checkout({
                                     {/* Divider */}
                                     <div className="mb-4 h-px bg-primary-100 md:mb-6" />
 
-                                    {/* Total */}
-                                    <div className="mb-4 flex items-baseline justify-between md:mb-6">
-                                        <span className="text-xs text-primary-600 md:text-sm">
-                                            {trans(
-                                                'checkout_page.summary.total',
-                                            )}
-                                        </span>
-                                        <span className="text-xl font-extrabold text-primary-900 md:text-3xl">
-                                            €
-                                            {Number(pkg.retail_price).toFixed(
-                                                2,
-                                            )}
-                                        </span>
+                                    {/* Pricing */}
+                                    <div className="mb-4 space-y-2 md:mb-6">
+                                        {/* Subtotal (original price) */}
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs text-primary-600 md:text-sm">
+                                                {trans('checkout_page.summary.subtotal')}
+                                            </span>
+                                            <span className="text-sm font-medium text-primary-900 md:text-base">
+                                                €{Number(pkg.retail_price).toFixed(2)}
+                                            </span>
+                                        </div>
+
+                                        {/* Coupon Discounts */}
+                                        {appliedCoupons.map((coupon) => (
+                                            <div key={coupon.code} className="flex items-center justify-between text-green-600">
+                                                <span className="flex items-center gap-1.5 text-xs md:text-sm">
+                                                    <Tag className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                                                    {trans('checkout_page.summary.discount')}
+                                                    <span className="font-mono text-[10px] md:text-xs">
+                                                        ({coupon.code})
+                                                    </span>
+                                                </span>
+                                                <span className="text-sm font-medium md:text-base">
+                                                    -€{coupon.discount.toFixed(2)}
+                                                </span>
+                                            </div>
+                                        ))}
+
+                                        {/* VAT Breakdown (if enabled and country has VAT) */}
+                                        {vat.enabled && currentVatRate > 0 && (
+                                            <>
+                                                <div className="h-px bg-primary-100" />
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-xs text-primary-600 md:text-sm">
+                                                        {trans('checkout_page.summary.net_amount')}
+                                                    </span>
+                                                    <span className="text-sm font-medium text-primary-900 md:text-base">
+                                                        €{currentVat.net.toFixed(2)}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-xs text-primary-600 md:text-sm">
+                                                        {trans('checkout_page.summary.vat', { rate: currentVatRate })}
+                                                    </span>
+                                                    <span className="text-sm font-medium text-primary-900 md:text-base">
+                                                        €{currentVat.vatAmount.toFixed(2)}
+                                                    </span>
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {/* Divider before total */}
+                                        <div className="h-px bg-primary-100" />
+
+                                        {/* Total */}
+                                        <div className="flex items-baseline justify-between">
+                                            <span className="text-xs text-primary-600 md:text-sm">
+                                                {trans('checkout_page.summary.total')}
+                                                {vat.enabled && currentVatRate > 0 && (
+                                                    <span className="ml-1 text-[10px] text-primary-400 md:text-xs">
+                                                        ({trans('checkout_page.summary.incl_vat')})
+                                                    </span>
+                                                )}
+                                            </span>
+                                            <div className="text-right">
+                                                {totalDiscount > 0 && (
+                                                    <span className="mr-2 text-sm text-primary-400 line-through md:text-base">
+                                                        €{Number(pkg.retail_price).toFixed(2)}
+                                                    </span>
+                                                )}
+                                                <span className="text-xl font-extrabold text-primary-900 md:text-3xl">
+                                                    €{finalPrice.toFixed(2)}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {/* Desktop Terms & Button */}
@@ -640,7 +868,7 @@ export default function Checkout({
                                                     {trans(
                                                         'checkout_page.form.submit.pay',
                                                         {
-                                                            amount: `€${Number(pkg.retail_price).toFixed(2)}`,
+                                                            amount: `€${finalPrice.toFixed(2)}`,
                                                         },
                                                     )}
                                                 </>

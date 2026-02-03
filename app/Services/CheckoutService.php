@@ -15,6 +15,7 @@ use App\Events\Order\OrderProcessingStarted;
 use App\Events\Payment\CheckoutCreated;
 use App\Events\Payment\PaymentSucceeded;
 use App\Models\Customer;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Package;
 use App\Models\Payment;
@@ -31,6 +32,8 @@ class CheckoutService
     public function __construct(
         private PaymentGatewayFactory $gatewayFactory,
         private BalanceGateway $balanceGateway,
+        private CouponService $couponService,
+        private VatService $vatService,
     ) {}
 
     /**
@@ -47,6 +50,8 @@ class CheckoutService
         ?string $customerIp = null,
         string $language = 'en',
         ?PaymentProvider $paymentProvider = null,
+        ?string $couponCode = null,
+        ?string $billingCountry = null,
     ): CheckoutResult {
         // Validate package availability
         if (!$package->isAvailable()) {
@@ -60,13 +65,31 @@ class CheckoutService
         // Calculate price with customer discount
         $price = $customer->calculateDiscountedPrice((float) $package->effective_retail_price);
 
+        // Apply coupon if provided
+        $appliedCoupon = null;
+        $couponDiscount = 0;
+        $originalPrice = $price;
+
+        if ($couponCode) {
+            $validation = $this->couponService->validateCoupon($couponCode, $customer, $package, $price);
+            if ($validation['valid']) {
+                $appliedCoupon = $validation['coupon'];
+                $couponDiscount = $validation['discount'];
+                $price = max(0, $validation['final_amount']);
+            }
+        }
+
         if ($customer->isB2B()) {
             return $this->createB2BCheckout(
                 customer: $customer,
                 package: $package,
                 price: $price,
+                originalPrice: $originalPrice,
+                coupon: $appliedCoupon,
+                couponDiscount: $couponDiscount,
                 customerEmail: $customerEmail,
                 customerIp: $customerIp,
+                billingCountry: $billingCountry,
             );
         }
 
@@ -74,6 +97,9 @@ class CheckoutService
             customer: $customer,
             package: $package,
             price: $price,
+            originalPrice: $originalPrice,
+            coupon: $appliedCoupon,
+            couponDiscount: $couponDiscount,
             successUrl: $successUrl,
             cancelUrl: $cancelUrl,
             failUrl: $failUrl,
@@ -81,6 +107,7 @@ class CheckoutService
             customerIp: $customerIp,
             language: $language,
             paymentProvider: $paymentProvider,
+            billingCountry: $billingCountry,
         );
     }
 
@@ -91,10 +118,13 @@ class CheckoutService
         Customer $customer,
         Package $package,
         float $price,
+        float $originalPrice,
+        ?Coupon $coupon,
+        float $couponDiscount,
         ?string $customerEmail,
         ?string $customerIp,
+        ?string $billingCountry = null,
     ): CheckoutResult {
-        // Check balance
         $balance = $customer->balance;
         if (!$balance || !$balance->canDeduct($price)) {
             return CheckoutResult::failed(
@@ -108,7 +138,8 @@ class CheckoutService
         try {
             DB::beginTransaction();
 
-            // Create order
+            $vatCalculation = $this->vatService->calculateInclusiveVat($price, $billingCountry ?? 'XK');
+
             $order = OrderCreated::commit(
                 customer_id: $customer->id,
                 package_id: $package->id,
@@ -119,6 +150,12 @@ class CheckoutService
                 customer_email: $customerEmail ?? $customer->user?->email,
                 customer_name: $customer->display_name,
                 ip_address: $customerIp,
+                billing_country: $billingCountry ?? 'XK',
+                coupon_id: $coupon?->id,
+                coupon_discount_amount: $couponDiscount,
+                vat_rate: $vatCalculation['rate'],
+                vat_amount: $vatCalculation['vat'],
+                net_amount: $vatCalculation['net'],
             );
 
             // Create payment record
@@ -132,6 +169,11 @@ class CheckoutService
                 customer_email: $customerEmail ?? $customer->user?->email,
                 customer_ip: $customerIp,
             );
+
+            // Record coupon usage if applicable
+            if ($coupon && $couponDiscount > 0) {
+                $this->couponService->recordUsage($coupon, $order, $originalPrice, $couponDiscount, $price);
+            }
 
             // Reserve and deduct balance
             BalanceReserved::fire(
@@ -166,6 +208,7 @@ class CheckoutService
                 'order_uuid' => $order->uuid,
                 'customer_id' => $customer->id,
                 'amount' => $price,
+                'coupon_discount' => $couponDiscount,
             ]);
 
             return CheckoutResult::success(
@@ -181,6 +224,8 @@ class CheckoutService
                     'order_number' => $order->order_number,
                     'payment_id' => $payment->id,
                     'instant_payment' => true,
+                    'coupon_applied' => $coupon ? true : false,
+                    'coupon_discount' => $couponDiscount,
                 ],
             );
         } catch (\Exception $e) {
@@ -207,6 +252,9 @@ class CheckoutService
         Customer $customer,
         Package $package,
         float $price,
+        float $originalPrice,
+        ?Coupon $coupon,
+        float $couponDiscount,
         string $successUrl,
         string $cancelUrl,
         ?string $failUrl,
@@ -214,11 +262,13 @@ class CheckoutService
         ?string $customerIp,
         string $language,
         ?PaymentProvider $paymentProvider = null,
+        ?string $billingCountry = null,
     ): CheckoutResult {
         try {
             DB::beginTransaction();
 
-            // Create order
+            $vatCalculation = $this->vatService->calculateInclusiveVat($price, $billingCountry ?? 'XK');
+
             $order = OrderCreated::commit(
                 customer_id: $customer->id,
                 package_id: $package->id,
@@ -229,6 +279,12 @@ class CheckoutService
                 customer_email: $customerEmail ?? $customer->user?->email,
                 customer_name: $customer->display_name,
                 ip_address: $customerIp,
+                billing_country: $billingCountry ?? 'XK',
+                coupon_id: $coupon?->id,
+                coupon_discount_amount: $couponDiscount,
+                vat_rate: $vatCalculation['rate'],
+                vat_amount: $vatCalculation['vat'],
+                net_amount: $vatCalculation['net'],
             );
 
             // Create checkout via payment gateway (use specified or default)
@@ -273,6 +329,7 @@ class CheckoutService
                 'order_uuid' => $order->uuid,
                 'customer_id' => $customer->id,
                 'checkout_url' => $checkoutResult->checkoutUrl,
+                'coupon_discount' => $couponDiscount,
             ]);
 
             return CheckoutResult::success(
@@ -287,6 +344,8 @@ class CheckoutService
                     'order_uuid' => $order->uuid,
                     'order_number' => $order->order_number,
                     'payment_id' => $payment->id,
+                    'coupon_applied' => $coupon ? true : false,
+                    'coupon_discount' => $couponDiscount,
                 ]),
             );
         } catch (\Exception $e) {
@@ -408,6 +467,8 @@ class CheckoutService
         ?string $customerIp = null,
         string $language = 'en',
         ?PaymentProvider $paymentProvider = null,
+        array $couponCodes = [],
+        ?string $billingCountry = null,
     ): CheckoutResult {
         // Validate package availability
         if (!$package->isAvailable()) {
@@ -419,12 +480,46 @@ class CheckoutService
         }
 
         $price = (float) $package->effective_retail_price;
+        $originalPrice = $price;
 
         try {
             DB::beginTransaction();
 
             // Find or create user and customer
             $customer = $this->findOrCreateGuestCustomer($email, $name, $phone);
+
+            // Apply coupons if provided
+            $appliedCoupons = [];
+            $totalDiscount = 0;
+            $primaryCoupon = null;
+            $currentPrice = $price;
+
+            foreach ($couponCodes as $couponCode) {
+                $validation = $this->couponService->validateCoupon($couponCode, $customer, $package, $currentPrice);
+                if ($validation['valid']) {
+                    $coupon = $validation['coupon'];
+                    $discount = $validation['discount'];
+
+                    $appliedCoupons[] = [
+                        'coupon' => $coupon,
+                        'discount' => $discount,
+                    ];
+
+                    // First valid coupon is the primary one (stored in order)
+                    if ($primaryCoupon === null) {
+                        $primaryCoupon = $coupon;
+                    }
+
+                    $totalDiscount += $discount;
+                    $currentPrice = max(0, $currentPrice - $discount);
+                }
+            }
+
+            $price = $currentPrice;
+
+            // Calculate VAT based on billing country (inclusive - extracted from total price)
+            // Default to Kosovo (XK) if no billing country specified
+            $vatCalculation = $this->vatService->calculateInclusiveVat($price, $billingCountry ?? 'XK');
 
             // Create order with customer
             $order = OrderCreated::commit(
@@ -437,6 +532,12 @@ class CheckoutService
                 customer_email: $email,
                 customer_name: $name,
                 ip_address: $customerIp,
+                billing_country: $billingCountry ?? 'XK',
+                coupon_id: $primaryCoupon?->id,
+                coupon_discount_amount: $totalDiscount,
+                vat_rate: $vatCalculation['rate'],
+                vat_amount: $vatCalculation['vat'],
+                net_amount: $vatCalculation['net'],
             );
 
             // Create checkout via payment gateway (use specified or default)
@@ -469,6 +570,17 @@ class CheckoutService
                 metadata: $checkoutResult->metadata,
             );
 
+            // Record coupon usage for all applied coupons
+            foreach ($appliedCoupons as $appliedCouponData) {
+                $this->couponService->recordUsage(
+                    $appliedCouponData['coupon'],
+                    $order,
+                    $originalPrice,
+                    $appliedCouponData['discount'],
+                    $price
+                );
+            }
+
             // Mark order as awaiting payment
             OrderAwaitingPayment::fire(
                 order_id: $order->id,
@@ -482,6 +594,8 @@ class CheckoutService
                 'customer_id' => $customer->id,
                 'email' => $email,
                 'checkout_url' => $checkoutResult->checkoutUrl,
+                'coupon_discount' => $totalDiscount,
+                'coupons_applied' => count($appliedCoupons),
             ]);
 
             return CheckoutResult::success(
@@ -497,6 +611,9 @@ class CheckoutService
                     'order_number' => $order->order_number,
                     'payment_id' => $payment->id,
                     'customer_id' => $customer->id,
+                    'coupon_applied' => $primaryCoupon !== null,
+                    'coupon_discount' => $totalDiscount,
+                    'coupons_count' => count($appliedCoupons),
                 ]),
             );
         } catch (\Exception $e) {

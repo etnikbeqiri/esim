@@ -68,16 +68,24 @@ class InvoiceService
      * Create a purchase invoice.
      */
     public function createPurchaseInvoice(
-        Customer $customer,
+        ?Customer $customer,
         Order $order,
         ?Payment $payment = null
     ): Invoice {
         return DB::transaction(function () use ($customer, $order, $payment) {
             $package = $order->package;
-            $amount = (float) $order->amount;
+            $total = (float) $order->amount; // Total amount paid (VAT inclusive)
+
+            // Get buyer details from customer or order (for guest checkouts)
+            $buyerDetails = $customer
+                ? $this->getBuyerDetails($customer)
+                : $this->getGuestBuyerDetails($order);
+
+            // Calculate VAT from settings (inclusive: VAT is extracted from total)
+            $vatCalculation = $this->calculateInclusiveVat($total, $customer);
 
             $invoice = Invoice::create([
-                'customer_id' => $customer->id,
+                'customer_id' => $customer?->id,
                 'order_id' => $order->id,
                 'payment_id' => $payment?->id,
                 'type' => InvoiceType::Purchase,
@@ -86,13 +94,13 @@ class InvoiceService
                 'issued_at' => now(),
                 'paid_at' => $order->paid_at ?? now(),
                 'seller_details' => $this->getSellerDetails(),
-                'buyer_details' => $this->getBuyerDetails($customer),
-                'subtotal' => $amount,
-                'vat_rate' => $this->getVatRate($customer),
-                'vat_amount' => $this->calculateVat($amount, $customer),
-                'total' => $amount,
-                'currency_id' => $this->currencyService->getDefaultCurrency()?->id,
-                'payment_method' => $order->isB2B() ? 'Account Balance' : ($payment?->provider?->label() ?? 'N/A'),
+                'buyer_details' => $buyerDetails,
+                'subtotal' => $vatCalculation['net'], // Net amount without VAT
+                'vat_rate' => $vatCalculation['rate'],
+                'vat_amount' => $vatCalculation['vat'],
+                'total' => $total, // Total amount with VAT
+                'currency_id' => $order->currency_id ?? $this->currencyService->getDefaultCurrency()?->id,
+                'payment_method' => $order->isB2B() ? 'Account Balance' : ($payment?->provider?->label() ?? 'Card'),
                 'payment_reference' => $order->order_number,
                 'line_items' => [
                     [
@@ -104,14 +112,29 @@ class InvoiceService
                             $package->validity_label ?? ''
                         ) : null,
                         'quantity' => 1,
-                        'unit_price' => $amount,
-                        'total' => $amount,
+                        'unit_price' => $vatCalculation['net'], // Net price per unit
+                        'total' => $vatCalculation['net'],
                     ],
                 ],
             ]);
 
             return $invoice;
         });
+    }
+
+    /**
+     * Get buyer details from order (for guest checkouts).
+     */
+    public function getGuestBuyerDetails(Order $order): array
+    {
+        return [
+            'company_name' => null,
+            'contact_name' => $order->customer_name,
+            'email' => $order->customer_email,
+            'address' => '',
+            'vat_number' => '',
+            'phone' => '',
+        ];
     }
 
     /**
@@ -273,18 +296,18 @@ class InvoiceService
     }
 
     /**
-     * Get seller details from config.
+     * Get seller details from settings (with config fallback).
      */
     public function getSellerDetails(): array
     {
         return [
-            'company_name' => config('invoice.seller.company_name', config('app.name')),
-            'address' => config('invoice.seller.address', ''),
+            'company_name' => setting('invoices.company_name') ?: config('invoice.seller.company_name', config('app.name')),
+            'address' => setting('invoices.company_address') ?: config('invoice.seller.address', ''),
             'city' => config('invoice.seller.city', ''),
             'postal_code' => config('invoice.seller.postal_code', ''),
-            'country' => config('invoice.seller.country', ''),
-            'vat_number' => config('invoice.seller.vat_number', ''),
-            'registration_number' => config('invoice.seller.registration_number', ''),
+            'country' => setting('invoices.vat_country', 'Kosovo'),
+            'vat_number' => setting('invoices.vat_number') ?: config('invoice.seller.vat_number', ''),
+            'registration_number' => setting('invoices.registration_number') ?: config('invoice.seller.registration_number', ''),
             'email' => config('invoice.seller.email', config('contact.support_email')),
             'phone' => config('invoice.seller.phone', config('contact.phone')),
             'bank_name' => config('invoice.seller.bank_name', ''),
@@ -342,6 +365,67 @@ class InvoiceService
 
         // Simplified check - in production, consider using VIES API
         return (bool) preg_match('/^[A-Z]{2}[A-Z0-9]+$/', strtoupper($vatNumber));
+    }
+
+    /**
+     * Calculate inclusive VAT (VAT is extracted from total price).
+     *
+     * For Kosovo: 18% VAT means if total = €9.99:
+     * - Net = 9.99 / 1.18 = €8.47
+     * - VAT = 9.99 - 8.47 = €1.52
+     *
+     * @param float $total Total amount (VAT inclusive)
+     * @param Customer|null $customer Customer for VAT exemption check
+     * @return array{net: float, vat: float, rate: float, total: float}
+     */
+    protected function calculateInclusiveVat(float $total, ?Customer $customer = null): array
+    {
+        // Check if VAT is enabled in settings
+        $vatEnabled = setting('invoices.vat_enabled', true);
+
+        if (!$vatEnabled) {
+            return [
+                'net' => $total,
+                'vat' => 0.00,
+                'rate' => 0.00,
+                'total' => $total,
+            ];
+        }
+
+        // B2B customers with valid EU VAT numbers are exempt (reverse charge)
+        if ($customer?->vat_number && $this->isValidEuVat($customer->vat_number)) {
+            return [
+                'net' => $total,
+                'vat' => 0.00,
+                'rate' => 0.00,
+                'total' => $total,
+            ];
+        }
+
+        // Get VAT rate from settings (default 18% for Kosovo)
+        $vatRate = (float) setting('invoices.vat_rate', 18);
+
+        if ($vatRate <= 0) {
+            return [
+                'net' => $total,
+                'vat' => 0.00,
+                'rate' => 0.00,
+                'total' => $total,
+            ];
+        }
+
+        // Calculate inclusive VAT: Net = Total / (1 + VAT%)
+        // Example: €9.99 / 1.18 = €8.4661
+        $vatMultiplier = 1 + ($vatRate / 100);
+        $net = round($total / $vatMultiplier, 2);
+        $vat = round($total - $net, 2);
+
+        return [
+            'net' => $net,
+            'vat' => $vat,
+            'rate' => $vatRate,
+            'total' => $total,
+        ];
     }
 
     /**

@@ -32,10 +32,11 @@ return [
     |--------------------------------------------------------------------------
     |
     | General invoice configuration options.
+    | Note: VAT settings are now managed in Admin Settings > Invoices & VAT
     |
     */
 
-    'default_vat_rate' => env('INVOICE_DEFAULT_VAT_RATE', 0),
+    'default_vat_rate' => env('INVOICE_DEFAULT_VAT_RATE', 18),
     'payment_terms_days' => env('INVOICE_PAYMENT_TERMS', 30),
     'currency' => env('INVOICE_CURRENCY', 'EUR'),
 

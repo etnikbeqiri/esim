@@ -39,6 +39,8 @@ Route::get('/checkout/callback', [\App\Http\Controllers\Public\CheckoutControlle
 Route::get('/checkout/success/{order:uuid}', [\App\Http\Controllers\Public\CheckoutController::class, 'success'])->name('public.checkout.success');
 Route::get('/checkout/{package}', [\App\Http\Controllers\Public\CheckoutController::class, 'show'])->name('public.checkout.show');
 Route::post('/checkout/{package}', [\App\Http\Controllers\Public\CheckoutController::class, 'process'])->name('public.checkout.process');
+Route::post('/api/v1/coupons/validate', [\App\Http\Controllers\Public\CouponController::class, 'validatePublic'])->name('public.coupons.validate');
+Route::get('/api/v1/geo/detect', [\App\Http\Controllers\Public\GeoLocationController::class, 'detect'])->name('public.geo.detect');
 Route::get('/order/{order:uuid}', [\App\Http\Controllers\Public\CheckoutController::class, 'status'])->name('public.order.show');
 Route::get('/order/{order:uuid}/status', [\App\Http\Controllers\Public\CheckoutController::class, 'status'])->name('public.order.status');
 Route::get('/order/{order:uuid}/check', [\App\Http\Controllers\Public\CheckoutController::class, 'checkStatus'])->name('public.order.check');
@@ -190,6 +192,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('brands/{brand}', [\App\Http\Controllers\Admin\BrandController::class, 'update'])->name('brands.update');
         Route::delete('brands/{brand}', [\App\Http\Controllers\Admin\BrandController::class, 'destroy'])->name('brands.destroy');
         Route::post('brands/{brand}/toggle', [\App\Http\Controllers\Admin\BrandController::class, 'toggleActive'])->name('brands.toggle');
+
+        Route::get('coupons', [\App\Http\Controllers\Admin\CouponController::class, 'index'])->name('coupons.index');
+        Route::get('coupons/create', [\App\Http\Controllers\Admin\CouponController::class, 'create'])->name('coupons.create');
+        Route::post('coupons', [\App\Http\Controllers\Admin\CouponController::class, 'store'])->name('coupons.store');
+        Route::get('coupons/{coupon}', [\App\Http\Controllers\Admin\CouponController::class, 'show'])->name('coupons.show');
+        Route::get('coupons/{coupon}/edit', [\App\Http\Controllers\Admin\CouponController::class, 'edit'])->name('coupons.edit');
+        Route::put('coupons/{coupon}', [\App\Http\Controllers\Admin\CouponController::class, 'update'])->name('coupons.update');
+        Route::delete('coupons/{coupon}', [\App\Http\Controllers\Admin\CouponController::class, 'destroy'])->name('coupons.destroy');
+        Route::post('coupons/{coupon}/toggle', [\App\Http\Controllers\Admin\CouponController::class, 'toggleActive'])->name('coupons.toggle');
+        Route::post('coupons/generate-bulk', [\App\Http\Controllers\Admin\CouponController::class, 'generateBulk'])->name('coupons.generate-bulk');
+        Route::post('coupons/bulk-activate', [\App\Http\Controllers\Admin\CouponController::class, 'bulkActivate'])->name('coupons.bulk-activate');
+        Route::post('coupons/bulk-deactivate', [\App\Http\Controllers\Admin\CouponController::class, 'bulkDeactivate'])->name('coupons.bulk-deactivate');
+        Route::post('coupons/bulk-delete', [\App\Http\Controllers\Admin\CouponController::class, 'bulkDelete'])->name('coupons.bulk-delete');
     });
 });
 

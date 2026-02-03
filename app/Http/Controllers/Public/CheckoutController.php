@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Package;
 use App\Services\CheckoutService;
 use App\Services\CurrencyService;
+use App\Services\VatService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,8 @@ use Inertia\Response;
 class CheckoutController extends Controller
 {
     public function __construct(
-        private readonly CheckoutService $checkoutService
+        private readonly CheckoutService $checkoutService,
+        private readonly VatService $vatService,
     ) {}
 
     /**
@@ -44,6 +46,13 @@ class CheckoutController extends Controller
             ];
         }
 
+        // Calculate VAT for the package price (default Kosovo)
+        $price = (float) $package->effective_retail_price;
+        $vatCalculation = $this->vatService->calculateInclusiveVat($price);
+
+        // Billing countries with VAT rates (Kosovo has 18%, others 0%)
+        $billingCountries = $this->vatService->getBillingCountries();
+
         return Inertia::render('public/checkout', [
             'package' => [
                 'id' => $package->id,
@@ -61,6 +70,15 @@ class CheckoutController extends Controller
             'paymentProviders' => $paymentProviders,
             'defaultProvider' => PaymentProvider::default()->value,
             'prefill' => $prefill,
+            'billingCountries' => $billingCountries,
+            'vat' => [
+                'enabled' => $this->vatService->isVatEnabled(),
+                'rate' => $vatCalculation['rate'],
+                'amount' => $vatCalculation['vat'],
+                'net' => $vatCalculation['net'],
+                'total' => $vatCalculation['total'],
+                'country' => setting('invoices.vat_country', 'Kosovo'),
+            ],
         ]);
     }
 
@@ -80,14 +98,30 @@ class CheckoutController extends Controller
             'email' => 'required|email|max:255',
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:50',
+            'billing_country' => 'nullable|string|max:5',
             'accept_terms' => 'required|accepted',
             "payment_provider" => "nullable|string|in:{$allowedProviders}",
+            'coupon_code' => 'nullable|string|max:50',
+            'coupon_codes' => 'nullable|array',
+            'coupon_codes.*' => 'string|max:50',
         ]);
 
         // Get selected payment provider or use default
         $paymentProvider = isset($validated['payment_provider'])
             ? PaymentProvider::tryFrom($validated['payment_provider'])
             : null;
+
+        // Process coupon codes (support both single and array)
+        $couponCodes = [];
+        if (!empty($validated['coupon_codes'])) {
+            $couponCodes = array_map(
+                fn ($code) => strtoupper(str_replace(' ', '', $code)),
+                $validated['coupon_codes']
+            );
+        } elseif (!empty($validated['coupon_code'])) {
+            // Backwards compatibility for single coupon code
+            $couponCodes = [strtoupper(str_replace(' ', '', $validated['coupon_code']))];
+        }
 
         $result = $this->checkoutService->createGuestCheckout(
             package: $package,
@@ -100,6 +134,8 @@ class CheckoutController extends Controller
             customerIp: $request->ip(),
             language: app()->getLocale(),
             paymentProvider: $paymentProvider,
+            couponCodes: $couponCodes,
+            billingCountry: $validated['billing_country'] ?? 'XK',
         );
 
         if (!$result->success) {
@@ -199,6 +235,16 @@ class CheckoutController extends Controller
             'order_number' => $order->order_number,
             'status' => $order->status->value,
             'status_label' => $order->status->label(),
+            'amount' => $order->amount,
+            'net_amount' => $order->net_amount,
+            'vat_rate' => $order->vat_rate,
+            'vat_amount' => $order->vat_amount,
+            'coupon_discount' => $order->coupon_discount_amount,
+            'coupon' => $order->coupon ? [
+                'code' => $order->coupon->code,
+                'name' => $order->coupon->name,
+                'discount_display' => $order->coupon->discount_display,
+            ] : null,
             'package' => $order->package ? [
                 'name' => $order->package->name,
                 'data_label' => $order->package->data_label,
@@ -232,7 +278,6 @@ class CheckoutController extends Controller
             $data['completed_at'] = $order->completed_at?->format('M j, Y H:i');
             $data['paid_at'] = $order->paid_at?->format('M j, Y H:i');
             $data['customer_name'] = $order->customer_name;
-            $data['amount'] = $order->amount;
             $data['payment_method'] = $order->payment?->provider?->label() ?? 'Card';
         }
 

@@ -33,6 +33,12 @@ class OrderState extends State
     public ?Carbon $paid_at = null;
     public ?Carbon $completed_at = null;
     public ?Carbon $checkout_expires_at = null;
+    public ?int $coupon_id = null;
+    public float $coupon_discount_amount = 0;
+    public float $vat_rate = 0;
+    public float $vat_amount = 0;
+    public ?float $net_amount = null;
+    public ?string $billing_country = null;
 
     public function canTransitionTo(OrderStatus $newStatus): bool
     {
