@@ -92,7 +92,7 @@ RUN composer dump-autoload --optimize
 
 COPY --chown=www-data:www-data .env .env
 
-RUN npm run build
+RUN npm run build:ssr
 
 # Create storage link
 RUN php artisan storage:link
