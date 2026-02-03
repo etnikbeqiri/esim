@@ -206,16 +206,15 @@
     }
 
     html {
-        scrollbar-gutter: stable;
-    }
-
-    html,
-    body {
-        @apply overflow-x-hidden;
+        overflow-y: scroll !important;
+        margin-right: 0 !important;
+        padding-right: 0 !important;
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply overflow-x-hidden bg-background text-foreground;
+        margin-right: 0 !important;
+        padding-right: 0 !important;
     }
 
     h1,
