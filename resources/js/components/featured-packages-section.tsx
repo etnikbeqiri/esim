@@ -124,9 +124,19 @@ export function FeaturedPackagesSection({
         if (container) {
             const cardWidth = window.innerWidth < 768 ? 280 : 320;
             const gap = window.innerWidth < 768 ? 16 : 24;
-            const scrollAmount = cardWidth + gap;
-            container.scrollBy({
-                left: direction === 'left' ? -scrollAmount : scrollAmount,
+            const itemWidth = cardWidth + gap;
+
+            // Calculate current position and snap to nearest card
+            const currentScroll = container.scrollLeft;
+            const currentIndex = Math.round(currentScroll / itemWidth);
+            const newIndex =
+                direction === 'left'
+                    ? Math.max(0, currentIndex - 1)
+                    : Math.min(packages.length - 1, currentIndex + 1);
+
+            // Scroll to exact card position (like finger scrolling)
+            container.scrollTo({
+                left: newIndex * itemWidth,
                 behavior: 'smooth',
             });
         }
