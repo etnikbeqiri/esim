@@ -1,6 +1,5 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Table,
     TableBody,
@@ -12,7 +11,7 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, Eye, Package, Star } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Eye, Star } from 'lucide-react';
 
 interface Package {
     id: number;
@@ -64,11 +63,7 @@ function formatData(mb: number): string {
     return `${mb} MB`;
 }
 
-export default function CountryShow({
-    country,
-    packages,
-    defaultCurrency,
-}: Props) {
+export default function CountryShow({ country, packages, defaultCurrency }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
         { title: 'Countries', href: '/admin/countries' },
@@ -81,10 +76,7 @@ export default function CountryShow({
         router.post(`/admin/countries/${country.id}/toggle-active`);
     }
 
-    function getEffectivePrice(pkg: Package): {
-        price: number;
-        isCustom: boolean;
-    } {
+    function getEffectivePrice(pkg: Package): { price: number; isCustom: boolean } {
         if (pkg.custom_retail_price !== null) {
             return { price: Number(pkg.custom_retail_price), isCustom: true };
         }
@@ -94,111 +86,66 @@ export default function CountryShow({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={country.name} />
-            <div className="flex flex-col gap-4 p-4">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" asChild>
-                        <Link href="/admin/countries">
-                            <ArrowLeft className="h-4 w-4" />
-                        </Link>
-                    </Button>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            {country.flag_emoji && (
-                                <span className="text-2xl">
-                                    {country.flag_emoji}
-                                </span>
-                            )}
-                            <h1 className="text-2xl font-semibold">
-                                {country.name}
-                            </h1>
+            <div className="flex flex-col gap-6">
+                <div className="flex items-start justify-between gap-4 p-4">
+                    <div className="flex items-start gap-4">
+                        <Button variant="ghost" size="icon" className="shrink-0" asChild>
+                            <Link href="/admin/countries">
+                                <ArrowLeft className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                {country.flag_emoji && <span className="text-2xl">{country.flag_emoji}</span>}
+                                <h1 className="text-xl font-semibold">{country.name}</h1>
+                                {country.is_popular && (
+                                    <Badge variant="outline" className="border-yellow-500/50 text-yellow-600">Popular</Badge>
+                                )}
+                            </div>
+                            <p className="mt-0.5 text-sm text-muted-foreground">
+                                {country.iso_code} / {country.iso_code_3} · {country.region || 'No region'}
+                            </p>
                         </div>
-                        <p className="text-muted-foreground">
-                            {country.iso_code} / {country.iso_code_3} |{' '}
-                            {country.region || 'No region'}
-                        </p>
                     </div>
-                    <div className="ml-auto flex gap-2">
-                        {country.is_popular && (
-                            <Badge
-                                variant="outline"
-                                className="border-yellow-500 text-yellow-600"
-                            >
-                                Popular
-                            </Badge>
-                        )}
-                        <Badge
-                            variant={
-                                country.is_active ? 'default' : 'secondary'
-                            }
-                        >
+                    <div className="flex items-center gap-2">
+                        <Badge variant={country.is_active ? 'default' : 'secondary'}>
                             {country.is_active ? 'Enabled' : 'Disabled'}
                         </Badge>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleToggleActive}
-                        >
-                            {country.is_active ? 'Disable' : 'Enable'} Country
+                        <Button size="sm" variant="outline" onClick={handleToggleActive}>
+                            {country.is_active ? 'Disable' : 'Enable'}
                         </Button>
                     </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Total Packages
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-2xl font-bold">
-                                {country.packages_count}
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Active Packages
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-2xl font-bold text-green-600">
-                                {country.active_packages_count}
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Inactive Packages
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-2xl font-bold text-muted-foreground">
-                                {country.packages_count -
-                                    country.active_packages_count}
-                            </p>
-                        </CardContent>
-                    </Card>
+                <div className="mx-auto w-full max-w-5xl space-y-6 px-4">
+                <div className="grid grid-cols-3 gap-px overflow-hidden rounded-lg border bg-border">
+                    <div className="bg-card p-4">
+                        <p className="text-xs text-muted-foreground">Total Packages</p>
+                        <p className="mt-1 text-lg font-semibold">{country.packages_count}</p>
+                    </div>
+                    <div className="bg-card p-4">
+                        <p className="text-xs text-muted-foreground">Active</p>
+                        <p className="mt-1 text-lg font-semibold text-green-600">{country.active_packages_count}</p>
+                    </div>
+                    <div className="bg-card p-4">
+                        <p className="text-xs text-muted-foreground">Inactive</p>
+                        <p className="mt-1 text-lg font-semibold text-muted-foreground">
+                            {country.packages_count - country.active_packages_count}
+                        </p>
+                    </div>
                 </div>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Package className="h-5 w-5" />
-                            Packages ({packages.total})
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                <div>
+                    <h2 className="mb-4 text-sm font-medium">Packages ({packages.total})</h2>
+                    <div className="rounded-lg border">
                         {packages.data.length === 0 ? (
-                            <p className="py-8 text-center text-muted-foreground">
+                            <div className="px-4 py-8 text-center text-sm text-muted-foreground">
                                 No packages in this country
-                            </p>
+                            </div>
                         ) : (
                             <Table>
                                 <TableHeader>
-                                    <TableRow>
+                                    <TableRow className="hover:bg-transparent">
                                         <TableHead>Name</TableHead>
                                         <TableHead>Provider</TableHead>
                                         <TableHead>Data</TableHead>
@@ -211,69 +158,46 @@ export default function CountryShow({
                                 </TableHeader>
                                 <TableBody>
                                     {packages.data.map((pkg) => {
-                                        const { price, isCustom } =
-                                            getEffectivePrice(pkg);
+                                        const { price, isCustom } = getEffectivePrice(pkg);
                                         return (
-                                            <TableRow key={pkg.id}>
-                                                <TableCell className="max-w-[200px] truncate font-medium">
-                                                    <div className="flex items-center gap-1">
+                                            <TableRow key={pkg.id} className={`group ${!pkg.is_active ? 'opacity-60' : ''}`}>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-1.5">
                                                         {pkg.is_featured && (
-                                                            <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                                                            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
                                                         )}
-                                                        {pkg.name}
+                                                        <span className="font-medium">{pkg.name}</span>
                                                     </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {pkg.provider?.name || '-'}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {formatData(pkg.data_mb)}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {pkg.validity_days}d
                                                 </TableCell>
                                                 <TableCell className="text-muted-foreground">
-                                                    {currencySymbol}
-                                                    {Number(
-                                                        pkg.cost_price,
-                                                    ).toFixed(2)}
+                                                    {pkg.provider?.name || '—'}
                                                 </TableCell>
-                                                <TableCell className="font-medium">
-                                                    <div className="flex items-center gap-1">
-                                                        {currencySymbol}
-                                                        {price.toFixed(2)}
+                                                <TableCell className="tabular-nums">{formatData(pkg.data_mb)}</TableCell>
+                                                <TableCell className="tabular-nums">{pkg.validity_days}d</TableCell>
+                                                <TableCell className="tabular-nums text-muted-foreground">
+                                                    {currencySymbol}{Number(pkg.cost_price).toFixed(2)}
+                                                </TableCell>
+                                                <TableCell className="tabular-nums">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="font-medium">{currencySymbol}{price.toFixed(2)}</span>
                                                         {isCustom && (
-                                                            <Badge
-                                                                variant="secondary"
-                                                                className="text-xs"
-                                                            >
-                                                                Custom
-                                                            </Badge>
+                                                            <Badge variant="outline" className="text-[10px] px-1 py-0">Custom</Badge>
                                                         )}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Badge
-                                                        variant={
-                                                            pkg.is_active
-                                                                ? 'default'
-                                                                : 'secondary'
-                                                        }
-                                                    >
-                                                        {pkg.is_active
-                                                            ? 'Active'
-                                                            : 'Inactive'}
+                                                    <Badge variant={pkg.is_active ? 'default' : 'secondary'}>
+                                                        {pkg.is_active ? 'Active' : 'Inactive'}
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell>
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
+                                                        className="h-8 w-8 opacity-0 group-hover:opacity-100"
                                                         asChild
                                                     >
-                                                        <Link
-                                                            href={`/admin/packages/${pkg.id}`}
-                                                        >
+                                                        <Link href={`/admin/packages/${pkg.id}`}>
                                                             <Eye className="h-4 w-4" />
                                                         </Link>
                                                     </Button>
@@ -284,40 +208,37 @@ export default function CountryShow({
                                 </TableBody>
                             </Table>
                         )}
+                    </div>
 
-                        {packages.last_page > 1 && (
-                            <div className="mt-4 flex justify-center gap-2">
-                                {Array.from(
-                                    {
-                                        length: Math.min(
-                                            packages.last_page,
-                                            10,
-                                        ),
-                                    },
-                                    (_, i) => i + 1,
-                                ).map((page) => (
-                                    <Button
-                                        key={page}
-                                        variant={
-                                            page === packages.current_page
-                                                ? 'default'
-                                                : 'outline'
-                                        }
-                                        size="sm"
-                                        onClick={() =>
-                                            router.get(
-                                                `/admin/countries/${country.id}`,
-                                                { page },
-                                            )
-                                        }
-                                    >
-                                        {page}
-                                    </Button>
-                                ))}
+                    {packages.last_page > 1 && (
+                        <div className="mt-4 flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">
+                                Page {packages.current_page} of {packages.last_page}
+                            </span>
+                            <div className="flex items-center gap-1">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8"
+                                    disabled={packages.current_page === 1}
+                                    onClick={() => router.get(`/admin/countries/${country.id}`, { page: packages.current_page - 1 })}
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8"
+                                    disabled={packages.current_page === packages.last_page}
+                                    onClick={() => router.get(`/admin/countries/${country.id}`, { page: packages.current_page + 1 })}
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
                             </div>
-                        )}
-                    </CardContent>
-                </Card>
+                        </div>
+                    )}
+                </div>
+                </div>
             </div>
         </AppLayout>
     );

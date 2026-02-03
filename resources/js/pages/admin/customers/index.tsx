@@ -1,6 +1,5 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -36,9 +35,7 @@ import {
     MailX,
     Pencil,
     Search,
-    ShoppingCart,
     User,
-    Users,
     Wallet,
     XCircle,
 } from 'lucide-react';
@@ -91,98 +88,24 @@ export default function CustomersIndex({ customers, filters }: Props) {
 
     function handleSearch(e: FormEvent) {
         e.preventDefault();
-        router.get(
-            '/admin/customers',
-            { ...filters, search, page: 1 },
-            { preserveState: true },
-        );
+        router.get('/admin/customers', { ...filters, search, page: 1 }, { preserveState: true });
     }
 
     function handleFilterChange(key: string, value: string) {
-        const newFilters = {
-            ...filters,
-            [key]: value === 'all' ? undefined : value,
-            page: 1,
-        };
+        const newFilters = { ...filters, [key]: value === 'all' ? undefined : value, page: 1 };
         router.get('/admin/customers', newFilters, { preserveState: true });
     }
-
-    function goToPage(page: number) {
-        router.get(
-            '/admin/customers',
-            { ...filters, page },
-            { preserveState: true, preserveScroll: true },
-        );
-    }
-
-    // Calculate stats
-    const b2bCount = customers.data.filter((c) => c.type === 'b2b').length;
-    const b2cCount = customers.data.filter((c) => c.type === 'b2c').length;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Customers" />
             <div className="flex flex-col gap-4 p-4">
-                {/* Header */}
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Users className="h-6 w-6 text-muted-foreground" />
-                        <div>
-                            <h1 className="text-2xl font-semibold">
-                                Customers
-                            </h1>
-                            <p className="text-sm text-muted-foreground">
-                                {customers.total} total customers
-                            </p>
-                        </div>
-                    </div>
+                    <h1 className="text-xl font-semibold">Customers</h1>
+                    <span className="text-sm text-muted-foreground">{customers.total} customers</span>
                 </div>
 
-                {/* Quick Stats */}
-                <div className="grid gap-4 md:grid-cols-3">
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                                <Users className="h-4 w-4" />
-                                Total Customers
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-2xl font-bold">
-                                {customers.total}
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                                <Building2 className="h-4 w-4 text-blue-500" />
-                                B2B Customers
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-2xl font-bold text-blue-600">
-                                {b2bCount}
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                                <User className="h-4 w-4 text-purple-500" />
-                                B2C Customers
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-2xl font-bold text-purple-600">
-                                {b2cCount}
-                            </p>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Filters */}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <form onSubmit={handleSearch} className="flex gap-2">
                         <div className="relative">
                             <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -191,19 +114,16 @@ export default function CustomersIndex({ customers, filters }: Props) {
                                 placeholder="Search by name or email..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-[250px] pl-9"
+                                className="h-9 w-[220px] pl-9"
                             />
                         </div>
-                        <Button type="submit" variant="secondary">
-                            Search
-                        </Button>
                     </form>
 
                     <Select
                         value={filters.type || 'all'}
                         onValueChange={(v) => handleFilterChange('type', v)}
                     >
-                        <SelectTrigger className="w-[130px]">
+                        <SelectTrigger className="h-9 w-[110px]">
                             <SelectValue placeholder="Type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -217,7 +137,7 @@ export default function CustomersIndex({ customers, filters }: Props) {
                         value={filters.active ?? 'all'}
                         onValueChange={(v) => handleFilterChange('active', v)}
                     >
-                        <SelectTrigger className="w-[130px]">
+                        <SelectTrigger className="h-9 w-[110px]">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
                         <SelectContent>
@@ -230,111 +150,71 @@ export default function CustomersIndex({ customers, filters }: Props) {
                     {(filters.search || filters.type || filters.active) && (
                         <Button
                             variant="ghost"
-                            onClick={() =>
-                                router.get(
-                                    '/admin/customers',
-                                    {},
-                                    { preserveState: true },
-                                )
-                            }
+                            size="sm"
+                            className="h-9"
+                            onClick={() => router.get('/admin/customers', {}, { preserveState: true })}
                         >
-                            Clear Filters
+                            Clear
                         </Button>
                     )}
                 </div>
 
-                {/* Table */}
                 <div className="rounded-lg border">
                     <Table>
                         <TableHeader>
-                            <TableRow>
+                            <TableRow className="hover:bg-transparent">
                                 <TableHead>Customer</TableHead>
                                 <TableHead>Type</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead className="text-right">
-                                    Orders
-                                </TableHead>
-                                <TableHead className="text-right">
-                                    Total Spent
-                                </TableHead>
-                                <TableHead className="text-right">
-                                    Balance
-                                </TableHead>
+                                <TableHead className="text-right">Orders</TableHead>
+                                <TableHead className="text-right">Total Spent</TableHead>
+                                <TableHead className="text-right">Balance</TableHead>
                                 <TableHead>Discount</TableHead>
                                 <TableHead>Joined</TableHead>
-                                <TableHead className="w-[100px]">
-                                    Actions
-                                </TableHead>
+                                <TableHead className="w-[80px]"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {customers.data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell
-                                        colSpan={9}
-                                        className="py-8 text-center text-muted-foreground"
-                                    >
+                                    <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
                                         No customers found
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 customers.data.map((customer) => (
-                                    <TableRow
-                                        key={customer.id}
-                                        className={
-                                            !customer.is_active
-                                                ? 'opacity-60'
-                                                : ''
-                                        }
-                                    >
+                                    <TableRow key={customer.id} className={`group ${!customer.is_active ? 'opacity-60' : ''}`}>
                                         <TableCell>
                                             {customer.user ? (
                                                 <div className="flex items-start gap-2">
                                                     <div>
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-1.5">
                                                             <Link
                                                                 href={`/admin/customers/${customer.id}`}
                                                                 className="font-medium hover:underline"
                                                             >
-                                                                {
-                                                                    customer
-                                                                        .user
-                                                                        .name
-                                                                }
+                                                                {customer.user.name}
                                                             </Link>
                                                             <TooltipProvider>
                                                                 <Tooltip>
                                                                     <TooltipTrigger>
-                                                                        {customer
-                                                                            .user
-                                                                            .email_verified ? (
+                                                                        {customer.user.email_verified ? (
                                                                             <Mail className="h-3.5 w-3.5 text-green-500" />
                                                                         ) : (
                                                                             <MailX className="h-3.5 w-3.5 text-yellow-500" />
                                                                         )}
                                                                     </TooltipTrigger>
                                                                     <TooltipContent>
-                                                                        {customer
-                                                                            .user
-                                                                            .email_verified
-                                                                            ? 'Email verified'
-                                                                            : 'Email not verified'}
+                                                                        {customer.user.email_verified ? 'Email verified' : 'Email not verified'}
                                                                     </TooltipContent>
                                                                 </Tooltip>
                                                             </TooltipProvider>
                                                         </div>
-                                                        <div className="text-sm text-muted-foreground">
-                                                            {
-                                                                customer.user
-                                                                    .email
-                                                            }
-                                                        </div>
+                                                        <div className="text-xs text-muted-foreground">{customer.user.email}</div>
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <span className="text-muted-foreground">
-                                                    No user
-                                                </span>
+                                                <span className="text-muted-foreground">No user</span>
                                             )}
                                         </TableCell>
                                         <TableCell>
@@ -356,133 +236,56 @@ export default function CustomersIndex({ customers, filters }: Props) {
                                         </TableCell>
                                         <TableCell>
                                             {customer.is_active ? (
-                                                <Badge
-                                                    variant="outline"
-                                                    className="border-green-200 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                                >
-                                                    <CheckCircle2 className="mr-1 h-3 w-3" />
-                                                    Active
-                                                </Badge>
+                                                <Badge variant="default">Active</Badge>
                                             ) : (
-                                                <Badge
-                                                    variant="outline"
-                                                    className="border-red-200 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                                                >
-                                                    <XCircle className="mr-1 h-3 w-3" />
-                                                    Inactive
-                                                </Badge>
+                                                <Badge variant="secondary">Inactive</Badge>
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex items-center justify-end gap-1">
-                                                <ShoppingCart className="h-3.5 w-3.5 text-muted-foreground" />
-                                                <span className="font-medium">
-                                                    {customer.orders_count}
-                                                </span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-right font-medium">
-                                            €
-                                            {Number(
-                                                customer.total_spent,
-                                            ).toFixed(2)}
+                                        <TableCell className="text-right tabular-nums">{customer.orders_count}</TableCell>
+                                        <TableCell className="text-right font-medium tabular-nums">
+                                            €{Number(customer.total_spent).toFixed(2)}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            {customer.type === 'b2b' &&
-                                            customer.balance ? (
+                                            {customer.type === 'b2b' && customer.balance ? (
                                                 <TooltipProvider>
                                                     <Tooltip>
                                                         <TooltipTrigger className="flex items-center justify-end gap-1">
                                                             <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
-                                                            <span className="font-medium text-green-600">
-                                                                €
-                                                                {Number(
-                                                                    customer
-                                                                        .balance
-                                                                        .available,
-                                                                ).toFixed(2)}
+                                                            <span className="font-medium tabular-nums text-green-600">
+                                                                €{Number(customer.balance.available).toFixed(2)}
                                                             </span>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
-                                                            Total: €
-                                                            {Number(
-                                                                customer.balance
-                                                                    .balance,
-                                                            ).toFixed(2)}
+                                                            Total: €{Number(customer.balance.balance).toFixed(2)}
                                                         </TooltipContent>
                                                     </Tooltip>
                                                 </TooltipProvider>
                                             ) : (
-                                                <span className="text-muted-foreground">
-                                                    -
-                                                </span>
+                                                <span className="text-muted-foreground">—</span>
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            {Number(
-                                                customer.discount_percentage,
-                                            ) > 0 ? (
-                                                <Badge variant="secondary">
-                                                    {
-                                                        customer.discount_percentage
-                                                    }
-                                                    %
-                                                </Badge>
+                                            {Number(customer.discount_percentage) > 0 ? (
+                                                <Badge variant="secondary">{customer.discount_percentage}%</Badge>
                                             ) : (
-                                                <span className="text-sm text-muted-foreground">
-                                                    -
-                                                </span>
+                                                <span className="text-sm text-muted-foreground">—</span>
                                             )}
                                         </TableCell>
                                         <TableCell className="text-sm text-muted-foreground">
-                                            {new Date(
-                                                customer.created_at,
-                                            ).toLocaleDateString()}
+                                            {new Date(customer.created_at).toLocaleDateString()}
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex gap-1">
-                                                <TooltipProvider>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="h-8 w-8"
-                                                                asChild
-                                                            >
-                                                                <Link
-                                                                    href={`/admin/customers/${customer.id}`}
-                                                                >
-                                                                    <Eye className="h-4 w-4" />
-                                                                </Link>
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            View details
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
-                                                <TooltipProvider>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="h-8 w-8"
-                                                                asChild
-                                                            >
-                                                                <Link
-                                                                    href={`/admin/customers/${customer.id}/edit`}
-                                                                >
-                                                                    <Pencil className="h-4 w-4" />
-                                                                </Link>
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            Edit customer
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
+                                            <div className="flex gap-1 opacity-0 group-hover:opacity-100">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                                                    <Link href={`/admin/customers/${customer.id}`}>
+                                                        <Eye className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                                                    <Link href={`/admin/customers/${customer.id}/edit`}>
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -492,81 +295,28 @@ export default function CustomersIndex({ customers, filters }: Props) {
                     </Table>
                 </div>
 
-                {/* Pagination */}
                 {customers.last_page > 1 && (
                     <div className="flex items-center justify-between">
-                        <p className="text-sm text-muted-foreground">
-                            Showing {customers.from}-{customers.to} of{' '}
-                            {customers.total} customers
-                        </p>
-                        <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                            Page {customers.current_page} of {customers.last_page}
+                        </span>
+                        <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() =>
-                                    goToPage(customers.current_page - 1)
-                                }
+                                className="h-8"
                                 disabled={customers.current_page === 1}
+                                onClick={() => router.get('/admin/customers', { ...filters, page: customers.current_page - 1 }, { preserveState: true, preserveScroll: true })}
                             >
                                 <ChevronLeft className="h-4 w-4" />
-                                Previous
                             </Button>
-                            <div className="flex items-center gap-1">
-                                {Array.from(
-                                    {
-                                        length: Math.min(
-                                            customers.last_page,
-                                            5,
-                                        ),
-                                    },
-                                    (_, i) => {
-                                        let page: number;
-                                        if (customers.last_page <= 5) {
-                                            page = i + 1;
-                                        } else if (
-                                            customers.current_page <= 3
-                                        ) {
-                                            page = i + 1;
-                                        } else if (
-                                            customers.current_page >=
-                                            customers.last_page - 2
-                                        ) {
-                                            page = customers.last_page - 4 + i;
-                                        } else {
-                                            page =
-                                                customers.current_page - 2 + i;
-                                        }
-                                        return (
-                                            <Button
-                                                key={page}
-                                                variant={
-                                                    page ===
-                                                    customers.current_page
-                                                        ? 'default'
-                                                        : 'outline'
-                                                }
-                                                size="sm"
-                                                className="w-9"
-                                                onClick={() => goToPage(page)}
-                                            >
-                                                {page}
-                                            </Button>
-                                        );
-                                    },
-                                )}
-                            </div>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() =>
-                                    goToPage(customers.current_page + 1)
-                                }
-                                disabled={
-                                    customers.current_page ===
-                                    customers.last_page
-                                }
+                                className="h-8"
+                                disabled={customers.current_page === customers.last_page}
+                                onClick={() => router.get('/admin/customers', { ...filters, page: customers.current_page + 1 }, { preserveState: true, preserveScroll: true })}
                             >
-                                Next
                                 <ChevronRight className="h-4 w-4" />
                             </Button>
                         </div>

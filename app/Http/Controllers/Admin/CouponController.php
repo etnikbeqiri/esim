@@ -22,7 +22,11 @@ class CouponController extends Controller
 
     public function index(Request $request): Response
     {
-        $coupons = Coupon::query()
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+        $sortableColumns = ['code', 'name', 'type', 'value', 'usage_count', 'valid_from', 'valid_until', 'is_active', 'created_at'];
+
+        $query = Coupon::query()
             ->when($request->search, fn ($q, $search) => $q
                 ->where('code', 'like', "%{$search}%")
                 ->orWhere('name', 'like', "%{$search}%")
@@ -34,14 +38,20 @@ class CouponController extends Controller
                 'expired' => $q->expired(),
                 'upcoming' => $q->upcoming(),
                 default => $q,
-            })
-            ->orderByDesc('created_at')
-            ->paginate(50)
-            ->withQueryString();
+            });
+
+        // Handle sorting
+        if (in_array($sortBy, $sortableColumns)) {
+            $query->orderBy($sortBy, $sortDir);
+        } else {
+            $query->orderByDesc('created_at');
+        }
+
+        $coupons = $query->paginate(50)->withQueryString();
 
         return Inertia::render('admin/coupons/index', [
             'coupons' => $coupons,
-            'filters' => $request->only('search', 'type', 'is_active', 'status'),
+            'filters' => $request->only('search', 'type', 'is_active', 'status', 'sort_by', 'sort_dir'),
         ]);
     }
 

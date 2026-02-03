@@ -16,16 +16,32 @@ class PackageController extends Controller
 {
     public function index(Request $request): Response
     {
-        $packages = Package::query()
+        $sortableColumns = ['name', 'data_mb', 'validity_days', 'cost_price', 'retail_price', 'is_active', 'is_featured', 'created_at', 'provider', 'country'];
+        $sortBy = in_array($request->sort_by, $sortableColumns) ? $request->sort_by : 'created_at';
+        $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
+        $perPage = in_array((int) $request->per_page, [25, 50, 100, 200]) ? (int) $request->per_page : 50;
+
+        $query = Package::query()
             ->with(['provider:id,name', 'country:id,name,iso_code,is_active'])
             ->when($request->search, fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
             ->when($request->provider_id, fn ($q, $id) => $q->where('provider_id', $id))
             ->when($request->country_id, fn ($q, $id) => $q->where('country_id', $id))
             ->when($request->has('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')))
-            ->when($request->has('country_active'), fn ($q) => $q->whereHas('country', fn ($cq) => $cq->where('is_active', $request->boolean('country_active'))))
-            ->orderByDesc('created_at')
-            ->paginate(50)
-            ->withQueryString();
+            ->when($request->has('country_active'), fn ($q) => $q->whereHas('country', fn ($cq) => $cq->where('is_active', $request->boolean('country_active'))));
+
+        if ($sortBy === 'provider') {
+            $query->leftJoin('providers', 'packages.provider_id', '=', 'providers.id')
+                ->orderBy('providers.name', $sortDir)
+                ->select('packages.*');
+        } elseif ($sortBy === 'country') {
+            $query->leftJoin('countries', 'packages.country_id', '=', 'countries.id')
+                ->orderBy('countries.name', $sortDir)
+                ->select('packages.*');
+        } else {
+            $query->orderBy($sortBy, $sortDir);
+        }
+
+        $packages = $query->paginate($perPage)->withQueryString();
 
         // Make hidden fields visible for admin
         $packages->getCollection()->transform(function ($package) {
@@ -36,7 +52,7 @@ class PackageController extends Controller
             'packages' => $packages,
             'providers' => Provider::select('id', 'name')->orderBy('name')->get(),
             'countries' => Country::select('id', 'name', 'iso_code', 'is_active')->orderBy('name')->get(),
-            'filters' => $request->only('search', 'provider_id', 'country_id', 'is_active', 'country_active'),
+            'filters' => $request->only('search', 'provider_id', 'country_id', 'is_active', 'country_active', 'sort_by', 'sort_dir', 'per_page'),
             'defaultCurrency' => Currency::getDefault(),
         ]);
     }

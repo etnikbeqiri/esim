@@ -19,14 +19,36 @@ class OrderController extends Controller
 {
     public function index(Request $request): Response
     {
-        $orders = Order::query()
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+        $sortableColumns = ['order_number', 'type', 'status', 'amount', 'created_at', 'customer', 'package'];
+
+        $query = Order::query()
             ->with(['customer.user:id,name,email', 'package:id,name'])
             ->when($request->search, fn ($q, $search) => $q->where('order_number', 'like', "%{$search}%")
                 ->orWhereHas('customer.user', fn ($q) => $q->where('email', 'like', "%{$search}%")))
             ->when($request->status, fn ($q, $status) => $q->where('status', $status))
-            ->when($request->type, fn ($q, $type) => $q->where('type', $type))
-            ->orderByDesc('created_at')
-            ->paginate(50)
+            ->when($request->type, fn ($q, $type) => $q->where('type', $type));
+
+        // Handle sorting
+        if (in_array($sortBy, $sortableColumns)) {
+            if ($sortBy === 'customer') {
+                $query->leftJoin('customers', 'orders.customer_id', '=', 'customers.id')
+                    ->leftJoin('users', 'customers.user_id', '=', 'users.id')
+                    ->orderBy('users.name', $sortDir)
+                    ->select('orders.*');
+            } elseif ($sortBy === 'package') {
+                $query->leftJoin('packages', 'orders.package_id', '=', 'packages.id')
+                    ->orderBy('packages.name', $sortDir)
+                    ->select('orders.*');
+            } else {
+                $query->orderBy($sortBy, $sortDir);
+            }
+        } else {
+            $query->orderByDesc('created_at');
+        }
+
+        $orders = $query->paginate(50)
             ->through(fn ($order) => [
                 'id' => $order->id,
                 'uuid' => $order->uuid,
@@ -42,12 +64,14 @@ class OrderController extends Controller
                 'failure_reason' => $order->failure_reason,
                 'created_at' => $order->created_at->format('M j, Y H:i'),
                 'customer' => $order->customer ? [
+                    'id' => $order->customer->id,
                     'user' => $order->customer->user ? [
                         'name' => $order->customer->user->name,
                         'email' => $order->customer->user->email,
                     ] : null,
                 ] : null,
                 'package' => $order->package ? [
+                    'id' => $order->package->id,
                     'name' => $order->package->name,
                 ] : null,
             ])
@@ -60,7 +84,7 @@ class OrderController extends Controller
                 'label' => $s->label(),
                 'color' => $s->color(),
             ]),
-            'filters' => $request->only('search', 'status', 'type'),
+            'filters' => $request->only('search', 'status', 'type', 'sort_by', 'sort_dir'),
             'defaultCurrency' => Currency::getDefault(),
         ]);
     }

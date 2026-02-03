@@ -104,6 +104,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('providers', [\App\Http\Controllers\Admin\ProviderController::class, 'index'])->name('providers.index');
         Route::get('providers/create', [\App\Http\Controllers\Admin\ProviderController::class, 'create'])->name('providers.create');
         Route::post('providers', [\App\Http\Controllers\Admin\ProviderController::class, 'store'])->name('providers.store');
+        Route::get('providers/{provider}', [\App\Http\Controllers\Admin\ProviderController::class, 'show'])->name('providers.show');
         Route::get('providers/{provider}/edit', [\App\Http\Controllers\Admin\ProviderController::class, 'edit'])->name('providers.edit');
         Route::put('providers/{provider}', [\App\Http\Controllers\Admin\ProviderController::class, 'update'])->name('providers.update');
         Route::delete('providers/{provider}', [\App\Http\Controllers\Admin\ProviderController::class, 'destroy'])->name('providers.destroy');

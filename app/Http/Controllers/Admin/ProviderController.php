@@ -32,6 +32,41 @@ class ProviderController extends Controller
         ]);
     }
 
+    public function show(Provider $provider): Response
+    {
+        $provider->loadCount(['packages', 'syncJobs', 'orders']);
+        $provider->load(['syncJobs' => fn ($q) => $q->latest()->limit(10)]);
+
+        $packages = $provider->packages()
+            ->with('country:id,name,iso_code')
+            ->select('id', 'name', 'data_mb', 'validity_days', 'cost_price', 'retail_price', 'custom_retail_price', 'is_active', 'is_featured', 'country_id')
+            ->orderByDesc('created_at')
+            ->paginate(20)
+            ->withQueryString();
+
+        $stats = [
+            'total_packages' => $provider->packages_count,
+            'active_packages' => $provider->packages()->where('is_active', true)->count(),
+            'total_orders' => $provider->orders_count,
+            'total_revenue' => $provider->orders()->sum('amount'),
+        ];
+
+        return Inertia::render('admin/providers/show', [
+            'provider' => $provider->makeVisible([
+                'api_base_url',
+                'rate_limit_ms',
+                'markup_percentage',
+                'custom_regions',
+                'last_synced_at',
+                'created_at',
+                'updated_at',
+            ]),
+            'packages' => $packages,
+            'stats' => $stats,
+            'defaultCurrency' => \App\Models\Currency::where('is_default', true)->first(),
+        ]);
+    }
+
     public function create(): Response
     {
         return Inertia::render('admin/providers/create');
