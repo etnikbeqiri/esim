@@ -81,11 +81,11 @@ class CouponRequest extends FormRequest
             ]);
         }
 
-        // Set default values for checkboxes
+        // Properly parse boolean values from the request
         $this->merge([
-            'is_active' => $this->has('is_active') ? true : false,
-            'is_stackable' => $this->has('is_stackable') ? true : false,
-            'first_time_only' => $this->has('first_time_only') ? true : false,
+            'is_active' => $this->boolean('is_active'),
+            'is_stackable' => $this->boolean('is_stackable'),
+            'first_time_only' => $this->boolean('first_time_only'),
         ]);
     }
 }
