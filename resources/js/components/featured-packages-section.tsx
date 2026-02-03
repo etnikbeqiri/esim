@@ -75,7 +75,10 @@ export function FeaturedPackagesSection({
                 containerWidth / 2 +
                 cardWidth / 2;
 
-            container.scrollLeft = Math.max(0, scrollPosition);
+            container.scrollTo({
+                left: Math.max(0, scrollPosition),
+                behavior: 'smooth',
+            });
             checkScrollButtons();
         }
     }, [packages.length]);
