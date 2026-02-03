@@ -121,6 +121,7 @@ return [
             'oceania' => 'Oqeania',
             'middle_east' => 'Lindja e Mesme',
             'caribbean' => 'Karaibet',
+            'carribeans' => 'Karaibet',
             'central_america' => 'Amerika Qendrore',
             'regional' => 'Rajonale',
             'virtuals' => 'Virtuale',

@@ -124,6 +124,7 @@ return [
             'oceania' => 'Ozeanien',
             'middle_east' => 'Naher Osten',
             'caribbean' => 'Karibik',
+            'carribeans' => 'Karibik',
             'central_america' => 'Zentralamerika',
             'regional' => 'Regional',
             'virtuals' => 'Virtuell',
