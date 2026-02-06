@@ -1,0 +1,45 @@
+http://merrsim.com, http://www.merrsim.com {
+	request_body {
+		max_size 100MB
+	}
+
+	encode zstd gzip
+
+	reverse_proxy localhost:6698 {
+		header_up Host {host}
+		header_up X-Real-IP {http.request.header.CF-Connecting-IP}
+		header_up X-Forwarded-For {http.request.header.CF-Connecting-IP}
+		header_up X-Forwarded-Proto https
+		header_up X-Forwarded-Host {host}
+		header_up Connection {http.request.header.Connection}
+		header_up Upgrade {http.request.header.Upgrade}
+
+		transport http {
+			keepalive 30s
+			keepalive_idle_conns 20
+			read_timeout 60s
+			write_timeout 60s
+		}
+
+		flush_interval -1
+
+		health_uri /
+		health_interval 30s
+		health_timeout 5s
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+		-X-Powered-By
+	}
+
+	@static path *.css *.js *.ico *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.webp
+	header @static Cache-Control "public, max-age=2592000"
+
+	@options method OPTIONS
+	respond @options 204
+}
