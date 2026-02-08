@@ -118,7 +118,16 @@ class HomeController extends Controller
             ->whereHas('packages', fn ($q) => $q->where('is_active', true))
             ->withCount(['packages' => fn ($q) => $q->where('is_active', true)])
             ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%");
+                $query->where(function ($q) use ($search) {
+                    $q->whereRaw('LOWER(countries.name) LIKE LOWER(?)', ["%{$search}%"])
+                        ->orWhereRaw('LOWER(countries.region) LIKE LOWER(?)', ["%{$search}%"])
+                        ->orWhereHas('packages', fn ($pq) => $pq
+                            ->whereRaw('LOWER(packages.name) LIKE LOWER(?)', ["%{$search}%"])
+                            ->orWhereRaw('LOWER(packages.description) LIKE LOWER(?)', ["%{$search}%"])
+                            ->orWhereRaw('packages.data_mb::text LIKE ?', ["%{$search}%"])
+                            ->orWhereRaw('packages.validity_days::text LIKE ?', ["%{$search}%"])
+                        );
+                });
             })
             ->when($request->region, function ($query, $region) {
                 $query->where('region', $region);
@@ -250,12 +259,19 @@ class HomeController extends Controller
             ->where('is_active', true)
             ->whereHas('packages', fn ($q) => $q->where('is_active', true))
             ->where(function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
-                    ->orWhere('iso_code', 'like', "%{$query}%");
+                $q->whereRaw('LOWER(countries.name) LIKE LOWER(?)', ["%{$query}%"])
+                    ->orWhereRaw('LOWER(countries.iso_code) LIKE LOWER(?)', ["%{$query}%"])
+                    ->orWhereRaw('LOWER(countries.region) LIKE LOWER(?)', ["%{$query}%"])
+                    ->orWhereHas('packages', fn ($pq) => $pq
+                        ->whereRaw('LOWER(packages.name) LIKE LOWER(?)', ["%{$query}%"])
+                        ->orWhereRaw('LOWER(packages.description) LIKE LOWER(?)', ["%{$query}%"])
+                        ->orWhereRaw('packages.data_mb::text LIKE ?', ["%{$query}%"])
+                        ->orWhereRaw('packages.validity_days::text LIKE ?', ["%{$query}%"])
+                    );
             })
             ->withCount(['packages' => fn ($q) => $q->where('is_active', true)])
-            ->orderByRaw('CASE WHEN name LIKE ? THEN 0 ELSE 1 END', ["{$query}%"])
-            ->orderBy('name')
+            ->orderByRaw('CASE WHEN LOWER(countries.name) LIKE LOWER(?) THEN 0 ELSE 1 END', ["{$query}%"])
+            ->orderBy('countries.name')
             ->limit(6)
             ->get()
             ->map(function ($country) {

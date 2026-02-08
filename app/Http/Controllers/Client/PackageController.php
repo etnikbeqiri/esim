@@ -20,14 +20,20 @@ class PackageController extends Controller
 
         // Apply filters
         if ($request->filled('country')) {
-            $query->whereHas('country', fn($q) => $q->where('iso_code', $request->country));
+            $query->whereHas('country', fn ($q) => $q->where('iso_code', $request->country));
         }
 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhereHas('country', fn($cq) => $cq->where('name', 'like', "%{$search}%"));
+                $q->whereRaw('LOWER(packages.name) LIKE LOWER(?)', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(packages.description) LIKE LOWER(?)', ["%{$search}%"])
+                    ->orWhereRaw('packages.data_mb::text LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('packages.validity_days::text LIKE ?', ["%{$search}%"])
+                    ->orWhereHas('country', fn ($cq) => $cq
+                        ->whereRaw('LOWER(countries.name) LIKE LOWER(?)', ["%{$search}%"])
+                        ->orWhereRaw('LOWER(countries.region) LIKE LOWER(?)', ["%{$search}%"])
+                    );
             });
         }
 
@@ -44,7 +50,7 @@ class PackageController extends Controller
         $sortDirection = $request->direction ?? 'asc';
 
         if ($sortField === 'price') {
-            $query->orderByRaw('COALESCE(custom_retail_price, retail_price) ' . $sortDirection);
+            $query->orderByRaw('COALESCE(custom_retail_price, retail_price) '.$sortDirection);
         } elseif ($sortField === 'data') {
             $query->orderBy('data_mb', $sortDirection);
         } elseif ($sortField === 'validity') {
@@ -53,7 +59,7 @@ class PackageController extends Controller
             $query->orderBy('name', $sortDirection);
         }
 
-        $packages = $query->paginate(20)->through(fn($pkg) => [
+        $packages = $query->paginate(20)->through(fn ($pkg) => [
             'id' => $pkg->id,
             'name' => $pkg->name,
             'slug' => $pkg->slug,
@@ -75,7 +81,7 @@ class PackageController extends Controller
 
         // Get countries for filter
         $countries = Country::active()
-            ->whereHas('packages', fn($q) => $q->available())
+            ->whereHas('packages', fn ($q) => $q->available())
             ->orderBy('name')
             ->get(['id', 'name', 'iso_code', 'region']);
 
@@ -97,7 +103,7 @@ class PackageController extends Controller
         $user = $request->user();
         $customer = $user->customer;
 
-        if (!$package->isAvailable()) {
+        if (! $package->isAvailable()) {
             abort(404, 'Package not available');
         }
 
@@ -114,7 +120,7 @@ class PackageController extends Controller
             ->where('country_id', $package->country_id)
             ->take(4)
             ->get()
-            ->map(fn($pkg) => [
+            ->map(fn ($pkg) => [
                 'id' => $pkg->id,
                 'name' => $pkg->name,
                 'data_label' => $pkg->data_label,
