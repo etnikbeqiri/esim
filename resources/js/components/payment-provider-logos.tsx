@@ -1,5 +1,36 @@
 import { CreditCard } from 'lucide-react';
 
+export function CardPaymentLogo({ className }: { className?: string }) {
+    return (
+        <svg
+            className={className}
+            viewBox="0 0 28 28"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-label="Credit / Debit Card"
+        >
+            {/* Back card */}
+            <rect x="5" y="2" width="22" height="16" rx="2.5" fill="#b5e8d8" />
+            {/* Front card */}
+            <rect x="1" y="6" width="22" height="16" rx="2.5" fill="#8cd9c3" />
+            {/* Magnetic stripe */}
+            <rect x="1" y="10" width="22" height="4.5" fill="#72ccb2" />
+            {/* EMV chip */}
+            <rect x="3.5" y="16" width="5.5" height="3.5" rx="0.8" fill="#FFD700" />
+            {/* Secure checkmark badge */}
+            <circle cx="22" cy="22" r="5.5" fill="#ffd700" />
+            <path
+                d="M19.5 22l1.7 1.7l3.3-3.4"
+                stroke="white"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                fill="none"
+            />
+        </svg>
+    );
+}
+
 export function StripeLogo({ className }: { className?: string }) {
     return (
         <svg
@@ -50,6 +81,8 @@ export function ProviderLogo({ provider, className }: ProviderLogoProps) {
             return <StripeLogo className={className} />;
         case 'paysera':
             return <PayseraLogo className={className} />;
+        case 'procard':
+            return <CardPaymentLogo className={className} />;
         default:
             return (
                 <div

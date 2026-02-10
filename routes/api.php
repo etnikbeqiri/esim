@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\PackageController;
 use App\Http\Controllers\Api\Webhooks\PayrexxWebhookController;
 use App\Http\Controllers\Api\Webhooks\PayseraWebhookController;
+use App\Http\Controllers\Api\Webhooks\ProcardWebhookController;
 use App\Http\Controllers\Api\Webhooks\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,7 @@ Route::prefix('v1')->group(function () {
         Route::post('stripe', [StripeWebhookController::class, 'handle'])->name('webhooks.stripe');
         Route::post('payrexx', [PayrexxWebhookController::class, 'handle'])->name('webhooks.payrexx');
         Route::post('paysera', [PayseraWebhookController::class, 'handle'])->name('webhooks.paysera');
+        Route::post('procard', [ProcardWebhookController::class, 'handle'])->name('webhooks.procard');
     });
 
     Route::middleware('auth:sanctum')->group(function () {

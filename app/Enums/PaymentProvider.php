@@ -7,6 +7,7 @@ enum PaymentProvider: string
     case Stripe = 'stripe';
     case Payrexx = 'payrexx';
     case Paysera = 'paysera';
+    case Procard = 'procard';
     case Balance = 'balance';
 
     public function label(): string
@@ -15,6 +16,7 @@ enum PaymentProvider: string
             self::Stripe => 'Stripe',
             self::Payrexx => 'Payrexx',
             self::Paysera => 'Paysera',
+            self::Procard => 'Credit / Debit Card',
             self::Balance => 'Balance',
         };
     }
@@ -25,6 +27,7 @@ enum PaymentProvider: string
             self::Stripe => 'Pay securely with card',
             self::Payrexx => 'Pay securely with card or other methods',
             self::Paysera => 'Pay securely with card or other methods',
+            self::Procard => 'Pay securely with card',
             self::Balance => 'Pay from your account balance',
         };
     }
@@ -60,6 +63,10 @@ enum PaymentProvider: string
                 'maestro' => ['name' => 'Maestro', 'icon' => 'maestro'],
                 'amex' => ['name' => 'American Express', 'icon' => 'amex'],
             ],
+            self::Procard => [
+                'visa' => ['name' => 'Visa', 'icon' => 'visa'],
+                'mastercard' => ['name' => 'Mastercard', 'icon' => 'mastercard'],
+            ],
             self::Balance => [
                 'balance' => ['name' => 'Account Balance', 'icon' => 'wallet'],
             ],
@@ -85,6 +92,7 @@ enum PaymentProvider: string
             self::Stripe => true,
             self::Payrexx => true,
             self::Paysera => true,
+            self::Procard => true,
             self::Balance => false,
         };
     }
@@ -113,6 +121,7 @@ enum PaymentProvider: string
             self::Stripe => ! empty(config('services.stripe.key')) && ! empty(config('services.stripe.secret')),
             self::Payrexx => ! empty(config('services.payrexx.instance')) && ! empty(config('services.payrexx.secret')),
             self::Paysera => ! empty(config('services.paysera.project_id')) && ! empty(config('services.paysera.password')),
+            self::Procard => ! empty(config('services.procard.merchant_id')) && ! empty(config('services.procard.secret_key')),
             self::Balance => true, // Balance is always available for B2B
         };
     }
@@ -124,7 +133,7 @@ enum PaymentProvider: string
      */
     public static function publicProviders(): array
     {
-        return [self::Paysera];
+        return [self::Procard, self::Paysera];
     }
 
     /**

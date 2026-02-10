@@ -48,6 +48,7 @@ class PaymentCallbackHandler
             $this->gatewayFactory->make(PaymentProvider::Paysera),
             $this->gatewayFactory->make(PaymentProvider::Stripe),
             $this->gatewayFactory->make(PaymentProvider::Payrexx),
+            $this->gatewayFactory->make(PaymentProvider::Procard),
         ];
     }
 }

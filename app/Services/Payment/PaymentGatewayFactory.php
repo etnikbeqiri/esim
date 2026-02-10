@@ -17,6 +17,7 @@ class PaymentGatewayFactory
             PaymentProvider::Stripe => app(StripeGateway::class),
             PaymentProvider::Payrexx => app(PayrexxGateway::class),
             PaymentProvider::Paysera => app(PayseraGateway::class),
+            PaymentProvider::Procard => app(ProcardGateway::class),
             PaymentProvider::Balance => app(BalanceGateway::class),
         };
     }

@@ -80,4 +80,10 @@ return [
         'test_mode' => env('PAYSERA_TEST_MODE', false),
     ],
 
+    'procard' => [
+        'merchant_id' => env('PROCARD_MERCHANT_ID'),
+        'secret_key' => env('PROCARD_SECRET_KEY'),
+        'api_url' => env('PROCARD_API_URL', 'https://pay.procard-ltd.com/api'),
+    ],
+
 ];
