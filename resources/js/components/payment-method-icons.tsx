@@ -84,13 +84,18 @@ export function PaymentMethodIcons({
     const containerRef = useRef<HTMLDivElement>(null);
     const trackRef = useRef<HTMLDivElement>(null);
     const [shouldScroll, setShouldScroll] = useState(false);
+    const [visible, setVisible] = useState(true);
     const shouldScrollRef = useRef(false);
     const methodsKey = methods.map((m) => m.icon).join(',');
 
     useEffect(() => {
-        // Reset on method change
-        shouldScrollRef.current = false;
-        setShouldScroll(false);
+        // Fade out, then reset, then fade back in
+        setVisible(false);
+        const fadeTimeout = setTimeout(() => {
+            shouldScrollRef.current = false;
+            setShouldScroll(false);
+            setVisible(true);
+        }, 200);
 
         const container = containerRef.current;
         const track = trackRef.current;
@@ -122,6 +127,7 @@ export function PaymentMethodIcons({
         images.forEach((img) => img.addEventListener('load', onImgLoad));
 
         return () => {
+            clearTimeout(fadeTimeout);
             cancelAnimationFrame(raf);
             clearTimeout(t1);
             clearTimeout(t2);
@@ -142,8 +148,9 @@ export function PaymentMethodIcons({
             <div
                 ref={trackRef}
                 className={cn(
-                    'flex w-max items-center gap-1.5',
+                    'flex w-max items-center gap-1.5 transition-opacity duration-300 ease-in-out',
                     shouldScroll && 'animate-marquee',
+                    visible ? 'opacity-100' : 'opacity-0',
                 )}
             >
                 {methods.map((method, index) => (
