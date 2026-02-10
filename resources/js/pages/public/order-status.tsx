@@ -1,20 +1,22 @@
 import { EsimQrCard } from '@/components/esim-qr-card';
 import { OrderSummaryCard } from '@/components/order-summary-card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { useAnalytics, usePageViewTracking } from '@/lib/analytics';
 import { Head, Link, router } from '@inertiajs/react';
 import {
+    BookOpen,
     Calendar,
     CheckCircle2,
-    Clock,
+    CreditCard,
+    Globe,
     HelpCircle,
     Loader2,
+    MessageCircle,
+    Receipt,
     RefreshCw,
+    Tag,
     XCircle,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
@@ -63,26 +65,26 @@ interface Props {
 function getStatusIcon(status: string) {
     switch (status) {
         case 'completed':
-            return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+            return <CheckCircle2 className="h-4 w-4 text-green-600" />;
         case 'processing':
-            return <Loader2 className="h-5 w-5 animate-spin text-blue-500" />;
+            return <Loader2 className="h-4 w-4 animate-spin text-primary-500" />;
         case 'pending_retry':
-            return <RefreshCw className="h-5 w-5 text-orange-500" />;
+            return <RefreshCw className="h-4 w-4 text-orange-500" />;
         case 'failed':
-            return <XCircle className="h-5 w-5 text-red-500" />;
+            return <XCircle className="h-4 w-4 text-red-500" />;
         default:
-            return <Clock className="h-5 w-5 text-yellow-500" />;
+            return <Loader2 className="h-4 w-4 animate-spin text-primary-500" />;
     }
 }
 
 function getStatusBadgeClass(color: string): string {
     const colors: Record<string, string> = {
-        green: 'bg-green-100 text-green-700 border-green-200',
-        yellow: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-        red: 'bg-red-100 text-red-700 border-red-200',
-        blue: 'bg-blue-100 text-blue-700 border-blue-200',
-        gray: 'bg-gray-100 text-gray-700 border-gray-200',
-        orange: 'bg-orange-100 text-orange-700 border-orange-200',
+        green: 'bg-green-50 text-green-700 ring-1 ring-green-200/50',
+        yellow: 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200/50',
+        red: 'bg-red-50 text-red-700 ring-1 ring-red-200/50',
+        blue: 'bg-primary-50 text-primary-700 ring-1 ring-primary-100',
+        gray: 'bg-primary-50 text-primary-600 ring-1 ring-primary-100',
+        orange: 'bg-orange-50 text-orange-700 ring-1 ring-orange-200/50',
     };
     return colors[color] || colors.gray;
 }
@@ -195,16 +197,16 @@ export default function OrderStatus({ order }: Props) {
                         <div className="mb-8 text-center">
                             <Badge
                                 variant="outline"
-                                className={`${getStatusBadgeClass(order.status_color)} mb-4 inline-flex items-center gap-2 px-4 py-2 text-sm`}
+                                className={`${getStatusBadgeClass(order.status_color)} mb-4 inline-flex items-center gap-1.5 rounded-lg border-0 px-3 py-1.5 text-[11px] font-semibold tracking-wider uppercase`}
                             >
                                 {getStatusIcon(order.status)}
                                 {order.status_label}
                             </Badge>
-                            <h1 className="text-2xl font-bold md:text-3xl">
+                            <h1 className="text-2xl font-bold text-primary-900 md:text-3xl">
                                 {trans('order_status_page.title')}
                             </h1>
-                            <div className="mt-2 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                                <Calendar className="h-4 w-4" />
+                            <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-primary-500 md:text-xs">
+                                <Calendar className="h-3.5 w-3.5" />
                                 <span>
                                     {trans('order_status_page.placed_on', {
                                         date: order.created_at,
@@ -213,45 +215,54 @@ export default function OrderStatus({ order }: Props) {
                             </div>
                         </div>
 
-                        {/* Status Message */}
+                        {/* Status Message - Processing */}
                         {isProcessing && (
-                            <Card className="mb-6 border-blue-200 bg-blue-50 dark:bg-blue-950/30">
-                                <CardContent className="flex items-center gap-3 py-4">
-                                    <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-                                    <div>
-                                        <p className="font-medium text-blue-700 dark:text-blue-400">
-                                            {trans(
-                                                'order_status_page.processing.title',
-                                            )}
-                                        </p>
-                                        <p className="text-sm text-blue-600 dark:text-blue-500">
-                                            {trans(
-                                                'order_status_page.processing.description',
-                                            )}
-                                        </p>
+                            <div className="mb-6 overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm">
+                                <div className="px-4 py-4 md:px-6 md:py-5">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50 ring-1 ring-primary-100 md:h-11 md:w-11">
+                                            <Loader2 className="h-5 w-5 animate-spin text-primary-500" />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-[15px] font-bold text-primary-900 md:text-base">
+                                                {trans(
+                                                    'order_status_page.processing.title',
+                                                )}
+                                            </p>
+                                            <p className="text-[11px] text-primary-500 md:text-xs">
+                                                {trans(
+                                                    'order_status_page.processing.description',
+                                                )}
+                                            </p>
+                                        </div>
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         )}
 
+                        {/* Status Message - Failed */}
                         {isFailed && (
-                            <Card className="mb-6 border-red-200 bg-red-50 dark:bg-red-950/30">
-                                <CardContent className="flex items-center gap-3 py-4">
-                                    <XCircle className="h-5 w-5 text-red-600" />
-                                    <div>
-                                        <p className="font-medium text-red-700 dark:text-red-400">
-                                            {trans(
-                                                'order_status_page.failed.title',
-                                            )}
-                                        </p>
-                                        <p className="text-sm text-red-600 dark:text-red-500">
-                                            {trans(
-                                                'order_status_page.failed.description',
-                                            )}
-                                        </p>
+                            <div className="mb-6 overflow-hidden rounded-2xl border border-red-200/60 bg-white shadow-sm">
+                                <div className="px-4 py-4 md:px-6 md:py-5">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 ring-1 ring-red-200/50 md:h-11 md:w-11">
+                                            <XCircle className="h-5 w-5 text-red-500" />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-[15px] font-bold text-primary-900 md:text-base">
+                                                {trans(
+                                                    'order_status_page.failed.title',
+                                                )}
+                                            </p>
+                                            <p className="text-[11px] text-primary-500 md:text-xs">
+                                                {trans(
+                                                    'order_status_page.failed.description',
+                                                )}
+                                            </p>
+                                        </div>
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         )}
 
                         {/* Order Summary */}
@@ -264,218 +275,236 @@ export default function OrderStatus({ order }: Props) {
 
                         {/* eSIM Details */}
                         {isCompleted && order.esim && (
-                            <EsimQrCard
-                                esim={order.esim}
-                                title={trans('order_status_page.esim.title')}
-                                description={trans(
-                                    'order_status_page.esim.description',
-                                )}
-                                onCopy={handleCopyData}
-                            />
+                            <div className="mb-6">
+                                <EsimQrCard
+                                    esim={order.esim}
+                                    title={trans('order_status_page.esim.title')}
+                                    description={trans(
+                                        'order_status_page.esim.description',
+                                    )}
+                                    onCopy={handleCopyData}
+                                />
+                            </div>
                         )}
 
-                        {/* Not completed yet */}
+                        {/* Not completed yet - Preparing */}
                         {!isCompleted && !isFailed && !order.esim && (
-                            <Card>
-                                <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                                    <div className="rounded-full bg-blue-100 p-4 dark:bg-blue-900">
-                                        <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
+                            <div className="mb-6 overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm">
+                                <div className="flex flex-col items-center justify-center px-4 py-10 text-center md:px-6 md:py-12">
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-50 ring-1 ring-primary-100 md:h-16 md:w-16">
+                                        <Loader2 className="h-7 w-7 animate-spin text-primary-500 md:h-8 md:w-8" />
                                     </div>
-                                    <h3 className="mt-4 font-semibold">
+                                    <h3 className="mt-4 text-[15px] font-bold text-primary-900 md:text-base">
                                         {trans(
                                             'order_status_page.preparing.title',
                                         )}
                                     </h3>
-                                    <p className="mt-1 text-sm text-muted-foreground">
+                                    <p className="mt-1 text-[11px] text-primary-500 md:text-xs">
                                         {trans(
                                             'order_status_page.preparing.description',
                                         )}
                                     </p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         )}
 
                         {/* Payment Summary */}
-                        <Card className="mt-6">
-                            <CardHeader className="pb-4">
-                                <CardTitle className="text-base">
-                                    {trans('order_status_page.payment.title')}
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-muted-foreground">
-                                        {trans(
-                                            'order_status_page.payment.method',
-                                        )}
-                                    </span>
-                                    <span className="font-medium">
-                                        {order.payment_method}
-                                    </span>
+                        <div className="overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm">
+                            <div className="bg-gradient-to-br from-primary-50 via-white to-accent-50/30 px-4 py-4 md:px-6 md:py-5">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-primary-500 shadow-sm ring-1 ring-primary-100 md:h-10 md:w-10">
+                                        <Receipt className="h-4 w-4 md:h-5 md:w-5" />
+                                    </div>
+                                    <h3 className="text-[15px] font-bold text-primary-900 md:text-base">
+                                        {trans('order_status_page.payment.title')}
+                                    </h3>
                                 </div>
-                                {order.paid_at && (
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-muted-foreground">
+                            </div>
+                            <div className="px-4 py-4 md:px-6 md:py-5">
+                                <div className="space-y-2.5">
+                                    {/* Payment Method */}
+                                    <div className="flex items-center justify-between">
+                                        <span className="flex items-center gap-1.5 text-xs text-primary-500 md:text-sm">
+                                            <CreditCard className="h-3.5 w-3.5" />
                                             {trans(
-                                                'order_status_page.payment.paid_on',
+                                                'order_status_page.payment.method',
                                             )}
                                         </span>
-                                        <span className="font-medium">
-                                            {order.paid_at}
+                                        <span className="text-xs font-medium text-primary-700 md:text-sm">
+                                            {order.payment_method}
                                         </span>
                                     </div>
-                                )}
-                                <Separator />
 
-                                {/* Coupon Discount */}
-                                {order.coupon &&
-                                    Number(order.coupon_discount) > 0 && (
-                                        <div className="flex justify-between text-sm text-green-600">
-                                            <span className="flex items-center gap-1">
+                                    {/* Paid On */}
+                                    {order.paid_at && (
+                                        <div className="flex items-center justify-between">
+                                            <span className="flex items-center gap-1.5 text-xs text-primary-500 md:text-sm">
+                                                <Calendar className="h-3.5 w-3.5" />
                                                 {trans(
-                                                    'order_status_page.payment.discount',
-                                                    { fallback: 'Discount' },
+                                                    'order_status_page.payment.paid_on',
                                                 )}
-                                                <Badge
-                                                    variant="outline"
-                                                    className="border-green-300 text-xs text-green-600"
-                                                >
-                                                    {order.coupon.code}
-                                                </Badge>
                                             </span>
-                                            <span className="font-medium">
-                                                -€
-                                                {Number(
-                                                    order.coupon_discount,
-                                                ).toFixed(2)}
+                                            <span className="text-xs font-medium text-primary-700 md:text-sm">
+                                                {order.paid_at}
                                             </span>
                                         </div>
                                     )}
 
-                                {/* VAT Breakdown */}
-                                {Number(order.vat_rate) > 0 &&
-                                    order.net_amount && (
-                                        <>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-muted-foreground">
-                                                    {trans(
-                                                        'order_status_page.payment.net_amount',
-                                                        {
-                                                            fallback:
-                                                                'Net Amount',
-                                                        },
-                                                    )}
-                                                </span>
-                                                <span className="font-medium">
-                                                    €
-                                                    {Number(
-                                                        order.net_amount,
-                                                    ).toFixed(2)}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-muted-foreground">
-                                                    {trans(
-                                                        'order_status_page.payment.vat',
-                                                        {
-                                                            rate: Number(
-                                                                order.vat_rate,
-                                                            ),
-                                                            fallback: `VAT (${Number(order.vat_rate)}%)`,
-                                                        },
-                                                    )}
-                                                </span>
-                                                <span className="font-medium">
-                                                    €
-                                                    {Number(
-                                                        order.vat_amount,
-                                                    ).toFixed(2)}
-                                                </span>
-                                            </div>
-                                            <Separator />
-                                        </>
-                                    )}
+                                    <div className="h-px bg-primary-100/80" />
 
-                                <div className="flex items-center justify-between pt-1">
-                                    <span className="font-medium">
-                                        {trans(
-                                            'order_status_page.payment.total',
+                                    {/* Coupon Discount */}
+                                    {order.coupon &&
+                                        Number(order.coupon_discount) > 0 && (
+                                            <div className="flex items-center justify-between">
+                                                <span className="flex items-center gap-1.5 text-xs text-green-600 md:text-sm">
+                                                    <Tag className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                                                    {trans(
+                                                        'order_status_page.payment.discount',
+                                                        { fallback: 'Discount' },
+                                                    )}
+                                                    <span className="rounded bg-green-50 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-green-600 ring-1 ring-green-200/50 md:text-xs">
+                                                        {order.coupon.code}
+                                                    </span>
+                                                </span>
+                                                <span className="text-xs font-medium text-green-600 md:text-sm">
+                                                    -€
+                                                    {Number(
+                                                        order.coupon_discount,
+                                                    ).toFixed(2)}
+                                                </span>
+                                            </div>
                                         )}
-                                        {Number(order.vat_rate) > 0 && (
-                                            <span className="ml-1 text-xs font-normal text-muted-foreground">
-                                                (
-                                                {trans(
-                                                    'order_status_page.payment.incl_vat',
-                                                    { fallback: 'incl. VAT' },
-                                                )}
-                                                )
-                                            </span>
+
+                                    {/* VAT Breakdown */}
+                                    {Number(order.vat_rate) > 0 &&
+                                        order.net_amount && (
+                                            <>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-xs text-primary-500 md:text-sm">
+                                                        {trans(
+                                                            'order_status_page.payment.net_amount',
+                                                            {
+                                                                fallback:
+                                                                    'Net Amount',
+                                                            },
+                                                        )}
+                                                    </span>
+                                                    <span className="text-xs font-medium text-primary-700 md:text-sm">
+                                                        €
+                                                        {Number(
+                                                            order.net_amount,
+                                                        ).toFixed(2)}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-xs text-primary-500 md:text-sm">
+                                                        {trans(
+                                                            'order_status_page.payment.vat',
+                                                            {
+                                                                rate: Number(
+                                                                    order.vat_rate,
+                                                                ),
+                                                                fallback: `VAT (${Number(order.vat_rate)}%)`,
+                                                            },
+                                                        )}
+                                                    </span>
+                                                    <span className="text-xs font-medium text-primary-700 md:text-sm">
+                                                        €
+                                                        {Number(
+                                                            order.vat_amount,
+                                                        ).toFixed(2)}
+                                                    </span>
+                                                </div>
+                                                <div className="h-px bg-primary-100/80" />
+                                            </>
                                         )}
-                                    </span>
-                                    <span className="text-xl font-bold">
-                                        €{Number(order.amount).toFixed(2)}
-                                    </span>
                                 </div>
-                            </CardContent>
-                        </Card>
+
+                                {/* Total */}
+                                <div className="mt-3 border-t border-primary-100 pt-3 md:mt-4 md:pt-4">
+                                    <div className="flex items-baseline justify-between">
+                                        <span className="text-xs font-medium text-primary-600 md:text-sm">
+                                            {trans(
+                                                'order_status_page.payment.total',
+                                            )}
+                                            {Number(order.vat_rate) > 0 && (
+                                                <span className="ml-1 text-[10px] text-primary-400 md:text-xs">
+                                                    (
+                                                    {trans(
+                                                        'order_status_page.payment.incl_vat',
+                                                        { fallback: 'incl. VAT' },
+                                                    )}
+                                                    )
+                                                </span>
+                                            )}
+                                        </span>
+                                        <span className="text-xl font-extrabold text-primary-900 md:text-2xl">
+                                            €{Number(order.amount).toFixed(2)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         {/* Actions */}
                         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-                            <Button asChild variant="outline">
-                                <Link href="/destinations">
-                                    {trans('order_status_page.actions.browse')}
-                                </Link>
-                            </Button>
+                            <Link
+                                href="/destinations"
+                                className="inline-flex h-11 items-center justify-center rounded-xl border border-primary-200 bg-white px-6 text-[13px] font-semibold text-primary-700 shadow-sm transition-colors hover:bg-primary-50 md:h-12 md:text-sm"
+                            >
+                                <Globe className="mr-2 h-4 w-4" />
+                                {trans('order_status_page.actions.browse')}
+                            </Link>
                         </div>
 
                         {/* Help Section */}
-                        <Card className="mt-8 border-primary-100 bg-white text-center shadow-sm">
-                            <CardContent className="py-6">
-                                <HelpCircle className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-                                <h3 className="font-semibold">
-                                    {trans('order_status_page.help.title')}
-                                </h3>
-                                <p className="mt-1 text-sm text-muted-foreground">
-                                    {trans(
-                                        'order_status_page.help.description',
-                                    )}
-                                </p>
-                                <div className="mt-4 flex justify-center gap-3">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        asChild
-                                        onClick={() => {
-                                            contentView(
-                                                'guide',
-                                                'how-it-works',
-                                                'How It Works Guide',
-                                            );
-                                        }}
-                                    >
-                                        <Link href="/how-it-works">
+                        <div className="mt-8 overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm">
+                            <div className="bg-gradient-to-br from-primary-50 via-white to-accent-50/30 px-4 py-4 md:px-6 md:py-5">
+                                <div className="flex flex-col items-center text-center">
+                                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-primary-400 shadow-sm ring-1 ring-primary-100 md:h-11 md:w-11">
+                                        <HelpCircle className="h-5 w-5" />
+                                    </div>
+                                    <h3 className="text-[15px] font-bold text-primary-900 md:text-base">
+                                        {trans('order_status_page.help.title')}
+                                    </h3>
+                                    <p className="mt-1 text-[11px] text-primary-500 md:text-xs">
+                                        {trans(
+                                            'order_status_page.help.description',
+                                        )}
+                                    </p>
+                                    <div className="mt-4 flex gap-2">
+                                        <Link
+                                            href="/how-it-works"
+                                            onClick={() => {
+                                                contentView(
+                                                    'guide',
+                                                    'how-it-works',
+                                                    'How It Works Guide',
+                                                );
+                                            }}
+                                            className="inline-flex items-center gap-1.5 rounded-xl border border-primary-200 bg-white px-4 py-2 text-[11px] font-semibold text-primary-700 shadow-sm transition-colors hover:bg-primary-50 md:text-xs"
+                                        >
+                                            <BookOpen className="h-3.5 w-3.5" />
                                             {trans(
                                                 'order_status_page.help.guide',
                                             )}
                                         </Link>
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        asChild
-                                        onClick={() =>
-                                            handleSupportClick('ticket')
-                                        }
-                                    >
-                                        <Link href="/help">
+                                        <Link
+                                            href="/help"
+                                            onClick={() =>
+                                                handleSupportClick('ticket')
+                                            }
+                                            className="inline-flex items-center gap-1.5 rounded-xl border border-primary-200 bg-white px-4 py-2 text-[11px] font-semibold text-primary-700 shadow-sm transition-colors hover:bg-primary-50 md:text-xs"
+                                        >
+                                            <MessageCircle className="h-3.5 w-3.5" />
                                             {trans(
                                                 'order_status_page.help.contact',
                                             )}
                                         </Link>
-                                    </Button>
+                                    </div>
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

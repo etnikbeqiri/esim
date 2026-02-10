@@ -450,7 +450,7 @@ export function HeroSection({
             </div>
 
             {/* Scroll Indicator */}
-            <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 opacity-50 md:bottom-4">
+            <div className="absolute bottom-0 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 opacity-50 md:bottom-1">
                 <span className="text-xs font-medium tracking-widest text-primary-400 uppercase">
                     {trans('common.scroll')}
                 </span>

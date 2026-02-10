@@ -56,6 +56,7 @@ interface Package {
 interface PaymentMethod {
     name: string;
     icon: string;
+    logo_url?: string;
 }
 
 interface PaymentProvider {
@@ -110,7 +111,7 @@ export default function Checkout({
         phone: prefill?.phone || '',
         billing_country: 'XK',
         accept_terms: false,
-        payment_provider: defaultProvider,
+        payment_provider: defaultProvider || paymentProviders[0]?.id || '',
         coupon_codes: [] as string[],
     });
 
@@ -147,6 +148,27 @@ export default function Checkout({
     const [appliedCoupons, setAppliedCoupons] = useState<AppliedCoupon[]>([]);
     const [totalDiscount, setTotalDiscount] = useState(0);
     const [finalPrice, setFinalPrice] = useState(Number(pkg.retail_price));
+    const [termsWiggle, setTermsWiggle] = useState(false);
+    const [dynamicPaymentMethods, setDynamicPaymentMethods] = useState<
+        PaymentMethod[] | null
+    >(null);
+
+    // Fetch available payment methods when billing country changes
+    useEffect(() => {
+        const amountCents = Math.round(Number(pkg.retail_price) * 100);
+        fetch(
+            `/api/v1/payment-methods?country=${data.billing_country}&amount=${amountCents}`,
+        )
+            .then((res) => res.json())
+            .then((result) => {
+                if (result.methods && result.methods.length > 0) {
+                    setDynamicPaymentMethods(result.methods);
+                } else {
+                    setDynamicPaymentMethods(null);
+                }
+            })
+            .catch(() => setDynamicPaymentMethods(null));
+    }, [data.billing_country]);
 
     // Get current VAT rate based on selected billing country
     const selectedCountry = billingCountries.find(
@@ -230,6 +252,13 @@ export default function Checkout({
         );
     }
 
+    function handlePayClick() {
+        if (!data.accept_terms) {
+            setTermsWiggle(true);
+            setTimeout(() => setTermsWiggle(false), 500);
+        }
+    }
+
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         trackSubmit();
@@ -261,30 +290,30 @@ export default function Checkout({
                         className="mb-3 md:mb-6"
                     />
 
-                    <div className="mb-4 text-center md:mb-8">
+                    <div className="mb-5 text-center md:mb-10">
                         <Badge
                             variant="outline"
-                            className="mb-3 inline-flex rounded-full border border-primary-100 bg-white/50 px-4 py-1.5 text-xs font-medium shadow-sm backdrop-blur-md md:mb-6 md:px-6 md:py-2 md:text-sm"
+                            className="mb-3 inline-flex rounded-full border border-primary-100 bg-white/60 px-4 py-1.5 text-xs font-medium shadow-sm backdrop-blur-md md:mb-5 md:px-6 md:py-2 md:text-sm"
                         >
                             <Sparkles className="mr-1.5 h-3.5 w-3.5 text-accent-500 md:mr-2 md:h-4 md:w-4" />
                             <span className="bg-gradient-to-r from-primary-800 to-primary-600 bg-clip-text text-transparent">
                                 {trans('checkout_page.secure_checkout')}
                             </span>
                         </Badge>
-                        <h1 className="mb-2 text-xl font-extrabold tracking-tight text-primary-900 md:mb-4 md:text-4xl lg:text-5xl">
+                        <h1 className="mb-2 text-2xl font-extrabold tracking-tight text-primary-900 md:mb-3 md:text-4xl lg:text-5xl">
                             {trans('checkout_page.title')}
                         </h1>
-                        <p className="mx-auto max-w-xl text-sm text-primary-600 md:text-lg">
+                        <p className="mx-auto max-w-xl text-[13px] leading-relaxed text-primary-500 md:text-lg">
                             {trans('checkout_page.subtitle')}
                         </p>
                     </div>
 
                     <div className="flex flex-col-reverse gap-4 md:flex-row md:items-start md:gap-8">
                         {/* Left Column - Form */}
-                        <div className="w-full md:flex-1">
+                        <div className="w-full md:min-w-0 md:flex-1">
                             <form
                                 onSubmit={handleSubmit}
-                                className="space-y-4 md:space-y-6"
+                                className="space-y-6 md:space-y-8"
                             >
                                 {/* General Error */}
                                 {/* @ts-ignore */}
@@ -302,35 +331,17 @@ export default function Checkout({
                                 )}
 
                                 {/* Your Details Section */}
-                                <div className="overflow-hidden rounded-xl border border-primary-100 bg-white shadow-sm md:rounded-2xl">
-                                    <div className="border-b border-primary-100 bg-primary-50/50 px-4 py-3 md:px-6 md:py-4">
-                                        <div className="flex items-center gap-2.5 md:gap-3">
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-primary-500 shadow-md ring-1 ring-primary-100 md:h-10 md:w-10 md:rounded-xl">
-                                                <User className="h-4 w-4 md:h-5 md:w-5" />
-                                            </div>
-                                            <div>
-                                                <h2 className="text-sm font-bold text-primary-900 md:text-base">
-                                                    {trans(
-                                                        'checkout_page.form.your_details',
-                                                    )}
-                                                </h2>
-                                                <p className="text-xs text-primary-600 md:text-sm">
-                                                    {trans(
-                                                        'checkout_page.form.where_to_send',
-                                                    )}
-                                                    {auth?.user && (
-                                                        <span className="ml-1 text-primary-400">
-                                                            {trans(
-                                                                'checkout_page.form.auto_filled',
-                                                            )}
-                                                        </span>
-                                                    )}
-                                                </p>
-                                            </div>
-                                        </div>
+                                <div className="space-y-2.5">
+                                    <div className="flex items-center gap-2 px-1">
+                                        <User className="h-4 w-4 text-primary-400" />
+                                        <h2 className="text-xs font-semibold tracking-wide text-primary-500 uppercase md:text-sm">
+                                            {trans(
+                                                'checkout_page.form.your_details',
+                                            )}
+                                        </h2>
                                     </div>
-
-                                    <div className="space-y-4 p-4 md:space-y-5 md:p-6">
+                                <div className="overflow-hidden rounded-xl border border-primary-100 bg-white shadow-sm md:rounded-2xl">
+                                    <div className="space-y-3.5 p-4 md:space-y-5 md:p-6">
                                         {/* Email */}
                                         <div className="space-y-1.5 md:space-y-2">
                                             <Label
@@ -537,79 +548,31 @@ export default function Checkout({
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Coupon Code Section */}
-                                <div className="overflow-hidden rounded-xl border border-primary-100 bg-white shadow-sm md:rounded-2xl">
-                                    <div className="border-b border-primary-100 bg-primary-50/50 px-4 py-3 md:px-6 md:py-4">
-                                        <div className="flex items-center gap-2.5 md:gap-3">
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-primary-500 shadow-md ring-1 ring-primary-100 md:h-10 md:w-10 md:rounded-xl">
-                                                <Tag className="h-4 w-4 md:h-5 md:w-5" />
-                                            </div>
-                                            <div>
-                                                <h2 className="text-sm font-bold text-primary-900 md:text-base">
-                                                    {trans(
-                                                        'checkout_page.form.coupon.title',
-                                                    )}
-                                                </h2>
-                                                <p className="text-xs text-primary-600 md:text-sm">
-                                                    {trans(
-                                                        'checkout_page.form.coupon.subtitle',
-                                                    )}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-4 md:p-6">
-                                        <CouponCodeInput
-                                            packageId={pkg.id}
-                                            email={data.email}
-                                            orderAmount={Number(
-                                                pkg.retail_price,
-                                            )}
-                                            onCouponsChanged={
-                                                handleCouponsChanged
-                                            }
-                                        />
-                                    </div>
                                 </div>
 
                                 {/* Payment Method Section */}
-                                <div className="overflow-hidden rounded-xl border border-primary-100 bg-white shadow-sm md:rounded-2xl">
-                                    <div className="border-b border-primary-100 bg-primary-50/50 px-4 py-3 md:px-6 md:py-4">
-                                        <div className="flex items-center gap-2.5 md:gap-3">
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-primary-500 shadow-md ring-1 ring-primary-100 md:h-10 md:w-10 md:rounded-xl">
-                                                <CreditCard className="h-4 w-4 md:h-5 md:w-5" />
-                                            </div>
-                                            <div>
-                                                <h2 className="text-sm font-bold text-primary-900 md:text-base">
-                                                    {trans(
-                                                        'checkout_page.form.payment_method.title',
-                                                    )}
-                                                </h2>
-                                                <p className="text-xs text-primary-600 md:text-sm">
-                                                    {trans(
-                                                        'checkout_page.form.payment_method.subtitle',
-                                                    )}
-                                                </p>
-                                            </div>
-                                        </div>
+                                <div className="space-y-2.5">
+                                    <div className="flex items-center gap-2 px-1">
+                                        <CreditCard className="h-4 w-4 text-primary-400" />
+                                        <h2 className="text-xs font-semibold tracking-wide text-primary-500 uppercase md:text-sm">
+                                            {trans(
+                                                'checkout_page.form.payment_method.title',
+                                            )}
+                                        </h2>
                                     </div>
-
-                                    <div className="p-4 md:p-6">
-                                        <PaymentProviderSelect
-                                            providers={paymentProviders}
-                                            value={data.payment_provider}
-                                            onChange={
-                                                handlePaymentProviderChange
-                                            }
-                                        />
-                                    </div>
+                                    <PaymentProviderSelect
+                                        providers={paymentProviders}
+                                        value={data.payment_provider}
+                                        onChange={
+                                            handlePaymentProviderChange
+                                        }
+                                        methodsOverride={dynamicPaymentMethods}
+                                    />
                                 </div>
 
                                 {/* Terms & Submit - Mobile only */}
                                 <div className="space-y-3 md:hidden">
-                                    <div className="flex items-start gap-2.5 rounded-lg border border-primary-100 bg-white p-3">
+                                    <div className={`flex items-start gap-2.5 rounded-lg border p-3 transition-all ${termsWiggle && !data.accept_terms ? 'animate-wiggle border-red-300 bg-red-50' : 'border-primary-100 bg-white'}`}>
                                         <Checkbox
                                             id="accept_terms_mobile"
                                             checked={data.accept_terms}
@@ -620,7 +583,7 @@ export default function Checkout({
                                                 )
                                             }
                                             required
-                                            className="mt-0.5 h-4 w-4 border-accent-400 data-[state=checked]:border-accent-500 data-[state=checked]:bg-accent-400 data-[state=checked]:text-accent-950"
+                                            className={`mt-0.5 h-4 w-4 border-accent-400 data-[state=checked]:border-accent-500 data-[state=checked]:bg-accent-400 data-[state=checked]:text-accent-950 ${!data.accept_terms ? 'animate-checkbox-glow' : ''}`}
                                         />
                                         <Label
                                             htmlFor="accept_terms_mobile"
@@ -659,9 +622,8 @@ export default function Checkout({
                                     <GoldButton
                                         type="submit"
                                         className="h-11 w-full rounded-lg text-sm font-semibold"
-                                        disabled={
-                                            processing || !data.accept_terms
-                                        }
+                                        disabled={processing}
+                                        onClick={!data.accept_terms ? (e: React.MouseEvent) => { e.preventDefault(); handlePayClick(); } : undefined}
                                     >
                                         {processing ? (
                                             <>
@@ -707,83 +669,95 @@ export default function Checkout({
 
                         {/* Right Column - Order Summary (Sticky) */}
                         <div className="w-full shrink-0 md:sticky md:top-28 md:w-[380px]">
-                            <div className="overflow-hidden rounded-xl border border-primary-100 bg-white shadow-lg md:rounded-2xl">
-                                {/* Header */}
-                                <div className="border-b border-primary-100 bg-primary-50/50 px-4 py-3 md:px-6 md:py-4">
-                                    <h2 className="text-sm font-bold text-primary-900 md:text-lg">
-                                        {trans('checkout_page.summary.title')}
-                                    </h2>
-                                </div>
-
-                                <div className="p-4 md:p-6">
-                                    {/* Package Card */}
-                                    <div className="mb-4 flex items-center gap-3 rounded-lg border border-primary-100 bg-primary-50/50 p-3 md:mb-6 md:gap-4 md:rounded-xl md:p-4">
+                            <div className="mb-2.5 flex items-center gap-2 px-1">
+                                <Sparkles className="h-4 w-4 text-primary-400" />
+                                <h2 className="text-xs font-semibold tracking-wide text-primary-500 uppercase md:text-sm">
+                                    {trans('checkout_page.summary.title')}
+                                </h2>
+                            </div>
+                            <div className="overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-lg">
+                                {/* Package Hero - compact on mobile */}
+                                <div className="bg-gradient-to-br from-primary-50 via-white to-accent-50/30 px-4 py-4 md:px-6 md:py-5">
+                                    <div className="flex items-center gap-3">
                                         {pkg.country && (
-                                            <div className="overflow-hidden rounded-md shadow-md ring-2 ring-white md:rounded-lg">
+                                            <div className="overflow-hidden rounded-lg shadow-md ring-2 ring-white">
                                                 <CountryFlag
                                                     countryCode={
                                                         pkg.country.iso_code
                                                     }
                                                     size="md"
-                                                    className="md:h-10 md:w-14"
+                                                    className="h-9 w-12 md:h-10 md:w-14"
                                                 />
                                             </div>
                                         )}
                                         <div className="min-w-0 flex-1">
-                                            <h3 className="truncate text-sm font-bold text-primary-900 md:text-base">
+                                            <h3 className="truncate text-[15px] font-bold text-primary-900 md:text-base">
                                                 {pkg.name}
                                             </h3>
                                             {pkg.country && (
-                                                <p className="text-xs text-primary-600 md:text-sm">
+                                                <p className="text-xs text-primary-500">
                                                     {pkg.country.name}
                                                 </p>
                                             )}
                                         </div>
                                     </div>
 
-                                    {/* Package Details */}
-                                    <div className="mb-4 space-y-2 md:mb-6 md:space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2 text-primary-600">
-                                                <HardDrive className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                                                <span className="text-xs md:text-sm">
+                                    {/* Inline Data & Validity pills */}
+                                    <div className="mt-3 flex gap-2 md:mt-4">
+                                        <div className="flex flex-1 items-center gap-2 rounded-lg bg-white/80 px-3 py-2 ring-1 ring-primary-100">
+                                            <HardDrive className="h-3.5 w-3.5 shrink-0 text-primary-400" />
+                                            <div className="min-w-0">
+                                                <p className="text-[10px] leading-tight text-primary-400 md:text-[11px]">
                                                     {trans(
                                                         'checkout_page.summary.data',
                                                     )}
-                                                </span>
+                                                </p>
+                                                <p className="text-xs font-bold text-primary-900 md:text-sm">
+                                                    {pkg.data_label}
+                                                </p>
                                             </div>
-                                            <span className="text-xs font-bold text-primary-900 md:text-sm">
-                                                {pkg.data_label}
-                                            </span>
                                         </div>
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2 text-primary-600">
-                                                <Timer className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                                                <span className="text-xs md:text-sm">
+                                        <div className="flex flex-1 items-center gap-2 rounded-lg bg-white/80 px-3 py-2 ring-1 ring-primary-100">
+                                            <Timer className="h-3.5 w-3.5 shrink-0 text-primary-400" />
+                                            <div className="min-w-0">
+                                                <p className="text-[10px] leading-tight text-primary-400 md:text-[11px]">
                                                     {trans(
                                                         'checkout_page.summary.validity',
                                                     )}
-                                                </span>
+                                                </p>
+                                                <p className="text-xs font-bold text-primary-900 md:text-sm">
+                                                    {pkg.validity_label}
+                                                </p>
                                             </div>
-                                            <span className="text-xs font-bold text-primary-900 md:text-sm">
-                                                {pkg.validity_label}
-                                            </span>
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* Divider */}
-                                    <div className="mb-4 h-px bg-primary-100 md:mb-6" />
+                                {/* Coupon Code */}
+                                <div className="border-t border-primary-100 px-4 pt-3 pb-3 md:px-6 md:pt-4 md:pb-4">
+                                    <CouponCodeInput
+                                        packageId={pkg.id}
+                                        email={data.email}
+                                        orderAmount={Number(
+                                            pkg.retail_price,
+                                        )}
+                                        onCouponsChanged={
+                                            handleCouponsChanged
+                                        }
+                                    />
+                                </div>
 
-                                    {/* Pricing */}
-                                    <div className="mb-4 space-y-2 md:mb-6">
-                                        {/* Subtotal (original price) */}
+                                {/* Pricing Breakdown */}
+                                <div className="px-4 pt-3 pb-4 md:px-6 md:pt-4 md:pb-6">
+                                    <div className="space-y-2.5 md:space-y-3">
+                                        {/* Subtotal */}
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs text-primary-600 md:text-sm">
+                                            <span className="text-xs text-primary-500 md:text-sm">
                                                 {trans(
                                                     'checkout_page.summary.subtotal',
                                                 )}
                                             </span>
-                                            <span className="text-sm font-medium text-primary-900 md:text-base">
+                                            <span className="text-xs font-medium text-primary-700 md:text-sm">
                                                 €
                                                 {Number(
                                                     pkg.retail_price,
@@ -795,9 +769,9 @@ export default function Checkout({
                                         {appliedCoupons.map((coupon) => (
                                             <div
                                                 key={coupon.code}
-                                                className="flex items-center justify-between text-green-600"
+                                                className="flex items-center justify-between"
                                             >
-                                                <span className="flex items-center gap-1.5 text-xs md:text-sm">
+                                                <span className="flex items-center gap-1.5 text-xs text-green-600 md:text-sm">
                                                     <Tag className="h-3 w-3 md:h-3.5 md:w-3.5" />
                                                     {trans(
                                                         'checkout_page.summary.discount',
@@ -806,24 +780,24 @@ export default function Checkout({
                                                         ({coupon.code})
                                                     </span>
                                                 </span>
-                                                <span className="text-sm font-medium md:text-base">
+                                                <span className="text-xs font-medium text-green-600 md:text-sm">
                                                     -€
                                                     {coupon.discount.toFixed(2)}
                                                 </span>
                                             </div>
                                         ))}
 
-                                        {/* VAT Breakdown (if enabled and country has VAT) */}
+                                        {/* VAT Breakdown */}
                                         {vat.enabled && currentVatRate > 0 && (
                                             <>
-                                                <div className="h-px bg-primary-100" />
+                                                <div className="h-px bg-primary-100/80" />
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-xs text-primary-600 md:text-sm">
+                                                    <span className="text-xs text-primary-500 md:text-sm">
                                                         {trans(
                                                             'checkout_page.summary.net_amount',
                                                         )}
                                                     </span>
-                                                    <span className="text-sm font-medium text-primary-900 md:text-base">
+                                                    <span className="text-xs font-medium text-primary-700 md:text-sm">
                                                         €
                                                         {currentVat.net.toFixed(
                                                             2,
@@ -831,7 +805,7 @@ export default function Checkout({
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-xs text-primary-600 md:text-sm">
+                                                    <span className="text-xs text-primary-500 md:text-sm">
                                                         {trans(
                                                             'checkout_page.summary.vat',
                                                             {
@@ -839,7 +813,7 @@ export default function Checkout({
                                                             },
                                                         )}
                                                     </span>
-                                                    <span className="text-sm font-medium text-primary-900 md:text-base">
+                                                    <span className="text-xs font-medium text-primary-700 md:text-sm">
                                                         €
                                                         {currentVat.vatAmount.toFixed(
                                                             2,
@@ -848,13 +822,12 @@ export default function Checkout({
                                                 </div>
                                             </>
                                         )}
+                                    </div>
 
-                                        {/* Divider before total */}
-                                        <div className="h-px bg-primary-100" />
-
-                                        {/* Total */}
+                                    {/* Total */}
+                                    <div className="mt-3 border-t border-primary-100 pt-3 md:mt-4 md:pt-4">
                                         <div className="flex items-baseline justify-between">
-                                            <span className="text-xs text-primary-600 md:text-sm">
+                                            <span className="text-xs font-medium text-primary-600 md:text-sm">
                                                 {trans(
                                                     'checkout_page.summary.total',
                                                 )}
@@ -869,25 +842,27 @@ export default function Checkout({
                                                         </span>
                                                     )}
                                             </span>
-                                            <div className="text-right">
+                                            <div className="flex items-baseline gap-2">
                                                 {totalDiscount > 0 && (
-                                                    <span className="mr-2 text-sm text-primary-400 line-through md:text-base">
+                                                    <span className="text-xs text-primary-400 line-through md:text-sm">
                                                         €
                                                         {Number(
                                                             pkg.retail_price,
                                                         ).toFixed(2)}
                                                     </span>
                                                 )}
-                                                <span className="text-xl font-extrabold text-primary-900 md:text-3xl">
+                                                <span className="text-xl font-extrabold text-primary-900 md:text-2xl">
                                                     €{finalPrice.toFixed(2)}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
+                                <div className="px-4 pb-4 md:px-6 md:pb-6">
                                     {/* Desktop Terms & Button */}
-                                    <div className="hidden space-y-4 md:block">
-                                        <div className="flex items-start gap-3 rounded-xl border border-primary-100 bg-primary-50/50 p-4">
+                                    <div className="hidden space-y-3 md:block">
+                                        <div className={`flex items-start gap-3 rounded-2xl border p-4 transition-all ${termsWiggle && !data.accept_terms ? 'animate-wiggle border-red-300 bg-red-50' : 'border-primary-100 bg-primary-50/30'}`}>
                                             <Checkbox
                                                 id="accept_terms_desktop"
                                                 checked={data.accept_terms}
@@ -898,18 +873,18 @@ export default function Checkout({
                                                     )
                                                 }
                                                 required
-                                                className="mt-0.5 border-accent-400 data-[state=checked]:border-accent-500 data-[state=checked]:bg-accent-400 data-[state=checked]:text-accent-950"
+                                                className={`mt-0.5 rounded border-accent-400 data-[state=checked]:border-accent-500 data-[state=checked]:bg-accent-400 data-[state=checked]:text-accent-950 ${!data.accept_terms ? 'animate-checkbox-glow' : ''}`}
                                             />
                                             <Label
                                                 htmlFor="accept_terms_desktop"
-                                                className="text-sm leading-relaxed text-primary-700"
+                                                className="text-[13px] leading-relaxed text-primary-600"
                                             >
                                                 {trans(
                                                     'checkout_page.form.terms.agree',
                                                 )}{' '}
                                                 <Link
                                                     href="/terms"
-                                                    className="font-medium text-primary-600 underline underline-offset-2 hover:text-primary-800"
+                                                    className="font-semibold text-primary-800 underline decoration-primary-300 underline-offset-2 hover:text-primary-900"
                                                 >
                                                     {trans(
                                                         'checkout_page.form.terms.terms_link',
@@ -920,7 +895,7 @@ export default function Checkout({
                                                 )}{' '}
                                                 <Link
                                                     href="/privacy"
-                                                    className="font-medium text-primary-600 underline underline-offset-2 hover:text-primary-800"
+                                                    className="font-semibold text-primary-800 underline decoration-primary-300 underline-offset-2 hover:text-primary-900"
                                                 >
                                                     {trans(
                                                         'checkout_page.form.terms.privacy_link',
@@ -929,7 +904,7 @@ export default function Checkout({
                                             </Label>
                                         </div>
                                         {errors.accept_terms && (
-                                            <p className="text-sm font-medium text-red-600">
+                                            <p className="text-xs font-medium text-red-600">
                                                 {errors.accept_terms}
                                             </p>
                                         )}
@@ -937,11 +912,9 @@ export default function Checkout({
                                         <GoldButton
                                             type="submit"
                                             form="checkout-form"
-                                            className="h-14 w-full rounded-xl text-base font-semibold"
-                                            disabled={
-                                                processing || !data.accept_terms
-                                            }
-                                            onClick={handleSubmit}
+                                            className="h-13 w-full rounded-xl text-base font-bold shadow-lg shadow-accent-500/20"
+                                            disabled={processing}
+                                            onClick={!data.accept_terms ? (e: React.MouseEvent) => { e.preventDefault(); handlePayClick(); } : handleSubmit}
                                         >
                                             {processing ? (
                                                 <>
@@ -963,7 +936,7 @@ export default function Checkout({
                                             )}
                                         </GoldButton>
 
-                                        <div className="flex items-center justify-center gap-4 text-xs text-primary-400">
+                                        <div className="flex items-center justify-center gap-4 py-1 text-[11px] text-primary-400">
                                             <div className="flex items-center gap-1.5">
                                                 <Shield className="h-3.5 w-3.5" />
                                                 <span>
@@ -972,6 +945,7 @@ export default function Checkout({
                                                     )}
                                                 </span>
                                             </div>
+                                            <span className="text-primary-200">|</span>
                                             <div className="flex items-center gap-1.5">
                                                 <Lock className="h-3.5 w-3.5" />
                                                 <span>

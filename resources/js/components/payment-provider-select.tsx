@@ -17,6 +17,7 @@ interface PaymentProviderSelectProps {
     value: string;
     onChange: (value: string) => void;
     className?: string;
+    methodsOverride?: PaymentMethod[] | null;
 }
 
 export function PaymentProviderSelect({
@@ -24,6 +25,7 @@ export function PaymentProviderSelect({
     value,
     onChange,
     className = '',
+    methodsOverride,
 }: PaymentProviderSelectProps) {
     if (providers.length === 0) {
         return null;
@@ -37,6 +39,7 @@ export function PaymentProviderSelect({
                     provider={provider}
                     isSelected={value === provider.id}
                     onSelect={() => onChange(provider.id)}
+                    methodsOverride={provider.id === 'paysera' ? methodsOverride : null}
                 />
             ))}
         </div>

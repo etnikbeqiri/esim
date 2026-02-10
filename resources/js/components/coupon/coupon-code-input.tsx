@@ -346,42 +346,42 @@ export function CouponCodeInput({
             {/* Applied Coupons List */}
             {appliedCoupons.length > 0 && (
                 <div className="mb-3 space-y-2">
-                    {appliedCoupons.map((coupon, index) => (
+                    {appliedCoupons.map((coupon) => (
                         <div
                             key={coupon.code}
-                            className="rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950"
+                            className="rounded-xl border border-green-200/80 bg-green-50/60 p-3"
                         >
-                            <div className="flex items-start justify-between">
-                                <div className="flex items-start gap-2.5">
-                                    <div className="mt-0.5 rounded-full bg-green-500 p-1">
-                                        <Check className="h-2.5 w-2.5 text-white" />
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-500/10">
+                                        <Check className="h-3.5 w-3.5 text-green-600" />
                                     </div>
                                     <div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm font-semibold text-green-800 dark:text-green-200">
+                                        <div className="flex items-baseline gap-1.5">
+                                            <span className="font-mono text-[13px] font-bold text-green-800">
                                                 {coupon.code}
                                             </span>
-                                            <span className="text-xs text-green-600 dark:text-green-400">
-                                                ({coupon.name})
+                                            <span className="text-[11px] text-green-600">
+                                                {coupon.name}
                                             </span>
                                         </div>
-                                        <div className="text-xs text-green-700 dark:text-green-300">
+                                        <p className="text-[11px] text-green-600">
                                             {coupon.type === 'percentage'
                                                 ? `${coupon.value}%`
                                                 : `€${coupon.value}`}{' '}
                                             {trans('coupon_input.off')}
-                                            {' • '}
-                                            <span className="font-medium">
+                                            {' · '}
+                                            <span className="font-semibold">
                                                 -€{coupon.discount.toFixed(2)}
                                             </span>
-                                        </div>
+                                        </p>
                                     </div>
                                 </div>
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => removeCoupon(coupon.code)}
-                                    className="h-6 w-6 p-0 text-green-700 hover:bg-green-100 hover:text-green-900 dark:text-green-300 dark:hover:bg-green-900"
+                                    className="h-7 w-7 rounded-lg p-0 text-green-600 hover:bg-green-100 hover:text-green-800"
                                 >
                                     <X className="h-3.5 w-3.5" />
                                 </Button>
@@ -391,7 +391,7 @@ export function CouponCodeInput({
 
                     {/* Total Savings */}
                     {appliedCoupons.length > 1 && (
-                        <div className="pl-1 text-sm font-medium text-green-700 dark:text-green-300">
+                        <div className="pl-1 text-xs font-semibold text-green-700">
                             {trans('coupon_input.total_savings')}: €
                             {totalDiscount.toFixed(2)}
                         </div>
@@ -401,10 +401,10 @@ export function CouponCodeInput({
 
             {/* Add Coupon Input */}
             {showInput && (
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                     <div className="flex gap-2">
                         <div className="relative flex-1">
-                            <Ticket className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Ticket className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-primary-400" />
                             <Input
                                 type="text"
                                 placeholder={
@@ -424,7 +424,7 @@ export function CouponCodeInput({
                                     isEmailValid &&
                                     validateCoupon()
                                 }
-                                className={`pl-10 font-mono ${error ? 'border-red-300 focus:border-red-400 focus:ring-red-200' : ''}`}
+                                className={`h-10 rounded-xl border-primary-200 pl-10 font-mono text-sm tracking-wider md:h-11 ${error ? 'border-red-300 focus:border-red-400 focus:ring-red-200' : ''}`}
                                 disabled={isValidating || !isEmailValid}
                             />
                         </div>
@@ -434,6 +434,7 @@ export function CouponCodeInput({
                                 !code.trim() || isValidating || !isEmailValid
                             }
                             variant="secondary"
+                            className="h-10 rounded-xl px-4 md:h-11"
                         >
                             {isValidating ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -446,7 +447,7 @@ export function CouponCodeInput({
                     </div>
 
                     {!isEmailValid && !error && (
-                        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <p className="flex items-center gap-1.5 text-[11px] text-primary-400">
                             <Info className="h-3 w-3" />
                             {trans('coupon_input.enter_email_first')}
                         </p>

@@ -13,6 +13,7 @@ use App\Models\Currency;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -87,7 +88,7 @@ class PayseraGateway implements PaymentGatewayContract
                 'test' => $this->testMode ? 1 : 0,
                 'language' => $this->mapLanguage($language),
                 'payment' => 'Cards', // Default to card payments
-                'country' => 'AL', // Albania
+                'country' => strtoupper($order->billing_country ?? 'XK'),
                 'version' => '1.9',
             ];
 
@@ -305,6 +306,114 @@ class PayseraGateway implements PaymentGatewayContract
                 amount: $amount,
             );
         }
+    }
+
+    /**
+     * Fetch available payment methods from Paysera API for a given country.
+     *
+     * @return array<array{name: string, icon: string}>
+     */
+    public function fetchAvailablePaymentMethods(string $countryCode, string $currency = 'EUR', int $amountCents = 1000): array
+    {
+        $countryCode = strtolower($countryCode);
+        $currency = strtoupper($currency);
+
+        $cacheKey = "paysera_methods:{$this->projectId}:{$currency}:{$amountCents}";
+
+        $allCountries = Cache::remember($cacheKey, 3600, function () use ($currency, $amountCents) {
+            try {
+                $url = "https://www.paysera.com/payment-methods/{$this->projectId}/currency:{$currency}/amount:{$amountCents}/language:en";
+                $response = Http::timeout(10)->get($url);
+
+                if (!$response->successful()) {
+                    Log::warning('Paysera payment methods API failed', ['status' => $response->status()]);
+                    return [];
+                }
+
+                $xml = simplexml_load_string($response->body());
+                if ($xml === false) {
+                    Log::warning('Paysera payment methods XML parse failed');
+                    return [];
+                }
+
+                $countries = [];
+                foreach ($xml->country as $country) {
+                    $code = strtolower((string) $country['code']);
+                    $types = [];
+
+                    foreach ($country->payment_group as $group) {
+                        $groupKey = (string) $group['key'];
+                        foreach ($group->payment_type as $type) {
+                            // Get English title and logo_url
+                            $title = (string) $type['key'];
+                            $logoUrl = '';
+
+                            foreach ($type->title as $t) {
+                                if ((string) $t['language'] === 'en') {
+                                    $title = (string) $t;
+                                    break;
+                                }
+                            }
+
+                            // Prefer SVG from logo_round_url attribute, fall back to PNG logo_url element
+                            $logoRoundUrl = (string) ($type['logo_round_url'] ?? '');
+                            if ($logoRoundUrl) {
+                                $logoUrl = $logoRoundUrl;
+                            } else {
+                                foreach ($type->logo_url as $l) {
+                                    if ((string) $l['language'] === 'en') {
+                                        $logoUrl = (string) $l;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            $types[] = [
+                                'key' => (string) $type['key'],
+                                'title' => $title,
+                                'group' => $groupKey,
+                                'logo_url' => $logoUrl,
+                            ];
+                        }
+                    }
+
+                    $countries[$code] = $types;
+                }
+
+                return $countries;
+            } catch (\Exception $e) {
+                Log::error('Paysera payment methods fetch failed', ['error' => $e->getMessage()]);
+                return [];
+            }
+        });
+
+        if (empty($allCountries)) {
+            return [];
+        }
+
+        $countryMethods = $allCountries[$countryCode] ?? $allCountries['other'] ?? [];
+
+        return $this->mapPayseraMethodsToIcons($countryMethods);
+    }
+
+    /**
+     * Map Paysera payment types to frontend-friendly format with logo URLs.
+     *
+     * @return array<array{name: string, icon: string, logo_url: string}>
+     */
+    private function mapPayseraMethodsToIcons(array $payseraTypes): array
+    {
+        $methods = [];
+
+        foreach ($payseraTypes as $type) {
+            $methods[] = [
+                'name' => $type['title'],
+                'icon' => $type['key'],
+                'logo_url' => $type['logo_url'] ?? '',
+            ];
+        }
+
+        return $methods;
     }
 
     private function encodePaymentData(array $data): string

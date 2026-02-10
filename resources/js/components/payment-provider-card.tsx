@@ -1,4 +1,5 @@
 import { useTrans } from '@/hooks/use-trans';
+import { Check } from 'lucide-react';
 import { PaymentMethodIcons } from './payment-method-icons';
 import { ProviderLogo } from './payment-provider-logos';
 
@@ -18,20 +19,16 @@ interface PaymentProviderCardProps {
     provider: PaymentProvider;
     isSelected: boolean;
     onSelect: () => void;
+    methodsOverride?: PaymentMethod[] | null;
 }
 
 export function PaymentProviderCard({
     provider,
     isSelected,
     onSelect,
+    methodsOverride,
 }: PaymentProviderCardProps) {
     const { trans } = useTrans();
-    const providerColor =
-        provider.id === 'paysera'
-            ? 'bg-blue-100 text-blue-800 ring-blue-400'
-            : 'bg-[#635bff] text-white ring-[#635bff]';
-    const providerColorInactive =
-        provider.id === 'paysera' ? 'text-blue-600' : 'text-[#635bff]';
 
     return (
         <div className="relative">
@@ -46,56 +43,53 @@ export function PaymentProviderCard({
             />
             <label
                 htmlFor={provider.id}
-                className={`flex cursor-pointer flex-col rounded-xl border-2 p-4 transition-all duration-200 ${
+                className={`group flex cursor-pointer flex-col overflow-hidden rounded-xl border p-3.5 transition-all duration-300 md:p-4 ${
                     isSelected
-                        ? 'border-accent-400 bg-accent-50/50 shadow-sm'
-                        : 'border-primary-100 bg-white hover:border-accent-200 hover:bg-accent-50/30'
+                        ? 'animate-glow-pulse border-transparent bg-white'
+                        : 'border-primary-100 bg-white hover:border-primary-200 hover:shadow-sm'
                 }`}
             >
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        {/* Cube-shaped logo container with rounded corners */}
-                        <div
-                            className={`relative flex h-12 w-12 items-center justify-center rounded-xl shadow-sm ${
-                                isSelected
-                                    ? providerColor
-                                    : `bg-white ${providerColorInactive}`
-                            }`}
-                        >
-                            {/* Logo fills the cube */}
-                            <ProviderLogo
-                                provider={provider.id}
-                                className="h-10 w-10"
-                            />
-                        </div>
-                        <div>
-                            <p className="font-semibold text-gray-900">
-                                {provider.name}
-                            </p>
-                            <p className="text-sm text-primary-600">
-                                {provider.description}
-                            </p>
-                        </div>
+                <div className="flex items-center gap-3">
+                    {/* Provider Logo */}
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white ring-1 ring-primary-100 md:h-11 md:w-11 md:rounded-xl">
+                        <ProviderLogo
+                            provider={provider.id}
+                            className="h-6 w-6 md:h-7 md:w-7"
+                        />
                     </div>
+
+                    {/* Name & description */}
+                    <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-primary-900 md:text-[15px]">
+                            {provider.name}
+                        </p>
+                        <p className="text-[11px] text-primary-500 md:text-xs">
+                            {provider.description}
+                        </p>
+                    </div>
+
+                    {/* Selection indicator */}
                     <div
-                        className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-all md:h-[22px] md:w-[22px] ${
                             isSelected
-                                ? 'border-accent-500 bg-accent-400'
-                                : 'border-primary-300 bg-white'
+                                ? 'bg-accent-400 shadow-sm'
+                                : 'bg-white shadow-sm ring-1 ring-primary-200'
                         }`}
                     >
                         {isSelected && (
-                            <div className="h-2 w-2 rounded-full bg-white" />
+                            <Check className="h-3 w-3 text-white md:h-3.5 md:w-3.5" strokeWidth={3} />
                         )}
                     </div>
                 </div>
-                <div className="mt-4 border-t border-primary-100 pt-4">
-                    <p className="mb-2 text-xs font-medium text-primary-500">
+
+                {/* Payment method icons */}
+                <div className="mt-3 min-w-0 border-t border-primary-100/80 pt-3">
+                    <p className="mb-1.5 text-[10px] font-medium tracking-wide text-primary-400 uppercase md:text-[11px]">
                         {trans(
                             'payment_provider_card.accepted_payment_methods',
                         )}
                     </p>
-                    <PaymentMethodIcons methods={provider.payment_methods} />
+                    <PaymentMethodIcons methods={methodsOverride ?? provider.payment_methods} />
                 </div>
             </label>
         </div>

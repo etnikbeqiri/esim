@@ -26,8 +26,8 @@ class PaymentGatewayFactory
      */
     public function default(): PaymentGatewayContract
     {
-        $default = config('services.payment.default', 'stripe');
-        $provider = PaymentProvider::tryFrom($default) ?? PaymentProvider::Stripe;
+        $default = config('services.payment.default', 'paysera');
+        $provider = PaymentProvider::tryFrom($default) ?? PaymentProvider::Paysera;
 
         return $this->make($provider);
     }

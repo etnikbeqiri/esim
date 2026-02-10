@@ -25,13 +25,13 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                 <header className="sticky top-0 z-50 w-full border-b border-primary-100 bg-white/80 backdrop-blur-lg">
                     <div className="container mx-auto flex h-20 items-center justify-between px-4">
                         {/* Logo */}
-                        <Link href="/" className="flex items-center gap-3">
+                        <Link href="/" className="flex items-center gap-2 md:gap-3">
                             <img
                                 alt={trans('common.logo')}
-                                className="h-12 w-12 object-contain"
+                                className="h-8 w-8 object-contain md:h-12 md:w-12"
                                 src="/logo.png"
                             />
-                            <span className="text-xl font-bold tracking-tight text-primary-900">
+                            <span className="text-lg font-bold tracking-tight text-primary-900 md:text-xl">
                                 {name}
                             </span>
                         </Link>

@@ -528,6 +528,85 @@
     }
 }
 
+@keyframes wiggle {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+}
+
+.animate-wiggle {
+    animation: wiggle 0.4s ease-in-out;
+}
+
+@keyframes glow-pulse {
+    0%, 100% {
+        box-shadow:
+            0 0 0 1px rgba(255, 215, 0, 0.1),
+            0 0 6px 1px rgba(255, 215, 0, 0.08),
+            0 0 16px 4px rgba(255, 215, 0, 0.06);
+        border-color: rgba(255, 215, 0, 0.18);
+    }
+    40% {
+        box-shadow:
+            0 0 0 1px rgba(255, 215, 0, 0.25),
+            0 0 10px 3px rgba(255, 215, 0, 0.18),
+            0 0 28px 8px rgba(255, 215, 0, 0.12);
+        border-color: rgba(255, 215, 0, 0.35);
+    }
+    60% {
+        box-shadow:
+            0 0 0 1px rgba(255, 215, 0, 0.22),
+            0 0 8px 2px rgba(255, 215, 0, 0.15),
+            0 0 24px 6px rgba(255, 215, 0, 0.1);
+        border-color: rgba(255, 215, 0, 0.3);
+    }
+}
+
+.animate-glow-pulse {
+    animation: glow-pulse 2.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes checkbox-glow {
+    0%, 100% {
+        box-shadow:
+            0 0 0 1px rgba(255, 215, 0, 0.12),
+            0 0 4px 1px rgba(255, 215, 0, 0.08);
+    }
+    50% {
+        box-shadow:
+            0 0 0 1px rgba(255, 215, 0, 0.3),
+            0 0 10px 3px rgba(255, 215, 0, 0.18);
+    }
+}
+
+.animate-checkbox-glow {
+    animation: checkbox-glow 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.animate-marquee {
+    animation: marquee 30s linear infinite;
+    will-change: transform;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+.marquee-mask {
+    mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+}
+
 @keyframes shimmer {
     0% {
         background-position: -200% 0;

@@ -1,14 +1,5 @@
-import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { useTrans } from '@/hooks/use-trans';
-import { CheckCircle2, Copy, QrCode } from 'lucide-react';
+import { CheckCircle2, Copy, KeyRound, QrCode, Server, Smartphone } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useState } from 'react';
 
@@ -60,22 +51,30 @@ export function EsimQrCard({
     }
 
     return (
-        <Card className="border-primary-100 bg-white shadow-sm">
-            <CardHeader className={compact ? 'pb-2' : undefined}>
-                <CardTitle className="flex items-center gap-2 text-base text-primary-900">
-                    <QrCode className="h-5 w-5 text-primary-600" />
-                    {displayTitle}
-                </CardTitle>
-                {displayDescription && (
-                    <CardDescription className="text-primary-600">
-                        {displayDescription}
-                    </CardDescription>
-                )}
-            </CardHeader>
-            <CardContent className={compact ? 'space-y-4' : 'space-y-6'}>
-                {/* QR Code */}
+        <div className="overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm">
+            {/* Header */}
+            <div className="bg-gradient-to-br from-primary-50 via-white to-accent-50/30 px-4 py-4 md:px-6 md:py-5">
+                <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-primary-500 shadow-sm ring-1 ring-primary-100 md:h-10 md:w-10">
+                        <QrCode className="h-4 w-4 md:h-5 md:w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <h3 className="text-[15px] font-bold text-primary-900 md:text-base">
+                            {displayTitle}
+                        </h3>
+                        {displayDescription && (
+                            <p className="text-[11px] text-primary-500 md:text-xs">
+                                {displayDescription}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* QR Code */}
+            <div className={`px-4 ${compact ? 'py-4' : 'py-5'} md:px-6`}>
                 <div className="flex justify-center">
-                    <div className="rounded-xl border-2 border-dashed border-primary-200 bg-white p-4">
+                    <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-primary-100">
                         {esim.qr_code_data ? (
                             <img
                                 src={esim.qr_code_data}
@@ -94,33 +93,32 @@ export function EsimQrCard({
 
                 {/* LPA String / Activation Code */}
                 {esim.lpa_string && (
-                    <div className="space-y-2">
+                    <div className="mt-4">
                         <div className="flex items-center justify-between">
-                            <label className="text-sm font-medium text-primary-900">
+                            <p className="text-[10px] font-semibold tracking-wider text-primary-400 uppercase md:text-[11px]">
                                 {trans('esim_qr.activation_code')}
-                            </label>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 text-primary-600 hover:bg-primary-50 hover:text-primary-700"
+                            </p>
+                            <button
                                 onClick={() =>
                                     copyToClipboard(esim.lpa_string!, 'lpa')
                                 }
+                                className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-primary-500 transition-colors hover:bg-primary-50 hover:text-primary-700"
                             >
                                 {copied === 'lpa' ? (
-                                    <span className="text-accent-600">
+                                    <span className="flex items-center gap-1 text-accent-600">
+                                        <CheckCircle2 className="h-3 w-3" />
                                         {trans('esim_qr.copied')}
                                     </span>
                                 ) : (
                                     <>
-                                        <Copy className="mr-1 h-3 w-3" />
+                                        <Copy className="h-3 w-3" />
                                         {trans('esim_qr.copy')}
                                     </>
                                 )}
-                            </Button>
+                            </button>
                         </div>
-                        <div className="rounded-lg bg-primary-50 p-3">
-                            <code className="font-mono text-xs break-all text-primary-800">
+                        <div className="mt-1.5 rounded-lg bg-primary-50/50 px-3 py-2.5 ring-1 ring-primary-100">
+                            <code className="font-mono text-[11px] break-all text-primary-800 md:text-xs">
                                 {esim.lpa_string}
                             </code>
                         </div>
@@ -129,103 +127,115 @@ export function EsimQrCard({
 
                 {showDetails && (
                     <>
-                        <Separator className="bg-primary-100" />
-
-                        {/* ICCID */}
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-primary-500">
-                                {trans('esim_qr.iccid')}
-                            </span>
-                            <div className="flex items-center gap-2">
-                                <code className="font-mono text-xs text-primary-800">
-                                    {esim.iccid}
-                                </code>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0 text-primary-500 hover:bg-primary-50 hover:text-primary-700"
+                        {/* ICCID & SM-DP+ as pills */}
+                        <div className="mt-4 space-y-2">
+                            {/* ICCID */}
+                            <div className="flex items-center justify-between rounded-lg bg-primary-50/50 px-3 py-2.5 ring-1 ring-primary-100">
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <Smartphone className="h-3.5 w-3.5 shrink-0 text-primary-400" />
+                                    <div className="min-w-0">
+                                        <p className="text-[10px] leading-tight text-primary-400 md:text-[11px]">
+                                            {trans('esim_qr.iccid')}
+                                        </p>
+                                        <code className="font-mono text-[11px] font-bold text-primary-900 md:text-xs">
+                                            {esim.iccid}
+                                        </code>
+                                    </div>
+                                </div>
+                                <button
                                     onClick={() =>
                                         copyToClipboard(esim.iccid, 'iccid')
                                     }
+                                    className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-primary-400 transition-colors hover:bg-white hover:text-primary-700"
                                 >
                                     {copied === 'iccid' ? (
-                                        <CheckCircle2 className="h-3 w-3 text-accent-600" />
+                                        <CheckCircle2 className="h-3.5 w-3.5 text-accent-600" />
                                     ) : (
-                                        <Copy className="h-3 w-3" />
+                                        <Copy className="h-3.5 w-3.5" />
                                     )}
-                                </Button>
+                                </button>
                             </div>
-                        </div>
 
-                        {/* SM-DP+ Address */}
-                        {esim.smdp_address && (
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-primary-500">
-                                    {trans('esim_qr.smdp_address')}
-                                </span>
-                                <div className="flex items-center gap-2">
-                                    <code className="font-mono text-xs text-primary-800">
-                                        {esim.smdp_address}
-                                    </code>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-6 w-6 p-0 text-primary-500 hover:bg-primary-50 hover:text-primary-700"
+                            {/* SM-DP+ Address */}
+                            {esim.smdp_address && (
+                                <div className="flex items-center justify-between rounded-lg bg-primary-50/50 px-3 py-2.5 ring-1 ring-primary-100">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <Server className="h-3.5 w-3.5 shrink-0 text-primary-400" />
+                                        <div className="min-w-0">
+                                            <p className="text-[10px] leading-tight text-primary-400 md:text-[11px]">
+                                                {trans('esim_qr.smdp_address')}
+                                            </p>
+                                            <code className="font-mono text-[11px] font-bold text-primary-900 md:text-xs break-all">
+                                                {esim.smdp_address}
+                                            </code>
+                                        </div>
+                                    </div>
+                                    <button
                                         onClick={() =>
                                             copyToClipboard(
                                                 esim.smdp_address!,
                                                 'smdp',
                                             )
                                         }
+                                        className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-primary-400 transition-colors hover:bg-white hover:text-primary-700"
                                     >
                                         {copied === 'smdp' ? (
-                                            <CheckCircle2 className="h-3 w-3 text-accent-600" />
+                                            <CheckCircle2 className="h-3.5 w-3.5 text-accent-600" />
                                         ) : (
-                                            <Copy className="h-3 w-3" />
+                                            <Copy className="h-3.5 w-3.5" />
                                         )}
-                                    </Button>
+                                    </button>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
 
-                        {/* PIN/PUK/APN */}
+                        {/* PIN/PUK/APN as inline pills */}
                         {(esim.pin || esim.puk || esim.apn) && (
-                            <div className="grid grid-cols-3 gap-4 text-sm">
+                            <div className="mt-3 flex gap-2">
                                 {esim.pin && (
-                                    <div>
-                                        <span className="text-xs text-primary-500">
-                                            {trans('esim_qr.pin')}
-                                        </span>
-                                        <p className="font-mono text-primary-800">
-                                            {esim.pin}
-                                        </p>
+                                    <div className="flex flex-1 items-center gap-2 rounded-lg bg-primary-50/50 px-3 py-2 ring-1 ring-primary-100">
+                                        <KeyRound className="h-3.5 w-3.5 shrink-0 text-primary-400" />
+                                        <div className="min-w-0">
+                                            <p className="text-[10px] leading-tight text-primary-400 md:text-[11px]">
+                                                {trans('esim_qr.pin')}
+                                            </p>
+                                            <p className="font-mono text-xs font-bold text-primary-900 md:text-sm">
+                                                {esim.pin}
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
                                 {esim.puk && (
-                                    <div>
-                                        <span className="text-xs text-primary-500">
-                                            {trans('esim_qr.puk')}
-                                        </span>
-                                        <p className="font-mono text-primary-800">
-                                            {esim.puk}
-                                        </p>
+                                    <div className="flex flex-1 items-center gap-2 rounded-lg bg-primary-50/50 px-3 py-2 ring-1 ring-primary-100">
+                                        <KeyRound className="h-3.5 w-3.5 shrink-0 text-primary-400" />
+                                        <div className="min-w-0">
+                                            <p className="text-[10px] leading-tight text-primary-400 md:text-[11px]">
+                                                {trans('esim_qr.puk')}
+                                            </p>
+                                            <p className="font-mono text-xs font-bold text-primary-900 md:text-sm">
+                                                {esim.puk}
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
                                 {esim.apn && (
-                                    <div>
-                                        <span className="text-xs text-primary-500">
-                                            {trans('esim_qr.apn')}
-                                        </span>
-                                        <p className="font-mono text-primary-800">
-                                            {esim.apn}
-                                        </p>
+                                    <div className="flex flex-1 items-center gap-2 rounded-lg bg-primary-50/50 px-3 py-2 ring-1 ring-primary-100">
+                                        <Server className="h-3.5 w-3.5 shrink-0 text-primary-400" />
+                                        <div className="min-w-0">
+                                            <p className="text-[10px] leading-tight text-primary-400 md:text-[11px]">
+                                                {trans('esim_qr.apn')}
+                                            </p>
+                                            <p className="font-mono text-xs font-bold text-primary-900 md:text-sm">
+                                                {esim.apn}
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
                             </div>
                         )}
                     </>
                 )}
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }

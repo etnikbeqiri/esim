@@ -99,9 +99,9 @@ enum PaymentProvider: string
      */
     public static function default(): self
     {
-        $default = config('services.payment.default', 'stripe');
+        $default = config('services.payment.default', 'paysera');
 
-        return self::tryFrom($default) ?? self::Stripe;
+        return self::tryFrom($default) ?? self::Paysera;
     }
 
     /**
@@ -110,9 +110,9 @@ enum PaymentProvider: string
     public function isActive(): bool
     {
         return match ($this) {
-            self::Stripe => !empty(config('services.stripe.key')) && !empty(config('services.stripe.secret')),
-            self::Payrexx => !empty(config('services.payrexx.instance')) && !empty(config('services.payrexx.secret')),
-            self::Paysera => !empty(config('services.paysera.project_id')) && !empty(config('services.paysera.password')),
+            self::Stripe => ! empty(config('services.stripe.key')) && ! empty(config('services.stripe.secret')),
+            self::Payrexx => ! empty(config('services.payrexx.instance')) && ! empty(config('services.payrexx.secret')),
+            self::Paysera => ! empty(config('services.paysera.project_id')) && ! empty(config('services.paysera.password')),
             self::Balance => true, // Balance is always available for B2B
         };
     }
@@ -124,7 +124,7 @@ enum PaymentProvider: string
      */
     public static function publicProviders(): array
     {
-        return [self::Stripe, self::Paysera];
+        return [self::Paysera];
     }
 
     /**
