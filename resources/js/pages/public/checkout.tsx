@@ -152,9 +152,11 @@ export default function Checkout({
     const [dynamicPaymentMethods, setDynamicPaymentMethods] = useState<
         PaymentMethod[] | null
     >(null);
+    const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(true);
 
     // Fetch available payment methods when billing country changes
     useEffect(() => {
+        setPaymentMethodsLoading(true);
         const amountCents = Math.round(Number(pkg.retail_price) * 100);
         fetch(
             `/api/v1/payment-methods?country=${data.billing_country}&amount=${amountCents}`,
@@ -167,7 +169,8 @@ export default function Checkout({
                     setDynamicPaymentMethods(null);
                 }
             })
-            .catch(() => setDynamicPaymentMethods(null));
+            .catch(() => setDynamicPaymentMethods(null))
+            .finally(() => setPaymentMethodsLoading(false));
     }, [data.billing_country]);
 
     // Get current VAT rate based on selected billing country
@@ -567,6 +570,7 @@ export default function Checkout({
                                             handlePaymentProviderChange
                                         }
                                         methodsOverride={dynamicPaymentMethods}
+                                        methodsLoading={paymentMethodsLoading}
                                     />
                                 </div>
 
@@ -789,22 +793,22 @@ export default function Checkout({
 
                                         {/* VAT Breakdown */}
                                         {vat.enabled && currentVatRate > 0 && (
-                                            <>
+                                            <div className="animate-in fade-in duration-300">
                                                 <div className="h-px bg-primary-100/80" />
-                                                <div className="flex items-center justify-between">
+                                                <div className="mt-2.5 flex items-center justify-between md:mt-3">
                                                     <span className="text-xs text-primary-500 md:text-sm">
                                                         {trans(
                                                             'checkout_page.summary.net_amount',
                                                         )}
                                                     </span>
-                                                    <span className="text-xs font-medium text-primary-700 md:text-sm">
+                                                    <span className="text-xs font-medium text-primary-700 transition-all duration-300 md:text-sm">
                                                         €
                                                         {currentVat.net.toFixed(
                                                             2,
                                                         )}
                                                     </span>
                                                 </div>
-                                                <div className="flex items-center justify-between">
+                                                <div className="mt-2.5 flex items-center justify-between md:mt-3">
                                                     <span className="text-xs text-primary-500 md:text-sm">
                                                         {trans(
                                                             'checkout_page.summary.vat',
@@ -813,14 +817,14 @@ export default function Checkout({
                                                             },
                                                         )}
                                                     </span>
-                                                    <span className="text-xs font-medium text-primary-700 md:text-sm">
+                                                    <span className="text-xs font-medium text-primary-700 transition-all duration-300 md:text-sm">
                                                         €
                                                         {currentVat.vatAmount.toFixed(
                                                             2,
                                                         )}
                                                     </span>
                                                 </div>
-                                            </>
+                                            </div>
                                         )}
                                     </div>
 

@@ -20,6 +20,7 @@ interface PaymentProviderCardProps {
     isSelected: boolean;
     onSelect: () => void;
     methodsOverride?: PaymentMethod[] | null;
+    methodsLoading?: boolean;
 }
 
 export function PaymentProviderCard({
@@ -27,6 +28,7 @@ export function PaymentProviderCard({
     isSelected,
     onSelect,
     methodsOverride,
+    methodsLoading,
 }: PaymentProviderCardProps) {
     const { trans } = useTrans();
 
@@ -89,7 +91,18 @@ export function PaymentProviderCard({
                             'payment_provider_card.accepted_payment_methods',
                         )}
                     </p>
-                    <PaymentMethodIcons methods={methodsOverride ?? provider.payment_methods} />
+                    {methodsLoading ? (
+                        <div className="flex items-center gap-1.5">
+                            {[...Array(4)].map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="h-[22px] w-[32px] animate-pulse rounded bg-primary-100"
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <PaymentMethodIcons methods={methodsOverride ?? provider.payment_methods} />
+                    )}
                 </div>
             </label>
         </div>
