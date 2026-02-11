@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\ApplePayController;
 use App\Http\Controllers\Api\V1\B2BOrderController;
 use App\Http\Controllers\Api\V1\BalanceController;
 use App\Http\Controllers\Api\V1\CheckoutController;
@@ -28,6 +29,11 @@ Route::prefix('v1')->group(function () {
             'status' => 'ok',
             'timestamp' => now()->toIso8601String(),
         ]);
+    });
+
+    Route::prefix('apple-pay')->group(function () {
+        Route::post('validate', [ApplePayController::class, 'validate']);
+        Route::post('process', [ApplePayController::class, 'process']);
     });
 
     Route::prefix('webhooks')->group(function () {

@@ -892,6 +892,11 @@ return [
         'secure_checkout' => 'Pagesë e Sigurt',
         'title' => 'Përfundoni Porosinë Tuaj',
         'subtitle' => 'Jeni vetëm disa hapa larg nga të qenit të lidhur.',
+        'apple_pay' => [
+            'pay_with' => 'Paguaj me',
+            'pay' => 'Pay',
+            'or' => 'OSE',
+        ],
         'form' => [
             'your_details' => 'Detajet Tuaja',
             'where_to_send' => 'Ku duhet ta dërgojmë eSIM-in tuaj?',

@@ -1,3 +1,4 @@
+import { ApplePayButton } from '@/components/apple-pay-button';
 import { BackButton } from '@/components/back-button';
 import { CountryFlag } from '@/components/country-flag';
 import { CouponCodeInput } from '@/components/coupon/coupon-code-input';
@@ -19,7 +20,7 @@ import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import type { PaymentMethod } from '@/lib/analytics';
 import { useAnalytics, useFormTracking } from '@/lib/analytics';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
     CheckCircle2,
@@ -94,6 +95,7 @@ interface Props {
     prefill: Prefill | null;
     billingCountries: BillingCountry[];
     vat: VatInfo;
+    applePayMerchantId: string | null;
 }
 
 export default function Checkout({
@@ -103,6 +105,7 @@ export default function Checkout({
     prefill,
     billingCountries,
     vat,
+    applePayMerchantId,
 }: Props) {
     const { trans } = useTrans();
     const { data, setData, post, processing, errors } = useForm({
@@ -149,6 +152,19 @@ export default function Checkout({
     const [totalDiscount, setTotalDiscount] = useState(0);
     const [finalPrice, setFinalPrice] = useState(Number(pkg.retail_price));
     const [termsWiggle, setTermsWiggle] = useState(false);
+    const [applePayAvailable, setApplePayAvailable] = useState(false);
+    const [applePayProcessing, setApplePayProcessing] = useState(false);
+
+    useEffect(() => {
+        if (!applePayMerchantId) return;
+
+        const ApplePaySession = (window as any).ApplePaySession;
+        if (!ApplePaySession || !ApplePaySession.canMakePayments()) return;
+
+        ApplePaySession.canMakePaymentsWithActiveCard(applePayMerchantId)
+            .then((canMake: boolean) => setApplePayAvailable(canMake))
+            .catch(() => {});
+    }, [applePayMerchantId]);
     const [dynamicPaymentMethods, setDynamicPaymentMethods] = useState<
         PaymentMethod[] | null
     >(null);
@@ -262,6 +278,96 @@ export default function Checkout({
         }
     }
 
+    function getCsrfToken(): string {
+        const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    function handleApplePayClick() {
+        startApplePaySession();
+    }
+
+    function startApplePaySession() {
+        const ApplePaySession = (window as any).ApplePaySession;
+
+        const request = {
+            countryCode: data.billing_country || 'XK',
+            currencyCode: 'EUR',
+            supportedNetworks: ['visa', 'masterCard', 'amex', 'maestro'],
+            merchantCapabilities: ['supports3DS'],
+            total: {
+                label: pkg.name,
+                amount: finalPrice.toFixed(2),
+            },
+            requiredShippingContactFields: ['email', 'name', 'phone'],
+        };
+
+        const session = new ApplePaySession(3, request);
+
+        session.onvalidatemerchant = async (event: any) => {
+            try {
+                const response = await fetch('/api/v1/apple-pay/validate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-XSRF-TOKEN': getCsrfToken(),
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ validationURL: event.validationURL }),
+                });
+                const merchantSession = await response.json();
+                session.completeMerchantValidation(merchantSession);
+            } catch {
+                session.abort();
+            }
+        };
+
+        session.onpaymentauthorized = async (event: any) => {
+            const payment = event.payment;
+            setApplePayProcessing(true);
+
+            try {
+                const response = await fetch('/api/v1/apple-pay/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-XSRF-TOKEN': getCsrfToken(),
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        package_id: pkg.id,
+                        token: payment.token,
+                        billing_country: data.billing_country,
+                        coupon_codes: data.coupon_codes,
+                        shipping_contact: payment.shippingContact,
+                        billing_contact: payment.billingContact,
+                    }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    session.completePayment(ApplePaySession.STATUS_SUCCESS);
+                    window.location.href = result.redirect_url || `/checkout/success/${result.order_uuid}`;
+                } else {
+                    session.completePayment(ApplePaySession.STATUS_FAILURE);
+                }
+            } catch {
+                session.completePayment(ApplePaySession.STATUS_FAILURE);
+            } finally {
+                setApplePayProcessing(false);
+            }
+        };
+
+        session.oncancel = () => {
+            setApplePayProcessing(false);
+        };
+
+        session.begin();
+    }
+
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         trackSubmit();
@@ -331,6 +437,26 @@ export default function Checkout({
                                             {errors.error}
                                         </AlertDescription>
                                     </Alert>
+                                )}
+
+                                {applePayAvailable && (
+                                    <>
+                                        <ApplePayButton
+                                            label={trans('checkout_page.apple_pay.pay_with')}
+                                            payLabel={trans('checkout_page.apple_pay.pay')}
+                                            onClick={handleApplePayClick}
+                                            disabled={processing}
+                                            processing={applePayProcessing}
+                                        />
+
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-px flex-1 bg-primary-200/60" />
+                                            <span className="text-xs font-medium text-primary-400 md:text-sm">
+                                                {trans('checkout_page.apple_pay.or')}
+                                            </span>
+                                            <div className="h-px flex-1 bg-primary-200/60" />
+                                        </div>
+                                    </>
                                 )}
 
                                 {/* Your Details Section */}

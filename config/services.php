@@ -80,6 +80,10 @@ return [
         'test_mode' => env('PAYSERA_TEST_MODE', false),
     ],
 
+    'apple_pay' => [
+        'merchant_id' => env('APPLE_PAY_MERCHANT_ID'),
+    ],
+
     'procard' => [
         'merchant_id' => env('PROCARD_MERCHANT_ID'),
         'secret_key' => env('PROCARD_SECRET_KEY'),

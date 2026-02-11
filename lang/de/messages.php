@@ -922,6 +922,11 @@ return [
         'secure_checkout' => 'Sichere Kasse',
         'title' => 'Bestellung abschließen',
         'subtitle' => 'Sie sind nur wenige Schritte davon entfernt, verbunden zu bleiben.',
+        'apple_pay' => [
+            'pay_with' => 'Zahlen mit',
+            'pay' => 'Pay',
+            'or' => 'ODER',
+        ],
         'form' => [
             'your_details' => 'Ihre Details',
             'where_to_send' => 'Wohin sollen wir Ihre eSIM senden?',

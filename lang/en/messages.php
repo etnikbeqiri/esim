@@ -922,6 +922,11 @@ return [
         'secure_checkout' => 'Secure Checkout',
         'title' => 'Complete Your Order',
         'subtitle' => "You're just a few steps away from staying connected.",
+        'apple_pay' => [
+            'pay_with' => 'Pay with',
+            'pay' => 'Pay',
+            'or' => 'OR',
+        ],
         'form' => [
             'your_details' => 'Your Details',
             'where_to_send' => 'Where should we send your eSIM?',
