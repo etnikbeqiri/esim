@@ -316,6 +316,12 @@ export default function Checkout({
                     credentials: 'same-origin',
                     body: JSON.stringify({ validationURL: event.validationURL }),
                 });
+
+                if (!response.ok) {
+                    session.abort();
+                    return;
+                }
+
                 const merchantSession = await response.json();
                 session.completeMerchantValidation(merchantSession);
             } catch {
@@ -345,6 +351,11 @@ export default function Checkout({
                         billing_contact: payment.billingContact,
                     }),
                 });
+
+                if (!response.ok) {
+                    session.completePayment(ApplePaySession.STATUS_FAILURE);
+                    return;
+                }
 
                 const result = await response.json();
 

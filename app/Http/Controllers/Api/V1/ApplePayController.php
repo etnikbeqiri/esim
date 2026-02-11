@@ -14,6 +14,8 @@ class ApplePayController extends Controller
             'validationURL' => 'required|url',
         ]);
 
+        sleep(30); // TODO: Remove - test delay only
+
         return response()->json([
             'error' => 'Merchant validation not yet implemented',
         ], 501);
