@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\Payment\CheckoutResult;
 use App\Enums\CustomerType;
+use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Enums\PaymentProvider;
 use App\Enums\PaymentStatus;
@@ -442,9 +443,14 @@ class CheckoutService
 
         $payment = $order->payments()->latest()->first();
 
+        // Mask admin_review as "processing" for public polling
+        $publicStatus = $order->status === OrderStatus::AdminReview
+            ? OrderStatus::Processing
+            : $order->status;
+
         return [
             'found' => true,
-            'order_status' => $order->status->value,
+            'order_status' => $publicStatus->value,
             'payment_status' => $payment?->status->value ?? 'pending',
             'has_esim' => $order->esimProfile !== null,
             'is_completed' => $order->isCompleted(),

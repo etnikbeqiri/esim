@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -29,30 +30,37 @@ class OrderController extends Controller
             $query->where('status', $request->status);
         }
 
-        $orders = $query->latest()->paginate(15)->through(fn($order) => [
-            'uuid' => $order->uuid,
-            'order_number' => $order->order_number,
-            'status' => $order->status->value,
-            'status_label' => $order->status->label(),
-            'status_color' => $order->status->color(),
-            'type' => $order->type->value,
-            'amount' => $order->amount,
-            'package' => $order->package ? [
-                'name' => $order->package->name,
-                'data_label' => $order->package->data_label,
-                'validity_label' => $order->package->validity_label,
-                'country' => $order->package->country?->name,
-                'country_iso' => $order->package->country?->iso_code,
-            ] : null,
-            'has_esim' => $order->esimProfile !== null,
-            'payment_status' => $order->payment_status?->value,
-            'retry_count' => $order->retry_count,
-            'max_retries' => $order->max_retries ?? 10,
-            'next_retry_at' => $order->next_retry_at?->format('M j, Y H:i'),
-            'failure_reason' => $order->failure_reason,
-            'created_at' => $order->created_at->format('M j, Y H:i'),
-            'completed_at' => $order->completed_at?->format('M j, Y H:i'),
-        ]);
+        $orders = $query->latest()->paginate(15)->through(function ($order) {
+            // Mask admin_review as "processing" for customers — they don't need to know about internal errors
+            $customerStatus = $order->status === OrderStatus::AdminReview
+                ? OrderStatus::Processing
+                : $order->status;
+
+            return [
+                'uuid' => $order->uuid,
+                'order_number' => $order->order_number,
+                'status' => $customerStatus->value,
+                'status_label' => $customerStatus->label(),
+                'status_color' => $customerStatus->color(),
+                'type' => $order->type->value,
+                'amount' => $order->amount,
+                'package' => $order->package ? [
+                    'name' => $order->package->name,
+                    'data_label' => $order->package->data_label,
+                    'validity_label' => $order->package->validity_label,
+                    'country' => $order->package->country?->name,
+                    'country_iso' => $order->package->country?->iso_code,
+                ] : null,
+                'has_esim' => $order->esimProfile !== null,
+                'payment_status' => $order->payment_status?->value,
+                'retry_count' => $order->retry_count,
+                'max_retries' => $order->max_retries ?? 10,
+                'next_retry_at' => $order->next_retry_at?->format('M j, Y H:i'),
+                'failure_reason' => null,
+                'created_at' => $order->created_at->format('M j, Y H:i'),
+                'completed_at' => $order->completed_at?->format('M j, Y H:i'),
+            ];
+        });
 
         return Inertia::render('client/orders/index', [
             'orders' => $orders,
@@ -78,13 +86,18 @@ class OrderController extends Controller
             ->with(['package.country', 'esimProfile', 'payments', 'provider'])
             ->firstOrFail();
 
+        // Mask admin_review as "processing" for customers
+        $customerStatus = $order->status === OrderStatus::AdminReview
+            ? OrderStatus::Processing
+            : $order->status;
+
         return Inertia::render('client/orders/show', [
             'order' => [
                 'uuid' => $order->uuid,
                 'order_number' => $order->order_number,
-                'status' => $order->status->value,
-                'status_label' => $order->status->label(),
-                'status_color' => $order->status->color(),
+                'status' => $customerStatus->value,
+                'status_label' => $customerStatus->label(),
+                'status_color' => $customerStatus->color(),
                 'type' => $order->type->value,
                 'type_label' => $order->type->label(),
                 'amount' => $order->amount,
@@ -95,7 +108,7 @@ class OrderController extends Controller
                 'retry_count' => $order->retry_count,
                 'max_retries' => $order->max_retries ?? 10,
                 'next_retry_at' => $order->next_retry_at?->format('M j, Y H:i'),
-                'failure_reason' => $order->failure_reason,
+                'failure_reason' => null,
                 'package' => $order->package ? [
                     'name' => $order->package->name,
                     'data_label' => $order->package->data_label,

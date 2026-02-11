@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Enums\OrderStatus;
 use App\Enums\PaymentProvider;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
@@ -176,12 +177,16 @@ class CheckoutController extends Controller
             $orderModel->refresh();
         }
 
+        $customerStatus = $orderModel->status === OrderStatus::AdminReview
+            ? OrderStatus::Processing
+            : $orderModel->status;
+
         return Inertia::render('client/checkout/success', [
             'order' => [
                 'uuid' => $orderModel->uuid,
                 'order_number' => $orderModel->order_number,
-                'status' => $orderModel->status->value,
-                'status_label' => $orderModel->status->label(),
+                'status' => $customerStatus->value,
+                'status_label' => $customerStatus->label(),
                 'amount' => $orderModel->amount,
                 'coupon_discount' => $orderModel->coupon_discount_amount,
                 'coupon' => $orderModel->coupon ? [

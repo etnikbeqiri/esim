@@ -81,13 +81,21 @@ class SmsPoolProvider extends BaseProvider
             ]);
 
             if (($purchaseResponse['success'] ?? 0) !== 1) {
-                $errorMessage = $purchaseResponse['message']
+                $providerMessage = $purchaseResponse['message']
                     ?? $purchaseResponse['error']
                     ?? 'Purchase failed';
 
+                $errorMessage = "SMSPool purchase failed: {$providerMessage} | Full response: " . json_encode($purchaseResponse);
+
+                Log::error('SMSPool purchase rejected', [
+                    'package_id' => $packageId,
+                    'message' => $providerMessage,
+                    'response' => $purchaseResponse,
+                ]);
+
                 return PurchaseResult::failure(
                     errorMessage: $errorMessage,
-                    isRetryable: $this->isRetryableError($errorMessage),
+                    isRetryable: $this->isRetryableError($providerMessage),
                 );
             }
 

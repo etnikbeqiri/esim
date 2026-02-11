@@ -133,7 +133,7 @@ enum PaymentProvider: string
      */
     public static function publicProviders(): array
     {
-        return [self::Procard, self::Paysera];
+        return [self::Stripe, self::Procard, self::Paysera];
     }
 
     /**

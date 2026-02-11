@@ -12,14 +12,16 @@ enum OrderStatus: string
     case Refunded = 'refunded';
     case Cancelled = 'cancelled';
     case PendingRetry = 'pending_retry';
+    case AdminReview = 'admin_review';
 
     public function canTransitionTo(self $new): bool
     {
         return match ($this) {
             self::Pending => in_array($new, [self::AwaitingPayment, self::Processing, self::Cancelled]),
             self::AwaitingPayment => in_array($new, [self::Processing, self::Cancelled, self::Failed]),
-            self::Processing => in_array($new, [self::Completed, self::Failed, self::PendingRetry]),
+            self::Processing => in_array($new, [self::Completed, self::Failed, self::PendingRetry, self::AdminReview]),
             self::PendingRetry => in_array($new, [self::Processing, self::Failed, self::Cancelled]),
+            self::AdminReview => in_array($new, [self::Processing, self::Failed, self::Cancelled]),
             self::Completed => in_array($new, [self::Refunded]),
             self::Failed => in_array($new, [self::PendingRetry]),
             default => false,
@@ -42,6 +44,7 @@ enum OrderStatus: string
             self::Refunded => 'purple',
             self::Cancelled => 'gray',
             self::PendingRetry => 'orange',
+            self::AdminReview => 'red',
         };
     }
 
@@ -50,9 +53,13 @@ enum OrderStatus: string
         return in_array($this, [self::Completed, self::Refunded, self::Cancelled]);
     }
 
+    public function isAwaitingAdminReview(): bool
+    {
+        return $this === self::AdminReview;
+    }
+
     public function canRetry(): bool
     {
-        // Processing orders can retry if provider purchase fails
-        return in_array($this, [self::Processing, self::Failed, self::PendingRetry]);
+        return in_array($this, [self::Processing, self::Failed, self::PendingRetry, self::AdminReview]);
     }
 }

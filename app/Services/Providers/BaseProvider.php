@@ -78,10 +78,7 @@ abstract class BaseProvider implements ProviderContract
     {
         return Http::baseUrl($this->baseUrl)
             ->timeout(30)
-            ->connectTimeout(10)
-            ->retry(3, 100, function ($exception, $request) {
-                return $exception instanceof \Illuminate\Http\Client\ConnectionException;
-            });
+            ->connectTimeout(10);
     }
 
     protected function makeGetRequest(string $endpoint, array $params = []): array
@@ -126,33 +123,34 @@ abstract class BaseProvider implements ProviderContract
             'body' => $body,
         ]);
 
-        $errorMessage = "Provider API error: HTTP {$status}";
-
+        $providerMessage = null;
         if ($json = $response->json()) {
-            $errorMessage = $json['message'] ?? $json['error'] ?? $errorMessage;
+            $providerMessage = $json['message'] ?? $json['error'] ?? null;
         }
 
-        throw new \RuntimeException($errorMessage);
+        // Include HTTP status + provider message + truncated response body for admin debugging
+        $errorParts = ["Provider API error: HTTP {$status}"];
+        if ($providerMessage) {
+            $errorParts[] = "Message: {$providerMessage}";
+        }
+        $truncatedBody = mb_substr($body, 0, 500);
+        if ($truncatedBody && $truncatedBody !== $providerMessage) {
+            $errorParts[] = "Response: {$truncatedBody}";
+        }
+
+        throw new \RuntimeException(implode(' | ', $errorParts));
     }
 
+    /**
+     * Only returns true for errors that are SAFE to auto-retry (temporary, no admin action needed).
+     * Only rate limits qualify — everything else needs admin review.
+     */
     protected function isRetryableError(string $message): bool
     {
         $patterns = [
-            'timeout',
             'rate limit',
             'too many requests',
-            'temporarily unavailable',
-            'service unavailable',
-            '503',
             '429',
-            '502',
-            '504',
-            'connection',
-            'try again',
-            'insufficient balance',
-            'insufficient funds',
-            'insufficient credit',
-            'top up',
         ];
 
         $messageLower = strtolower($message);

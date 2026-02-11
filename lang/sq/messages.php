@@ -1173,6 +1173,7 @@ return [
             'awaiting_payment' => 'Në Pritje të Pagesës',
             'processing' => 'Duke Procesuar',
             'pending_retry' => 'Në Pritje të Riprovimit',
+            'admin_review' => 'Rishikim nga Admini',
             'completed' => 'E Përfunduar',
             'failed' => 'Dështoi',
         ],
@@ -1480,6 +1481,7 @@ return [
         'refunded' => 'U Rimbursua',
         'cancelled' => 'U Anulua',
         'pending_retry' => 'Duke Riprovojë',
+        'admin_review' => 'Rishikim nga Admini',
     ],
     'admin' => [
         'dashboard' => [
@@ -1537,6 +1539,8 @@ return [
                 'awaiting_payment_title' => 'Në Pritje të Pagesës',
                 'awaiting_payment_desc' => 'Kjo porosi është në pritje të konfirmimit të pagesës. Nëse klienti braktis pagesën, porosia do të skadojë automatikisht. Mund ta shënoni edhe manualisht si të dështuar.',
                 'pending_retry_title' => 'Porosi në Pritje të Riprovimit',
+                'admin_review_title' => 'Porosia Kërkon Rishikim nga Admini',
+                'admin_review_desc' => 'API e ofruesit ktheu një gabim. Porosia mund të jetë procesuar nga ofruesi. Kontrolloni me ofruesin para se të riprovoni për të shmangur blerje të dyfishta.',
                 'failed_title' => 'Porosia Dështoi',
                 'failed_desc' => 'Kjo porosi ka dështuar pas :count përpjekjeve për riprovim.',
             ],

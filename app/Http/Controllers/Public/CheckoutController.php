@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Public;
 
+use App\Enums\OrderStatus;
 use App\Enums\PaymentProvider;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
@@ -230,11 +231,16 @@ class CheckoutController extends Controller
      */
     private function formatOrderForView(Order $order, bool $includeStatus = false): array
     {
+        // Mask admin_review as "processing" for public-facing pages
+        $publicStatus = $order->status === OrderStatus::AdminReview
+            ? OrderStatus::Processing
+            : $order->status;
+
         $data = [
             'uuid' => $order->uuid,
             'order_number' => $order->order_number,
-            'status' => $order->status->value,
-            'status_label' => $order->status->label(),
+            'status' => $publicStatus->value,
+            'status_label' => $publicStatus->label(),
             'amount' => $order->amount,
             'net_amount' => $order->net_amount,
             'vat_rate' => $order->vat_rate,
@@ -273,7 +279,7 @@ class CheckoutController extends Controller
         ];
 
         if ($includeStatus) {
-            $data['status_color'] = $order->status->color();
+            $data['status_color'] = $publicStatus->color();
             $data['created_at'] = $order->created_at->format('M j, Y H:i');
             $data['completed_at'] = $order->completed_at?->format('M j, Y H:i');
             $data['paid_at'] = $order->paid_at?->format('M j, Y H:i');

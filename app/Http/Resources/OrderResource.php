@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\OrderStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,12 +15,18 @@ class OrderResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // Mask admin_review as "processing" for non-admin users
+        $status = $this->status;
+        if (!$this->isAdminRequest($request) && $status === OrderStatus::AdminReview) {
+            $status = OrderStatus::Processing;
+        }
+
         $data = [
             'id' => $this->id,
             'uuid' => $this->uuid,
             'order_number' => $this->order_number,
             'type' => $this->type,
-            'status' => $this->status,
+            'status' => $status,
             'payment_status' => $this->payment_status,
             'amount' => $this->amount,
             'customer_email' => $this->customer_email,

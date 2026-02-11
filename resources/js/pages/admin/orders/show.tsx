@@ -164,6 +164,8 @@ function getStatusIcon(status: string) {
             return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
         case 'pending_retry':
             return <RefreshCw className="h-4 w-4 text-orange-500" />;
+        case 'admin_review':
+            return <AlertCircle className="h-4 w-4 text-red-500" />;
         case 'failed':
         case 'cancelled':
             return <XCircle className="h-4 w-4 text-red-500" />;
@@ -247,17 +249,19 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
     const isActive = [
         'processing',
         'pending_retry',
+        'admin_review',
         'pending',
         'awaiting_payment',
     ].includes(order.status);
     const isPendingRetry = order.status === 'pending_retry';
+    const isAdminReview = order.status === 'admin_review';
     const isFailed = order.status === 'failed';
     const isProcessing = order.status === 'processing';
     const isAwaitingPayment = order.status === 'awaiting_payment';
-    const canRetry = ['failed', 'pending_retry', 'processing'].includes(
+    const canRetry = ['failed', 'pending_retry', 'processing', 'admin_review'].includes(
         order.status,
     );
-    const canFail = ['awaiting_payment', 'pending_retry'].includes(
+    const canFail = ['awaiting_payment', 'pending_retry', 'admin_review'].includes(
         order.status,
     );
 
@@ -372,7 +376,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                 </div>
 
                 <div className="mx-auto w-full max-w-5xl space-y-6 px-4">
-                    {(isAwaitingPayment || isPendingRetry || isFailed) && (
+                    {(isAwaitingPayment || isPendingRetry || isAdminReview || isFailed) && (
                         <div
                             className={`rounded-lg border p-4 ${
                                 isAwaitingPayment
@@ -388,6 +392,9 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                 )}
                                 {isPendingRetry && (
                                     <RefreshCw className="h-5 w-5 shrink-0 text-orange-600" />
+                                )}
+                                {isAdminReview && (
+                                    <AlertCircle className="h-5 w-5 shrink-0 text-red-600" />
                                 )}
                                 {isFailed && (
                                     <XCircle className="h-5 w-5 shrink-0 text-red-600" />
@@ -405,8 +412,14 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                         {isAwaitingPayment &&
                                             'Awaiting Payment'}
                                         {isPendingRetry && 'Pending Retry'}
+                                        {isAdminReview && 'Requires Admin Review'}
                                         {isFailed && 'Order Failed'}
                                     </p>
+                                    {isAdminReview && (
+                                        <p className="mt-1 text-sm text-red-700 dark:text-red-400">
+                                            The provider API returned an error. The order may have already been processed. Check with the provider before retrying to avoid duplicate purchases.
+                                        </p>
+                                    )}
                                     {order.failure_reason && (
                                         <p className="mt-1 text-sm">
                                             <span className="text-muted-foreground">

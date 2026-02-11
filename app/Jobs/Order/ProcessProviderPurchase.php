@@ -3,6 +3,7 @@
 namespace App\Jobs\Order;
 
 use App\Events\EsimProfile\EsimProfileCreated;
+use App\Events\Order\OrderAdminReviewRequired;
 use App\Events\Order\OrderCompleted;
 use App\Events\Order\OrderFailed;
 use App\Events\Order\OrderProviderPurchased;
@@ -27,20 +28,38 @@ class ProcessProviderPurchase implements ShouldQueue
     private const MAX_RETRIES = 10;
     private const RETRY_DELAY_MINUTES = 5;
 
+    /**
+     * Only errors that are SAFE to auto-retry (temporary, will resolve on their own).
+     * Rate limits = request was rejected, will work after cooldown.
+     */
     private const RETRYABLE_PATTERNS = [
-        'timeout',
         'rate limit',
         'too many requests',
+        '429',
+    ];
+
+    /**
+     * Errors that require admin intervention — do NOT auto-retry.
+     * Server errors: provider may have processed the order (duplicate risk).
+     * Balance errors: admin needs to top up the account manually.
+     */
+    private const ADMIN_REVIEW_PATTERNS = [
+        'timeout',
         'temporarily unavailable',
         'service unavailable',
+        '500',
         '503',
-        '429',
         '502',
         '504',
         'connection',
         'try again',
+        'internal server error',
+        'bad gateway',
+        'gateway timeout',
         'insufficient balance',
         'insufficient funds',
+        'insufficient credit',
+        'top up',
     ];
 
     public function __construct(
@@ -113,15 +132,23 @@ class ProcessProviderPurchase implements ShouldQueue
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            $this->handleFailure($order, $e->getMessage(), $this->isRetryableError($e->getMessage()));
+            $this->handleFailure($order, $e->getMessage());
         }
     }
 
-    private function handleFailure(Order $order, string $message, bool $isRetryable = false): void
+    private function handleFailure(Order $order, string $message, ?bool $providerIsRetryable = null): void
     {
-        $canRetry = $isRetryable && $order->retry_count < self::MAX_RETRIES;
+        // If the provider explicitly flagged the error, respect it.
+        // Otherwise fall back to pattern matching.
+        if ($providerIsRetryable === true) {
+            $errorType = 'retryable';
+        } elseif ($providerIsRetryable === false) {
+            $errorType = 'admin_review';
+        } else {
+            $errorType = $this->classifyError($message);
+        }
 
-        if ($canRetry) {
+        if ($errorType === 'retryable' && $order->retry_count < self::MAX_RETRIES) {
             OrderRetryScheduled::fire(
                 order_id: $this->orderId,
                 failure_reason: $message,
@@ -131,6 +158,20 @@ class ProcessProviderPurchase implements ShouldQueue
             Log::info('ProcessProviderPurchase: Order scheduled for retry', [
                 'order_id' => $this->orderId,
                 'retry_count' => $order->retry_count + 1,
+                'reason' => $message,
+            ]);
+        } elseif ($errorType === 'admin_review') {
+            // API/server error — provider may have processed the order.
+            // Do NOT retry to avoid duplicate purchases. Flag for admin review.
+            OrderAdminReviewRequired::fire(
+                order_id: $this->orderId,
+                failure_reason: $message,
+                failure_code: 'provider_api_error',
+            );
+
+            Log::warning('ProcessProviderPurchase: Order flagged for admin review — possible duplicate risk', [
+                'order_id' => $this->orderId,
+                'retry_count' => $order->retry_count,
                 'reason' => $message,
             ]);
         } else {
@@ -147,17 +188,33 @@ class ProcessProviderPurchase implements ShouldQueue
         }
     }
 
-    private function isRetryableError(string $message): bool
+    /**
+     * Classify an error into: 'retryable', 'admin_review', or 'failed'.
+     *
+     * - retryable: Safe to retry (request was NOT processed by provider)
+     * - admin_review: Provider may have processed the order, admin must decide
+     * - failed: Permanent failure, no retry
+     */
+    private function classifyError(string $message): string
     {
         $messageLower = strtolower($message);
 
+        // Check safe-to-retry patterns first (balance issues, rate limits)
         foreach (self::RETRYABLE_PATTERNS as $pattern) {
             if (str_contains($messageLower, $pattern)) {
-                return true;
+                return 'retryable';
             }
         }
 
-        return false;
+        // Check API/server error patterns — NOT safe to retry
+        foreach (self::ADMIN_REVIEW_PATTERNS as $pattern) {
+            if (str_contains($messageLower, $pattern)) {
+                return 'admin_review';
+            }
+        }
+
+        // Unknown errors also go to admin review to be safe
+        return 'admin_review';
     }
 
     public function failed(\Throwable $exception): void

@@ -31,12 +31,14 @@ class DashboardController extends Controller
                 ->latest()
                 ->take(5)
                 ->get()
-                ->map(fn($order) => [
+                ->map(function ($order) {
+                    $s = $order->status === OrderStatus::AdminReview ? OrderStatus::Processing : $order->status;
+                    return [
                     'uuid' => $order->uuid,
                     'order_number' => $order->order_number,
-                    'status' => $order->status->value,
-                    'status_label' => $order->status->label(),
-                    'status_color' => $order->status->color(),
+                    'status' => $s->value,
+                    'status_label' => $s->label(),
+                    'status_color' => $s->color(),
                     'amount' => $order->amount,
                     'package_name' => $order->package?->name,
                     'country_name' => $order->package?->country?->name,
@@ -46,7 +48,8 @@ class DashboardController extends Controller
                     'esim_status' => $order->esimProfile?->status?->value,
                     'created_at' => $order->created_at->diffForHumans(),
                     'created_at_date' => $order->created_at->format('M j, Y'),
-                ])
+                    ];
+                })
             : [];
 
         // Get featured packages

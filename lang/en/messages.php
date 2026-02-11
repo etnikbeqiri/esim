@@ -1173,6 +1173,7 @@ return [
             'awaiting_payment' => 'Awaiting Payment',
             'processing' => 'Processing',
             'pending_retry' => 'Pending Retry',
+            'admin_review' => 'Admin Review',
             'completed' => 'Completed',
             'failed' => 'Failed',
         ],
@@ -1418,6 +1419,7 @@ return [
         'refunded' => 'Refunded',
         'cancelled' => 'Cancelled',
         'pending_retry' => 'Pending Retry',
+        'admin_review' => 'Admin Review',
     ],
     'admin' => [
         'dashboard' => [
@@ -1475,6 +1477,8 @@ return [
                 'awaiting_payment_title' => 'Awaiting Payment',
                 'awaiting_payment_desc' => 'This order is waiting for payment confirmation. If the customer abandons the checkout, the order will automatically expire. You can also manually mark it as failed.',
                 'pending_retry_title' => 'Order Pending Retry',
+                'admin_review_title' => 'Order Requires Admin Review',
+                'admin_review_desc' => 'The provider API returned an error. The order may have been processed on the provider side. Check with the provider before retrying to avoid duplicate purchases.',
                 'failed_title' => 'Order Failed',
                 'failed_desc' => 'This order has failed after :count retry attempts.',
             ],

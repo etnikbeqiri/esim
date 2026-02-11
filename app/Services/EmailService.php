@@ -389,6 +389,27 @@ class EmailService
     }
 
     /**
+     * Notify admin that an order requires manual review due to a provider API error.
+     * The provider may have already processed the order, so retrying is not safe.
+     */
+    public function notifyAdminOrderRequiresReview(Order $order, string $reason = ''): ?EmailQueue
+    {
+        return $this->queueUnlessReplaying(
+            EmailTemplate::AdminOrderRequiresReview,
+            $this->getAdminEmail(),
+            'Admin',
+            null,
+            $order->id,
+            [
+                'order_number' => $order->order_number,
+                'customer_email' => $order->customer_email ?? $order->customer?->user?->email,
+                'package_name' => $order->package?->name ?? 'Unknown',
+                'reason' => $reason,
+            ]
+        );
+    }
+
+    /**
      * Notify admin of payment failure.
      */
     public function notifyAdminPaymentFailed(Order $order, string $errorCode = '', string $errorMessage = ''): ?EmailQueue

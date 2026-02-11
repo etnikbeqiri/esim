@@ -29,6 +29,7 @@ enum EmailTemplate: string
     case AdminLowStock = 'admin_low_stock';
     case AdminNewB2BCustomer = 'admin_new_b2b_customer';
     case AdminBalanceTopUp = 'admin_balance_top_up';
+    case AdminOrderRequiresReview = 'admin_order_requires_review';
     case AdminTicketCreated = 'admin_ticket_created';
 
     public function label(): string
@@ -51,6 +52,7 @@ enum EmailTemplate: string
             self::AdminLowStock => 'Admin: Low Stock Alert',
             self::AdminNewB2BCustomer => 'Admin: New B2B Customer',
             self::AdminBalanceTopUp => 'Admin: Balance Top Up',
+            self::AdminOrderRequiresReview => 'Admin: Order Requires Review',
             self::TicketCreated => 'Ticket Created',
             self::TicketReply => 'Ticket Reply',
             self::AdminTicketReply => 'Admin: Customer Reply',
@@ -80,6 +82,7 @@ enum EmailTemplate: string
             self::AdminLowStock => "[{$appName}] Low Stock Warning",
             self::AdminNewB2BCustomer => "[{$appName}] New B2B Customer Registration",
             self::AdminBalanceTopUp => "[{$appName}] B2B Balance Top Up",
+            self::AdminOrderRequiresReview => "[{$appName}] ORDER REQUIRES REVIEW — Provider API Error",
             self::TicketCreated => "Your Support Ticket Has Been Created",
             self::TicketReply => "New Reply to Your Support Ticket",
             self::AdminTicketReply => "[{$appName}] Customer Reply on Ticket",
@@ -100,6 +103,7 @@ enum EmailTemplate: string
             self::OrderFailed => 5,
             self::AdminPaymentFailed => 5,
             self::AdminOrderFailed => 5,
+            self::AdminOrderRequiresReview => 3,
 
             // Medium priority - confirmations
             self::OrderConfirmation => 6,
@@ -130,6 +134,7 @@ enum EmailTemplate: string
             self::AdminLowStock,
             self::AdminNewB2BCustomer,
             self::AdminBalanceTopUp,
+            self::AdminOrderRequiresReview,
             self::AdminTicketCreated,
             self::AdminTicketReply => true,
             default => false,
@@ -167,6 +172,7 @@ enum EmailTemplate: string
             self::AdminPaymentFailed => 'emails.admin_payment_failed',
             self::AdminLowStock => 'emails.admin_low_stock',
             self::AdminNewB2BCustomer => 'emails.admin_new_b2b_customer',
+            self::AdminOrderRequiresReview => 'emails.admin_order_requires_review',
             self::AdminBalanceTopUp => 'emails.admin_balance_topup',
             self::AdminTicketCreated => 'emails.admin_ticket_created',
             self::AdminTicketReply => 'emails.admin_ticket_reply',

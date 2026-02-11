@@ -236,18 +236,15 @@ class OrderController extends Controller
 
     public function retry(Order $order): RedirectResponse
     {
-        // Only allow retry for orders in retryable states
-        if (!in_array($order->status, [OrderStatus::Failed, OrderStatus::PendingRetry, OrderStatus::Processing])) {
+        if (!in_array($order->status, [OrderStatus::Failed, OrderStatus::PendingRetry, OrderStatus::Processing, OrderStatus::AdminReview])) {
             return back()->with('error', 'This order cannot be retried.');
         }
 
-        // Reset to processing state
         $order->update([
             'status' => OrderStatus::Processing,
             'next_retry_at' => null,
         ]);
 
-        // Dispatch the job immediately (no delay)
         ProcessProviderPurchase::dispatch($order->id);
 
         return back()->with('success', 'Order retry has been triggered.');
@@ -255,9 +252,8 @@ class OrderController extends Controller
 
     public function fail(Request $request, Order $order): RedirectResponse
     {
-        // Only allow failing orders in awaiting_payment or pending_retry states
-        if (!in_array($order->status, [OrderStatus::AwaitingPayment, OrderStatus::PendingRetry])) {
-            return back()->with('error', 'Only orders in "Awaiting Payment" or "Pending Retry" status can be manually failed.');
+        if (!in_array($order->status, [OrderStatus::AwaitingPayment, OrderStatus::PendingRetry, OrderStatus::AdminReview])) {
+            return back()->with('error', 'Only orders in "Awaiting Payment", "Pending Retry", or "Admin Review" status can be manually failed.');
         }
 
         $reason = $request->input('reason', 'Manually failed by admin');
