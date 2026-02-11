@@ -26,13 +26,13 @@ class PackageController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->whereRaw('LOWER(packages.name) LIKE LOWER(?)', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(packages.description) LIKE LOWER(?)', ["%{$search}%"])
-                    ->orWhereRaw('packages.data_mb::text LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('packages.validity_days::text LIKE ?', ["%{$search}%"])
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('data_mb', 'like', "%{$search}%")
+                    ->orWhere('validity_days', 'like', "%{$search}%")
                     ->orWhereHas('country', fn ($cq) => $cq
-                        ->whereRaw('LOWER(countries.name) LIKE LOWER(?)', ["%{$search}%"])
-                        ->orWhereRaw('LOWER(countries.region) LIKE LOWER(?)', ["%{$search}%"])
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('region', 'like', "%{$search}%")
                     );
             });
         }

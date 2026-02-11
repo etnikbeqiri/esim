@@ -12,8 +12,6 @@ RUN apk add --no-cache \
     mariadb-client \
     mariadb-connector-c \
     mariadb-connector-c-dev \
-    postgresql-client \
-    postgresql-dev \
     freetype \
     freetype-dev \
     libjpeg-turbo \
@@ -34,7 +32,7 @@ RUN docker-php-ext-configure gd \
     --with-jpeg \
     --with-webp
 
-RUN docker-php-ext-install -j$(nproc) pdo_mysql pdo_pgsql pgsql
+RUN docker-php-ext-install -j$(nproc) pdo_mysql
 RUN docker-php-ext-install -j$(nproc) gd
 RUN docker-php-ext-install -j$(nproc) zip
 
@@ -46,8 +44,7 @@ RUN apk del --no-cache \
     freetype-dev \
     libjpeg-turbo-dev \
     libpng-dev \
-    libwebp-dev \
-    postgresql-dev
+    libwebp-dev
 
 # Copy config files
 COPY docker/php/production.ini /usr/local/etc/php/conf.d/production.ini
@@ -91,10 +88,11 @@ RUN npm ci
 # ============================================
 COPY --chown=www-data:www-data . .
 
+# Copy .env before running composer scripts that need it
+COPY --chown=www-data:www-data .env .env
+
 # Run composer scripts that need the full codebase
 RUN composer dump-autoload --optimize
-
-COPY --chown=www-data:www-data .env .env
 
 RUN npm run build:ssr
 
