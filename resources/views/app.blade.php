@@ -14,6 +14,7 @@
         <meta name="verify-paysera" content="38d93c2b5a851fce36a1f6feb461c5c0">
         <meta name="yandex-verification" content="db3364ee0471a212" />
         <meta name="msvalidate.01" content="E53E5C3BFF03427591C1699203F32568" />
+        <meta name="cryptomus" content="7c0ee239" />
 
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
