@@ -889,6 +889,32 @@ return [
             ],
         ],
     ],
+    'payment_providers' => [
+        'stripe' => [
+            'label' => 'Stripe',
+            'description' => 'Sicher mit Karte bezahlen',
+        ],
+        'payrexx' => [
+            'label' => 'Payrexx',
+            'description' => 'Sicher mit Karte oder anderen Methoden bezahlen',
+        ],
+        'paysera' => [
+            'label' => 'Paysera',
+            'description' => 'Sicher mit Karte oder anderen Methoden bezahlen',
+        ],
+        'procard' => [
+            'label' => 'Kredit- / Debitkarte',
+            'description' => 'Sicher mit Karte bezahlen',
+        ],
+        'cryptomus' => [
+            'label' => 'Krypto / Kryptowährungen',
+            'description' => 'Mit Bitcoin, Ethereum, USDT & 100+ Kryptowährungen bezahlen',
+        ],
+        'balance' => [
+            'label' => 'Guthaben',
+            'description' => 'Vom Kontoguthaben bezahlen',
+        ],
+    ],
     'payment_provider_card' => [
         'accepted_payment_methods' => 'Akzeptierte Zahlungsmethoden:',
     ],

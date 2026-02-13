@@ -90,4 +90,9 @@ return [
         'api_url' => env('PROCARD_API_URL', 'https://pay.procard-ltd.com/api'),
     ],
 
+    'cryptomus' => [
+        'payment_key' => env('CRYPTOMUS_PAYMENT_KEY'),
+        'merchant_id' => env('CRYPTOMUS_MERCHANT_ID'),
+    ],
+
 ];

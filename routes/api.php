@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\CheckoutController;
 use App\Http\Controllers\Api\V1\CountryController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\PackageController;
+use App\Http\Controllers\Api\Webhooks\CryptomusWebhookController;
 use App\Http\Controllers\Api\Webhooks\PayrexxWebhookController;
 use App\Http\Controllers\Api\Webhooks\PayseraWebhookController;
 use App\Http\Controllers\Api\Webhooks\ProcardWebhookController;
@@ -41,6 +42,7 @@ Route::prefix('v1')->group(function () {
         Route::post('payrexx', [PayrexxWebhookController::class, 'handle'])->name('webhooks.payrexx');
         Route::post('paysera', [PayseraWebhookController::class, 'handle'])->name('webhooks.paysera');
         Route::post('procard', [ProcardWebhookController::class, 'handle'])->name('webhooks.procard');
+        Route::post('cryptomus', [CryptomusWebhookController::class, 'handle'])->name('webhooks.cryptomus');
     });
 
     Route::middleware('auth:sanctum')->group(function () {

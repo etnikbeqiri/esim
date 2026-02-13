@@ -3,6 +3,7 @@ import { PaymentProviderCard } from './payment-provider-card';
 interface PaymentMethod {
     name: string;
     icon: string;
+    logo_url?: string;
 }
 
 interface PaymentProvider {

@@ -6,6 +6,7 @@ import { ProviderLogo } from './payment-provider-logos';
 interface PaymentMethod {
     name: string;
     icon: string;
+    logo_url?: string;
 }
 
 interface PaymentProvider {

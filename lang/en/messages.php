@@ -889,6 +889,32 @@ return [
             ],
         ],
     ],
+    'payment_providers' => [
+        'stripe' => [
+            'label' => 'Stripe',
+            'description' => 'Pay securely with card',
+        ],
+        'payrexx' => [
+            'label' => 'Payrexx',
+            'description' => 'Pay securely with card or other methods',
+        ],
+        'paysera' => [
+            'label' => 'Paysera',
+            'description' => 'Pay securely with card or other methods',
+        ],
+        'procard' => [
+            'label' => 'Credit / Debit Card',
+            'description' => 'Pay securely with card',
+        ],
+        'cryptomus' => [
+            'label' => 'Crypto / Cryptocurrencies',
+            'description' => 'Pay with Bitcoin, Ethereum, USDT & 100+ cryptocurrencies',
+        ],
+        'balance' => [
+            'label' => 'Balance',
+            'description' => 'Pay from your account balance',
+        ],
+    ],
     'payment_provider_card' => [
         'accepted_payment_methods' => 'Accepted payment methods:',
     ],

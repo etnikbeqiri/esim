@@ -8,28 +8,17 @@ enum PaymentProvider: string
     case Payrexx = 'payrexx';
     case Paysera = 'paysera';
     case Procard = 'procard';
+    case Cryptomus = 'cryptomus';
     case Balance = 'balance';
 
     public function label(): string
     {
-        return match ($this) {
-            self::Stripe => 'Stripe',
-            self::Payrexx => 'Payrexx',
-            self::Paysera => 'Paysera',
-            self::Procard => 'Credit / Debit Card',
-            self::Balance => 'Balance',
-        };
+        return __('messages.payment_providers.' . $this->value . '.label');
     }
 
     public function description(): string
     {
-        return match ($this) {
-            self::Stripe => 'Pay securely with card',
-            self::Payrexx => 'Pay securely with card or other methods',
-            self::Paysera => 'Pay securely with card or other methods',
-            self::Procard => 'Pay securely with card',
-            self::Balance => 'Pay from your account balance',
-        };
+        return __('messages.payment_providers.' . $this->value . '.description');
     }
 
     /**
@@ -67,6 +56,20 @@ enum PaymentProvider: string
                 'visa' => ['name' => 'Visa', 'icon' => 'visa'],
                 'mastercard' => ['name' => 'Mastercard', 'icon' => 'mastercard'],
             ],
+            self::Cryptomus => [
+                'btc' => ['name' => 'Bitcoin', 'icon' => 'btc', 'logo_url' => 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons/svg/color/btc.svg'],
+                'eth' => ['name' => 'Ethereum', 'icon' => 'eth', 'logo_url' => 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons/svg/color/eth.svg'],
+                'usdt' => ['name' => 'USDT', 'icon' => 'usdt', 'logo_url' => 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons/svg/color/usdt.svg'],
+                'bnb' => ['name' => 'BNB', 'icon' => 'bnb', 'logo_url' => 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons/svg/color/bnb.svg'],
+                'xrp' => ['name' => 'XRP', 'icon' => 'xrp', 'logo_url' => 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons/svg/color/xrp.svg'],
+                'sol' => ['name' => 'Solana', 'icon' => 'sol', 'logo_url' => 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons/svg/color/sol.svg'],
+                'ada' => ['name' => 'Cardano', 'icon' => 'ada', 'logo_url' => 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons/svg/color/ada.svg'],
+                'doge' => ['name' => 'Dogecoin', 'icon' => 'doge', 'logo_url' => 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons/svg/color/doge.svg'],
+                'trx' => ['name' => 'TRON', 'icon' => 'trx', 'logo_url' => 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons/svg/color/trx.svg'],
+                'dot' => ['name' => 'Polkadot', 'icon' => 'dot', 'logo_url' => 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons/svg/color/dot.svg'],
+                'ltc' => ['name' => 'Litecoin', 'icon' => 'ltc', 'logo_url' => 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons/svg/color/ltc.svg'],
+                'usdc' => ['name' => 'USDC', 'icon' => 'usdc', 'logo_url' => 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons/svg/color/usdc.svg'],
+            ],
             self::Balance => [
                 'balance' => ['name' => 'Account Balance', 'icon' => 'wallet'],
             ],
@@ -93,6 +96,7 @@ enum PaymentProvider: string
             self::Payrexx => true,
             self::Paysera => true,
             self::Procard => true,
+            self::Cryptomus => true,
             self::Balance => false,
         };
     }
@@ -122,6 +126,7 @@ enum PaymentProvider: string
             self::Payrexx => ! empty(config('services.payrexx.instance')) && ! empty(config('services.payrexx.secret')),
             self::Paysera => ! empty(config('services.paysera.project_id')) && ! empty(config('services.paysera.password')),
             self::Procard => ! empty(config('services.procard.merchant_id')) && ! empty(config('services.procard.secret_key')),
+            self::Cryptomus => ! empty(config('services.cryptomus.payment_key')) && ! empty(config('services.cryptomus.merchant_id')),
             self::Balance => true, // Balance is always available for B2B
         };
     }
@@ -133,7 +138,7 @@ enum PaymentProvider: string
      */
     public static function publicProviders(): array
     {
-        return [self::Stripe, self::Procard, self::Paysera];
+        return [self::Stripe, self::Procard, self::Paysera, self::Cryptomus];
     }
 
     /**

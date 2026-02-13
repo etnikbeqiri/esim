@@ -1380,6 +1380,32 @@ return [
         'puk' => 'PUK',
         'apn' => 'APN',
     ],
+    'payment_providers' => [
+        'stripe' => [
+            'label' => 'Stripe',
+            'description' => 'Paguani në mënyrë të sigurt me kartë',
+        ],
+        'payrexx' => [
+            'label' => 'Payrexx',
+            'description' => 'Paguani në mënyrë të sigurt me kartë ose metoda të tjera',
+        ],
+        'paysera' => [
+            'label' => 'Paysera',
+            'description' => 'Paguani në mënyrë të sigurt me kartë ose metoda të tjera',
+        ],
+        'procard' => [
+            'label' => 'Kartë Krediti / Debiti',
+            'description' => 'Paguani në mënyrë të sigurt me kartë',
+        ],
+        'cryptomus' => [
+            'label' => 'Kripto / Kriptovaluta',
+            'description' => 'Paguani me Bitcoin, Ethereum, USDT & 100+ kriptovaluta',
+        ],
+        'balance' => [
+            'label' => 'Bilanci',
+            'description' => 'Paguani nga bilanci i llogarisë suaj',
+        ],
+    ],
     'payment_provider_card' => [
         'accepted_payment_methods' => 'Metodat e pranuara të pagesës:',
     ],

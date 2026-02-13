@@ -76,6 +76,7 @@ interface Currency {
 interface PaymentMethod {
     name: string;
     icon: string;
+    logo_url?: string;
 }
 
 interface PaymentProvider {
