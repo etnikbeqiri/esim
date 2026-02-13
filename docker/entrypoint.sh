@@ -3,10 +3,10 @@ set -e
 
 echo "Running Laravel optimizations..."
 
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-php artisan event:cache
+php artisan config:cache || true
+php artisan route:cache || echo "Route cache skipped"
+php artisan view:cache || true
+php artisan event:cache || true
 
 echo "Running database migrations..."
 php artisan migrate --force --no-interaction

@@ -57,7 +57,7 @@ export function PaymentProviderCard({
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white ring-1 ring-primary-100 md:h-11 md:w-11 md:rounded-xl">
                         <ProviderLogo
                             provider={provider.id}
-                            className="h-7 w-7 md:h-8 md:w-8"
+                            className="h-[22px] w-[22px] md:h-6 md:w-6"
                         />
                     </div>
 
