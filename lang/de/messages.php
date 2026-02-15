@@ -1445,6 +1445,7 @@ return [
         'pending' => 'Ausstehend',
         'awaiting_payment' => 'Warten auf Zahlung',
         'processing' => 'Verarbeitung',
+        'provider_purchased' => 'Beim Anbieter gekauft',
         'completed' => 'Abgeschlossen',
         'failed' => 'Fehlgeschlagen',
         'refunded' => 'Erstattet',
@@ -1506,7 +1507,7 @@ return [
             ],
             'status_alert' => [
                 'awaiting_payment_title' => 'Wartet auf Zahlung',
-                'awaiting_payment_desc' => 'Diese Bestellung wartet auf Zahlungsbestätigung. Wenn der Kunde den Checkout abbricht, verfällt die Bestellung automatisch. Sie können sie auch manuell als fehlgeschlagen markieren.',
+                'awaiting_payment_desc' => 'Diese Bestellung wartet auf Zahlungsbestätigung. Wenn der Kunde den Checkout abbricht, verfällt die Bestellung automatisch nach 1 Tag. Sie können sie auch manuell als fehlgeschlagen markieren.',
                 'pending_retry_title' => 'Bestellung wartet auf Wiederholung',
                 'admin_review_title' => 'Bestellung erfordert Admin-Überprüfung',
                 'admin_review_desc' => 'Die Provider-API hat einen Fehler zurückgegeben. Die Bestellung wurde möglicherweise bereits beim Provider verarbeitet. Prüfen Sie beim Provider, bevor Sie es erneut versuchen, um doppelte Käufe zu vermeiden.',

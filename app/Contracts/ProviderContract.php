@@ -43,6 +43,12 @@ interface ProviderContract
     public function getEsimProfile(string $providerOrderId): EsimProfileData;
 
     /**
+     * Fetch eSIM profile raw data (does not throw on HTTP errors)
+     * Returns array with 'success' bool and profile data or error info
+     */
+    public function fetchEsimProfileRaw(string $providerOrderId): array;
+
+    /**
      * Check package stock availability
      */
     public function checkStock(string $packageId): bool;
@@ -61,4 +67,10 @@ interface ProviderContract
      * Test connection to provider API
      */
     public function testConnection(): bool;
+
+    /**
+     * Update eSIM label for tracking
+     * Returns array with 'success' bool and data or error info
+     */
+    public function updateEsimLabel(string $transactionId, ?string $label): array;
 }

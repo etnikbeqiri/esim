@@ -7,6 +7,7 @@ enum OrderStatus: string
     case Pending = 'pending';
     case AwaitingPayment = 'awaiting_payment';
     case Processing = 'processing';
+    case ProviderPurchased = 'provider_purchased';
     case Completed = 'completed';
     case Failed = 'failed';
     case Refunded = 'refunded';
@@ -19,9 +20,10 @@ enum OrderStatus: string
         return match ($this) {
             self::Pending => in_array($new, [self::AwaitingPayment, self::Processing, self::Cancelled]),
             self::AwaitingPayment => in_array($new, [self::Processing, self::Cancelled, self::Failed]),
-            self::Processing => in_array($new, [self::Completed, self::Failed, self::PendingRetry, self::AdminReview]),
+            self::Processing => in_array($new, [self::ProviderPurchased, self::Failed, self::PendingRetry, self::AdminReview]),
+            self::ProviderPurchased => in_array($new, [self::Completed, self::Failed, self::AdminReview]),
             self::PendingRetry => in_array($new, [self::Processing, self::Failed, self::Cancelled]),
-            self::AdminReview => in_array($new, [self::Processing, self::Failed, self::Cancelled]),
+            self::AdminReview => in_array($new, [self::Processing, self::ProviderPurchased, self::Failed, self::Cancelled]),
             self::Completed => in_array($new, [self::Refunded]),
             self::Failed => in_array($new, [self::PendingRetry]),
             default => false,
@@ -39,6 +41,7 @@ enum OrderStatus: string
             self::Pending => 'gray',
             self::AwaitingPayment => 'yellow',
             self::Processing => 'blue',
+            self::ProviderPurchased => 'cyan',
             self::Completed => 'green',
             self::Failed => 'red',
             self::Refunded => 'purple',
@@ -60,6 +63,6 @@ enum OrderStatus: string
 
     public function canRetry(): bool
     {
-        return in_array($this, [self::Processing, self::Failed, self::PendingRetry, self::AdminReview]);
+        return in_array($this, [self::Processing, self::Failed, self::PendingRetry, self::AdminReview, self::ProviderPurchased]);
     }
 }

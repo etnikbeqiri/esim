@@ -73,71 +73,89 @@ class SmsPoolProvider extends BaseProvider
 
     public function purchaseEsim(string $packageId): PurchaseResult
     {
+        $endpoint = '/esim/purchase';
+        $url = $this->baseUrl . $endpoint;
+        
         try {
-            // Step 1: Purchase the eSIM
-            $purchaseResponse = $this->makePostRequest('/esim/purchase', [
-                'key' => $this->apiKey,
-                'plan' => $packageId,
+            $this->applyRateLimit();
+
+            Log::info('SMSPool API request', [
+                'method' => 'POST',
+                'url' => $url,
+                'endpoint' => $endpoint,
+                'params' => ['plan' => $packageId, 'key' => substr($this->apiKey, 0, 10) . '...'],
             ]);
 
-            if (($purchaseResponse['success'] ?? 0) !== 1) {
-                $providerMessage = $purchaseResponse['message']
-                    ?? $purchaseResponse['error']
-                    ?? 'Purchase failed';
+            $response = $this->http()
+                ->withHeaders($this->getHeaders())
+                ->asForm()
+                ->post($endpoint, [
+                    'key' => $this->apiKey,
+                    'plan' => $packageId,
+                ]);
 
-                $errorMessage = "SMSPool purchase failed: {$providerMessage} | Full response: " . json_encode($purchaseResponse);
+            $body = $response->body();
+            $data = $response->json() ?? [];
+            $httpStatus = $response->status();
 
-                Log::error('SMSPool purchase rejected', [
+            if (($data['success'] ?? 0) === 1) {
+                $transactionId = $data['transactionId'] ?? null;
+
+                if (!$transactionId) {
+                    Log::error('SMSPool purchase: No transaction ID', [
+                        'url' => $url,
+                        'response' => $data,
+                    ]);
+                    return PurchaseResult::failure(
+                        errorMessage: 'No transaction ID returned from purchase',
+                        isRetryable: false,
+                    );
+                }
+
+                Log::info('SMSPool purchase successful', [
+                    'url' => $url,
                     'package_id' => $packageId,
-                    'message' => $providerMessage,
-                    'response' => $purchaseResponse,
+                    'transaction_id' => $transactionId,
+                    'http_status' => $httpStatus,
                 ]);
 
-                return PurchaseResult::failure(
-                    errorMessage: $errorMessage,
-                    isRetryable: $this->isRetryableError($providerMessage),
+                return PurchaseResult::success(
+                    providerOrderId: $transactionId,
+                    iccid: $transactionId,
+                    activationCode: '',
+                    smdpAddress: null,
+                    qrCodeData: null,
+                    lpaString: null,
+                    pin: null,
+                    puk: null,
+                    apn: null,
+                    dataTotalBytes: 0,
+                    providerData: $data,
                 );
             }
 
-            $transactionId = $purchaseResponse['transactionId'] ?? null;
+            $providerMessage = $data['message'] ?? $data['error'] ?? 'Purchase failed';
+            $errorMessage = "SMSPool purchase failed (HTTP {$httpStatus}): {$providerMessage}";
 
-            if (!$transactionId) {
-                return PurchaseResult::failure(
-                    errorMessage: 'No transaction ID returned from purchase',
-                    isRetryable: false,
-                );
-            }
-
-            // Step 2: Fetch the eSIM profile details
-            $profileResponse = $this->makePostRequest('/esim/profile', [
-                'key' => $this->apiKey,
-                'transactionId' => $transactionId,
+            Log::error('SMSPool purchase rejected', [
+                'url' => $url,
+                'package_id' => $packageId,
+                'http_status' => $httpStatus,
+                'message' => $providerMessage,
+                'response_body' => $body,
+                'response_json' => $data,
             ]);
 
-            if (($profileResponse['success'] ?? 0) !== 1) {
-                Log::warning('SMSPool: Purchase succeeded but profile fetch failed', [
-                    'transaction_id' => $transactionId,
-                    'response' => $profileResponse,
-                ]);
-            }
-
-            return PurchaseResult::success(
-                providerOrderId: $transactionId,
-                iccid: $profileResponse['iccid'] ?? $transactionId,
-                activationCode: $profileResponse['activationCode'] ?? '',
-                smdpAddress: $profileResponse['smdp'] ?? null,
-                qrCodeData: $profileResponse['qrCode'] ?? null,
-                lpaString: $profileResponse['ac'] ?? null,
-                pin: $profileResponse['pin'] ?? null,
-                puk: $profileResponse['puk'] ?? null,
-                apn: $profileResponse['apn'] ?? null,
-                dataTotalBytes: $this->parseDataBytes($profileResponse['totalData'] ?? null),
-                providerData: $profileResponse,
+            return PurchaseResult::failure(
+                errorMessage: $errorMessage,
+                isRetryable: $this->isRetryableError($providerMessage),
             );
         } catch (\Exception $e) {
             Log::error('SMSPool purchase error', [
+                'url' => $url,
                 'package_id' => $packageId,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return PurchaseResult::failure(
@@ -167,6 +185,94 @@ class SmsPoolProvider extends BaseProvider
             topupAvailable: ($response['topup'] ?? 0) === 1,
             metadata: $response,
         );
+    }
+
+    public function fetchEsimProfileRaw(string $providerOrderId): array
+    {
+        $this->applyRateLimit();
+
+        $response = $this->http()
+            ->withHeaders($this->getHeaders())
+            ->asForm()
+            ->post('/esim/profile', [
+                'key' => $this->apiKey,
+                'transactionId' => $providerOrderId,
+            ]);
+
+        if (!$response->successful()) {
+            return [
+                'success' => false,
+                'status' => $response->status(),
+                'message' => $response->json('message') ?? 'Profile fetch failed',
+                'body' => $response->body(),
+            ];
+        }
+
+        $data = $response->json() ?? [];
+        $data['success'] = true;
+
+        return $data;
+    }
+
+    public function updateEsimLabel(string $transactionId, ?string $label): array
+    {
+        if (empty($label)) {
+            return ['success' => false, 'error' => 'No label provided'];
+        }
+
+        $endpoint = '/esim/label/update';
+        $url = $this->baseUrl . $endpoint;
+
+        try {
+            $this->applyRateLimit();
+
+            Log::info('SMSPool: Updating eSIM label', [
+                'url' => $url,
+                'transaction_id' => $transactionId,
+                'label' => $label,
+            ]);
+
+            $response = $this->http()
+                ->withHeaders($this->getHeaders())
+                ->asForm()
+                ->post($endpoint, [
+                    'key' => $this->apiKey,
+                    'transactionId' => $transactionId,
+                    'label' => $label,
+                ]);
+
+            $responseBody = $response->body();
+            $responseData = $response->json() ?? [];
+            
+            if ($response->successful() && ($responseData['success'] ?? 0) === 1) {
+                Log::info('SMSPool: eSIM label updated', [
+                    'transaction_id' => $transactionId,
+                    'label' => $label,
+                    'http_status' => $response->status(),
+                    'response' => $responseBody,
+                ]);
+                return ['success' => true, 'data' => $responseData];
+            } else {
+                Log::warning('SMSPool: Failed to update eSIM label', [
+                    'transaction_id' => $transactionId,
+                    'label' => $label,
+                    'status' => $response->status(),
+                    'body' => $responseBody,
+                ]);
+                return [
+                    'success' => false,
+                    'error' => $responseData['message'] ?? 'Label update failed',
+                    'http_status' => $response->status(),
+                ];
+            }
+        } catch (\Exception $e) {
+            Log::warning('SMSPool: Exception updating eSIM label', [
+                'transaction_id' => $transactionId,
+                'label' => $label,
+                'error' => $e->getMessage(),
+            ]);
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
     }
 
     public function checkStock(string $packageId): bool

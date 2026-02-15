@@ -1507,6 +1507,7 @@ return [
         'pending' => 'Në Pritje',
         'awaiting_payment' => 'Në Pritje të Pagesës',
         'processing' => 'Duke Procesuar',
+        'provider_purchased' => 'Blerë tek Ofruesi',
         'completed' => 'E Përfunduar',
         'failed' => 'Dështoi',
         'refunded' => 'U Rimbursua',
@@ -1568,7 +1569,7 @@ return [
             ],
             'status_alert' => [
                 'awaiting_payment_title' => 'Në Pritje të Pagesës',
-                'awaiting_payment_desc' => 'Kjo porosi është në pritje të konfirmimit të pagesës. Nëse klienti braktis pagesën, porosia do të skadojë automatikisht. Mund ta shënoni edhe manualisht si të dështuar.',
+                'awaiting_payment_desc' => 'Kjo porosi është në pritje të konfirmimit të pagesës. Nëse klienti braktis pagesën, porosia do të skadojë automatikisht pas 1 dite. Mund ta shënoni edhe manualisht si të dështuar.',
                 'pending_retry_title' => 'Porosi në Pritje të Riprovimit',
                 'admin_review_title' => 'Porosia Kërkon Rishikim nga Admini',
                 'admin_review_desc' => 'API e ofruesit ktheu një gabim. Porosia mund të jetë procesuar nga ofruesi. Kontrolloni me ofruesin para se të riprovoni për të shmangur blerje të dyfishta.',

@@ -37,8 +37,8 @@ class OrderAwaitingPayment extends Event
         $state->status = OrderStatus::AwaitingPayment;
         $state->payment_id = $this->payment_id;
 
-        // Set expiration time for the checkout session
-        $expirationMinutes = $this->expiration_minutes ?? config('services.payment.checkout_expiration_minutes', 30);
+        // Set expiration time for the checkout session (1 day = 1440 minutes)
+        $expirationMinutes = $this->expiration_minutes ?? config('services.payment.checkout_expiration_minutes', 1440);
         $state->checkout_expires_at = Carbon::now()->addMinutes($expirationMinutes);
     }
 

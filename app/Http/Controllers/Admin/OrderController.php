@@ -236,7 +236,7 @@ class OrderController extends Controller
 
     public function retry(Order $order): RedirectResponse
     {
-        if (!in_array($order->status, [OrderStatus::Failed, OrderStatus::PendingRetry, OrderStatus::Processing, OrderStatus::AdminReview])) {
+        if (!in_array($order->status, [OrderStatus::Failed, OrderStatus::PendingRetry, OrderStatus::Processing, OrderStatus::AdminReview, OrderStatus::ProviderPurchased])) {
             return back()->with('error', 'This order cannot be retried.');
         }
 

@@ -1445,6 +1445,7 @@ return [
         'pending' => 'Pending',
         'awaiting_payment' => 'Awaiting Payment',
         'processing' => 'Processing',
+        'provider_purchased' => 'Provider Purchased',
         'completed' => 'Completed',
         'failed' => 'Failed',
         'refunded' => 'Refunded',
@@ -1506,7 +1507,7 @@ return [
             ],
             'status_alert' => [
                 'awaiting_payment_title' => 'Awaiting Payment',
-                'awaiting_payment_desc' => 'This order is waiting for payment confirmation. If the customer abandons the checkout, the order will automatically expire. You can also manually mark it as failed.',
+                'awaiting_payment_desc' => 'This order is waiting for payment confirmation. If the customer abandons the checkout, the order will automatically expire after 1 day. You can also manually mark it as failed.',
                 'pending_retry_title' => 'Order Pending Retry',
                 'admin_review_title' => 'Order Requires Admin Review',
                 'admin_review_desc' => 'The provider API returned an error. The order may have been processed on the provider side. Check with the provider before retrying to avoid duplicate purchases.',

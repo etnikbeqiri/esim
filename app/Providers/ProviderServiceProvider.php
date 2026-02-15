@@ -115,4 +115,20 @@ class ProviderFactory
             ->map(fn ($p) => $this->createFromModel($p))
             ->all();
     }
+
+    /**
+     * Create a provider instance by provider ID
+     */
+    public function makeById(int $providerId): ProviderContract
+    {
+        $provider = Provider::find($providerId);
+
+        if (!$provider) {
+            throw new \InvalidArgumentException(
+                "Provider not found with ID: {$providerId}"
+            );
+        }
+
+        return $this->createFromModel($provider);
+    }
 }
