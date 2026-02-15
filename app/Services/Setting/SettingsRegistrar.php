@@ -423,15 +423,6 @@ class SettingsRegistrar
 
         // Homepage Settings
         $this->register(
-            key: 'homepage.featured_package_ids',
-            label: 'Featured Package IDs',
-            description: 'Comma-separated list of package IDs with optional labels to display in the featured carousel. Format: ID|label_key (e.g., 1558|featured,1834|best_value). Available labels: featured, best_value, popular, hot_deal',
-            group: SettingGroup::Homepage,
-            type: SettingType::String,
-            default: ''
-        );
-
-        $this->register(
             key: 'homepage.show_featured_packages',
             label: 'Show Featured Packages',
             description: 'Display the featured packages carousel on the homepage',

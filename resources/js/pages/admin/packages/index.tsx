@@ -587,7 +587,7 @@ export default function PackagesIndex({
                                                 </Badge>
                                             </TableCell>
                                             <TableCell>
-                                                <div className="flex justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                                                <div className="flex justify-end gap-0.5">
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"

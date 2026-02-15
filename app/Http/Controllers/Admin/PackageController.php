@@ -21,15 +21,63 @@ class PackageController extends Controller
         $sortDir = $request->sort_dir === 'asc' ? 'asc' : 'desc';
         $perPage = in_array((int) $request->per_page, [25, 50, 100, 200]) ? (int) $request->per_page : 50;
 
+        $hasSearch = (bool) $request->search;
+        $userChoseSort = $request->filled('sort_by');
+
         $query = Package::query()
-            ->with(['provider:id,name', 'country:id,name,iso_code,is_active'])
-            ->when($request->search, fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
-            ->when($request->provider_id, fn ($q, $id) => $q->where('provider_id', $id))
+            ->with(['provider:id,name', 'country:id,name,iso_code,is_active']);
+
+        if ($hasSearch) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('packages.name', 'like', "%{$search}%")
+                    ->orWhereHas('country', fn ($cq) => $cq->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('provider', fn ($pq) => $pq->where('name', 'like', "%{$search}%"));
+            });
+
+            if (!$userChoseSort) {
+                $query->selectRaw("packages.*, (
+                    CASE
+                        WHEN packages.name LIKE ? THEN 100
+                        WHEN packages.name LIKE ? THEN 80
+                        WHEN packages.name LIKE ? THEN 60
+                        ELSE 0
+                    END
+                    + CASE
+                        WHEN EXISTS(SELECT 1 FROM countries WHERE countries.id = packages.country_id AND countries.name LIKE ?) THEN 50
+                        WHEN EXISTS(SELECT 1 FROM countries WHERE countries.id = packages.country_id AND countries.name LIKE ?) THEN 40
+                        WHEN EXISTS(SELECT 1 FROM countries WHERE countries.id = packages.country_id AND countries.name LIKE ?) THEN 30
+                        ELSE 0
+                    END
+                    + CASE
+                        WHEN EXISTS(SELECT 1 FROM providers WHERE providers.id = packages.provider_id AND providers.name LIKE ?) THEN 20
+                        WHEN EXISTS(SELECT 1 FROM providers WHERE providers.id = packages.provider_id AND providers.name LIKE ?) THEN 15
+                        WHEN EXISTS(SELECT 1 FROM providers WHERE providers.id = packages.provider_id AND providers.name LIKE ?) THEN 10
+                        ELSE 0
+                    END
+                ) as relevance_score", [
+                    $search,
+                    $search . '%',
+                    '%' . $search . '%',
+                    $search,
+                    $search . '%',
+                    '%' . $search . '%',
+                    $search,
+                    $search . '%',
+                    '%' . $search . '%',
+                ]);
+            }
+        }
+
+        $query->when($request->provider_id, fn ($q, $id) => $q->where('provider_id', $id))
             ->when($request->country_id, fn ($q, $id) => $q->where('country_id', $id))
             ->when($request->has('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')))
             ->when($request->has('country_active'), fn ($q) => $q->whereHas('country', fn ($cq) => $cq->where('is_active', $request->boolean('country_active'))));
 
-        if ($sortBy === 'provider') {
+        if ($hasSearch && !$userChoseSort) {
+            $query->orderByDesc('relevance_score');
+        } elseif ($sortBy === 'provider') {
             $query->leftJoin('providers', 'packages.provider_id', '=', 'providers.id')
                 ->orderBy('providers.name', $sortDir)
                 ->select('packages.*');
@@ -43,9 +91,11 @@ class PackageController extends Controller
 
         $packages = $query->paginate($perPage)->withQueryString();
 
-        // Make hidden fields visible for admin
+        // Make hidden fields visible for admin, strip relevance_score from response
         $packages->getCollection()->transform(function ($package) {
-            return $package->makeVisible(['cost_price', 'retail_price', 'custom_retail_price', 'provider_package_id']);
+            $package->makeVisible(['cost_price', 'retail_price', 'custom_retail_price', 'provider_package_id']);
+            unset($package->relevance_score);
+            return $package;
         });
 
         return Inertia::render('admin/packages/index', [
@@ -94,12 +144,23 @@ class PackageController extends Controller
             'custom_retail_price' => ['nullable', 'numeric', 'min:0'],
             'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
+            'show_on_homepage' => ['boolean'],
             'featured_order' => ['nullable', 'integer', 'min:0'],
+            'featured_label' => ['nullable', 'string', 'in:featured,best_value,popular,hot_deal'],
         ]);
 
-        // Handle empty string as null for custom_retail_price
+        // Handle empty strings as null
         if (isset($validated['custom_retail_price']) && $validated['custom_retail_price'] === '') {
             $validated['custom_retail_price'] = null;
+        }
+        if (isset($validated['featured_label']) && $validated['featured_label'] === '') {
+            $validated['featured_label'] = null;
+        }
+
+        // Clear homepage carousel fields when removing from homepage
+        if (!($validated['show_on_homepage'] ?? true)) {
+            $validated['featured_label'] = null;
+            $validated['featured_order'] = 0;
         }
 
         $package->update($validated);

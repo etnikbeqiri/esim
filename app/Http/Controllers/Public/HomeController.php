@@ -63,37 +63,12 @@ class HomeController extends Controller
             return [];
         }
 
-        $packageIdsString = $settings->get('homepage.featured_package_ids', '');
-        if (empty($packageIdsString)) {
-            return [];
-        }
-
-        // Parse package IDs with optional labels (format: ID|label or just ID)
-        $packageEntries = array_filter(array_map('trim', explode(',', $packageIdsString)));
-        $packageIds = [];
-        $packageLabels = [];
-
-        foreach ($packageEntries as $entry) {
-            if (str_contains($entry, '|')) {
-                [$id, $label] = explode('|', $entry, 2);
-                $packageIds[] = (int) $id;
-                $packageLabels[(int) $id] = $label;
-            } else {
-                $packageIds[] = (int) $entry;
-            }
-        }
-
-        if (empty($packageIds)) {
-            return [];
-        }
-
         return Package::query()
-            ->whereIn('id', $packageIds)
+            ->where('show_on_homepage', true)
             ->where('is_active', true)
             ->with('country:id,name,iso_code')
+            ->orderBy('featured_order')
             ->get()
-            ->sortBy(fn ($pkg) => array_search($pkg->id, $packageIds))
-            ->values()
             ->map(fn ($pkg) => [
                 'id' => $pkg->id,
                 'name' => $pkg->name,
@@ -106,7 +81,7 @@ class HomeController extends Controller
                     'name' => $pkg->country->name,
                     'iso_code' => $pkg->country->iso_code,
                 ] : null,
-                'badge_label' => $packageLabels[$pkg->id] ?? null,
+                'badge_label' => $pkg->featured_label,
             ])
             ->toArray();
     }

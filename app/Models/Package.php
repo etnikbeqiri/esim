@@ -49,7 +49,9 @@ class Package extends Model
         'in_stock',
         'is_popular',
         'is_featured',
+        'show_on_homepage',
         'featured_order',
+        'featured_label',
         'metadata',
         'last_synced_at',
     ];
@@ -73,6 +75,7 @@ class Package extends Model
             'in_stock' => 'boolean',
             'is_popular' => 'boolean',
             'is_featured' => 'boolean',
+            'show_on_homepage' => 'boolean',
             'metadata' => 'array',
             'last_synced_at' => 'datetime',
         ];

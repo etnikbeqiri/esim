@@ -27,7 +27,9 @@ interface Package {
     custom_retail_price: string | number | null;
     is_active: boolean;
     is_featured: boolean;
+    show_on_homepage: boolean;
     featured_order: number;
+    featured_label: string | null;
     provider: { id: number; name: string; slug: string } | null;
     country: { id: number; name: string; iso_code: string } | null;
     source_currency: { id: number; code: string; symbol: string } | null;
@@ -69,7 +71,9 @@ export default function PackageEdit({ package: pkg, defaultCurrency }: Props) {
         custom_retail_price: pkg.custom_retail_price?.toString() || '',
         is_active: pkg.is_active,
         is_featured: pkg.is_featured,
+        show_on_homepage: pkg.show_on_homepage,
         featured_order: pkg.featured_order || 0,
+        featured_label: pkg.featured_label || '',
     });
 
     function handleSubmit(e: FormEvent) {
@@ -305,7 +309,8 @@ export default function PackageEdit({ package: pkg, defaultCurrency }: Props) {
                                             Featured
                                         </Label>
                                         <p className="text-sm text-muted-foreground">
-                                            Show in featured/promoted section
+                                            Highlight with gold badge on country
+                                            page
                                         </p>
                                     </div>
                                     <Switch
@@ -316,43 +321,109 @@ export default function PackageEdit({ package: pkg, defaultCurrency }: Props) {
                                         }
                                     />
                                 </div>
-                            </CardContent>
-                        </Card>
 
-                        {data.is_featured && (
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Featured Order</CardTitle>
-                                    <CardDescription>
-                                        Control the display order for featured
-                                        packages
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-2">
-                                    <Label htmlFor="featured_order">
-                                        Sort Order
-                                    </Label>
-                                    <Input
-                                        id="featured_order"
-                                        type="number"
-                                        min="0"
-                                        value={data.featured_order}
-                                        onChange={(e) =>
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="show_on_homepage">
+                                            Show on Homepage
+                                        </Label>
+                                        <p className="text-sm text-muted-foreground">
+                                            Display in the homepage carousel
+                                        </p>
+                                    </div>
+                                    <Switch
+                                        id="show_on_homepage"
+                                        checked={data.show_on_homepage}
+                                        onCheckedChange={(checked) =>
                                             setData(
-                                                'featured_order',
-                                                parseInt(e.target.value) || 0,
+                                                'show_on_homepage',
+                                                checked,
                                             )
                                         }
                                     />
-                                    {errors.featured_order && (
-                                        <p className="text-sm text-destructive">
-                                            {errors.featured_order}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {data.show_on_homepage && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Featured Settings</CardTitle>
+                                    <CardDescription>
+                                        Control how this package appears in the
+                                        homepage carousel
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="featured_label">
+                                            Badge Label
+                                        </Label>
+                                        <select
+                                            id="featured_label"
+                                            value={data.featured_label}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'featured_label',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm focus-visible:ring-1 focus-visible:outline-none"
+                                        >
+                                            <option value="">
+                                                None
+                                            </option>
+                                            <option value="featured">
+                                                Featured
+                                            </option>
+                                            <option value="best_value">
+                                                Best Value
+                                            </option>
+                                            <option value="popular">
+                                                Popular
+                                            </option>
+                                            <option value="hot_deal">
+                                                Hot Deal
+                                            </option>
+                                        </select>
+                                        {errors.featured_label && (
+                                            <p className="text-sm text-destructive">
+                                                {errors.featured_label}
+                                            </p>
+                                        )}
+                                        <p className="text-sm text-muted-foreground">
+                                            Optional badge shown on the homepage
+                                            carousel card
                                         </p>
-                                    )}
-                                    <p className="text-sm text-muted-foreground">
-                                        Lower numbers appear first. Default is
-                                        0.
-                                    </p>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="featured_order">
+                                            Sort Order
+                                        </Label>
+                                        <Input
+                                            id="featured_order"
+                                            type="number"
+                                            min="0"
+                                            value={data.featured_order}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'featured_order',
+                                                    parseInt(e.target.value) ||
+                                                        0,
+                                                )
+                                            }
+                                        />
+                                        {errors.featured_order && (
+                                            <p className="text-sm text-destructive">
+                                                {errors.featured_order}
+                                            </p>
+                                        )}
+                                        <p className="text-sm text-muted-foreground">
+                                            Lower numbers appear first. Default
+                                            is 0.
+                                        </p>
+                                    </div>
                                 </CardContent>
                             </Card>
                         )}
