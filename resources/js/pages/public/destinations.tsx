@@ -51,17 +51,45 @@ export default function Destinations({ countries, regions, filters }: Props) {
     const hasTrackedInitialList = useRef(false);
     const lastTrackedListKey = useRef<string>('');
 
-    // Filter countries locally for instant feedback
+    // Score a country's relevance to the search query
+    function getRelevanceScore(country: Country, query: string): number {
+        let score = 0;
+        const name = country.name.toLowerCase();
+        const iso = country.iso_code.toLowerCase();
+        const region = (country.region || '').toLowerCase();
+
+        if (name === query) score += 100;
+        else if (name.startsWith(query)) score += 80;
+        else if (name.includes(query)) score += 60;
+
+        if (iso === query) score += 70;
+        else if (iso.startsWith(query)) score += 50;
+
+        if (region.startsWith(query)) score += 30;
+        else if (region.includes(query)) score += 20;
+
+        return score;
+    }
+
+    // Filter countries locally for instant feedback, sorted by relevance
     const filteredCountries = useMemo(() => {
         let result = countries;
 
         if (searchQuery.trim()) {
             const query = searchQuery.toLowerCase();
-            result = result.filter(
-                (country) =>
-                    country.name.toLowerCase().includes(query) ||
-                    country.iso_code.toLowerCase().includes(query),
-            );
+            result = result
+                .filter(
+                    (country) =>
+                        country.name.toLowerCase().includes(query) ||
+                        country.iso_code.toLowerCase().includes(query) ||
+                        (country.region || '').toLowerCase().includes(query),
+                )
+                .sort((a, b) => {
+                    const scoreA = getRelevanceScore(a, query);
+                    const scoreB = getRelevanceScore(b, query);
+                    if (scoreB !== scoreA) return scoreB - scoreA;
+                    return a.name.localeCompare(b.name);
+                });
         }
 
         if (activeRegion !== 'all') {
@@ -207,7 +235,7 @@ export default function Destinations({ countries, regions, filters }: Props) {
             {/* Region Tabs */}
             <section className="sticky top-16 z-40 border-b border-primary-100 bg-white/90 backdrop-blur-xl">
                 <div className="container mx-auto px-4">
-                    <div className="no-scrollbar -mb-px flex gap-2 overflow-x-auto py-3">
+                    <div className="flex flex-wrap gap-2 py-3">
                         {activeRegion === 'all' ? (
                             <GoldButton
                                 size="sm"

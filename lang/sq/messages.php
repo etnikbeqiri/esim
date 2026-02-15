@@ -473,10 +473,32 @@ return [
         'available_packages' => 'Paketa të Disponueshme',
         'sort' => [
             'label' => 'Rendit:',
+            'best_value' => 'Oferta më e mirë',
             'data' => 'Të dhëna',
+            'most_data' => 'Më shumë të dhëna',
             'price_asc' => 'Çmimi: Ulët-Lart',
             'price_desc' => 'Çmimi: Lart-Ulët',
-            'validity' => 'Vlefshmëria',
+            'validity' => 'Vlefshmëria më e gjatë',
+        ],
+        'filters' => [
+            'label' => 'Filtro:',
+            'all' => 'Të gjitha',
+            'duration' => [
+                'short' => '1-7 Ditë',
+                'medium' => '8-15 Ditë',
+                'long' => '16-30 Ditë',
+                'extended' => '30+ Ditë',
+            ],
+            'data' => [
+                'light' => 'Nën 1 GB',
+                'standard' => '1-3 GB',
+                'heavy' => '3-10 GB',
+                'unlimited' => '10+ GB',
+            ],
+            'featured' => 'Të veçanta',
+            'clear' => 'Pastro filtrat',
+            'no_results' => 'Asnjë paketë nuk përputhet me filtrat tuaj',
+            'no_results_action' => 'Pastro Filtrat',
         ],
         'best_value' => 'VLERË MË E MIRË',
         'data_included' => 'Të dhëna të përfshira',
@@ -505,6 +527,14 @@ return [
         'buttons' => [
             'how_it_works' => 'Si Punon',
             'help' => 'Keni Nevojë për Ndihmë?',
+        ],
+        'regional_bundles' => [
+            'title' => 'Paketa rajonale që përfshijnë :country',
+            'subtitle' => 'Kurseni më shumë me paketat shumë-vendshe',
+            'covers' => 'Mbulon :count vende',
+            'from' => 'Nga',
+            'plans_available' => ':count paketa',
+            'view_all' => 'Shiko të gjitha paketat :region',
         ],
     ],
     'help_page' => [

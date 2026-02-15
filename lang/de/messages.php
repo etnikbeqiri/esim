@@ -476,10 +476,32 @@ return [
         'available_packages' => 'Verfügbare Pakete',
         'sort' => [
             'label' => 'Sortieren:',
+            'best_value' => 'Bestes Angebot',
             'data' => 'Daten',
+            'most_data' => 'Meiste Daten',
             'price_asc' => 'Preis: Niedrig-Hoch',
             'price_desc' => 'Preis: Hoch-Niedrig',
-            'validity' => 'Gültigkeit',
+            'validity' => 'Längste Gültigkeit',
+        ],
+        'filters' => [
+            'label' => 'Filter:',
+            'all' => 'Alle',
+            'duration' => [
+                'short' => '1-7 Tage',
+                'medium' => '8-15 Tage',
+                'long' => '16-30 Tage',
+                'extended' => '30+ Tage',
+            ],
+            'data' => [
+                'light' => 'Unter 1 GB',
+                'standard' => '1-3 GB',
+                'heavy' => '3-10 GB',
+                'unlimited' => '10+ GB',
+            ],
+            'featured' => 'Empfohlen',
+            'clear' => 'Filter zurücksetzen',
+            'no_results' => 'Keine Pakete entsprechen Ihren Filtern',
+            'no_results_action' => 'Filter zurücksetzen',
         ],
         'best_value' => 'BESTER WERT',
         'data_included' => 'Daten inklusive',
@@ -508,6 +530,14 @@ return [
         'buttons' => [
             'how_it_works' => 'So funktioniert\'s',
             'help' => 'Brauchen Sie Hilfe?',
+        ],
+        'regional_bundles' => [
+            'title' => 'Regionalpakete mit :country',
+            'subtitle' => 'Sparen Sie mehr mit Mehrländer-Paketen',
+            'covers' => ':count Länder abgedeckt',
+            'from' => 'Ab',
+            'plans_available' => ':count Pakete',
+            'view_all' => 'Alle :region Pakete ansehen',
         ],
     ],
     'help_page' => [

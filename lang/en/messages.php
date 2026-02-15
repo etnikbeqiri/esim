@@ -476,10 +476,32 @@ return [
         'available_packages' => 'Available Packages',
         'sort' => [
             'label' => 'Sort:',
+            'best_value' => 'Best Value',
             'data' => 'Data',
+            'most_data' => 'Most Data',
             'price_asc' => 'Price: Low-High',
             'price_desc' => 'Price: High-Low',
-            'validity' => 'Validity',
+            'validity' => 'Longest Validity',
+        ],
+        'filters' => [
+            'label' => 'Filter:',
+            'all' => 'All',
+            'duration' => [
+                'short' => '1-7 Days',
+                'medium' => '8-15 Days',
+                'long' => '16-30 Days',
+                'extended' => '30+ Days',
+            ],
+            'data' => [
+                'light' => 'Under 1 GB',
+                'standard' => '1-3 GB',
+                'heavy' => '3-10 GB',
+                'unlimited' => '10+ GB',
+            ],
+            'featured' => 'Featured',
+            'clear' => 'Clear Filters',
+            'no_results' => 'No packages match your filters',
+            'no_results_action' => 'Clear Filters',
         ],
         'best_value' => 'BEST VALUE',
         'data_included' => 'Data included',
@@ -508,6 +530,14 @@ return [
         'buttons' => [
             'how_it_works' => 'How It Works',
             'help' => 'Need Help?',
+        ],
+        'regional_bundles' => [
+            'title' => 'Regional Plans That Include :country',
+            'subtitle' => 'Save more with multi-country bundles',
+            'covers' => 'Covers :count countries',
+            'from' => 'From',
+            'plans_available' => ':count plans',
+            'view_all' => 'View All :region Plans',
         ],
     ],
     'help_page' => [

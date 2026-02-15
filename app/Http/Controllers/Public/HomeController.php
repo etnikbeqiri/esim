@@ -88,43 +88,84 @@ class HomeController extends Controller
 
     public function destinations(Request $request): Response
     {
-        $countries = Country::query()
+        $search = $request->search;
+
+        $query = Country::query()
             ->where('is_active', true)
             ->whereHas('packages', fn ($q) => $q->where('is_active', true))
-            ->withCount(['packages' => fn ($q) => $q->where('is_active', true)])
-            ->when($request->search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('region', 'like', "%{$search}%")
-                        ->orWhereHas('packages', fn ($pq) => $pq
-                            ->where('name', 'like', "%{$search}%")
-                            ->orWhere('description', 'like', "%{$search}%")
-                            ->orWhere('data_mb', 'like', "%{$search}%")
-                            ->orWhere('validity_days', 'like', "%{$search}%")
-                        );
-                });
-            })
-            ->when($request->region, function ($query, $region) {
-                $query->where('region', $region);
-            })
-            ->orderBy('name')
-            ->get()
-            ->map(function ($country) {
-                // Calculate min effective price (considering custom prices)
-                $minPrice = $country->packages()
-                    ->where('is_active', true)
-                    ->get()
-                    ->min(fn ($p) => $p->effective_retail_price);
+            ->withCount(['packages' => fn ($q) => $q->where('is_active', true)]);
 
-                return [
-                    'id' => $country->id,
-                    'name' => $country->name,
-                    'iso_code' => $country->iso_code,
-                    'region' => $country->region,
-                    'package_count' => $country->packages_count,
-                    'min_price' => $minPrice,
-                ];
+        if ($search) {
+            $query->selectRaw("countries.*, (
+                CASE
+                    WHEN countries.name LIKE ? THEN 100
+                    WHEN countries.name LIKE ? THEN 80
+                    WHEN countries.name LIKE ? THEN 60
+                    ELSE 0
+                END
+                + CASE
+                    WHEN countries.iso_code LIKE ? THEN 70
+                    WHEN countries.iso_code LIKE ? THEN 50
+                    ELSE 0
+                END
+                + CASE
+                    WHEN countries.region LIKE ? THEN 30
+                    WHEN countries.region LIKE ? THEN 20
+                    ELSE 0
+                END
+                + CASE
+                    WHEN EXISTS(SELECT 1 FROM packages WHERE packages.country_id = countries.id AND packages.is_active = 1 AND (packages.name LIKE ? OR packages.description LIKE ?)) THEN 15
+                    ELSE 0
+                END
+            ) as relevance_score", [
+                $search,
+                $search . '%',
+                '%' . $search . '%',
+                $search,
+                $search . '%',
+                $search . '%',
+                '%' . $search . '%',
+                '%' . $search . '%',
+                '%' . $search . '%',
+            ]);
+
+            $query->where(function ($q) use ($search) {
+                $q->where('countries.name', 'like', "%{$search}%")
+                    ->orWhere('countries.iso_code', 'like', "%{$search}%")
+                    ->orWhere('countries.region', 'like', "%{$search}%")
+                    ->orWhereHas('packages', fn ($pq) => $pq
+                        ->where('is_active', true)
+                        ->where(function ($inner) use ($search) {
+                            $inner->where('name', 'like', "%{$search}%")
+                                ->orWhere('description', 'like', "%{$search}%");
+                        })
+                    );
             });
+
+            $query->orderByDesc('relevance_score')->orderBy('countries.name');
+        } else {
+            $query->orderBy('name');
+        }
+
+        if ($request->region) {
+            $query->where('region', $request->region);
+        }
+
+        $countries = $query->get()->map(function ($country) {
+            $minPrice = $country->packages()
+                ->where('is_active', true)
+                ->get()
+                ->min(fn ($p) => $p->effective_retail_price);
+
+            return [
+                'id' => $country->id,
+                'name' => $country->name,
+                'iso_code' => $country->iso_code,
+                'region' => $country->region,
+                'package_count' => $country->packages_count,
+                'min_price' => $minPrice,
+            ];
+        });
 
         // Get unique regions for filtering
         $regions = Country::query()
@@ -174,6 +215,47 @@ class HomeController extends Controller
                 'networks' => $package->supported_networks,
             ]);
 
+        // Find regional bundles that include this country
+        $regionalBundles = Package::query()
+            ->where('coverage_type', 'regional')
+            ->where('is_active', true)
+            ->whereJsonContains('coverage_countries', $country->name)
+            ->with('country:id,name,iso_code')
+            ->orderBy('data_mb')
+            ->orderByRaw('COALESCE(custom_retail_price, retail_price) ASC')
+            ->get()
+            ->groupBy(fn ($pkg) => $pkg->country?->name ?? 'Other')
+            ->map(function ($packages, $regionName) {
+                $firstPkg = $packages->first();
+                $regionCountry = $firstPkg->country;
+
+                // Pick best-value package per data tier for diverse preview
+                $preview = $packages->groupBy('data_mb')
+                    ->map(fn ($group) => $group->sortBy(fn ($p) => (float) $p->effective_retail_price)->first())
+                    ->sortBy('data_mb')
+                    ->values()
+                    ->take(4);
+
+                return [
+                    'region_name' => $regionName,
+                    'region_iso' => $regionCountry?->iso_code,
+                    'country_count' => is_array($firstPkg->coverage_countries) ? count($firstPkg->coverage_countries) : 0,
+                    'packages' => $preview->map(fn ($pkg) => [
+                        'id' => $pkg->id,
+                        'name' => $pkg->name,
+                        'data_mb' => $pkg->data_mb,
+                        'data_label' => $pkg->data_label,
+                        'validity_days' => $pkg->validity_days,
+                        'validity_label' => $pkg->validity_label,
+                        'retail_price' => $pkg->effective_retail_price,
+                    ])->values()->toArray(),
+                    'total_count' => $packages->count(),
+                    'min_price' => $packages->min(fn ($p) => $p->effective_retail_price),
+                ];
+            })
+            ->values()
+            ->toArray();
+
         return Inertia::render('public/country', [
             'country' => [
                 'id' => $country->id,
@@ -182,6 +264,7 @@ class HomeController extends Controller
                 'region' => $country->region,
             ],
             'packages' => $packages,
+            'regionalBundles' => $regionalBundles,
         ]);
     }
 
@@ -224,29 +307,62 @@ class HomeController extends Controller
 
     public function searchDestinations(Request $request): JsonResponse
     {
-        $query = $request->get('q', '');
+        $search = $request->get('q', '');
 
-        if (strlen($query) < 2) {
+        if (strlen($search) < 2) {
             return response()->json([]);
         }
 
         $countries = Country::query()
+            ->selectRaw("countries.*, (
+                CASE
+                    WHEN countries.name LIKE ? THEN 100
+                    WHEN countries.name LIKE ? THEN 80
+                    WHEN countries.name LIKE ? THEN 60
+                    ELSE 0
+                END
+                + CASE
+                    WHEN countries.iso_code LIKE ? THEN 70
+                    WHEN countries.iso_code LIKE ? THEN 50
+                    ELSE 0
+                END
+                + CASE
+                    WHEN countries.region LIKE ? THEN 30
+                    WHEN countries.region LIKE ? THEN 20
+                    ELSE 0
+                END
+                + CASE
+                    WHEN EXISTS(SELECT 1 FROM packages WHERE packages.country_id = countries.id AND packages.is_active = 1 AND (packages.name LIKE ? OR packages.description LIKE ?)) THEN 15
+                    ELSE 0
+                END
+            ) as relevance_score", [
+                $search,
+                $search . '%',
+                '%' . $search . '%',
+                $search,
+                $search . '%',
+                $search . '%',
+                '%' . $search . '%',
+                '%' . $search . '%',
+                '%' . $search . '%',
+            ])
             ->where('is_active', true)
             ->whereHas('packages', fn ($q) => $q->where('is_active', true))
-            ->where(function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
-                    ->orWhere('iso_code', 'like', "%{$query}%")
-                    ->orWhere('region', 'like', "%{$query}%")
+            ->where(function ($q) use ($search) {
+                $q->where('countries.name', 'like', "%{$search}%")
+                    ->orWhere('countries.iso_code', 'like', "%{$search}%")
+                    ->orWhere('countries.region', 'like', "%{$search}%")
                     ->orWhereHas('packages', fn ($pq) => $pq
-                        ->where('name', 'like', "%{$query}%")
-                        ->orWhere('description', 'like', "%{$query}%")
-                        ->orWhere('data_mb', 'like', "%{$query}%")
-                        ->orWhere('validity_days', 'like', "%{$query}%")
+                        ->where('is_active', true)
+                        ->where(function ($inner) use ($search) {
+                            $inner->where('name', 'like', "%{$search}%")
+                                ->orWhere('description', 'like', "%{$search}%");
+                        })
                     );
             })
             ->withCount(['packages' => fn ($q) => $q->where('is_active', true)])
-            ->orderByRaw("CASE WHEN name LIKE '{$query}%' THEN 0 ELSE 1 END")
-            ->orderBy('name')
+            ->orderByDesc('relevance_score')
+            ->orderBy('countries.name')
             ->limit(6)
             ->get()
             ->map(function ($country) {

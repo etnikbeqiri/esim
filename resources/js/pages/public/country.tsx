@@ -35,6 +35,7 @@ import {
     Search,
     Shield,
     Smartphone,
+    Star,
     Wifi,
     Zap,
 } from 'lucide-react';
@@ -79,12 +80,41 @@ interface Country {
     region: string | null;
 }
 
+interface RegionalBundlePackage {
+    id: number;
+    name: string;
+    data_mb: number;
+    data_label: string;
+    validity_days: number;
+    validity_label: string;
+    retail_price: string | number;
+}
+
+interface RegionalBundle {
+    region_name: string;
+    region_iso: string | null;
+    country_count: number;
+    packages: RegionalBundlePackage[];
+    total_count: number;
+    min_price: string | number;
+}
+
 interface Props {
     country: Country;
     packages: Package[];
+    regionalBundles?: RegionalBundle[];
 }
 
-type SortOption = 'data' | 'price-asc' | 'price-desc' | 'validity';
+type SortOption =
+    | 'best-value'
+    | 'data'
+    | 'most-data'
+    | 'price-asc'
+    | 'price-desc'
+    | 'validity';
+
+type DurationFilter = 'all' | 'short' | 'medium' | 'long' | 'extended';
+type DataFilter = 'all' | 'light' | 'standard' | 'heavy' | 'unlimited';
 
 // Network Coverage Dialog Component with search
 function NetworkCoverageDialog({
@@ -244,9 +274,13 @@ function NetworkCoverageDialog({
     );
 }
 
-export default function CountryPage({ country, packages }: Props) {
+export default function CountryPage({ country, packages, regionalBundles }: Props) {
     const { trans } = useTrans();
-    const [sortBy, setSortBy] = useState<SortOption>('data');
+    const [sortBy, setSortBy] = useState<SortOption>('best-value');
+    const [durationFilter, setDurationFilter] =
+        useState<DurationFilter>('all');
+    const [dataFilter, setDataFilter] = useState<DataFilter>('all');
+    const [featuredOnly, setFeaturedOnly] = useState(false);
     const {
         viewItemList,
         selectItem,
@@ -254,6 +288,10 @@ export default function CountryPage({ country, packages }: Props) {
         createItem,
         viewNetworkCoverage,
     } = useAnalytics();
+
+    const hasFeaturedPackages = packages.some((p) => p.is_featured);
+    const hasActiveFilters =
+        durationFilter !== 'all' || dataFilter !== 'all' || featuredOnly;
 
     usePageViewTracking('country', country.name, {
         country_code: country.iso_code,
@@ -305,6 +343,28 @@ export default function CountryPage({ country, packages }: Props) {
         [filterApplied],
     );
 
+    const handleDurationFilter = useCallback(
+        (value: DurationFilter) => {
+            setDurationFilter(value);
+            filterApplied('duration', value, 'country');
+        },
+        [filterApplied],
+    );
+
+    const handleDataFilter = useCallback(
+        (value: DataFilter) => {
+            setDataFilter(value);
+            filterApplied('data_size', value, 'country');
+        },
+        [filterApplied],
+    );
+
+    const clearFilters = useCallback(() => {
+        setDurationFilter('all');
+        setDataFilter('all');
+        setFeaturedOnly(false);
+    }, []);
+
     const handleSelectPlan = useCallback(
         (pkg: Package, index: number) => {
             const item = createAnalyticsItem(pkg, index);
@@ -329,25 +389,82 @@ export default function CountryPage({ country, packages }: Props) {
         [viewNetworkCoverage, country.iso_code],
     );
 
-    const sortedPackages = useMemo(() => {
-        const sorted = [...packages];
+    const filteredAndSortedPackages = useMemo(() => {
+        let result = [...packages];
+
+        // Apply featured filter
+        if (featuredOnly) {
+            result = result.filter((pkg) => pkg.is_featured);
+        }
+
+        // Apply duration filter
+        if (durationFilter !== 'all') {
+            result = result.filter((pkg) => {
+                switch (durationFilter) {
+                    case 'short':
+                        return pkg.validity_days >= 1 && pkg.validity_days <= 7;
+                    case 'medium':
+                        return (
+                            pkg.validity_days >= 8 && pkg.validity_days <= 15
+                        );
+                    case 'long':
+                        return (
+                            pkg.validity_days >= 16 && pkg.validity_days <= 30
+                        );
+                    case 'extended':
+                        return pkg.validity_days > 30;
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        // Apply data filter
+        if (dataFilter !== 'all') {
+            result = result.filter((pkg) => {
+                switch (dataFilter) {
+                    case 'light':
+                        return pkg.data_mb < 1024;
+                    case 'standard':
+                        return pkg.data_mb >= 1024 && pkg.data_mb <= 3072;
+                    case 'heavy':
+                        return pkg.data_mb > 3072 && pkg.data_mb <= 10240;
+                    case 'unlimited':
+                        return pkg.data_mb > 10240;
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        // Sort
         switch (sortBy) {
+            case 'best-value':
+                return result.sort((a, b) => {
+                    const aPerGb = Number(a.retail_price) / (a.data_mb / 1024);
+                    const bPerGb = Number(b.retail_price) / (b.data_mb / 1024);
+                    return aPerGb - bPerGb;
+                });
             case 'data':
-                return sorted.sort((a, b) => a.data_mb - b.data_mb);
+                return result.sort((a, b) => a.data_mb - b.data_mb);
+            case 'most-data':
+                return result.sort((a, b) => b.data_mb - a.data_mb);
             case 'price-asc':
-                return sorted.sort(
+                return result.sort(
                     (a, b) => Number(a.retail_price) - Number(b.retail_price),
                 );
             case 'price-desc':
-                return sorted.sort(
+                return result.sort(
                     (a, b) => Number(b.retail_price) - Number(a.retail_price),
                 );
             case 'validity':
-                return sorted.sort((a, b) => b.validity_days - a.validity_days);
+                return result.sort(
+                    (a, b) => b.validity_days - a.validity_days,
+                );
             default:
-                return sorted;
+                return result;
         }
-    }, [packages, sortBy]);
+    }, [packages, sortBy, durationFilter, dataFilter, featuredOnly]);
 
     const lowestPrice =
         packages.length > 0
@@ -368,10 +485,13 @@ export default function CountryPage({ country, packages }: Props) {
                 />
             </Head>
 
-            {/* Hero Header */}
-            <section className="bg-mesh relative overflow-hidden pt-4 pb-6 md:pt-8 md:pb-12">
+            {/* Seamless bg-mesh for hero + packages */}
+            <div className="bg-mesh relative">
                 <div className="animate-float absolute top-10 -left-20 h-48 w-48 rounded-full bg-primary-200/40 blur-3xl md:h-80 md:w-80" />
-                <div className="animate-float-delayed absolute -right-20 bottom-10 h-48 w-48 rounded-full bg-accent-200/30 blur-3xl md:h-80 md:w-80" />
+                <div className="animate-float-delayed absolute -right-20 bottom-40 h-64 w-64 rounded-full bg-accent-200/30 blur-3xl md:h-96 md:w-96" />
+
+            {/* Hero Header */}
+            <section className="relative overflow-hidden pt-4 pb-6 md:pt-8 md:pb-12">
 
                 <div className="relative z-10 container mx-auto px-4">
                     <BackButton
@@ -383,12 +503,12 @@ export default function CountryPage({ country, packages }: Props) {
                     {/* Country Info */}
                     <div className="flex flex-col items-center text-center md:flex-row md:items-center md:gap-10 md:text-left">
                         {/* Flag */}
-                        <div className="group relative mb-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/60 bg-white/70 p-2 shadow-lg backdrop-blur-sm md:mb-0 md:h-40 md:w-40 md:rounded-3xl md:p-3 md:shadow-xl">
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent" />
+                        <div className="group relative mb-4 overflow-hidden rounded-xl shadow-lg ring-1 ring-white/60 md:mb-0 md:rounded-2xl md:shadow-xl">
                             <CountryFlag
                                 countryCode={country.iso_code}
-                                className="relative z-10 h-14 w-20 transform shadow-md transition-transform duration-500 group-hover:scale-110 md:h-28 md:w-40"
+                                className="relative z-10 block h-16 w-24 transform transition-transform duration-500 group-hover:scale-110 md:h-28 md:w-40"
                             />
+                            <div className="pointer-events-none absolute inset-0 z-20 rounded-xl ring-1 ring-inset ring-black/10 md:rounded-2xl" />
                         </div>
 
                         {/* Details */}
@@ -460,9 +580,7 @@ export default function CountryPage({ country, packages }: Props) {
             </section>
 
             {/* Packages */}
-            <section className="relative bg-white py-8 md:py-16">
-                {/* Subtle pattern */}
-                <div className="absolute inset-0 bg-[radial-gradient(#0d9488_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] [background-size:24px_24px] opacity-[0.02]" />
+            <section className="relative overflow-hidden py-8 md:py-16">
 
                 <div className="relative z-10 container mx-auto px-4">
                     {packages.length === 0 ? (
@@ -488,32 +606,32 @@ export default function CountryPage({ country, packages }: Props) {
                         </div>
                     ) : (
                         <>
-                            {/* Sort Controls */}
-                            <div className="mb-5 flex flex-col gap-3 rounded-xl border border-primary-100 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between md:mb-8 md:gap-4 md:rounded-2xl md:p-4">
-                                <h2 className="flex items-center gap-2 text-base font-bold text-primary-900 md:gap-3 md:text-xl">
-                                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-100 text-xs font-extrabold text-accent-700 md:h-8 md:w-8 md:text-sm">
-                                        {packages.length}
-                                    </span>
-                                    {trans('country_page.available_packages')}
-                                </h2>
-                                <div className="flex items-center gap-2 md:gap-3">
-                                    <span className="text-xs font-medium text-primary-900 md:text-sm">
-                                        {trans('country_page.sort.label')}
-                                    </span>
+                            {/* Filter & Sort Controls */}
+                            <div className="mb-5 space-y-3 rounded-xl border border-primary-100 bg-white p-3 shadow-sm md:mb-8 md:rounded-2xl md:p-4">
+                                {/* Header row */}
+                                <div className="flex items-center justify-between">
+                                    <h2 className="flex items-center gap-2 text-base font-bold text-primary-900 md:gap-3 md:text-xl">
+                                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-100 text-xs font-extrabold text-accent-700 md:h-8 md:w-8 md:text-sm">
+                                            {filteredAndSortedPackages.length}
+                                        </span>
+                                        {trans(
+                                            'country_page.available_packages',
+                                        )}
+                                    </h2>
                                     <Select
                                         value={sortBy}
                                         onValueChange={handleSortChange}
                                     >
-                                        <SelectTrigger className="h-8 w-[115px] border-primary-200 bg-white text-xs text-primary-900 focus:ring-primary-400 md:h-10 md:w-[160px] md:text-sm">
+                                        <SelectTrigger className="h-7 w-[120px] border-primary-200 bg-primary-50 text-[10px] text-primary-600 focus:ring-primary-400 md:h-8 md:w-[150px] md:text-xs">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="border-primary-200 bg-white">
                                             <SelectItem
-                                                value="data"
+                                                value="best-value"
                                                 className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm"
                                             >
                                                 {trans(
-                                                    'country_page.sort.data',
+                                                    'country_page.sort.best_value',
                                                 )}
                                             </SelectItem>
                                             <SelectItem
@@ -533,6 +651,14 @@ export default function CountryPage({ country, packages }: Props) {
                                                 )}
                                             </SelectItem>
                                             <SelectItem
+                                                value="most-data"
+                                                className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm"
+                                            >
+                                                {trans(
+                                                    'country_page.sort.most_data',
+                                                )}
+                                            </SelectItem>
+                                            <SelectItem
                                                 value="validity"
                                                 className="text-xs text-primary-900 focus:bg-primary-50 md:text-sm"
                                             >
@@ -543,11 +669,144 @@ export default function CountryPage({ country, packages }: Props) {
                                         </SelectContent>
                                     </Select>
                                 </div>
+
+                                {/* Quick Filter Chips */}
+                                <div className="space-y-2 md:space-y-0">
+                                    {/* Mobile: stacked rows / Desktop: single row */}
+                                    <div className="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:gap-2">
+                                        {/* Featured + Duration row */}
+                                        <div className="flex flex-wrap items-center gap-1.5 md:gap-2">
+                                            {hasFeaturedPackages && (
+                                                <>
+                                                    <button
+                                                        onClick={() => {
+                                                            setFeaturedOnly(
+                                                                !featuredOnly,
+                                                            );
+                                                            filterApplied(
+                                                                'featured',
+                                                                !featuredOnly
+                                                                    ? 'yes'
+                                                                    : 'all',
+                                                                'country',
+                                                            );
+                                                        }}
+                                                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold transition-all md:px-3 md:py-1.5 md:text-xs ${
+                                                            featuredOnly
+                                                                ? 'bg-amber-500 text-white shadow-sm'
+                                                                : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                                                        }`}
+                                                    >
+                                                        <Star className="h-3 w-3" />
+                                                        {trans(
+                                                            'country_page.filters.featured',
+                                                        )}
+                                                    </button>
+                                                    <div className="mx-0.5 hidden h-4 w-px bg-primary-200 md:block" />
+                                                </>
+                                            )}
+                                            {(
+                                                [
+                                                    'short',
+                                                    'medium',
+                                                    'long',
+                                                    'extended',
+                                                ] as const
+                                            ).map((key) => (
+                                                <button
+                                                    key={key}
+                                                    onClick={() =>
+                                                        handleDurationFilter(
+                                                            durationFilter ===
+                                                                key
+                                                                ? 'all'
+                                                                : key,
+                                                        )
+                                                    }
+                                                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition-all md:px-3 md:py-1.5 md:text-xs ${
+                                                        durationFilter === key
+                                                            ? 'bg-primary-600 text-white shadow-sm'
+                                                            : 'bg-primary-50 text-primary-600 hover:bg-primary-100'
+                                                    }`}
+                                                >
+                                                    {trans(
+                                                        `country_page.filters.duration.${key}` as any,
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <div className="mx-0.5 hidden h-4 w-px bg-primary-200 md:block" />
+
+                                        {/* Data row */}
+                                        <div className="flex flex-wrap items-center gap-1.5 md:gap-2">
+                                            {(
+                                                [
+                                                    'light',
+                                                    'standard',
+                                                    'heavy',
+                                                    'unlimited',
+                                                ] as const
+                                            ).map((key) => (
+                                                <button
+                                                    key={key}
+                                                    onClick={() =>
+                                                        handleDataFilter(
+                                                            dataFilter === key
+                                                                ? 'all'
+                                                                : key,
+                                                        )
+                                                    }
+                                                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition-all md:px-3 md:py-1.5 md:text-xs ${
+                                                        dataFilter === key
+                                                            ? 'bg-accent-500 text-accent-950 shadow-sm'
+                                                            : 'bg-accent-50 text-accent-700 hover:bg-accent-100'
+                                                    }`}
+                                                >
+                                                    {trans(
+                                                        `country_page.filters.data.${key}` as any,
+                                                    )}
+                                                </button>
+                                            ))}
+
+                                            {hasActiveFilters && (
+                                                <button
+                                                    onClick={clearFilters}
+                                                    className="ml-1 rounded-full px-2.5 py-1 text-[10px] font-semibold text-red-500 transition-all hover:bg-red-50 md:px-3 md:py-1.5 md:text-xs"
+                                                >
+                                                    {trans(
+                                                        'country_page.filters.clear',
+                                                    )}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Package Grid */}
+                            {filteredAndSortedPackages.length === 0 ? (
+                                <div className="rounded-xl border border-primary-100 bg-primary-50 py-10 text-center md:rounded-2xl md:py-16">
+                                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 md:mb-5 md:h-16 md:w-16">
+                                        <Search className="h-6 w-6 text-primary-500 md:h-8 md:w-8" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-primary-900 md:text-xl">
+                                        {trans(
+                                            'country_page.filters.no_results',
+                                        )}
+                                    </h3>
+                                    <GoldButton
+                                        className="mt-5 md:mt-6"
+                                        onClick={clearFilters}
+                                    >
+                                        {trans(
+                                            'country_page.filters.no_results_action',
+                                        )}
+                                    </GoldButton>
+                                </div>
+                            ) : (
                             <div className="grid gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-                                {sortedPackages.map((pkg, index) => (
+                                {filteredAndSortedPackages.map((pkg, index) => (
                                     <div
                                         key={pkg.id}
                                         className={`group relative flex flex-col overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:rounded-2xl ${
@@ -751,10 +1010,147 @@ export default function CountryPage({ country, packages }: Props) {
                                     </div>
                                 ))}
                             </div>
+                            )}
                         </>
                     )}
                 </div>
             </section>
+
+            {/* Regional Bundles Section */}
+            {regionalBundles && regionalBundles.length > 0 && (
+                <section className="relative overflow-hidden py-8 md:py-12">
+
+                    <div className="relative z-10 container mx-auto px-4">
+                        <div className="mb-5 text-center md:mb-8">
+                            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-primary-200 bg-white/80 px-3 py-1 text-xs font-semibold text-primary-700 shadow-sm backdrop-blur-sm md:text-sm">
+                                <Globe className="h-3.5 w-3.5 text-primary-500" />
+                                {trans(
+                                    'country_page.regional_bundles.subtitle',
+                                )}
+                            </div>
+                            <h2 className="text-lg font-extrabold tracking-tight text-primary-900 md:text-2xl">
+                                {trans(
+                                    'country_page.regional_bundles.title',
+                                    { country: country.name },
+                                )}
+                            </h2>
+                        </div>
+
+                        <div className="space-y-5 md:space-y-6">
+                            {regionalBundles.map((bundle) => (
+                                <div
+                                    key={bundle.region_iso}
+                                    className="group/bundle overflow-hidden rounded-xl border border-primary-100 bg-white shadow-sm transition-shadow hover:shadow-md md:rounded-2xl"
+                                >
+                                    {/* Desktop: Side-by-side layout / Mobile: Stacked */}
+                                    <div className="flex flex-col md:flex-row">
+                                        {/* Region Info Panel */}
+                                        <div className="relative flex items-center gap-3 border-b border-primary-100 bg-gradient-to-br from-primary-600 to-primary-700 p-4 md:w-56 md:shrink-0 md:flex-col md:items-start md:justify-center md:gap-4 md:border-b-0 md:border-r md:p-6">
+                                            {/* Subtle pattern overlay */}
+                                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_50%)]" />
+
+                                            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15 shadow-inner backdrop-blur-sm md:h-12 md:w-12">
+                                                <Globe className="h-5 w-5 text-white md:h-6 md:w-6" />
+                                            </div>
+                                            <div className="relative">
+                                                <h3 className="text-base font-bold text-white md:text-lg">
+                                                    {bundle.region_name}
+                                                </h3>
+                                                <p className="text-xs text-primary-200 md:mt-0.5 md:text-sm">
+                                                    {trans(
+                                                        'country_page.regional_bundles.covers',
+                                                        {
+                                                            count: bundle.country_count.toString(),
+                                                        },
+                                                    )}
+                                                </p>
+                                            </div>
+                                            <div className="ml-auto md:ml-0 md:mt-1">
+                                                <p className="text-[10px] font-medium text-primary-300 md:text-xs">
+                                                    {trans(
+                                                        'country_page.regional_bundles.from',
+                                                    )}
+                                                </p>
+                                                <p className="text-lg font-extrabold text-white md:text-2xl">
+                                                    €
+                                                    {Number(
+                                                        bundle.min_price,
+                                                    ).toFixed(2)}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Packages Grid */}
+                                        <div className="flex-1 p-3 md:p-5">
+                                            <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
+                                                {bundle.packages.map(
+                                                    (pkg) => (
+                                                        <Link
+                                                            key={pkg.id}
+                                                            href={`/checkout/${pkg.id}`}
+                                                            className="group relative flex flex-col overflow-hidden rounded-lg border border-primary-100 bg-white p-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary-300 hover:shadow-md md:rounded-xl md:p-4"
+                                                        >
+                                                            <span className="text-sm font-bold text-primary-900 md:text-base">
+                                                                {
+                                                                    pkg.data_label
+                                                                }
+                                                            </span>
+                                                            <span className="mt-0.5 flex items-center gap-1 text-[10px] text-primary-500 md:text-xs">
+                                                                <Calendar className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                                                                {
+                                                                    pkg.validity_label
+                                                                }
+                                                            </span>
+                                                            <span className="mt-2 text-base font-extrabold tracking-tight text-primary-900 md:mt-3 md:text-lg">
+                                                                €
+                                                                {Number(
+                                                                    pkg.retail_price,
+                                                                ).toFixed(
+                                                                    2,
+                                                                )}
+                                                            </span>
+                                                            <span className="mt-1.5 flex items-center gap-0.5 text-[10px] font-semibold text-primary-500 transition-colors group-hover:text-primary-700 md:text-xs">
+                                                                {trans(
+                                                                    'country_page.select_plan',
+                                                                )}
+                                                                <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5 md:h-3 md:w-3" />
+                                                            </span>
+                                                            {/* Hover gradient overlay */}
+                                                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary-50/0 to-accent-50/0 transition-all duration-200 group-hover:from-primary-50/40 group-hover:to-accent-50/20" />
+                                                        </Link>
+                                                    ),
+                                                )}
+                                            </div>
+
+                                            {bundle.total_count > 4 &&
+                                                bundle.region_iso && (
+                                                    <div className="mt-3 flex justify-center md:mt-4">
+                                                        <Link
+                                                            href={`/destinations/${bundle.region_iso.toLowerCase()}`}
+                                                            className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-primary-50 px-4 py-2 text-xs font-bold text-primary-700 transition-all hover:border-primary-300 hover:bg-primary-100 md:text-sm"
+                                                        >
+                                                            {trans(
+                                                                'country_page.regional_bundles.view_all',
+                                                                {
+                                                                    region: bundle.region_name,
+                                                                },
+                                                            )}
+                                                            <span className="rounded-full bg-primary-200/60 px-2 py-0.5 text-[10px] font-bold text-primary-600 md:text-xs">
+                                                                {bundle.total_count}
+                                                            </span>
+                                                            <ArrowRight className="h-3.5 w-3.5" />
+                                                        </Link>
+                                                    </div>
+                                                )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+            </div>{/* end bg-mesh wrapper */}
 
             {/* Features Section */}
             <section className="relative overflow-hidden border-t border-primary-100 py-8 md:py-16">
