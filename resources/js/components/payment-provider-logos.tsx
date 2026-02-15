@@ -72,12 +72,19 @@ export function PayseraLogo({ className }: { className?: string }) {
 
 export function CryptomusLogo({ className }: { className?: string }) {
     return (
-        <img
-            src="https://cdn.jsdelivr.net/npm/cryptocurrency-icons@latest/svg/color/btc.svg"
-            alt="Bitcoin"
+        <svg
             className={className}
-            loading="lazy"
-        />
+            viewBox="0 0 32 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-label="Crypto / Cryptocurrencies"
+        >
+            <circle cx="16" cy="16" r="14" fill="#f7931a" />
+            <path
+                d="M21.2 14.1c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.6-.4-.7 2.6c-.4-.1-.8-.2-1.3-.3l.7-2.7-1.6-.4-.7 2.7c-.3-.1-.7-.2-1-.3l-2.2-.5-.4 1.7s1.2.3 1.2.3c.7.2.8.6.8 1l-.8 3.2c0 0 .1 0 .1 0l-.1 0-1.1 4.5c-.1.2-.3.5-.7.4 0 0-1.2-.3-1.2-.3l-.8 1.8 2.1.5c.4.1.8.2 1.2.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.7 1.6.4.7-2.8c2.9.5 5.1.3 6-2.3.7-2.1 0-3.3-1.5-4.1 1.1-.3 1.9-1 2.1-2.5zm-3.7 5.2c-.5 2.1-4.1 1-5.3.7l.9-3.8c1.2.3 4.9.9 4.4 3.1zm.5-5.3c-.5 1.9-3.5.9-4.5.7l.9-3.4c1 .2 4.1.7 3.6 2.7z"
+                fill="white"
+            />
+        </svg>
     );
 }
 

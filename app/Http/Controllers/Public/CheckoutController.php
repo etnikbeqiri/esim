@@ -243,6 +243,7 @@ class CheckoutController extends Controller
             'status' => $publicStatus->value,
             'status_label' => $publicStatus->label(),
             'amount' => $order->amount,
+            'original_amount' => $order->original_amount,
             'net_amount' => $order->net_amount,
             'vat_rate' => $order->vat_rate,
             'vat_amount' => $order->vat_amount,
