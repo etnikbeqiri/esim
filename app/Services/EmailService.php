@@ -117,7 +117,7 @@ class EmailService
      * Get the best email address for an order.
      * Priority: payment email (from payment form) > order email (from checkout) > customer account email.
      */
-    protected function getOrderEmail(Order $order): ?string
+    public function getOrderEmail(Order $order): ?string
     {
         return $order->payments()->latest()->first()?->customer_email
             ?? $order->customer_email
@@ -186,6 +186,47 @@ class EmailService
             [
                 'order_number' => $order->order_number,
                 'order_uuid' => $order->uuid,
+            ]
+        );
+    }
+
+    /**
+     * Resend eSIM delivery email to a specific email address.
+     * This is used when the customer wants to resend the eSIM data,
+     * optionally to a different email address than the original.
+     */
+    public function resendEsimDelivery(Order $order, ?string $customEmail = null): ?EmailQueue
+    {
+        if (!$order->esimProfile) {
+            Log::warning('Cannot resend eSIM delivery - no eSIM profile', ['order_id' => $order->id]);
+            return null;
+        }
+
+        // Use custom email if provided, otherwise fall back to the order's email
+        $email = $customEmail ?? $this->getOrderEmail($order);
+        $name = $this->getOrderName($order);
+
+        if (!$email) {
+            Log::warning('Cannot resend eSIM delivery - no email address', ['order_id' => $order->id]);
+            return null;
+        }
+
+        Log::info('Resending eSIM delivery email', [
+            'order_id' => $order->id,
+            'email' => $email,
+            'is_custom_email' => $customEmail !== null,
+        ]);
+
+        return $this->queueUnlessReplaying(
+            EmailTemplate::EsimDelivery,
+            $email,
+            $name,
+            $order->customer_id,
+            $order->id,
+            [
+                'order_number' => $order->order_number,
+                'order_uuid' => $order->uuid,
+                'is_resend' => true,
             ]
         );
     }

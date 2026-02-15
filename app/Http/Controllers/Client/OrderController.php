@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Client;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\EmailService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class OrderController extends Controller
@@ -140,5 +142,63 @@ class OrderController extends Controller
                 'is_b2b' => $customer->isB2B(),
             ],
         ]);
+    }
+
+    public function resendEsim(Request $request, string $uuid)
+    {
+        $user = $request->user();
+        $customer = $user->customer;
+
+        if (!$customer) {
+            abort(403, 'Customer account required');
+        }
+
+        $order = Order::where('uuid', $uuid)
+            ->where('customer_id', $customer->id)
+            ->with(['esimProfile', 'payments'])
+            ->firstOrFail();
+
+        // Validate the order has an eSIM profile
+        if (!$order->esimProfile) {
+            return back()->with('error', 'This order does not have an eSIM profile yet.');
+        }
+
+        // Validate custom email format if provided
+        $customEmail = $request->input('email');
+        if ($customEmail && !filter_var($customEmail, FILTER_VALIDATE_EMAIL)) {
+            return back()->with('error', 'Please provide a valid email address.');
+        }
+
+        try {
+            $emailService = app(EmailService::class);
+
+            // Use the resendEsimDelivery method which properly handles the email logic
+            // If a custom email is provided, it will use that; otherwise, it uses the order's email
+            $emailQueue = $emailService->resendEsimDelivery($order, $customEmail);
+
+            if (!$emailQueue) {
+                return back()->with('error', 'Failed to queue eSIM email. Please try again or contact support.');
+            }
+
+            // Get the actual email that will receive the message (for the success message)
+            $targetEmail = $customEmail ?? $emailService->getOrderEmail($order);
+
+            Log::info('eSIM data resent', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'email' => $targetEmail,
+                'is_custom_email' => $customEmail !== null,
+                'requested_by' => $user->id,
+            ]);
+
+            return back()->with('success', "eSIM data has been sent to {$targetEmail}. Please check your inbox.");
+        } catch (\Exception $e) {
+            Log::error('Failed to resend eSIM data', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Failed to resend eSIM data. Please try again or contact support.');
+        }
     }
 }

@@ -8,11 +8,21 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     ArrowLeft,
     CheckCircle,
@@ -23,6 +33,7 @@ import {
     Globe,
     HardDrive,
     Loader2,
+    Mail,
     Package,
     RefreshCw,
     Smartphone,
@@ -119,6 +130,11 @@ function getStatusBadgeClass(color: string): string {
 
 export default function OrderShow({ order, customer }: Props) {
     const [copied, setCopied] = useState<string | null>(null);
+    const [dialogOpen, setDialogOpen] = useState(false);
+
+    const resendForm = useForm({
+        email: '',
+    });
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Shop', href: '/client/packages' },
@@ -152,6 +168,16 @@ export default function OrderShow({ order, customer }: Props) {
         navigator.clipboard.writeText(text);
         setCopied(field);
         setTimeout(() => setCopied(null), 2000);
+    }
+
+    function handleResendEsim(e: React.FormEvent) {
+        e.preventDefault();
+        resendForm.post(route('client.orders.resend-esim', order.uuid), {
+            onSuccess: () => {
+                setDialogOpen(false);
+                resendForm.reset();
+            },
+        });
     }
 
     const isPendingRetry = order.status === 'pending_retry';
@@ -440,6 +466,75 @@ export default function OrderShow({ order, customer }: Props) {
                                             )}
                                         </Button>
                                     </div>
+
+                                    <Separator />
+
+                                    {/* Resend eSIM Email */}
+                                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                className="w-full"
+                                            >
+                                                <Mail className="mr-2 h-4 w-4" />
+                                                Resend eSIM to Email
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Resend eSIM Data</DialogTitle>
+                                                <DialogDescription>
+                                                    We'll resend your eSIM QR code and activation details to your email. You can also specify a different email address if needed.
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <form onSubmit={handleResendEsim}>
+                                                <div className="grid gap-4 py-4">
+                                                    <div className="space-y-2">
+                                                        <label htmlFor="email" className="text-sm font-medium">
+                                                            Email Address (optional)
+                                                        </label>
+                                                        <Input
+                                                            id="email"
+                                                            type="email"
+                                                            placeholder="Leave empty to use original email"
+                                                            value={resendForm.data.email}
+                                                            onChange={(e) => resendForm.setData('email', e.target.value)}
+                                                            disabled={resendForm.processing}
+                                                        />
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Leave empty to send to the email used during checkout.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <DialogFooter>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        onClick={() => setDialogOpen(false)}
+                                                        disabled={resendForm.processing}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                    <Button
+                                                        type="submit"
+                                                        disabled={resendForm.processing}
+                                                    >
+                                                        {resendForm.processing ? (
+                                                            <>
+                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                Sending...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Mail className="mr-2 h-4 w-4" />
+                                                                Send eSIM Data
+                                                            </>
+                                                        )}
+                                                    </Button>
+                                                </DialogFooter>
+                                            </form>
+                                        </DialogContent>
+                                    </Dialog>
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-12 text-center">

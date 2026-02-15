@@ -79,6 +79,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('orders', [\App\Http\Controllers\Client\OrderController::class, 'index'])->name('orders.index');
         Route::get('orders/{uuid}', [\App\Http\Controllers\Client\OrderController::class, 'show'])->name('orders.show');
+        Route::post('orders/{uuid}/resend-esim', [\App\Http\Controllers\Client\OrderController::class, 'resendEsim'])->name('orders.resend-esim');
 
         Route::get('tickets', [\App\Http\Controllers\Client\TicketController::class, 'index'])->name('tickets.index');
         Route::get('tickets/create', [\App\Http\Controllers\Client\TicketController::class, 'create'])->name('tickets.create');
