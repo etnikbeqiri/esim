@@ -149,7 +149,13 @@ return [
         ],
         'results' => [
             'showing' => 'Zeige :count Reiseziel(e)',
+            'showing_label' => 'Reiseziele',
             'in_region' => 'in :region',
+        ],
+        'sort' => [
+            'name' => 'A-Z',
+            'most_plans' => 'Meiste Pläne',
+            'cheapest' => 'Günstigste zuerst',
         ],
         'card' => [
             'plan' => 'Plan',

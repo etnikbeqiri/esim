@@ -811,7 +811,7 @@ export default function CountryPage({ country, packages, regionalBundles }: Prop
                                 {/* Header row */}
                                 <div className="flex items-center justify-between">
                                     <h2 className="flex items-center gap-2 text-base font-bold text-primary-900 md:gap-3 md:text-xl">
-                                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-100 text-xs font-extrabold text-accent-700 md:h-8 md:w-8 md:text-sm">
+                                        <span className="inline-flex min-w-6 items-center justify-center rounded-full bg-gradient-to-r from-accent-300 to-accent-400 px-1.5 py-0.5 text-xs font-extrabold text-accent-950 shadow-sm md:min-w-8 md:px-2 md:py-1 md:text-sm">
                                             {filteredAndSortedPackages.length}
                                         </span>
                                         {trans(
@@ -891,10 +891,10 @@ export default function CountryPage({ country, packages, regionalBundles }: Prop
                                                                 'country',
                                                             );
                                                         }}
-                                                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold transition-all md:px-3 md:py-1.5 md:text-xs ${
+                                                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold transition-all md:px-3 md:py-1.5 md:text-xs ${
                                                             featuredOnly
-                                                                ? 'bg-amber-500 text-white shadow-sm'
-                                                                : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                                                                ? 'border border-accent-600 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 text-accent-950 shadow-[0px_3px_10px_rgba(212,175,55,0.3)]'
+                                                                : 'border border-transparent bg-amber-50 text-amber-700 hover:bg-amber-100'
                                                         }`}
                                                     >
                                                         <Star className="h-3 w-3" />
@@ -923,10 +923,10 @@ export default function CountryPage({ country, packages, regionalBundles }: Prop
                                                                 : key,
                                                         )
                                                     }
-                                                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition-all md:px-3 md:py-1.5 md:text-xs ${
+                                                    className={`rounded-full px-2.5 py-1 text-[10px] font-bold transition-all md:px-3 md:py-1.5 md:text-xs ${
                                                         durationFilter === key
-                                                            ? 'bg-primary-600 text-white shadow-sm'
-                                                            : 'bg-primary-50 text-primary-600 hover:bg-primary-100'
+                                                            ? 'border border-primary-700 bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500 text-white shadow-[0px_3px_10px_rgba(13,148,136,0.3)]'
+                                                            : 'border border-transparent bg-primary-50 text-primary-600 hover:bg-primary-100'
                                                     }`}
                                                 >
                                                     {trans(
@@ -957,10 +957,10 @@ export default function CountryPage({ country, packages, regionalBundles }: Prop
                                                                 : key,
                                                         )
                                                     }
-                                                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition-all md:px-3 md:py-1.5 md:text-xs ${
+                                                    className={`rounded-full px-2.5 py-1 text-[10px] font-bold transition-all md:px-3 md:py-1.5 md:text-xs ${
                                                         dataFilter === key
-                                                            ? 'bg-accent-500 text-accent-950 shadow-sm'
-                                                            : 'bg-accent-50 text-accent-700 hover:bg-accent-100'
+                                                            ? 'border border-accent-600 bg-gradient-to-r from-accent-300 via-accent-400 to-accent-300 text-accent-950 shadow-[0px_3px_10px_rgba(212,175,55,0.3)]'
+                                                            : 'border border-transparent bg-accent-50 text-accent-700 hover:bg-accent-100'
                                                     }`}
                                                 >
                                                     {trans(

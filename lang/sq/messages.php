@@ -146,7 +146,13 @@ return [
         ],
         'results' => [
             'showing' => 'Duke shfaqur :count destinacion(e)',
+            'showing_label' => 'Destinacione',
             'in_region' => 'në :region',
+        ],
+        'sort' => [
+            'name' => 'A-Z',
+            'most_plans' => 'Më Shumë Plane',
+            'cheapest' => 'Më të Lira Fillimisht',
         ],
         'card' => [
             'plan' => 'plan',

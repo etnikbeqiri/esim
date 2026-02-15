@@ -149,7 +149,13 @@ return [
         ],
         'results' => [
             'showing' => 'Showing :count destination(s)',
+            'showing_label' => 'Destinations',
             'in_region' => 'in :region',
+        ],
+        'sort' => [
+            'name' => 'A-Z',
+            'most_plans' => 'Most Plans',
+            'cheapest' => 'Cheapest First',
         ],
         'card' => [
             'plan' => 'plan',
