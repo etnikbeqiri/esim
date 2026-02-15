@@ -386,7 +386,7 @@ export default function Destinations({ countries, regions, filters }: Props) {
                             </GoldButton>
                         </div>
                     ) : (
-                        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+                        <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
                             {filteredCountries.map((country, index) => (
                                 <DestinationCard
                                     key={country.id}
