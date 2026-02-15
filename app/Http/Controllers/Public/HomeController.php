@@ -229,12 +229,64 @@ class HomeController extends Controller
                 $firstPkg = $packages->first();
                 $regionCountry = $firstPkg->country;
 
-                // Pick best-value package per data tier for diverse preview
-                $preview = $packages->groupBy('data_mb')
-                    ->map(fn ($group) => $group->sortBy(fn ($p) => (float) $p->effective_retail_price)->first())
+                // Score each package to find the best ones to preview
+                $maxData = $packages->max('data_mb') ?: 1;
+                $maxValidity = $packages->max('validity_days') ?: 1;
+                $prices = $packages->map(fn ($p) => (float) $p->effective_retail_price);
+                $maxPrice = $prices->max() ?: 1;
+                $minPrice = $prices->min() ?: 0;
+                $priceRange = max($maxPrice - $minPrice, 1);
+
+                $scored = $packages->map(function ($pkg) use ($maxData, $maxValidity, $minPrice, $priceRange) {
+                    $price = (float) $pkg->effective_retail_price;
+                    $dataGb = $pkg->data_mb / 1024;
+                    $score = 0;
+
+                    // Value score (price per GB, lower = better) — weight: 30
+                    $pricePerGb = $dataGb > 0 ? $price / $dataGb : 999;
+                    $score += max(0, 30 - ($pricePerGb * 2));
+
+                    // Data amount score (more data = better) — weight: 25
+                    $score += ($pkg->data_mb / $maxData) * 25;
+
+                    // Validity score (longer = better) — weight: 15
+                    $score += ($pkg->validity_days / $maxValidity) * 15;
+
+                    // Penalize tiny plans (< 1 GB) — weight: -15
+                    if ($pkg->data_mb < 1024) {
+                        $score -= 15;
+                    }
+
+                    // Penalize very short plans (1 day) — weight: -10
+                    if ($pkg->validity_days <= 1) {
+                        $score -= 10;
+                    }
+
+                    // Bonus for featured/popular — weight: 10
+                    if ($pkg->is_featured || $pkg->is_popular) {
+                        $score += 10;
+                    }
+
+                    // Mid-range price bonus (not cheapest junk, not most expensive) — weight: 10
+                    $priceNorm = ($price - $minPrice) / $priceRange;
+                    $score += (1 - abs($priceNorm - 0.4)) * 10;
+
+                    $pkg->_preview_score = $score;
+
+                    return $pkg;
+                });
+
+                // Pick top 4 by score, then sort by data for display
+                $preview = $scored->sortByDesc('_preview_score')
+                    ->unique(fn ($p) => match (true) {
+                        $p->data_mb <= 1024  => 'small',
+                        $p->data_mb <= 3072  => 'medium',
+                        $p->data_mb <= 10240 => 'large',
+                        default              => 'xl',
+                    })
+                    ->take(4)
                     ->sortBy('data_mb')
-                    ->values()
-                    ->take(4);
+                    ->values();
 
                 return [
                     'region_name' => $regionName,
