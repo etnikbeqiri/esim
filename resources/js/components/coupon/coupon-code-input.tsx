@@ -31,6 +31,7 @@ interface CouponCodeInputProps {
         totalDiscount: number,
         finalAmount: number,
     ) => void;
+    onEmailFocus?: () => void;
     className?: string;
 }
 
@@ -39,6 +40,7 @@ export function CouponCodeInput({
     email,
     orderAmount,
     onCouponsChanged,
+    onEmailFocus,
     className = '',
 }: CouponCodeInputProps) {
     const { trans } = useTrans();
@@ -403,7 +405,10 @@ export function CouponCodeInput({
             {showInput && (
                 <div className="space-y-2.5">
                     <div className="flex gap-2">
-                        <div className="relative flex-1">
+                        <div
+                            className="relative flex-1"
+                            onClick={!isEmailValid ? onEmailFocus : undefined}
+                        >
                             <Ticket className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-primary-400" />
                             <Input
                                 type="text"
@@ -424,7 +429,7 @@ export function CouponCodeInput({
                                     isEmailValid &&
                                     validateCoupon()
                                 }
-                                className={`h-10 rounded-xl border-primary-200 pl-10 font-mono text-sm tracking-wider md:h-11 ${error ? 'border-red-300 focus:border-red-400 focus:ring-red-200' : ''}`}
+                                className={`h-10 rounded-xl border-primary-200 pl-10 font-mono text-sm tracking-wider md:h-11 ${error ? 'border-red-300 focus:border-red-400 focus:ring-red-200' : ''} ${!isEmailValid ? 'cursor-pointer' : ''}`}
                                 disabled={isValidating || !isEmailValid}
                             />
                         </div>
@@ -447,10 +452,14 @@ export function CouponCodeInput({
                     </div>
 
                     {!isEmailValid && !error && (
-                        <p className="flex items-center gap-1.5 text-[11px] text-primary-400">
+                        <button
+                            type="button"
+                            onClick={onEmailFocus}
+                            className="flex items-center gap-1.5 text-[11px] text-primary-400 transition-colors hover:text-primary-600"
+                        >
                             <Info className="h-3 w-3" />
                             {trans('coupon_input.enter_email_first')}
-                        </p>
+                        </button>
                     )}
 
                     {error &&

@@ -118,6 +118,7 @@ export default function Checkout({
         coupon_codes: [] as string[],
     });
 
+    const emailInputRef = useRef<HTMLInputElement>(null);
     const geoDetected = useRef(false);
 
     useEffect(() => {
@@ -498,6 +499,7 @@ export default function Checkout({
                                             <div className="group relative">
                                                 <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-primary-400 transition-colors group-focus-within:text-primary-600" />
                                                 <Input
+                                                    ref={emailInputRef}
                                                     id="email"
                                                     type="email"
                                                     placeholder={trans(
@@ -885,6 +887,10 @@ export default function Checkout({
                                         onCouponsChanged={
                                             handleCouponsChanged
                                         }
+                                        onEmailFocus={() => {
+                                            emailInputRef.current?.focus();
+                                            emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        }}
                                     />
                                 </div>
 

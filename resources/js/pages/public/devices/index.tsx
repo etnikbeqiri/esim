@@ -1,5 +1,4 @@
 import { HeroSection } from '@/components/hero-section';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useTrans } from '@/hooks/use-trans';
@@ -11,7 +10,7 @@ import {
 } from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import { Check, Smartphone, X } from 'lucide-react';
+import { Check, Smartphone } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface Brand {
@@ -198,10 +197,6 @@ export default function DevicesIndex({
     const { trans } = useTrans();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedBrand, setSelectedBrand] = useState<string>('all');
-    const [detectedDevice, setDetectedDevice] = useState<Device | null>(null);
-    const [showDetectionAlert, setShowDetectionAlert] = useState(false);
-    const [isCompatible, setIsCompatible] = useState<boolean | null>(null);
-
     // Analytics hooks
     const {
         search,
@@ -228,27 +223,15 @@ export default function DevicesIndex({
         [deviceDetected],
     );
 
-    // Detect user's device on mount
+    // Detect user's device on mount (for analytics only)
     useEffect(() => {
         const detected = detectUserDevice(userAgent, devices);
         if (detected) {
-            setDetectedDevice(detected);
-            setIsCompatible(true);
-            setShowDetectionAlert(true);
             handleDeviceCheck(
                 detected.name,
                 detected.brand?.name || 'Unknown',
                 true,
             );
-        } else if (
-            userAgent &&
-            (userAgent.toLowerCase().includes('mobile') ||
-                userAgent.toLowerCase().includes('android'))
-        ) {
-            // Mobile device detected but not in our list
-            setIsCompatible(false);
-            setShowDetectionAlert(true);
-            handleDeviceCheck('Unknown', 'Unknown', false);
         }
     }, [userAgent, devices, handleDeviceCheck]);
 
@@ -388,64 +371,6 @@ export default function DevicesIndex({
             />
 
             <div className="min-h-screen bg-primary-50">
-                {/* Detection Alert */}
-                {showDetectionAlert && (
-                    <div className="relative z-20 container mx-auto -mt-6 mb-6 px-4">
-                        <Alert
-                            className={`relative ${
-                                isCompatible
-                                    ? 'border-green-500/50 bg-green-50'
-                                    : 'border-amber-500/50 bg-amber-50'
-                            }`}
-                        >
-                            {isCompatible ? (
-                                <Check className="h-4 w-4 text-green-600" />
-                            ) : (
-                                <Smartphone className="h-4 w-4 text-amber-600" />
-                            )}
-                            <AlertTitle
-                                className={
-                                    isCompatible
-                                        ? 'text-green-700'
-                                        : 'text-amber-700'
-                                }
-                            >
-                                {isCompatible
-                                    ? trans(
-                                          'devices_page.detection.supported_title',
-                                      )
-                                    : trans(
-                                          'devices_page.detection.not_recognized_title',
-                                      )}
-                            </AlertTitle>
-                            <AlertDescription
-                                className={
-                                    isCompatible
-                                        ? 'text-green-600'
-                                        : 'text-amber-600'
-                                }
-                            >
-                                {isCompatible && detectedDevice
-                                    ? trans(
-                                          'devices_page.detection.supported_description',
-                                          {
-                                              device: `${detectedDevice.brand?.name} ${detectedDevice.name}`,
-                                          },
-                                      )
-                                    : trans(
-                                          'devices_page.detection.not_recognized_description',
-                                      )}
-                            </AlertDescription>
-                            <button
-                                onClick={() => setShowDetectionAlert(false)}
-                                className="absolute top-2 right-2 rounded p-1 hover:bg-primary-100"
-                            >
-                                <X className="h-4 w-4 text-primary-500" />
-                            </button>
-                        </Alert>
-                    </div>
-                )}
-
                 {/* Brand Filter Tabs */}
                 <section className="container mx-auto px-4 py-8">
                     <div className="mb-8 flex flex-wrap justify-center gap-2">
