@@ -358,8 +358,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                             </p>
                         </div>
 
-                        {/* Paysera Trust Badge - Disabled */
-                        {/* <PayseraTrustBadge /> */}
+                        {/* Paysera Trust Badge - Disabled <PayseraTrustBadge /> */}
                     </div>
                 </footer>
             </div>
