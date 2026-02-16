@@ -12,17 +12,23 @@ Route::get('/preview-email/{template}', [EmailPreviewController::class, 'preview
 
 Route::get('/sitemap.xml', [SitemapController::class, '__invoke'])->name('sitemap');
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::middleware(['cacheResponse:300'])->group(function () {
+    Route::get('/', [HomeController::class, 'index'])->name('home');
+    Route::get('/destinations', [HomeController::class, 'destinations'])->name('destinations');
+    Route::get('/how-it-works', [HomeController::class, 'howItWorks'])->name('how-it-works');
+    Route::get('/privacy', fn () => \Inertia\Inertia::render('public/privacy'))->name('privacy');
+    Route::get('/terms', fn () => \Inertia\Inertia::render('public/terms'))->name('terms');
+    Route::get('/refund', fn () => \Inertia\Inertia::render('public/refund'))->name('refund');
+    Route::get('/faq', fn () => \Inertia\Inertia::render('public/faq'))->name('faq');
+    Route::get('/help', fn () => \Inertia\Inertia::render('public/help'))->name('help');
+    Route::get('/blog', [ArticleController::class, 'index'])->name('blog.index');
+    Route::get('/devices', [DeviceController::class, 'index'])->name('devices.index');
+});
+
+// API routes (not cached)
 Route::get('/api/destinations/search', [HomeController::class, 'searchDestinations'])->name('api.destinations.search');
-Route::get('/destinations', [HomeController::class, 'destinations'])->name('destinations');
 Route::get('/destinations/{country}', [HomeController::class, 'country'])->name('destinations.country');
 Route::get('/package/{package}', [HomeController::class, 'package'])->name('package.show');
-Route::get('/how-it-works', [HomeController::class, 'howItWorks'])->name('how-it-works');
-Route::get('/privacy', fn () => \Inertia\Inertia::render('public/privacy'))->name('privacy');
-Route::get('/terms', fn () => \Inertia\Inertia::render('public/terms'))->name('terms');
-Route::get('/refund', fn () => \Inertia\Inertia::render('public/refund'))->name('refund');
-Route::get('/faq', fn () => \Inertia\Inertia::render('public/faq'))->name('faq');
-Route::get('/help', fn () => \Inertia\Inertia::render('public/help'))->name('help');
 
 Route::prefix('tickets')->name('tickets.')->group(function () {
     Route::get('/', [\App\Http\Controllers\Public\TicketController::class, 'index'])->name('index');
