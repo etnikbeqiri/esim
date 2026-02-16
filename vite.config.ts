@@ -24,4 +24,13 @@ export default defineConfig({
     esbuild: {
         jsx: 'automatic',
     },
+    build: {
+        minify: true,
+        rollupOptions: {
+            treeshake: true,
+        },
+    },
+    ssr: {
+        noExternal: ['@inertiajs/react'],
+    },
 });
