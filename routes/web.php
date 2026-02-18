@@ -132,6 +132,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('orders/{order}/retry', [\App\Http\Controllers\Admin\OrderController::class, 'retry'])->name('orders.retry');
         Route::post('orders/{order}/fail', [\App\Http\Controllers\Admin\OrderController::class, 'fail'])->name('orders.fail');
         Route::post('orders/{order}/sync-esim', [\App\Http\Controllers\Admin\OrderController::class, 'syncEsim'])->name('orders.sync-esim');
+        Route::post('orders/{order}/resend-esim-email', [\App\Http\Controllers\Admin\OrderController::class, 'resendEsimEmail'])->name('orders.resend-esim-email');
 
         Route::get('customers', [\App\Http\Controllers\Admin\CustomerController::class, 'index'])->name('customers.index');
         Route::get('customers/{customer}', [\App\Http\Controllers\Admin\CustomerController::class, 'show'])->name('customers.show');

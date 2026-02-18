@@ -8,12 +8,14 @@ import { useAnalytics, usePageViewTracking } from '@/lib/analytics';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     BookOpen,
+    Calendar,
     CheckCircle2,
     ChevronRight,
     Globe,
     HelpCircle,
     Loader2,
     MessageCircle,
+    RefreshCw,
     XCircle,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
@@ -23,6 +25,7 @@ interface Order {
     order_number: string;
     status: string;
     status_label: string;
+    status_color: string;
     package: {
         name: string;
         data_label: string;
@@ -38,6 +41,8 @@ interface Order {
         activation_code: string | null;
     } | null;
     customer_email: string;
+    created_at: string;
+    amount: string | number;
     analytics: {
         transaction_id: string;
         value: number;
@@ -52,6 +57,37 @@ interface Order {
 
 interface Props {
     order: Order;
+}
+
+function getStatusIcon(status: string) {
+    switch (status) {
+        case 'completed':
+            return <CheckCircle2 className="h-4 w-4 text-green-600" />;
+        case 'processing':
+            return (
+                <Loader2 className="h-4 w-4 animate-spin text-primary-500" />
+            );
+        case 'pending_retry':
+            return <RefreshCw className="h-4 w-4 text-orange-500" />;
+        case 'failed':
+            return <XCircle className="h-4 w-4 text-red-500" />;
+        default:
+            return (
+                <Loader2 className="h-4 w-4 animate-spin text-primary-500" />
+            );
+    }
+}
+
+function getStatusBadgeClass(color: string): string {
+    const colors: Record<string, string> = {
+        green: 'bg-green-50 text-green-700 ring-1 ring-green-200/50',
+        yellow: 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200/50',
+        red: 'bg-red-50 text-red-700 ring-1 ring-red-200/50',
+        blue: 'bg-primary-50 text-primary-700 ring-1 ring-primary-100',
+        gray: 'bg-primary-50 text-primary-600 ring-1 ring-primary-100',
+        orange: 'bg-orange-50 text-orange-700 ring-1 ring-orange-200/50',
+    };
+    return colors[color] || colors.gray;
 }
 
 export default function CheckoutSuccess({ order }: Props) {
@@ -127,11 +163,11 @@ export default function CheckoutSuccess({ order }: Props) {
         [contentShare, order.uuid, trackInstallationStep],
     );
 
-    // Poll for updates while processing
+    // Poll for updates while processing OR until eSIM data is available
     useEffect(() => {
-        if (!isProcessing) return;
+        const shouldPoll = isProcessing || (isCompleted && !order.esim);
+        if (!shouldPoll) return;
 
-        // Immediate check (1s) in case webhook fired during page load
         const quickCheck = setTimeout(() => {
             router.reload({ only: ['order'] });
         }, 1000);
@@ -144,7 +180,7 @@ export default function CheckoutSuccess({ order }: Props) {
             clearTimeout(quickCheck);
             clearInterval(interval);
         };
-    }, [isProcessing]);
+    }, [isProcessing, isCompleted, order.esim]);
 
     return (
         <GuestLayout>
@@ -158,112 +194,84 @@ export default function CheckoutSuccess({ order }: Props) {
                 }
             />
 
-            <section className="bg-mesh relative min-h-screen overflow-hidden py-12 md:py-16">
-                {/* Decorative blobs */}
-                <div className="animate-float absolute top-10 -left-32 h-96 w-96 rounded-full bg-primary-200/30 blur-3xl" />
-                <div className="animate-float-delayed absolute -right-32 bottom-20 h-96 w-96 rounded-full bg-accent-200/20 blur-3xl" />
-
-                <div className="relative z-10 container mx-auto px-4">
-                    <div className="mx-auto max-w-3xl">
-                        {/* Status Header */}
+            <section className="py-12 md:py-20">
+                <div className="container mx-auto px-4">
+                    <div className="mx-auto max-w-2xl">
+                        {/* Celebration Header */}
                         <div className="mb-8 text-center">
-                            {isProcessing && (
-                                <>
-                                    <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-50 shadow-sm ring-1 ring-primary-100 md:h-20 md:w-20">
-                                        <Loader2 className="h-8 w-8 animate-spin text-primary-500 md:h-10 md:w-10" />
+                            <Badge
+                                variant="outline"
+                                className={`${getStatusBadgeClass(order.status_color)} mb-4 inline-flex items-center gap-1.5 rounded-lg border-0 px-3 py-1.5 text-[11px] font-semibold tracking-wider uppercase`}
+                            >
+                                {getStatusIcon(order.status)}
+                                {order.status_label}
+                            </Badge>
+                            <h1 className="text-2xl font-bold text-primary-900 md:text-3xl">
+                                {isCompleted
+                                    ? trans('checkout_success_page.status.ready')
+                                    : isProcessing
+                                      ? trans('checkout_success_page.status.preparing')
+                                      : trans('checkout_success_page.status.failed_title')}
+                            </h1>
+                            <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-primary-500 md:text-xs">
+                                <Calendar className="h-3.5 w-3.5" />
+                                <span>
+                                    {trans('checkout_success_page.placed_on', {
+                                        date: order.created_at,
+                                    })}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Processing State */}
+                        {isProcessing && (
+                            <div className="mb-6 overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm">
+                                <div className="flex flex-col items-center justify-center px-4 py-10 text-center md:px-6 md:py-12">
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-50 ring-1 ring-primary-100 md:h-16 md:w-16">
+                                        <Loader2 className="h-7 w-7 animate-spin text-primary-500 md:h-8 md:w-8" />
                                     </div>
-                                    <Badge
-                                        variant="secondary"
-                                        className="mb-3 rounded-lg bg-primary-50 px-3 py-1 text-[11px] font-semibold tracking-wider text-primary-600 uppercase ring-1 ring-primary-100"
-                                    >
-                                        <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
-                                        {isAwaitingPayment
-                                            ? trans(
-                                                  'checkout_success_page.status.verifying',
-                                              )
-                                            : trans(
-                                                  'checkout_success_page.status.processing',
-                                              )}
-                                    </Badge>
-                                    <h1 className="text-2xl font-bold tracking-tight text-primary-900 md:text-4xl">
-                                        {isAwaitingPayment
-                                            ? trans(
-                                                  'checkout_success_page.status.confirming',
-                                              )
-                                            : trans(
-                                                  'checkout_success_page.status.preparing',
-                                              )}
-                                    </h1>
-                                    <p className="mt-2 text-[13px] text-primary-500 md:mt-3 md:text-base">
-                                        {isAwaitingPayment
-                                            ? trans(
-                                                  'checkout_success_page.status.verifying_desc',
-                                              )
-                                            : trans(
-                                                  'checkout_success_page.status.preparing_desc',
-                                              )}
-                                    </p>
-                                </>
-                            )}
-                            {isCompleted && (
-                                <>
-                                    <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-50 shadow-sm ring-1 ring-accent-200/50 md:h-20 md:w-20">
-                                        <CheckCircle2 className="h-8 w-8 text-accent-600 md:h-10 md:w-10" />
-                                    </div>
-                                    <Badge className="mb-3 rounded-lg bg-accent-50 px-3 py-1 text-[11px] font-semibold tracking-wider text-accent-700 uppercase ring-1 ring-accent-200/50">
-                                        <CheckCircle2 className="mr-1.5 h-3 w-3" />
+                                    <h3 className="mt-4 text-[15px] font-bold text-primary-900 md:text-base">
                                         {trans(
-                                            'checkout_success_page.status.complete',
+                                            isAwaitingPayment
+                                                ? 'checkout_success_page.status.confirming'
+                                                : 'checkout_success_page.preparing.title',
                                         )}
-                                    </Badge>
-                                    <h1 className="text-2xl font-bold tracking-tight text-primary-900 md:text-4xl">
+                                    </h3>
+                                    <p className="mt-1 text-[11px] text-primary-500 md:text-xs">
                                         {trans(
-                                            'checkout_success_page.status.ready',
-                                        )}
-                                    </h1>
-                                    <p className="mt-2 text-[13px] text-primary-500 md:mt-3 md:text-base">
-                                        {trans(
-                                            'checkout_success_page.status.scan_qr',
+                                            isAwaitingPayment
+                                                ? 'checkout_success_page.status.verifying_desc'
+                                                : 'checkout_success_page.preparing.description',
                                         )}
                                     </p>
-                                </>
-                            )}
-                            {isFailed && (
-                                <>
-                                    <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 shadow-sm ring-1 ring-red-200/50 md:h-20 md:w-20">
-                                        <XCircle className="h-8 w-8 text-red-500 md:h-10 md:w-10" />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Failed State */}
+                        {isFailed && (
+                            <div className="mb-6 overflow-hidden rounded-2xl border border-red-200/60 bg-white shadow-sm">
+                                <div className="flex flex-col items-center justify-center px-4 py-10 text-center md:px-6 md:py-12">
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 ring-1 ring-red-200/50 md:h-16 md:w-16">
+                                        <XCircle className="h-7 w-7 text-red-500 md:h-8 md:w-8" />
                                     </div>
-                                    <Badge className="mb-3 rounded-lg bg-red-50 px-3 py-1 text-[11px] font-semibold tracking-wider text-red-600 uppercase ring-1 ring-red-200/50">
-                                        <XCircle className="mr-1.5 h-3 w-3" />
-                                        {trans(
-                                            'checkout_success_page.status.failed',
-                                        )}
-                                    </Badge>
-                                    <h1 className="text-2xl font-bold tracking-tight text-primary-900 md:text-4xl">
+                                    <h3 className="mt-4 text-[15px] font-bold text-primary-900 md:text-base">
                                         {trans(
                                             'checkout_success_page.status.failed_title',
                                         )}
-                                    </h1>
-                                    <p className="mt-2 text-[13px] text-primary-500 md:mt-3 md:text-base">
+                                    </h3>
+                                    <p className="mt-1 text-[11px] text-primary-500 md:text-xs">
                                         {trans(
                                             'checkout_success_page.status.failed_desc',
                                         )}
                                     </p>
-                                </>
-                            )}
-                        </div>
+                                </div>
+                            </div>
+                        )}
 
-                        {/* Order Summary Card */}
-                        <OrderSummaryCard
-                            orderNumber={order.order_number}
-                            customerEmail={order.customer_email}
-                            package={order.package}
-                            className="mb-6"
-                        />
-
-                        {/* eSIM Installation (when completed) */}
+                        {/* eSIM QR Code - HERO when completed */}
                         {isCompleted && order.esim && (
-                            <div className="mb-6 space-y-4">
+                            <div className="mb-6">
                                 <EsimQrCard
                                     esim={order.esim}
                                     title={trans(
@@ -274,155 +282,43 @@ export default function CheckoutSuccess({ order }: Props) {
                                     )}
                                     onCopy={handleCopyTracking}
                                 />
-
-                                {/* Installation Instructions */}
-                                <div className="overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm">
-                                    <div className="bg-gradient-to-br from-primary-50 via-white to-accent-50/30 px-4 py-4 md:px-6 md:py-5">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-primary-500 shadow-sm ring-1 ring-primary-100 md:h-10 md:w-10">
-                                                <BookOpen className="h-4 w-4 md:h-5 md:w-5" />
-                                            </div>
-                                            <h3 className="text-[15px] font-bold text-primary-900 md:text-base">
-                                                {trans(
-                                                    'checkout_success_page.installation.title',
-                                                )}
-                                            </h3>
-                                        </div>
-                                    </div>
-                                    <div className="px-4 py-4 md:px-6 md:py-5">
-                                        <div className="space-y-3">
-                                            {[1, 2, 3, 4].map((step) => (
-                                                <div
-                                                    key={step}
-                                                    className="flex items-start gap-3"
-                                                >
-                                                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-[11px] font-bold text-primary-600 ring-1 ring-primary-100">
-                                                        {step}
-                                                    </div>
-                                                    <p className="pt-1 text-[13px] leading-relaxed text-primary-600 md:text-sm">
-                                                        {step === 1 && (
-                                                            <>
-                                                                {
-                                                                    trans(
-                                                                        'checkout_success_page.installation.step_1',
-                                                                        {
-                                                                            setting_path:
-                                                                                '',
-                                                                        },
-                                                                    ).split(
-                                                                        ':setting_path',
-                                                                    )[0]
-                                                                }
-                                                                <strong className="font-semibold text-primary-900">
-                                                                    {trans(
-                                                                        'checkout_success_page.installation.step_1_path',
-                                                                    )}
-                                                                </strong>
-                                                            </>
-                                                        )}
-                                                        {step === 2 && (
-                                                            <>
-                                                                {trans(
-                                                                    'checkout_success_page.installation.step_2',
-                                                                    {
-                                                                        option_1:
-                                                                            '__OPTION_1__',
-                                                                        option_2:
-                                                                            '__OPTION_2__',
-                                                                    },
-                                                                )
-                                                                    .split(
-                                                                        '__OPTION_1__',
-                                                                    )[0]
-                                                                    .trim()}{' '}
-                                                                <strong className="font-semibold text-primary-900">
-                                                                    {trans(
-                                                                        'checkout_success_page.installation.step_2_opt_1',
-                                                                    )}
-                                                                </strong>{' '}
-                                                                {trans(
-                                                                    'checkout_success_page.installation.step_2',
-                                                                    {
-                                                                        option_1:
-                                                                            '__OPTION_1__',
-                                                                        option_2:
-                                                                            '__OPTION_2__',
-                                                                    },
-                                                                )
-                                                                    .split(
-                                                                        '__OPTION_1__',
-                                                                    )[1]
-                                                                    .split(
-                                                                        '__OPTION_2__',
-                                                                    )[0]
-                                                                    .trim()}{' '}
-                                                                <strong className="font-semibold text-primary-900">
-                                                                    {trans(
-                                                                        'checkout_success_page.installation.step_2_opt_2',
-                                                                    )}
-                                                                </strong>
-                                                            </>
-                                                        )}
-                                                        {step === 3 &&
-                                                            trans(
-                                                                'checkout_success_page.installation.step_3',
-                                                            )}
-                                                        {step === 4 && (
-                                                            <>
-                                                                {
-                                                                    trans(
-                                                                        'checkout_success_page.installation.step_4',
-                                                                        {
-                                                                            feature:
-                                                                                '__FEATURE__',
-                                                                        },
-                                                                    ).split(
-                                                                        '__FEATURE__',
-                                                                    )[0]
-                                                                }
-                                                                <strong className="font-semibold text-primary-900">
-                                                                    {trans(
-                                                                        'checkout_success_page.installation.step_4_feature',
-                                                                    )}
-                                                                </strong>
-                                                            </>
-                                                        )}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         )}
 
-                        {/* Processing State */}
-                        {isProcessing && (
-                            <div className="mb-6 overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm">
-                                <div className="px-4 py-4 md:px-6 md:py-5">
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50 ring-1 ring-primary-100 md:h-11 md:w-11">
-                                            <Loader2 className="h-5 w-5 animate-spin text-primary-500" />
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <h3 className="text-[15px] font-bold text-primary-900 md:text-base">
-                                                {trans(
-                                                    'checkout_success_page.processing_card.title',
-                                                )}
-                                            </h3>
-                                            <p className="text-[11px] text-primary-500 md:text-xs">
-                                                {trans(
-                                                    'checkout_success_page.processing_card.description',
-                                                )}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                        {/* Order Summary - Simple */}
+                        <OrderSummaryCard
+                            orderNumber={order.order_number}
+                            customerEmail={order.customer_email}
+                            package={order.package}
+                            className="mb-6"
+                        />
 
-                        {/* Actions */}
+                        {/* Simple Total */}
+                        <div className="mb-6 flex items-center justify-between rounded-2xl border border-primary-100 bg-white px-4 py-4 shadow-sm md:px-6">
+                            <span className="text-sm font-bold text-primary-900 md:text-[15px]">
+                                {trans('checkout_success_page.payment.total')}
+                            </span>
+                            <span className="text-lg font-extrabold text-primary-900 md:text-xl">
+                                €{Number(order.amount).toFixed(2)}
+                            </span>
+                        </div>
+
+                        {/* Primary Action */}
                         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+                            {isCompleted && (
+                                <GoldButton
+                                    asChild
+                                    size="lg"
+                                    className="h-11 rounded-xl text-[13px] font-semibold md:h-12 md:text-sm"
+                                >
+                                    <Link href={`/order/${order.uuid}/status`}>
+                                        {trans(
+                                            'checkout_success_page.actions.view_order',
+                                        )}
+                                        <ChevronRight className="ml-1 h-4 w-4" />
+                                    </Link>
+                                </GoldButton>
+                            )}
                             <Link
                                 href="/destinations"
                                 className="inline-flex h-11 items-center justify-center rounded-xl border border-primary-200 bg-white px-6 text-[13px] font-semibold text-primary-700 shadow-sm transition-colors hover:bg-primary-50 md:h-12 md:text-sm"
@@ -432,54 +328,55 @@ export default function CheckoutSuccess({ order }: Props) {
                                     'checkout_success_page.actions.browse',
                                 )}
                             </Link>
-                            {isCompleted && (
-                                <GoldButton asChild size="lg" className="h-11 rounded-xl text-[13px] font-semibold md:h-12 md:text-sm">
-                                    <Link href={`/order/${order.uuid}/status`}>
-                                        {trans(
-                                            'checkout_success_page.actions.view_order',
-                                        )}
-                                        <ChevronRight className="ml-1 h-4 w-4" />
-                                    </Link>
-                                </GoldButton>
-                            )}
                         </div>
 
-                        {/* Help Section */}
-                        <div className="mt-8 overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm">
-                            <div className="bg-gradient-to-br from-primary-50 via-white to-accent-50/30 px-4 py-4 md:px-6 md:py-5">
-                                <div className="flex flex-col items-center text-center">
-                                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-primary-400 shadow-sm ring-1 ring-primary-100 md:h-11 md:w-11">
-                                        <HelpCircle className="h-5 w-5 md:h-5 md:w-5" />
-                                    </div>
-                                    <h3 className="text-[15px] font-bold text-primary-900 md:text-base">
-                                        {trans('checkout_success_page.help.title')}
-                                    </h3>
-                                    <p className="mt-1 text-[11px] text-primary-500 md:text-xs">
+                        {/* Help Section - 3 Column Grid */}
+                        <div className="mt-8 rounded-2xl border border-primary-100 bg-primary-50/30 p-4 md:p-5">
+                            <div className="flex items-center gap-2 text-primary-500">
+                                <HelpCircle className="h-4 w-4 shrink-0" />
+                                <p className="text-xs font-medium md:text-sm">
+                                    {trans('checkout_success_page.help.title')}
+                                </p>
+                            </div>
+                            <p className="mt-1 text-[11px] text-primary-400 md:text-xs">
+                                {trans(
+                                    'checkout_success_page.help.description',
+                                )}
+                            </p>
+                            <div className="mt-3 grid grid-cols-3 gap-2">
+                                <Link
+                                    href="/how-it-works"
+                                    className="flex flex-col items-center gap-1.5 rounded-xl border border-primary-100 bg-white px-2 py-3 text-center transition-colors hover:bg-primary-50"
+                                >
+                                    <BookOpen className="h-4 w-4 text-primary-400" />
+                                    <span className="text-[10px] font-semibold text-primary-700 md:text-[11px]">
                                         {trans(
-                                            'checkout_success_page.help.description',
+                                            'checkout_success_page.help.guide',
                                         )}
-                                    </p>
-                                    <div className="mt-4 flex gap-2">
-                                        <Link
-                                            href="/how-it-works"
-                                            className="inline-flex items-center gap-1.5 rounded-xl border border-primary-200 bg-white px-4 py-2 text-[11px] font-semibold text-primary-700 shadow-sm transition-colors hover:bg-primary-50 md:text-xs"
-                                        >
-                                            <BookOpen className="h-3.5 w-3.5" />
-                                            {trans(
-                                                'checkout_success_page.help.guide',
-                                            )}
-                                        </Link>
-                                        <Link
-                                            href="/help"
-                                            className="inline-flex items-center gap-1.5 rounded-xl border border-primary-200 bg-white px-4 py-2 text-[11px] font-semibold text-primary-700 shadow-sm transition-colors hover:bg-primary-50 md:text-xs"
-                                        >
-                                            <MessageCircle className="h-3.5 w-3.5" />
-                                            {trans(
-                                                'checkout_success_page.help.contact',
-                                            )}
-                                        </Link>
-                                    </div>
-                                </div>
+                                    </span>
+                                </Link>
+                                <Link
+                                    href="/help"
+                                    className="flex flex-col items-center gap-1.5 rounded-xl border border-primary-100 bg-white px-2 py-3 text-center transition-colors hover:bg-primary-50"
+                                >
+                                    <MessageCircle className="h-4 w-4 text-primary-400" />
+                                    <span className="text-[10px] font-semibold text-primary-700 md:text-[11px]">
+                                        {trans(
+                                            'checkout_success_page.help.contact',
+                                        )}
+                                    </span>
+                                </Link>
+                                <Link
+                                    href="/destinations"
+                                    className="flex flex-col items-center gap-1.5 rounded-xl border border-primary-100 bg-white px-2 py-3 text-center transition-colors hover:bg-primary-50"
+                                >
+                                    <Globe className="h-4 w-4 text-primary-400" />
+                                    <span className="text-[10px] font-semibold text-primary-700 md:text-[11px]">
+                                        {trans(
+                                            'checkout_success_page.actions.browse',
+                                        )}
+                                    </span>
+                                </Link>
                             </div>
                         </div>
                     </div>

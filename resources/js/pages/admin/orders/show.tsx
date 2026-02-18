@@ -14,6 +14,7 @@ import {
     Clock,
     Copy,
     Loader2,
+    Mail,
     Play,
     RefreshCw,
     XCircle,
@@ -268,7 +269,9 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
     const retryForm = useForm({});
     const failForm = useForm({ reason: 'Manually failed by admin' });
     const syncForm = useForm({});
+    const resendEmailForm = useForm({ email: '' });
     const [syncSuccess, setSyncSuccess] = useState(false);
+    const [resendEmailSuccess, setResendEmailSuccess] = useState(false);
 
     function handleSyncEsim() {
         syncForm.post(`/admin/orders/${order.uuid}/sync-esim`, {
@@ -276,6 +279,18 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
             onSuccess: () => {
                 setSyncSuccess(true);
                 setTimeout(() => setSyncSuccess(false), 3000);
+            },
+        });
+    }
+
+    function handleResendEsimEmail(e: React.FormEvent) {
+        e.preventDefault();
+        resendEmailForm.post(`/admin/orders/${order.uuid}/resend-esim-email`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setResendEmailSuccess(true);
+                resendEmailForm.reset();
+                setTimeout(() => setResendEmailSuccess(false), 3000);
             },
         });
     }
@@ -856,25 +871,57 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                                 <h2 className="text-sm font-medium">
                                     eSIM Profile
                                 </h2>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleSyncEsim}
-                                    disabled={syncForm.processing}
-                                >
-                                    {syncForm.processing ? (
-                                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                                    ) : syncSuccess ? (
-                                        <CheckCircle2 className="mr-1.5 h-3.5 w-3.5 text-green-500" />
-                                    ) : (
-                                        <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleSyncEsim}
+                                        disabled={syncForm.processing}
+                                    >
+                                        {syncForm.processing ? (
+                                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                        ) : syncSuccess ? (
+                                            <CheckCircle2 className="mr-1.5 h-3.5 w-3.5 text-green-500" />
+                                        ) : (
+                                            <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                                        )}
+                                        {syncForm.processing
+                                            ? 'Syncing...'
+                                            : syncSuccess
+                                              ? 'Synced!'
+                                              : 'Sync'}
+                                    </Button>
+                                    {order.status === 'completed' && (
+                                        <form onSubmit={handleResendEsimEmail} className="flex items-center gap-2">
+                                            <input
+                                                type="email"
+                                                placeholder="Custom email (optional)"
+                                                value={resendEmailForm.data.email}
+                                                onChange={(e) => resendEmailForm.setData('email', e.target.value)}
+                                                className="h-8 w-48 rounded-md border border-input bg-background px-3 text-xs"
+                                            />
+                                            <Button
+                                                type="submit"
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={resendEmailForm.processing}
+                                            >
+                                                {resendEmailForm.processing ? (
+                                                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                                ) : resendEmailSuccess ? (
+                                                    <CheckCircle2 className="mr-1.5 h-3.5 w-3.5 text-green-500" />
+                                                ) : (
+                                                    <Mail className="mr-1.5 h-3.5 w-3.5" />
+                                                )}
+                                                {resendEmailForm.processing
+                                                    ? 'Sending...'
+                                                    : resendEmailSuccess
+                                                      ? 'Sent!'
+                                                      : 'Resend Email'}
+                                            </Button>
+                                        </form>
                                     )}
-                                    {syncForm.processing
-                                        ? 'Syncing...'
-                                        : syncSuccess
-                                          ? 'Synced!'
-                                          : 'Sync'}
-                                </Button>
+                                </div>
                             </div>
                             <div className="rounded-lg border">
                                 <div className="divide-y">

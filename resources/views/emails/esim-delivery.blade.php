@@ -3,19 +3,33 @@
 
     <x-email.text>Hello {{ $customerName ?? 'there' }},</x-email.text>
 
-    <x-email.text>Your eSIM for <strong>{{ $package->name }}</strong> has been successfully provisioned. Scan the QR code below to install it immediately.</x-email.text>
+    <x-email.text>Your eSIM for <strong>{{ $package->name }}</strong> has been successfully provisioned and is ready to install.</x-email.text>
 
+    {{-- QR Code --}}
     @if($esimProfile->qr_code_data)
-        <div style="margin: 32px 0; text-align: center;">
-            <div style="display: inline-block; padding: 16px; border: 1px solid #e4e4e7; border-radius: 12px; background-color: #ffffff;">
-                <img src="data:image/svg+xml;base64,{{ $esimProfile->qr_code_data }}" alt="eSIM QR Code" style="display: block; width: 180px; height: 180px;">
-            </div>
-            <x-email.text small muted center class="mt-4">Scan with your phone's camera</x-email.text>
+        <x-email.qr-code :data="'data:image/svg+xml;base64,' . $esimProfile->qr_code_data" caption="Scan with your phone's camera" />
+    @endif
+
+    {{-- Install Buttons --}}
+    @php
+        $lpaString = $esimProfile->lpa_string;
+        $iosDeeplink = $lpaString ? 'https://esimsetup.apple.com/esim_qrcode_provisioning?carddata=' . urlencode($lpaString) : null;
+        $androidDeeplink = $lpaString ? 'https://lpa.ds/?' . urlencode(str_replace('LPA:1$', '', $lpaString)) : null;
+    @endphp
+
+    @if($iosDeeplink || $androidDeeplink)
+        <div style="text-align: center; margin: 24px 0;">
+            @if($iosDeeplink)
+                <x-email.button :href="$iosDeeplink" style="margin-right: 8px;">📱 Install on iPhone</x-email.button>
+            @endif
+            @if($androidDeeplink)
+                <x-email.button :href="$androidDeeplink" variant="outline">🤖 Install on Android</x-email.button>
+            @endif
         </div>
     @endif
 
     <x-email.heading :level="2">Manual Installation</x-email.heading>
-    <x-email.text>If you can't scan the QR code, enter these details manually in your settings:</x-email.text>
+    <x-email.text>If you can't scan the QR code or use the install buttons, enter these details manually:</x-email.text>
 
     <x-email.info-box title="SM-DP+ Address">
         {{ $esimProfile->smdp_address }}
@@ -32,15 +46,15 @@
         <strong>Android:</strong> Settings → Network & Internet → SIMs → Add SIM
     </x-email.step>
 
-    <x-email.step number="2" title="Scan QR Code">
-        Scan the QR code above or select "Enter Details Manually" to use the codes provided.
+    <x-email.step number="2" title="Install Your eSIM">
+        Use the install buttons above, scan the QR code, or enter the manual details.
     </x-email.step>
 
     <x-email.step number="3" title="Activate Data Roaming">
         Once installed, turn on "Data Roaming" for this eSIM to connect when you arrive.
     </x-email.step>
 
-    <x-email.heading :level="2">Plan Summary</x-email.heading>
+    <x-email.heading :level="2">Order Summary</x-email.heading>
 
     <x-email.summary>
         <x-email.summary-row label="Plan" :value="$package->name" />
@@ -52,11 +66,17 @@
         <x-email.summary-row label="Order" :value="'#' . $order->order_number" />
     </x-email.summary>
 
-    <x-email.alert type="info" title="Note">
+    <x-email.divider />
+
+    <div style="text-align: center; margin: 24px 0;">
+        <x-email.button :href="config('app.url') . '/order/' . $order->uuid . '/status'" size="lg">View Order Status</x-email.button>
+    </div>
+
+    <x-email.alert type="info" title="Important">
         Your validity period starts only when your eSIM connects to a supported network at your destination.
     </x-email.alert>
 
-    <div style="text-align: center; margin-top: 32px;">
+    <div style="text-align: center; margin-top: 24px;">
         <x-email.button :href="config('app.url') . '/help'" variant="outline">Need Help?</x-email.button>
     </div>
 </x-email.layout>

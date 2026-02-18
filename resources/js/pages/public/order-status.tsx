@@ -39,6 +39,15 @@ interface Order {
         lpa_string: string | null;
         smdp_address: string | null;
         activation_code: string | null;
+        // Usage tracking
+        data_used_gb: number;
+        data_total_gb: number | null;
+        data_remaining_gb: number | null;
+        usage_percentage: number;
+        expires_at: string | null;
+        days_remaining: number | null;
+        is_expired: boolean;
+        is_data_depleted: boolean;
     } | null;
     customer_email: string;
     amount: string | number;
@@ -276,6 +285,123 @@ export default function OrderStatus({ order }: Props) {
                                     esim={order.esim}
                                     onCopy={handleCopyData}
                                 />
+                            </div>
+                        )}
+
+                        {/* eSIM Usage Tracking */}
+                        {isCompleted && order.esim && order.esim.data_total_gb && (
+                            <div className="mb-6 overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-sm">
+                                <div className="px-4 py-4 md:px-6 md:py-5">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-sm font-bold text-primary-900 md:text-[15px]">
+                                            {trans(
+                                                'order_status_page.usage.title',
+                                                { fallback: 'Data Usage' }
+                                            )}
+                                        </h3>
+                                        {order.esim.is_expired ? (
+                                            <span className="rounded-lg bg-red-50 px-2 py-1 text-[10px] font-semibold text-red-600 ring-1 ring-red-200/50">
+                                                {trans(
+                                                    'order_status_page.usage.expired',
+                                                    { fallback: 'Expired' }
+                                                )}
+                                            </span>
+                                        ) : order.esim.is_data_depleted ? (
+                                            <span className="rounded-lg bg-orange-50 px-2 py-1 text-[10px] font-semibold text-orange-600 ring-1 ring-orange-200/50">
+                                                {trans(
+                                                    'order_status_page.usage.depleted',
+                                                    { fallback: 'Data Depleted' }
+                                                )}
+                                            </span>
+                                        ) : (
+                                            <span className="rounded-lg bg-green-50 px-2 py-1 text-[10px] font-semibold text-green-600 ring-1 ring-green-200/50">
+                                                {trans(
+                                                    'order_status_page.usage.active',
+                                                    { fallback: 'Active' }
+                                                )}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Progress Bar */}
+                                    <div className="mt-3">
+                                        <div className="flex items-center justify-between text-[11px] md:text-xs">
+                                            <span className="text-primary-600">
+                                                {order.esim.data_used_gb.toFixed(2)} GB{' '}
+                                                {trans(
+                                                    'order_status_page.usage.used',
+                                                    { fallback: 'used' }
+                                                )}
+                                            </span>
+                                            <span className="text-primary-400">
+                                                {order.esim.data_total_gb.toFixed(2)} GB{' '}
+                                                {trans(
+                                                    'order_status_page.usage.total',
+                                                    { fallback: 'total' }
+                                                )}
+                                            </span>
+                                        </div>
+                                        <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-primary-100">
+                                            <div
+                                                className={`h-full rounded-full transition-all ${
+                                                    order.esim.usage_percentage > 90
+                                                        ? 'bg-red-500'
+                                                        : order.esim.usage_percentage > 75
+                                                          ? 'bg-orange-500'
+                                                          : 'bg-green-500'
+                                                }`}
+                                                style={{
+                                                    width: `${Math.min(order.esim.usage_percentage, 100)}%`,
+                                                }}
+                                            />
+                                        </div>
+                                        <p className="mt-1.5 text-[10px] text-primary-400 md:text-[11px]">
+                                            {order.esim.data_remaining_gb !== null
+                                                ? `${order.esim.data_remaining_gb.toFixed(2)} GB ${trans(
+                                                      'order_status_page.usage.remaining',
+                                                      { fallback: 'remaining' }
+                                                  )} (${order.esim.usage_percentage.toFixed(1)}%)`
+                                                : `${order.esim.usage_percentage.toFixed(1)}% ${trans(
+                                                      'order_status_page.usage.used_percent',
+                                                      { fallback: 'used' }
+                                                  )}`}
+                                        </p>
+                                    </div>
+
+                                    {/* Expiry Info */}
+                                    {order.esim.expires_at && (
+                                        <div className="mt-3 flex items-center gap-2 border-t border-primary-100 pt-3">
+                                            <Calendar className="h-3.5 w-3.5 text-primary-400" />
+                                            <span className="text-[11px] text-primary-500 md:text-xs">
+                                                {order.esim.days_remaining !== null &&
+                                                order.esim.days_remaining > 0
+                                                    ? trans(
+                                                          'order_status_page.usage.expires_in',
+                                                          {
+                                                              days: String(order.esim.days_remaining),
+                                                              date: order.esim.expires_at,
+                                                              fallback: `Expires in ${order.esim.days_remaining} days (${order.esim.expires_at})`,
+                                                          }
+                                                      )
+                                                    : order.esim.days_remaining === 0
+                                                      ? trans(
+                                                            'order_status_page.usage.expires_today',
+                                                            {
+                                                                date: order.esim.expires_at,
+                                                                fallback: `Expires today (${order.esim.expires_at})`,
+                                                            }
+                                                        )
+                                                      : trans(
+                                                            'order_status_page.usage.expired_on',
+                                                            {
+                                                                date: order.esim.expires_at,
+                                                                fallback: `Expired on ${order.esim.expires_at}`,
+                                                            }
+                                                        )}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
 

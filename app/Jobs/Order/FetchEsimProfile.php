@@ -75,14 +75,26 @@ class FetchEsimProfile implements ShouldQueue
             $dataTotalBytes = $this->parseDataBytes($profileData['totalData'] ?? null)
                 ?: ($order->package->data_mb * 1024 * 1024);
 
+            // Build LPA string for QR code
+            $lpaString = $profileData['ac'] ?? null;
+            if (!$lpaString && ($profileData['smdp'] ?? null) && ($profileData['activationCode'] ?? null)) {
+                $lpaString = "LPA:1\${$profileData['smdp']}\${$profileData['activationCode']}";
+            }
+
+            // Generate QR code from LPA string
+            $qrCodeData = null;
+            if ($lpaString) {
+                $qrCodeData = $this->generateQrCode($lpaString);
+            }
+
             $esimProfile = EsimProfileCreated::commit(
                 order_id: $this->orderId,
                 iccid: $iccid,
                 activation_code: $profileData['activationCode'] ?? '',
                 data_total_bytes: $dataTotalBytes,
                 smdp_address: $profileData['smdp'] ?? null,
-                qr_code_data: null,
-                lpa_string: $profileData['ac'] ?? null,
+                qr_code_data: $qrCodeData,
+                lpa_string: $lpaString,
                 pin: $profileData['pin'] ?? null,
                 puk: $profileData['puk'] ?? null,
                 apn: $profileData['apn'] ?? null,
@@ -103,7 +115,9 @@ class FetchEsimProfile implements ShouldQueue
 
             // Dispatch label update 30 seconds after successful profile fetch
             if ($this->orderNumber) {
-                $label = 'Order ' . $this->orderNumber;
+                // SMSPool requires alphanumeric-only labels (no spaces or hyphens)
+                // Use order number without hyphens for readability: ORD-260218-TI8XXZ -> ORD260218TI8XXZ
+                $label = str_replace('-', '', $this->orderNumber);
                 UpdateEsimLabel::dispatch($this->providerOrderId, $label, $order->provider_id)
                     ->delay(now()->addSeconds(30));
                 
@@ -189,6 +203,51 @@ class FetchEsimProfile implements ShouldQueue
         }
 
         return 0;
+    }
+
+    /**
+     * Generate QR code as base64 encoded SVG.
+     *
+     * Creates a 400x400px SVG QR code for eSIM installation.
+     * Returns base64 encoded string for embedding in emails and web pages.
+     */
+    private function generateQrCode(string $data): string
+    {
+        if (empty($data)) {
+            Log::warning('FetchEsimProfile: Cannot generate QR code - empty data provided');
+
+            return '';
+        }
+
+        try {
+            // Generate QR code with no border (quiet zone = 0)
+            $rendererStyle = new \BaconQrCode\Renderer\RendererStyle\RendererStyle(
+                size: 400,
+                margin: 0
+            );
+            $renderer = new \BaconQrCode\Renderer\ImageRenderer(
+                $rendererStyle,
+                new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
+            );
+            $writer = new \BaconQrCode\Writer($renderer);
+            $svg = $writer->writeString($data);
+
+            if (empty($svg)) {
+                Log::error('FetchEsimProfile: QR code generation returned empty SVG');
+
+                return '';
+            }
+
+            return base64_encode($svg);
+        } catch (\Exception $e) {
+            Log::error('FetchEsimProfile: Failed to generate QR code', [
+                'error' => $e->getMessage(),
+                'data_length' => strlen($data),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return '';
+        }
     }
 
     public function failed(\Throwable $exception): void

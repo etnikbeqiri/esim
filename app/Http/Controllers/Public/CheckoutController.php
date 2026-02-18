@@ -242,6 +242,7 @@ class CheckoutController extends Controller
             'order_number' => $order->order_number,
             'status' => $publicStatus->value,
             'status_label' => $publicStatus->label(),
+            'status_color' => $publicStatus->color(),
             'amount' => $order->amount,
             'original_amount' => $order->original_amount,
             'net_amount' => $order->net_amount,
@@ -266,8 +267,20 @@ class CheckoutController extends Controller
                 'lpa_string' => $order->esimProfile->lpa_string,
                 'smdp_address' => $order->esimProfile->smdp_address,
                 'activation_code' => $order->esimProfile->activation_code,
+                // Usage tracking data
+                'data_used_gb' => $order->esimProfile->data_used_gb,
+                'data_total_gb' => $order->esimProfile->data_total_bytes ? round($order->esimProfile->data_total_bytes / (1024 * 1024 * 1024), 2) : null,
+                'data_remaining_gb' => $order->esimProfile->data_total_bytes ? round($order->esimProfile->data_remaining_bytes / (1024 * 1024 * 1024), 2) : null,
+                'usage_percentage' => $order->esimProfile->data_usage_percentage,
+                'expires_at' => $order->esimProfile->expires_at?->format('M j, Y'),
+                'days_remaining' => $order->esimProfile->expires_at ? now()->diffInDays($order->esimProfile->expires_at, false) : null,
+                'is_expired' => $order->esimProfile->isExpired(),
+                'is_data_depleted' => $order->esimProfile->isDataConsumed(),
             ] : null,
             'customer_email' => $order->customer_email,
+            'created_at' => $order->created_at->format('M j, Y H:i'),
+            'paid_at' => $order->paid_at?->format('M j, Y H:i'),
+            'payment_method' => $order->payment?->provider?->label() ?? 'Card',
             'analytics' => [
                 'transaction_id' => (string) $order->id,
                 'value' => (float) $order->amount,
@@ -281,12 +294,8 @@ class CheckoutController extends Controller
         ];
 
         if ($includeStatus) {
-            $data['status_color'] = $publicStatus->color();
-            $data['created_at'] = $order->created_at->format('M j, Y H:i');
             $data['completed_at'] = $order->completed_at?->format('M j, Y H:i');
-            $data['paid_at'] = $order->paid_at?->format('M j, Y H:i');
             $data['customer_name'] = $order->customer_name;
-            $data['payment_method'] = $order->payment?->provider?->label() ?? 'Card';
         }
 
         return $data;

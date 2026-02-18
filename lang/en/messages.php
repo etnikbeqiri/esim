@@ -1111,13 +1111,27 @@ return [
         ],
         'actions' => [
             'browse' => 'Browse More Plans',
-            'view_order' => 'View Order Details',
+            'view_order' => 'View Full Order Details',
+            'install_now' => 'Install eSIM Now',
         ],
         'help' => [
             'title' => 'Need Help?',
             'description' => 'Having trouble installing your eSIM? Check our installation guide or contact support.',
             'guide' => 'Installation Guide',
             'contact' => 'Contact Support',
+        ],
+        'placed_on' => 'Placed on :date',
+        'preparing' => [
+            'title' => 'Preparing your eSIM...',
+            'description' => 'Your eSIM details will appear here once ready',
+        ],
+        'payment' => [
+            'total' => 'Total',
+            'subtotal' => 'Subtotal',
+            'discount' => 'Discount',
+            'net_amount' => 'Net Amount',
+            'vat' => 'VAT (:rate%)',
+            'incl_vat' => 'incl. VAT',
         ],
     ],
     'order_status_page' => [
@@ -1169,6 +1183,19 @@ return [
             'description' => 'Having trouble installing your eSIM? Check our installation guide or contact support.',
             'guide' => 'Installation Guide',
             'contact' => 'Contact Support',
+        ],
+        'usage' => [
+            'title' => 'Data Usage',
+            'active' => 'Active',
+            'expired' => 'Expired',
+            'depleted' => 'Data Depleted',
+            'used' => 'used',
+            'total' => 'total',
+            'remaining' => 'remaining',
+            'used_percent' => 'used',
+            'expires_in' => 'Expires in :days days (:date)',
+            'expires_today' => 'Expires today (:date)',
+            'expired_on' => 'Expired on :date',
         ],
     ],
     'forgot_password_page' => [

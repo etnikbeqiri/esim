@@ -98,7 +98,7 @@ export function EsimQrCard({
                     <div className="relative rounded-2xl border-2 border-dashed border-primary-200 bg-white p-5">
                         {esim.qr_code_data ? (
                             <img
-                                src={esim.qr_code_data}
+                                src={`data:image/svg+xml;base64,${esim.qr_code_data}`}
                                 alt="eSIM QR Code"
                                 className={
                                     compact

@@ -10,6 +10,7 @@ use App\Jobs\Order\ProcessProviderPurchase;
 use App\Jobs\Sync\SyncEsimUsageJob;
 use App\Models\Currency;
 use App\Models\Order;
+use App\Services\EmailService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -293,5 +294,30 @@ class OrderController extends Controller
         SyncEsimUsageJob::dispatch($order->esimProfile->id);
 
         return back()->with('success', 'eSIM usage sync has been triggered. Refresh the page in a few seconds to see updated data.');
+    }
+
+    public function resendEsimEmail(Request $request, Order $order): RedirectResponse
+    {
+        // Validate order is completed
+        if ($order->status !== OrderStatus::Completed) {
+            return back()->with('error', 'Cannot resend eSIM email. Order must be completed first. Current status: ' . $order->status->label());
+        }
+
+        if (!$order->esimProfile) {
+            return back()->with('error', 'This order has no eSIM profile to resend.');
+        }
+
+        $customEmail = $request->input('email');
+        $emailService = app(EmailService::class);
+
+        $emailQueue = $emailService->resendEsimDelivery($order, $customEmail);
+
+        if (!$emailQueue) {
+            return back()->with('error', 'Failed to resend eSIM email. Please check the order has a valid email address.');
+        }
+
+        $targetEmail = $customEmail ?? $emailService->getOrderEmail($order);
+
+        return back()->with('success', "eSIM delivery email has been resent to {$targetEmail}.");
     }
 }
