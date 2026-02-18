@@ -19,7 +19,7 @@ $style = $types[$type] ?? $types['default'];
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 @if($title)
                     <tr>
-                        <td style="padding-bottom: 4px; font-weight: 500; font-size: 14px; color: {{ $style['title'] }}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: -0.01em;">
+                        <td style="padding-bottom: 4px; font-weight: 700; font-size: 14px; color: {{ $style['title'] }}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: -0.01em;">
                             {{ $title }}
                         </td>
                     </tr>
