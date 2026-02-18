@@ -10,7 +10,8 @@ return new class extends Migration
     {
         // Add custom_regions to providers for provider-specific region codes
         Schema::table('providers', function (Blueprint $table) {
-            $table->json('custom_regions')->nullable()->after('metadata');
+            $table->json('metadata')->nullable();
+            $table->json('custom_regions')->nullable();
         });
 
         // Add is_region to countries to distinguish regions from actual countries
