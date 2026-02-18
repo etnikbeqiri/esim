@@ -1,5 +1,6 @@
 import { EsimQrCard } from '@/components/esim-qr-card';
 import { OrderSummaryCard } from '@/components/order-summary-card';
+import { SetupGuide } from '@/components/setup-guide';
 import { Badge } from '@/components/ui/badge';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
@@ -286,6 +287,11 @@ export default function OrderStatus({ order }: Props) {
                                     onCopy={handleCopyData}
                                 />
                             </div>
+                        )}
+
+                        {/* Quick Setup Guide */}
+                        {isCompleted && order.esim && (
+                            <SetupGuide className="mb-6" />
                         )}
 
                         {/* eSIM Usage Tracking */}

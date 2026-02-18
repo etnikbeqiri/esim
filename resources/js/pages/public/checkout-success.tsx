@@ -1,5 +1,6 @@
 import { EsimQrCard } from '@/components/esim-qr-card';
 import { OrderSummaryCard } from '@/components/order-summary-card';
+import { SetupGuide } from '@/components/setup-guide';
 import { Badge } from '@/components/ui/badge';
 import { GoldButton } from '@/components/ui/gold-button';
 import { useTrans } from '@/hooks/use-trans';
@@ -283,6 +284,11 @@ export default function CheckoutSuccess({ order }: Props) {
                                     onCopy={handleCopyTracking}
                                 />
                             </div>
+                        )}
+
+                        {/* Quick Setup Guide */}
+                        {isCompleted && order.esim && (
+                            <SetupGuide className="mb-6" />
                         )}
 
                         {/* Order Summary - Simple */}
