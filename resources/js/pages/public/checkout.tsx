@@ -304,6 +304,7 @@ export default function Checkout({
         };
 
         const session = new ApplePaySession(3, request);
+        let applePayOrderId: string | null = null;
 
         session.onvalidatemerchant = async (event: any) => {
             try {
@@ -315,7 +316,12 @@ export default function Checkout({
                         'X-XSRF-TOKEN': getCsrfToken(),
                     },
                     credentials: 'same-origin',
-                    body: JSON.stringify({ validationURL: event.validationURL }),
+                    body: JSON.stringify({
+                        validationURL: event.validationURL,
+                        package_id: pkg.id,
+                        billing_country: data.billing_country,
+                        coupon_codes: data.coupon_codes,
+                    }),
                 });
 
                 if (!response.ok) {
@@ -323,8 +329,9 @@ export default function Checkout({
                     return;
                 }
 
-                const merchantSession = await response.json();
-                session.completeMerchantValidation(merchantSession);
+                const result = await response.json();
+                applePayOrderId = result.orderId;
+                session.completeMerchantValidation(result.merchantSession);
             } catch {
                 session.abort();
             }
@@ -344,12 +351,9 @@ export default function Checkout({
                     },
                     credentials: 'same-origin',
                     body: JSON.stringify({
-                        package_id: pkg.id,
+                        order_id: applePayOrderId,
                         token: payment.token,
-                        billing_country: data.billing_country,
-                        coupon_codes: data.coupon_codes,
                         shipping_contact: payment.shippingContact,
-                        billing_contact: payment.billingContact,
                     }),
                 });
 

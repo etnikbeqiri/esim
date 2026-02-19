@@ -3,49 +3,80 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Package;
+use App\Services\Payment\ApplePayService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ApplePayController extends Controller
 {
+    public function __construct(
+        private readonly ApplePayService $applePayService,
+    ) {}
+
     public function validate(Request $request): JsonResponse
     {
         $request->validate([
             'validationURL' => 'required|url',
+            'package_id' => 'required|integer|exists:packages,id',
+            'billing_country' => 'nullable|string|max:5',
+            'coupon_codes' => 'nullable|array',
+            'coupon_codes.*' => 'string|max:50',
         ]);
 
-        sleep(30); // TODO: Remove - test delay only
+        $package = Package::findOrFail($request->input('package_id'));
+
+        if (!$package->is_active) {
+            return response()->json(['error' => 'Package not available'], 422);
+        }
+
+        $result = $this->applePayService->validateMerchant(
+            validationUrl: $request->input('validationURL'),
+            package: $package,
+            billingCountry: $request->input('billing_country', 'XK'),
+            couponCodes: $request->input('coupon_codes', []),
+        );
+
+        if (!$result['success']) {
+            return response()->json(['error' => $result['error']], 422);
+        }
 
         return response()->json([
-            'error' => 'Merchant validation not yet implemented',
-        ], 501);
+            'merchantSession' => $result['merchantSession'],
+            'orderId' => $result['orderId'],
+        ]);
     }
 
     public function process(Request $request): JsonResponse
     {
         $request->validate([
-            'package_id' => 'required|integer|exists:packages,id',
+            'order_id' => 'required|string|uuid',
             'token' => 'required|array',
-            'billing_country' => 'nullable|string|max:5',
-            'coupon_codes' => 'nullable|array',
             'shipping_contact' => 'nullable|array',
-            'billing_contact' => 'nullable|array',
         ]);
 
-        // TODO: Implement payment processing
-        // 1. Extract user info from shipping_contact (email, name, phone)
-        // 2. Create user/customer (like guest checkout)
-        // 3. Send token to your payment gateway for processing
-        // 4. Create order and payment records
-        // 5. Return success with order UUID
+        $shippingContact = $request->input('shipping_contact', []);
+        $email = $shippingContact['emailAddress'] ?? null;
+        $name = trim(($shippingContact['givenName'] ?? '') . ' ' . ($shippingContact['familyName'] ?? ''));
+        $phone = $shippingContact['phoneNumber'] ?? null;
 
-        // $email = $request->input('shipping_contact.emailAddress');
-        // $name = trim($request->input('shipping_contact.givenName') . ' ' . $request->input('shipping_contact.familyName'));
-        // $phone = $request->input('shipping_contact.phoneNumber');
-        // $token = $request->input('token');
+        if (!$email) {
+            return response()->json(['error' => 'Email is required'], 422);
+        }
 
-        return response()->json([
-            'error' => 'Payment processing not yet implemented',
-        ], 501);
+        $result = $this->applePayService->processPayment(
+            orderId: $request->input('order_id'),
+            token: $request->input('token'),
+            email: $email,
+            name: $name ?: $email,
+            phone: $phone,
+            customerIp: $request->ip(),
+        );
+
+        if (!$result['success']) {
+            return response()->json($result, 422);
+        }
+
+        return response()->json($result);
     }
 }

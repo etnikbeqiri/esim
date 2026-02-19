@@ -286,6 +286,51 @@ class ProcardGateway implements PaymentGatewayContract
         ];
     }
 
+    /**
+     * Apple Pay: Validate merchant with Apple via Procard.
+     */
+    public function applePayValidate(string $validationUrl, string $orderId, float $amount, string $currency, string $description): array
+    {
+        $amountStr = $this->formatAmount($amount);
+
+        $signature = $this->generateSignature(
+            $this->merchantId,
+            $orderId,
+            $amountStr,
+            $currency,
+            $description,
+        );
+
+        $response = Http::timeout(30)->post($this->apiUrl . '/apple/validate', [
+            'operation' => 'Purchase',
+            'apple_validation_url' => $validationUrl,
+            'merchant_id' => $this->merchantId,
+            'order_id' => $orderId,
+            'amount' => $amountStr,
+            'currency_iso' => $currency,
+            'description' => $description,
+            'signature' => $signature,
+            'callback_url' => route('webhooks.procard'),
+        ]);
+
+        return $response->json() ?? [];
+    }
+
+    /**
+     * Apple Pay: Process payment with Apple Pay token.
+     */
+    public function applePayProcess(string $orderKey, array $token): array
+    {
+        $paymentData = base64_encode(json_encode($token));
+
+        $response = Http::timeout(30)->post($this->apiUrl . '/apple/payment', [
+            'order_key' => $orderKey,
+            'apple_pay_payment_data' => $paymentData,
+        ]);
+
+        return $response->json() ?? [];
+    }
+
     public function canHandleCallback(Request $request): bool
     {
         return $request->has('payment_id')

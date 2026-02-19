@@ -689,6 +689,128 @@ class CheckoutService
         return $customer;
     }
 
+    /**
+     * Create an order for an already-confirmed Apple Pay payment.
+     * Similar to B2B flow: payment is already approved, so we create order + payment and start processing.
+     */
+    public function createApplePayCheckout(
+        Package $package,
+        string $email,
+        string $name,
+        ?string $phone,
+        ?string $customerIp,
+        string $billingCountry,
+        array $couponCodes,
+        string $gatewayOrderId,
+        string $transactionId,
+        float $amount,
+    ): array {
+        try {
+            DB::beginTransaction();
+
+            $customer = $this->findOrCreateGuestCustomer($email, $name, $phone);
+
+            $price = $amount;
+            $primaryCoupon = null;
+            $totalDiscount = 0;
+            $appliedCoupons = [];
+
+            foreach ($couponCodes as $couponCode) {
+                $validation = $this->couponService->validateCoupon($couponCode, $customer, $package, $price);
+                if ($validation['valid']) {
+                    $coupon = $validation['coupon'];
+                    $discount = $validation['discount'];
+                    $appliedCoupons[] = ['coupon' => $coupon, 'discount' => $discount];
+                    if ($primaryCoupon === null) {
+                        $primaryCoupon = $coupon;
+                    }
+                    $totalDiscount += $discount;
+                    $price = max(0, $price - $discount);
+                }
+            }
+
+            $vatCalculation = $this->vatService->calculateInclusiveVat($price, $billingCountry);
+
+            $order = OrderCreated::commit(
+                customer_id: $customer->id,
+                package_id: $package->id,
+                provider_id: $package->provider_id,
+                type: OrderType::B2C,
+                amount: $price,
+                cost_price: (float) $package->cost_price,
+                customer_email: $email,
+                customer_name: $name,
+                ip_address: $customerIp,
+                billing_country: $billingCountry,
+                coupon_id: $primaryCoupon?->id,
+                coupon_discount_amount: $totalDiscount,
+                vat_rate: $vatCalculation['rate'],
+                vat_amount: $vatCalculation['vat'],
+                net_amount: $vatCalculation['net'],
+            );
+
+            $payment = CheckoutCreated::commit(
+                order_id: $order->id,
+                customer_id: $customer->id,
+                provider: PaymentProvider::Procard,
+                amount: $price,
+                currency_id: null,
+                gateway_id: $gatewayOrderId,
+                gateway_session_id: $gatewayOrderId,
+                customer_email: $email,
+                customer_ip: $customerIp,
+                metadata: ['apple_pay' => true, 'transaction_id' => $transactionId],
+            );
+
+            foreach ($appliedCoupons as $appliedCouponData) {
+                $this->couponService->recordUsage(
+                    $appliedCouponData['coupon'],
+                    $order,
+                    $amount,
+                    $appliedCouponData['discount'],
+                    $price,
+                );
+            }
+
+            PaymentSucceeded::fire(
+                payment_id: $payment->id,
+                transaction_id: $transactionId,
+                confirmed_amount: $price,
+                gateway_status: 'Approved',
+            );
+
+            OrderProcessingStarted::fire(order_id: $order->id);
+
+            DB::commit();
+
+            Log::info('Apple Pay checkout completed', [
+                'order_uuid' => $order->uuid,
+                'customer_id' => $customer->id,
+                'amount' => $price,
+                'gateway_order_id' => $gatewayOrderId,
+            ]);
+
+            return [
+                'success' => true,
+                'order_uuid' => $order->uuid,
+                'order_number' => $order->order_number,
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Apple Pay checkout failed', [
+                'email' => $email,
+                'package_id' => $package->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
     private function formatOrderResponse(Order $order): array
     {
         return [
