@@ -13,6 +13,7 @@ import { dashboard } from '@/routes';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
+    BarChart3,
     Briefcase,
     Coins,
     FileText,
@@ -105,6 +106,7 @@ export function AppSidebar() {
                   { title: 'Customers', href: '/admin/customers', icon: Users },
                   { title: 'Invoices', href: '/admin/invoices', icon: Receipt },
                   { title: 'Tickets', href: '/admin/tickets', icon: LifeBuoy },
+                  { title: 'Sales Export', href: '/admin/sales-export', icon: BarChart3 },
               ]
             : [];
 

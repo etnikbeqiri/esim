@@ -202,6 +202,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('brands/{brand}', [\App\Http\Controllers\Admin\BrandController::class, 'destroy'])->name('brands.destroy');
         Route::post('brands/{brand}/toggle', [\App\Http\Controllers\Admin\BrandController::class, 'toggleActive'])->name('brands.toggle');
 
+        Route::get('sales-export', [\App\Http\Controllers\Admin\SalesExportController::class, 'index'])->name('sales-export.index');
+        Route::get('sales-export/detailed', [\App\Http\Controllers\Admin\SalesExportController::class, 'exportDetailed'])->name('sales-export.detailed');
+        Route::get('sales-export/summary', [\App\Http\Controllers\Admin\SalesExportController::class, 'exportSummary'])->name('sales-export.summary');
+
         Route::get('coupons', [\App\Http\Controllers\Admin\CouponController::class, 'index'])->name('coupons.index');
         Route::get('coupons/create', [\App\Http\Controllers\Admin\CouponController::class, 'create'])->name('coupons.create');
         Route::post('coupons', [\App\Http\Controllers\Admin\CouponController::class, 'store'])->name('coupons.store');
