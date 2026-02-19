@@ -103,6 +103,7 @@ export default function CheckoutSuccess({ order }: Props) {
         'pending',
         'pending_retry',
         'awaiting_payment',
+        'provider_purchased',
     ].includes(order.status);
     const isAwaitingPayment = order.status === 'awaiting_payment';
     const isCompleted = order.status === 'completed';

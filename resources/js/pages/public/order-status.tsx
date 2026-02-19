@@ -118,6 +118,7 @@ export default function OrderStatus({ order }: Props) {
         'pending',
         'pending_retry',
         'awaiting_payment',
+        'provider_purchased',
     ].includes(order.status);
     const isCompleted = order.status === 'completed';
     const isFailed = order.status === 'failed';
