@@ -45,6 +45,10 @@ Route::post('/checkout/{package}', [\App\Http\Controllers\Public\CheckoutControl
 Route::post('/api/v1/coupons/validate', [\App\Http\Controllers\Public\CouponController::class, 'validatePublic'])->name('public.coupons.validate');
 Route::get('/api/v1/geo/detect', [\App\Http\Controllers\Public\GeoLocationController::class, 'detect'])->name('public.geo.detect');
 Route::get('/api/v1/payment-methods', [\App\Http\Controllers\Public\PaymentMethodsController::class, 'index'])->name('public.payment-methods');
+Route::get('/track', [\App\Http\Controllers\Public\TrackOrderController::class, 'index'])->name('public.track');
+Route::post('/track', [\App\Http\Controllers\Public\TrackOrderController::class, 'sendLink'])->middleware('throttle:5,1')->name('public.track.send');
+Route::get('/track/verify', [\App\Http\Controllers\Public\TrackOrderController::class, 'verify'])->name('public.track.verify');
+
 Route::get('/order/{order:uuid}', [\App\Http\Controllers\Public\CheckoutController::class, 'status'])->name('public.order.show');
 Route::get('/order/{order:uuid}/status', [\App\Http\Controllers\Public\CheckoutController::class, 'status'])->name('public.order.status');
 Route::get('/order/{order:uuid}/check', [\App\Http\Controllers\Public\CheckoutController::class, 'checkStatus'])->name('public.order.check');

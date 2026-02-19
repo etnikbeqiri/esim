@@ -5,8 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { useAnalytics, usePageViewTracking } from '@/lib/analytics';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
+    ArrowLeft,
     BookOpen,
     Calendar,
     CheckCircle2,
@@ -19,7 +20,7 @@ import {
     Tag,
     XCircle,
 } from 'lucide-react';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 interface Order {
     uuid: string;
@@ -197,6 +198,12 @@ export default function OrderStatus({ order }: Props) {
         [supportContact],
     );
 
+    const page = usePage();
+    const fromTrack = useMemo(
+        () => page.url.includes('from=track'),
+        [page.url],
+    );
+
     return (
         <GuestLayout>
             <Head
@@ -205,9 +212,22 @@ export default function OrderStatus({ order }: Props) {
                 })}
             />
 
-            <section className="py-12 md:py-20">
+            <section className={fromTrack ? 'pt-4 pb-12 md:pt-6 md:pb-20' : 'py-12 md:py-20'}>
                 <div className="container mx-auto px-4">
                     <div className="mx-auto max-w-2xl">
+                        {/* Back link */}
+                        {fromTrack && (
+                            <div className="mb-4">
+                                <button
+                                    onClick={() => window.history.back()}
+                                    className="inline-flex items-center gap-1 text-xs font-medium text-primary-400 transition-colors hover:text-primary-700"
+                                >
+                                    <ArrowLeft className="h-3 w-3" />
+                                    {trans('track_order_results.all_orders')}
+                                </button>
+                            </div>
+                        )}
+
                         {/* Header */}
                         <div className="mb-8 text-center">
                             <Badge

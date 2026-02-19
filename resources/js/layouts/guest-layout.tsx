@@ -72,6 +72,12 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
 
                         {/* Desktop Auth Buttons */}
                         <div className="hidden items-center gap-3 md:flex">
+                            <Link
+                                href="/track"
+                                className="text-sm font-medium text-primary-500 transition-colors hover:text-primary-900"
+                            >
+                                {trans('nav.track_order')}
+                            </Link>
                             <LanguageSwitcher />
                             {auth.user ? (
                                 <GoldButton
@@ -166,6 +172,15 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                 >
                                     {trans('nav.devices')}
                                 </Link>
+                                <div className="mt-3 border-t border-primary-100 pt-3">
+                                    <Link
+                                        href="/track"
+                                        className="flex items-center rounded-xl px-4 py-3 text-sm font-medium text-primary-500 hover:bg-primary-50 hover:text-primary-900"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        {trans('nav.track_order')}
+                                    </Link>
+                                </div>
                                 <div className="mt-3 flex items-center justify-between border-t border-primary-100 pt-4">
                                     <LanguageSwitcher showLabel />
                                 </div>
