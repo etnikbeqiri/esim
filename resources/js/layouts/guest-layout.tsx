@@ -6,7 +6,7 @@ import { useTrans } from '@/hooks/use-trans';
 import { AnalyticsProvider } from '@/lib/analytics';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Menu, User, X } from 'lucide-react';
+import { Menu, Search, User, X } from 'lucide-react';
 import { useState } from 'react';
 
 interface GuestLayoutProps {
@@ -117,6 +117,13 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
 
                         {/* Mobile Language Switcher & Menu Button */}
                         <div className="flex items-center gap-2 md:hidden">
+                            <Link
+                                href="/track"
+                                className="rounded-lg p-2 text-primary-500 hover:bg-primary-50 hover:text-primary-800"
+                                aria-label={trans('nav.track_order')}
+                            >
+                                <Search className="h-5 w-5" />
+                            </Link>
                             <LanguageSwitcher />
                             <button
                                 className="rounded-lg p-2 text-primary-800 hover:bg-primary-50"
@@ -172,15 +179,6 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                 >
                                     {trans('nav.devices')}
                                 </Link>
-                                <div className="mt-3 border-t border-primary-100 pt-3">
-                                    <Link
-                                        href="/track"
-                                        className="flex items-center rounded-xl px-4 py-3 text-sm font-medium text-primary-500 hover:bg-primary-50 hover:text-primary-900"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        {trans('nav.track_order')}
-                                    </Link>
-                                </div>
                                 <div className="mt-3 flex items-center justify-between border-t border-primary-100 pt-4">
                                     <LanguageSwitcher showLabel />
                                 </div>
