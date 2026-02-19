@@ -16,6 +16,10 @@ class ApplePayController extends Controller
 
     public function validate(Request $request): JsonResponse
     {
+        if (!setting_enabled('payments.apple_pay_enabled')) {
+            return response()->json(['error' => 'Apple Pay is not available'], 403);
+        }
+
         $request->validate([
             'validationURL' => 'required|url',
             'package_id' => 'required|integer|exists:packages,id',
@@ -49,6 +53,10 @@ class ApplePayController extends Controller
 
     public function process(Request $request): JsonResponse
     {
+        if (!setting_enabled('payments.apple_pay_enabled')) {
+            return response()->json(['error' => 'Apple Pay is not available'], 403);
+        }
+
         $request->validate([
             'order_id' => 'required|string|uuid',
             'token' => 'required|array',

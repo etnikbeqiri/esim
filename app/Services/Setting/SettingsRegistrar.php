@@ -421,6 +421,52 @@ class SettingsRegistrar
             default: ''
         );
 
+        // Payment Settings
+        $this->register(
+            key: 'payments.apple_pay_enabled',
+            label: 'Apple Pay',
+            description: 'Enable Apple Pay as a payment option on checkout',
+            group: SettingGroup::Payments,
+            type: SettingType::Boolean,
+            default: false
+        );
+
+        $this->register(
+            key: 'payments.procard_enabled',
+            label: 'Procard',
+            description: 'Enable Procard card payments on checkout',
+            group: SettingGroup::Payments,
+            type: SettingType::Boolean,
+            default: true
+        );
+
+        $this->register(
+            key: 'payments.paysera_enabled',
+            label: 'Paysera',
+            description: 'Enable Paysera payments on checkout',
+            group: SettingGroup::Payments,
+            type: SettingType::Boolean,
+            default: true
+        );
+
+        $this->register(
+            key: 'payments.stripe_enabled',
+            label: 'Stripe',
+            description: 'Enable Stripe card payments on checkout',
+            group: SettingGroup::Payments,
+            type: SettingType::Boolean,
+            default: false
+        );
+
+        $this->register(
+            key: 'payments.cryptomus_enabled',
+            label: 'Cryptomus',
+            description: 'Enable cryptocurrency payments on checkout',
+            group: SettingGroup::Payments,
+            type: SettingType::Boolean,
+            default: true
+        );
+
         // Homepage Settings
         $this->register(
             key: 'homepage.show_featured_packages',

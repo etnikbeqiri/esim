@@ -132,13 +132,44 @@ enum PaymentProvider: string
     }
 
     /**
+     * Get the setting key that controls whether this provider is enabled.
+     */
+    public function settingKey(): ?string
+    {
+        return match ($this) {
+            self::Stripe => 'payments.stripe_enabled',
+            self::Procard => 'payments.procard_enabled',
+            self::Paysera => 'payments.paysera_enabled',
+            self::Cryptomus => 'payments.cryptomus_enabled',
+            default => null,
+        };
+    }
+
+    /**
+     * Check if this provider is enabled via settings.
+     */
+    public function isEnabledInSettings(): bool
+    {
+        $key = $this->settingKey();
+
+        if ($key === null) {
+            return true;
+        }
+
+        return setting_enabled($key, false);
+    }
+
+    /**
      * Get all available providers for public checkout (excludes Balance).
      *
      * @return array<self>
      */
     public static function publicProviders(): array
     {
-        return [self::Procard, self::Paysera, self::Cryptomus];
+        return array_values(array_filter(
+            [self::Stripe, self::Procard, self::Paysera, self::Cryptomus],
+            fn (self $provider) => $provider->isEnabledInSettings(),
+        ));
     }
 
     /**

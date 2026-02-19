@@ -8,6 +8,7 @@ enum SettingGroup: string
     case Analytics = 'analytics';
     case Invoices = 'invoices';
     case Homepage = 'homepage';
+    case Payments = 'payments';
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum SettingGroup: string
             self::Analytics => 'Analytics',
             self::Invoices => 'Invoices & VAT',
             self::Homepage => 'Homepage',
+            self::Payments => 'Payments',
         };
     }
 
@@ -26,6 +28,7 @@ enum SettingGroup: string
             self::Analytics => 'BarChart3',
             self::Invoices => 'Receipt',
             self::Homepage => 'Home',
+            self::Payments => 'CreditCard',
         };
     }
 }

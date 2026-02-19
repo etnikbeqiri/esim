@@ -80,7 +80,7 @@ class CheckoutController extends Controller
                 'total' => $vatCalculation['total'],
                 'country' => setting('invoices.vat_country', 'Kosovo'),
             ],
-            'applePayMerchantId' => config('services.apple_pay.merchant_id'),
+            'applePayMerchantId' => setting_enabled('payments.apple_pay_enabled') ? config('services.apple_pay.merchant_id') : null,
         ]);
     }
 
