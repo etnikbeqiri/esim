@@ -27,7 +27,7 @@
     @php
         $lpaString = $esimProfile->lpa_string;
         $iosDeeplink = $lpaString ? 'https://esimsetup.apple.com/esim_qrcode_provisioning?carddata=' . urlencode($lpaString) : null;
-        $androidDeeplink = $lpaString ? 'https://lpa.ds/?' . str_replace('LPA:1$', '', $lpaString) : null;
+        $androidDeeplink = $lpaString ? 'https://esimsetup.android.com/esim_qrcode_provisioning?carddata=' . urlencode($lpaString) : null;
     @endphp
 
     @if($iosDeeplink || $androidDeeplink)
