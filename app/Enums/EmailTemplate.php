@@ -18,6 +18,7 @@ enum EmailTemplate: string
     case LowBalance = 'low_balance';
 
     // Ticket emails
+    case TrackOrder = 'track_order';
     case TicketCreated = 'ticket_created';
     case TicketReply = 'ticket_reply';
     case AdminTicketReply = 'admin_ticket_reply';
@@ -53,6 +54,7 @@ enum EmailTemplate: string
             self::AdminNewB2BCustomer => 'Admin: New B2B Customer',
             self::AdminBalanceTopUp => 'Admin: Balance Top Up',
             self::AdminOrderRequiresReview => 'Admin: Order Requires Review',
+            self::TrackOrder => 'Track Order Link',
             self::TicketCreated => 'Ticket Created',
             self::TicketReply => 'Ticket Reply',
             self::AdminTicketReply => 'Admin: Customer Reply',
@@ -83,6 +85,7 @@ enum EmailTemplate: string
             self::AdminNewB2BCustomer => "[{$appName}] New B2B Customer Registration",
             self::AdminBalanceTopUp => "[{$appName}] B2B Balance Top Up",
             self::AdminOrderRequiresReview => "[{$appName}] ORDER REQUIRES REVIEW — Provider API Error",
+            self::TrackOrder => "Track Your Orders - {$appName}",
             self::TicketCreated => "Your Support Ticket Has Been Created",
             self::TicketReply => "New Reply to Your Support Ticket",
             self::AdminTicketReply => "[{$appName}] Customer Reply on Ticket",
@@ -118,6 +121,7 @@ enum EmailTemplate: string
             self::AdminLowStock => 10,
             self::AdminNewB2BCustomer => 10,
             self::AdminBalanceTopUp => 10,
+            self::TrackOrder => 4,
             self::TicketCreated => 7,
             self::TicketReply => 6,
             self::AdminTicketReply => 6,
@@ -158,6 +162,7 @@ enum EmailTemplate: string
             self::PaymentFailed => 'emails.payment_failed',
             self::EsimDelivery => 'emails.esim_qr_code',
             self::BalanceTopUp => 'emails.balance_topup',
+            self::TrackOrder => 'emails.track_order',
             self::TicketCreated => 'emails.ticket_created',
             self::TicketReply => 'emails.ticket_reply',
             self::EmailVerification => 'emails.email_verification',

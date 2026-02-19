@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Public;
 
+use App\Enums\EmailTemplate;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
+use App\Mail\TemplatedMail;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -41,13 +43,14 @@ class TrackOrderController extends Controller
                 ['email' => $email]
             );
 
-            Mail::queue('emails.track-order', [
-                'url' => $signedUrl,
-                'appName' => config('app.name'),
-            ], function ($message) use ($email) {
-                $message->to($email)
-                    ->subject('Track Your Orders - ' . config('app.name'));
-            });
+            Mail::to($email)->queue(
+                new TemplatedMail(
+                    template: EmailTemplate::TrackOrder,
+                    templateData: [
+                        'url' => $signedUrl,
+                    ],
+                )
+            );
         }
 
         // Always show success (don't reveal if email exists or not)
