@@ -95,12 +95,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('balance/topup', [\App\Http\Controllers\Client\BalanceController::class, 'topUp'])->middleware('b2b')->name('balance.topup');
         Route::get('balance/topup/callback', [\App\Http\Controllers\Client\BalanceController::class, 'topUpCallback'])->middleware('b2b')->name('balance.topup.callback');
 
-        Route::middleware('b2b')->group(function () {
-            Route::get('invoices', [\App\Http\Controllers\Client\InvoiceController::class, 'index'])->name('invoices.index');
-            Route::get('invoices/statement', [\App\Http\Controllers\Client\InvoiceController::class, 'statement'])->name('invoices.statement');
-            Route::get('invoices/{invoice}', [\App\Http\Controllers\Client\InvoiceController::class, 'show'])->name('invoices.show');
-            Route::get('invoices/{invoice}/download', [\App\Http\Controllers\Client\InvoiceController::class, 'download'])->name('invoices.download');
-        });
+        Route::get('invoices', [\App\Http\Controllers\Client\InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('invoices/statement', [\App\Http\Controllers\Client\InvoiceController::class, 'statement'])->middleware('b2b')->name('invoices.statement');
+        Route::get('invoices/{invoice}', [\App\Http\Controllers\Client\InvoiceController::class, 'show'])->name('invoices.show');
+        Route::get('invoices/{invoice}/download', [\App\Http\Controllers\Client\InvoiceController::class, 'download'])->name('invoices.download');
     });
 
     Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {

@@ -1,12 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { CountryFlag } from '@/components/country-flag';
 import { Progress } from '@/components/ui/progress';
 import { useTrans } from '@/hooks/use-trans';
 import AppLayout from '@/layouts/app-layout';
@@ -17,6 +11,7 @@ import {
     ArrowUpRight,
     Building2,
     CheckCircle2,
+    ChevronRight,
     Clock,
     CreditCard,
     Globe,
@@ -25,8 +20,6 @@ import {
     RefreshCw,
     ShoppingCart,
     Smartphone,
-    TrendingUp,
-    User,
     Wallet,
     Wifi,
     XCircle,
@@ -59,16 +52,6 @@ interface RecentOrder {
     esim_status: string | null;
     created_at: string;
     created_at_date: string;
-}
-
-interface FeaturedPackage {
-    id: number;
-    name: string;
-    country: string | null;
-    country_iso: string | null;
-    data_label: string;
-    validity_label: string;
-    price: string;
 }
 
 interface ActiveEsim {
@@ -104,43 +87,42 @@ interface Stats {
 interface Props {
     customer: Customer | null;
     recentOrders: RecentOrder[];
-    featuredPackages: FeaturedPackage[];
     activeEsims: ActiveEsim[];
     balanceHistory: BalanceTransaction[];
     stats: Stats | null;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '/client' }];
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Dashboard', href: '/client' },
+];
 
-function getStatusBadgeClass(color: string): string {
+function getStatusStyle(color: string): string {
     const colors: Record<string, string> = {
-        green: 'bg-primary-100 text-primary-700 border-primary-200',
-        yellow: 'bg-accent-100 text-accent-700 border-accent-200',
-        red: 'bg-red-100 text-red-700 border-red-200',
-        blue: 'bg-primary-100 text-primary-700 border-primary-200',
-        gray: 'bg-neutral-100 text-neutral-700 border-neutral-200',
-        purple: 'bg-purple-100 text-purple-700 border-purple-200',
-        orange: 'bg-orange-100 text-orange-700 border-orange-200',
+        green: 'bg-green-50 text-green-700 ring-green-600/20 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20',
+        yellow: 'bg-yellow-50 text-yellow-700 ring-yellow-600/20 dark:bg-yellow-500/10 dark:text-yellow-400 dark:ring-yellow-500/20',
+        red: 'bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20',
+        blue: 'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20',
+        gray: 'bg-gray-50 text-gray-700 ring-gray-600/20 dark:bg-gray-500/10 dark:text-gray-400 dark:ring-gray-500/20',
+        orange: 'bg-orange-50 text-orange-700 ring-orange-600/20 dark:bg-orange-500/10 dark:text-orange-400 dark:ring-orange-500/20',
     };
     return colors[color] || colors.gray;
 }
 
-function getStatusIcon(status: string, size = 'h-3 w-3') {
+function getStatusIcon(status: string) {
     switch (status) {
         case 'completed':
-            return <CheckCircle2 className={`${size} text-primary-500`} />;
+            return <CheckCircle2 className="h-3.5 w-3.5" />;
         case 'processing':
-            return (
-                <Loader2 className={`${size} animate-spin text-primary-500`} />
-            );
+        case 'provider_purchased':
+            return <Loader2 className="h-3.5 w-3.5 animate-spin" />;
         case 'pending_retry':
-            return <RefreshCw className={`${size} text-orange-500`} />;
+            return <RefreshCw className="h-3.5 w-3.5" />;
         case 'failed':
         case 'cancelled':
-            return <XCircle className={`${size} text-red-500`} />;
+            return <XCircle className="h-3.5 w-3.5" />;
         case 'awaiting_payment':
         case 'pending':
-            return <Clock className={`${size} text-accent-500`} />;
+            return <Clock className="h-3.5 w-3.5" />;
         default:
             return null;
     }
@@ -161,7 +143,6 @@ function formatCurrency(amount: number | string): string {
 export default function ClientDashboard({
     customer,
     recentOrders,
-    featuredPackages,
     activeEsims,
     balanceHistory,
     stats,
@@ -172,526 +153,363 @@ export default function ClientDashboard({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={trans('client_dashboard.welcome')} />
-            <div className="flex flex-col gap-6 p-4">
-                {/* Welcome Section */}
+            <div className="mx-auto w-full max-w-4xl space-y-5 p-4 md:space-y-6 md:p-6">
+                {/* Welcome header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="flex items-center gap-2 text-2xl font-semibold">
+                        <h1 className="text-xl font-semibold md:text-2xl">
                             {trans('client_dashboard.welcome')}
                             {customer ? `, ${customer.display_name}` : ''}
-                            {isB2B && customer?.company_name && (
-                                <Badge
-                                    variant="outline"
-                                    className="border-primary-200 bg-primary-100 text-primary-700"
-                                >
-                                    <Building2 className="mr-1 h-3 w-3" />
-                                    {customer.company_name}
-                                </Badge>
-                            )}
                         </h1>
-                        {customer && (
-                            <p className="mt-1 flex items-center gap-2 text-muted-foreground">
+                        <div className="mt-1 flex items-center gap-2">
+                            {customer && (
                                 <Badge
-                                    variant="outline"
-                                    className={
-                                        isB2B
-                                            ? 'border-primary-200 bg-primary-100 text-primary-700'
-                                            : 'border-purple-200 bg-purple-100 text-purple-700'
-                                    }
+                                    variant="secondary"
+                                    className="text-xs ring-1 ring-inset ring-gray-600/10"
                                 >
                                     {isB2B ? (
                                         <Building2 className="mr-1 h-3 w-3" />
-                                    ) : (
-                                        <User className="mr-1 h-3 w-3" />
-                                    )}
+                                    ) : null}
                                     {customer.type_label}
                                 </Badge>
-                                {customer.discount_percentage &&
-                                    Number(customer.discount_percentage) >
-                                        0 && (
-                                        <Badge
-                                            variant="secondary"
-                                            className="bg-primary-100 text-primary-700"
-                                        >
-                                            {customer.discount_percentage}%
-                                            discount
-                                        </Badge>
-                                    )}
-                            </p>
-                        )}
+                            )}
+                            {isB2B &&
+                                customer?.company_name && (
+                                    <span className="text-sm text-muted-foreground">
+                                        {customer.company_name}
+                                    </span>
+                                )}
+                            {customer?.discount_percentage &&
+                                Number(customer.discount_percentage) > 0 && (
+                                    <Badge
+                                        variant="secondary"
+                                        className="bg-green-50 text-xs text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-500/10 dark:text-green-400"
+                                    >
+                                        {customer.discount_percentage}% discount
+                                    </Badge>
+                                )}
+                        </div>
                     </div>
-                    <Button asChild>
+                    <Button asChild size="sm" className="gap-2">
                         <Link href="/client/packages">
-                            <Globe className="mr-2 h-4 w-4" />
-                            {trans('client_dashboard.browse_packages')}
+                            <Globe className="h-4 w-4" />
+                            <span className="hidden sm:inline">
+                                {trans('client_dashboard.browse_packages')}
+                            </span>
                         </Link>
                     </Button>
                 </div>
 
-                {/* Stats Cards */}
-                <div
-                    className={`grid gap-4 ${isB2B ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}
-                >
-                    {isB2B && (
-                        <Card className="border-primary-200 bg-gradient-to-br from-primary-50 to-primary-100">
-                            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium text-primary-700">
-                                    {trans(
-                                        'client_dashboard.available_balance',
-                                    )}
-                                </CardTitle>
-                                <Wallet className="h-4 w-4 text-primary-500" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-primary-700">
-                                    {formatCurrency(
-                                        customer?.available_balance || 0,
-                                    )}
+                {/* Stats row */}
+                <div className="rounded-xl border bg-card">
+                    <div
+                        className={`grid divide-y md:divide-x md:divide-y-0 ${isB2B ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}
+                    >
+                        {isB2B && (
+                            <Link
+                                href="/client/balance"
+                                className="flex items-center gap-3 px-5 py-4 transition-colors hover:bg-muted/50"
+                            >
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 dark:bg-green-500/10">
+                                    <Wallet className="h-5 w-5 text-green-600 dark:text-green-400" />
                                 </div>
-                                {Number(customer?.reserved_balance || 0) >
-                                    0 && (
-                                    <p className="text-xs text-primary-600">
-                                        {formatCurrency(
-                                            customer?.reserved_balance || 0,
-                                        )}{' '}
-                                        {trans('client_dashboard.reserved')}
+                                <div className="min-w-0">
+                                    <p className="text-xs text-muted-foreground">
+                                        {trans('client_dashboard.available_balance')}
                                     </p>
-                                )}
-                                <Link
-                                    href="/client/balance"
-                                    className="mt-1 inline-block text-xs text-primary-600 hover:underline"
-                                >
-                                    {trans(
-                                        'client_dashboard.view_transactions',
-                                    )}{' '}
-                                    →
-                                </Link>
-                            </CardContent>
-                        </Card>
-                    )}
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                {trans('client_dashboard.total_orders')}
-                            </CardTitle>
-                            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                {stats?.total_orders ?? 0}
+                                    <p className="text-lg font-semibold tabular-nums text-green-600 dark:text-green-400">
+                                        {formatCurrency(customer?.available_balance || 0)}
+                                    </p>
+                                </div>
+                            </Link>
+                        )}
+                        <div className="flex items-center gap-3 px-5 py-4">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted">
+                                <ShoppingCart className="h-5 w-5 text-muted-foreground" />
                             </div>
-                            <p className="text-xs text-muted-foreground">
-                                {stats?.pending_orders ?? 0}{' '}
-                                {trans('client_dashboard.pending')}
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                {trans('client_dashboard.completed')}
-                            </CardTitle>
-                            <CheckCircle2 className="h-4 w-4 text-primary-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-primary-600">
-                                {stats?.completed_orders ?? 0}
+                            <div className="min-w-0">
+                                <p className="text-xs text-muted-foreground">
+                                    {trans('client_dashboard.total_orders')}
+                                </p>
+                                <p className="text-lg font-semibold tabular-nums">
+                                    {stats?.total_orders ?? 0}
+                                </p>
                             </div>
-                            <p className="text-xs text-muted-foreground">
-                                {trans('client_dashboard.successful_orders')}
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                {trans('client_dashboard.active_esims')}
-                            </CardTitle>
-                            <Wifi className="h-4 w-4 text-primary-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                {stats?.active_esims ?? 0}
+                        </div>
+                        <div className="flex items-center gap-3 px-5 py-4">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 dark:bg-green-500/10">
+                                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
                             </div>
-                            <p className="text-xs text-muted-foreground">
-                                {trans('client_dashboard.ready_to_use')}
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                {trans('client_dashboard.total_spent')}
-                            </CardTitle>
-                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                {formatCurrency(stats?.total_spent ?? 0)}
+                            <div className="min-w-0">
+                                <p className="text-xs text-muted-foreground">
+                                    {trans('client_dashboard.completed')}
+                                </p>
+                                <p className="text-lg font-semibold tabular-nums">
+                                    {stats?.completed_orders ?? 0}
+                                </p>
                             </div>
-                            <p className="text-xs text-muted-foreground">
-                                {formatCurrency(stats?.spent_this_month ?? 0)}{' '}
-                                {trans('client_dashboard.this_month')}
-                            </p>
-                        </CardContent>
-                    </Card>
+                        </div>
+                        <div className="flex items-center gap-3 px-5 py-4">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-500/10">
+                                <Wifi className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-xs text-muted-foreground">
+                                    {trans('client_dashboard.active_esims')}
+                                </p>
+                                <p className="text-lg font-semibold tabular-nums">
+                                    {stats?.active_esims ?? 0}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 px-5 py-4">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted">
+                                <CreditCard className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-xs text-muted-foreground">
+                                    {trans('client_dashboard.total_spent')}
+                                </p>
+                                <p className="text-lg font-semibold tabular-nums">
+                                    {formatCurrency(stats?.total_spent ?? 0)}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Active eSIMs (if any) */}
+                {/* Active eSIMs */}
                 {activeEsims.length > 0 && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Smartphone className="h-5 w-5 text-primary-500" />
-                                {trans('client_dashboard.your_active_esims')}
-                            </CardTitle>
-                            <CardDescription>
-                                {trans('client_dashboard.monitor_usage')}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid gap-4 md:grid-cols-3">
-                                {activeEsims.map((esim) => {
-                                    const usagePercent =
-                                        esim.data_total_bytes > 0
-                                            ? (esim.data_used_bytes /
-                                                  esim.data_total_bytes) *
-                                              100
-                                            : 0;
-                                    return (
-                                        <Link
-                                            key={esim.iccid}
-                                            href={`/client/orders/${esim.order_uuid}`}
-                                            className="rounded-lg border p-4 transition-colors hover:bg-muted/50"
-                                        >
-                                            <div className="mb-2 flex items-center justify-between">
-                                                <span className="font-medium">
-                                                    {esim.country}
-                                                </span>
-                                                <Badge
-                                                    variant={
-                                                        esim.status === 'active'
-                                                            ? 'default'
-                                                            : 'secondary'
-                                                    }
-                                                >
-                                                    {esim.status}
-                                                </Badge>
+                    <div className="rounded-xl border bg-card">
+                        <div className="flex items-center justify-between border-b px-5 py-4">
+                            <div className="flex items-center gap-2">
+                                <Smartphone className="h-4 w-4 text-muted-foreground" />
+                                <h2 className="text-base font-semibold">
+                                    {trans('client_dashboard.your_active_esims')}
+                                </h2>
+                            </div>
+                        </div>
+                        <div className="divide-y">
+                            {activeEsims.map((esim) => {
+                                const usagePercent =
+                                    esim.data_total_bytes > 0
+                                        ? (esim.data_used_bytes /
+                                              esim.data_total_bytes) *
+                                          100
+                                        : 0;
+                                return (
+                                    <Link
+                                        key={esim.iccid}
+                                        href={`/client/orders/${esim.order_uuid}`}
+                                        className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/50"
+                                    >
+                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted">
+                                            {esim.country_iso ? (
+                                                <CountryFlag
+                                                    countryCode={esim.country_iso}
+                                                    size="md"
+                                                />
+                                            ) : (
+                                                <Wifi className="h-5 w-5 text-muted-foreground" />
+                                            )}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <div className="min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="truncate text-sm font-semibold">
+                                                            {esim.country || esim.package_name}
+                                                        </p>
+                                                        <Badge
+                                                            variant="secondary"
+                                                            className="bg-green-50 text-[11px] text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-500/10 dark:text-green-400"
+                                                        >
+                                                            {esim.status}
+                                                        </Badge>
+                                                    </div>
+                                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                                        {esim.package_name}
+                                                    </p>
+                                                </div>
+                                                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-muted-foreground" />
                                             </div>
-                                            <p className="mb-2 text-sm text-muted-foreground">
-                                                {esim.package_name}
-                                            </p>
-                                            <div className="space-y-1">
-                                                <div className="flex justify-between text-xs">
+                                            <div className="mt-2.5">
+                                                <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
                                                     <span>
-                                                        {trans(
-                                                            'client_dashboard.data_used',
-                                                        )}
+                                                        {trans('client_dashboard.data_used')}
                                                     </span>
-                                                    <span>
-                                                        {formatBytes(
-                                                            esim.data_used_bytes,
-                                                        )}{' '}
-                                                        /{' '}
-                                                        {formatBytes(
-                                                            esim.data_total_bytes,
-                                                        )}
+                                                    <span className="tabular-nums">
+                                                        {formatBytes(esim.data_used_bytes)} /{' '}
+                                                        {formatBytes(esim.data_total_bytes)}
                                                     </span>
                                                 </div>
                                                 <Progress
                                                     value={usagePercent}
-                                                    className="h-2"
+                                                    className="h-1.5"
                                                 />
                                             </div>
-                                        </Link>
-                                    );
-                                })}
-                            </div>
-                        </CardContent>
-                    </Card>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    </div>
                 )}
 
-                <div className="grid gap-6 lg:grid-cols-2">
+                {/* Recent Orders + Balance History */}
+                <div className={`grid gap-5 md:gap-6 ${isB2B && balanceHistory.length > 0 ? 'lg:grid-cols-2' : ''}`}>
                     {/* Recent Orders */}
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <div>
-                                <CardTitle>
-                                    {trans('client_dashboard.recent_orders')}
-                                </CardTitle>
-                                <CardDescription>
-                                    {trans('client_dashboard.latest_purchases')}
-                                </CardDescription>
-                            </div>
-                            <Button variant="outline" size="sm" asChild>
+                    <div className="rounded-xl border bg-card">
+                        <div className="flex items-center justify-between border-b px-5 py-4">
+                            <h2 className="text-base font-semibold">
+                                {trans('client_dashboard.recent_orders')}
+                            </h2>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="gap-1 text-xs text-muted-foreground"
+                                asChild
+                            >
                                 <Link href="/client/orders">
                                     {trans('client_dashboard.view_all')}
-                                    <ArrowUpRight className="ml-1 h-4 w-4" />
+                                    <ChevronRight className="h-3.5 w-3.5" />
                                 </Link>
                             </Button>
-                        </CardHeader>
-                        <CardContent>
-                            {recentOrders.length === 0 ? (
-                                <div className="py-8 text-center">
-                                    <ShoppingCart className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
-                                    <p className="mb-3 text-muted-foreground">
-                                        {trans('client_dashboard.no_orders')}
-                                    </p>
-                                    <Button asChild>
-                                        <Link href="/client/packages">
-                                            {trans(
-                                                'client_dashboard.browse_packages',
-                                            )}
-                                        </Link>
-                                    </Button>
+                        </div>
+                        {recentOrders.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-12">
+                                <div className="mb-3 rounded-full bg-muted p-3">
+                                    <ShoppingCart className="h-6 w-6 text-muted-foreground" />
                                 </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    {recentOrders.map((order) => (
-                                        <Link
-                                            key={order.uuid}
-                                            href={`/client/orders/${order.uuid}`}
-                                            className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
-                                        >
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-medium">
-                                                        {order.package_name ||
-                                                            trans(
-                                                                'client_dashboard.esim_package',
-                                                            )}
-                                                    </span>
-                                                    <Badge
-                                                        variant="outline"
-                                                        className={`${getStatusBadgeClass(order.status_color)} flex items-center gap-1`}
-                                                    >
-                                                        {getStatusIcon(
-                                                            order.status,
-                                                        )}
-                                                        {order.status_label}
-                                                    </Badge>
-                                                </div>
-                                                <p className="mt-1 text-sm text-muted-foreground">
+                                <p className="text-sm text-muted-foreground">
+                                    {trans('client_dashboard.no_orders')}
+                                </p>
+                                <Button asChild size="sm" className="mt-3">
+                                    <Link href="/client/packages">
+                                        {trans('client_dashboard.browse_packages')}
+                                    </Link>
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="divide-y">
+                                {recentOrders.map((order) => (
+                                    <Link
+                                        key={order.uuid}
+                                        href={`/client/orders/${order.uuid}`}
+                                        className="group flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/50"
+                                    >
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
+                                            {order.country_iso ? (
+                                                <CountryFlag
+                                                    countryCode={order.country_iso}
+                                                    size="sm"
+                                                />
+                                            ) : (
+                                                <Package className="h-4 w-4 text-muted-foreground" />
+                                            )}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <p className="truncate text-sm font-medium">
+                                                    {order.package_name ||
+                                                        trans('client_dashboard.esim_package')}
+                                                </p>
+                                                <span className="shrink-0 text-sm font-semibold tabular-nums">
+                                                    {formatCurrency(order.amount)}
+                                                </span>
+                                            </div>
+                                            <div className="mt-0.5 flex items-center justify-between gap-2">
+                                                <span className="text-xs text-muted-foreground">
                                                     {order.country_name &&
                                                         `${order.country_name} · `}
-                                                    {order.data_label} ·{' '}
-                                                    {order.created_at}
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                <span className="font-bold">
-                                                    {formatCurrency(
-                                                        order.amount,
-                                                    )}
+                                                    {order.data_label} · {order.created_at}
                                                 </span>
-                                                {order.has_esim && (
-                                                    <p className="flex items-center justify-end gap-1 text-xs text-primary-600">
-                                                        <Wifi className="h-3 w-3" />
-                                                        {trans(
-                                                            'client_dashboard.esim_ready',
-                                                        )}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    {/* Balance History (B2B) or Featured Packages (B2C) */}
-                    {isB2B && balanceHistory.length > 0 ? (
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between">
-                                <div>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <CreditCard className="h-5 w-5" />
-                                        {trans(
-                                            'client_dashboard.balance_history',
-                                        )}
-                                    </CardTitle>
-                                    <CardDescription>
-                                        {trans(
-                                            'client_dashboard.recent_transactions',
-                                        )}
-                                    </CardDescription>
-                                </div>
-                                <Button variant="outline" size="sm" asChild>
-                                    <Link href="/client/balance">
-                                        {trans('client_dashboard.view_all')}
-                                        <ArrowUpRight className="ml-1 h-4 w-4" />
-                                    </Link>
-                                </Button>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-3">
-                                    {balanceHistory.map((tx) => {
-                                        const isCredit = [
-                                            'top_up',
-                                            'refund',
-                                        ].includes(tx.type);
-                                        return (
-                                            <div
-                                                key={tx.id}
-                                                className="flex items-center justify-between rounded-lg border p-3"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div
-                                                        className={`rounded-full p-2 ${isCredit ? 'bg-primary-100' : 'bg-red-100'}`}
-                                                    >
-                                                        {isCredit ? (
-                                                            <ArrowDownLeft className="h-4 w-4 text-primary-600" />
-                                                        ) : (
-                                                            <ArrowUpRight className="h-4 w-4 text-red-600" />
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-medium">
-                                                            {tx.type_label}
-                                                        </p>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            {tx.description ||
-                                                                tx.created_at}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <span
-                                                        className={`font-bold ${isCredit ? 'text-primary-600' : 'text-red-600'}`}
-                                                    >
-                                                        {isCredit ? '+' : '-'}
-                                                        {formatCurrency(
-                                                            tx.amount,
-                                                        )}
-                                                    </span>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {trans(
-                                                            'client_dashboard.balance',
-                                                        )}
-                                                        :{' '}
-                                                        {formatCurrency(
-                                                            tx.balance_after,
-                                                        )}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ) : (
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between">
-                                <div>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Package className="h-5 w-5" />
-                                        {trans(
-                                            'client_dashboard.featured_packages',
-                                        )}
-                                    </CardTitle>
-                                    <CardDescription>
-                                        {trans(
-                                            'client_dashboard.popular_plans',
-                                        )}
-                                    </CardDescription>
-                                </div>
-                                <Button variant="outline" size="sm" asChild>
-                                    <Link href="/client/packages">
-                                        {trans('client_dashboard.view_all')}
-                                        <ArrowUpRight className="ml-1 h-4 w-4" />
-                                    </Link>
-                                </Button>
-                            </CardHeader>
-                            <CardContent>
-                                {featuredPackages.length === 0 ? (
-                                    <p className="py-8 text-center text-muted-foreground">
-                                        {trans(
-                                            'client_dashboard.no_featured_packages',
-                                        )}
-                                    </p>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {featuredPackages
-                                            .slice(0, 5)
-                                            .map((pkg) => (
-                                                <Link
-                                                    key={pkg.id}
-                                                    href={`/client/packages/${pkg.id}`}
-                                                    className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
+                                                <Badge
+                                                    variant="secondary"
+                                                    className={`${getStatusStyle(order.status_color)} inline-flex shrink-0 items-center gap-1 text-[11px] ring-1 ring-inset`}
                                                 >
-                                                    <div>
-                                                        <p className="font-medium">
-                                                            {pkg.name}
-                                                        </p>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            {pkg.country} ·{' '}
-                                                            {pkg.data_label} ·{' '}
-                                                            {pkg.validity_label}
-                                                        </p>
-                                                    </div>
-                                                    <span className="font-bold text-primary">
-                                                        {formatCurrency(
-                                                            pkg.price,
-                                                        )}
-                                                    </span>
-                                                </Link>
-                                            ))}
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    )}
-                </div>
-
-                {/* Featured Packages for B2B (they already have balance history) */}
-                {isB2B && featuredPackages.length > 0 && (
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <div>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Package className="h-5 w-5" />
-                                    {trans(
-                                        'client_dashboard.featured_packages',
-                                    )}
-                                </CardTitle>
-                                <CardDescription>
-                                    {trans('client_dashboard.popular_plans')}
-                                </CardDescription>
-                            </div>
-                            <Button variant="outline" size="sm" asChild>
-                                <Link href="/client/packages">
-                                    {trans('client_dashboard.view_all')}
-                                    <ArrowUpRight className="ml-1 h-4 w-4" />
-                                </Link>
-                            </Button>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid gap-3 md:grid-cols-3">
-                                {featuredPackages.slice(0, 6).map((pkg) => (
-                                    <Link
-                                        key={pkg.id}
-                                        href={`/client/packages/${pkg.id}`}
-                                        className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
-                                    >
-                                        <div>
-                                            <p className="font-medium">
-                                                {pkg.name}
-                                            </p>
-                                            <p className="text-sm text-muted-foreground">
-                                                {pkg.country} · {pkg.data_label}
-                                            </p>
+                                                    {getStatusIcon(order.status)}
+                                                    {order.status_label}
+                                                </Badge>
+                                            </div>
                                         </div>
-                                        <span className="font-bold text-primary">
-                                            {formatCurrency(pkg.price)}
-                                        </span>
                                     </Link>
                                 ))}
                             </div>
-                        </CardContent>
-                    </Card>
-                )}
+                        )}
+                    </div>
+
+                    {/* Right column: Balance History (B2B only) */}
+                    {isB2B && balanceHistory.length > 0 && (
+                        <div className="rounded-xl border bg-card">
+                            <div className="flex items-center justify-between border-b px-5 py-4">
+                                <h2 className="text-base font-semibold">
+                                    {trans('client_dashboard.balance_history')}
+                                </h2>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="gap-1 text-xs text-muted-foreground"
+                                    asChild
+                                >
+                                    <Link href="/client/balance">
+                                        {trans('client_dashboard.view_all')}
+                                        <ChevronRight className="h-3.5 w-3.5" />
+                                    </Link>
+                                </Button>
+                            </div>
+                            <div className="divide-y">
+                                {balanceHistory.map((tx) => {
+                                    const isCredit = [
+                                        'top_up',
+                                        'refund',
+                                    ].includes(tx.type);
+                                    return (
+                                        <div
+                                            key={tx.id}
+                                            className="flex items-center gap-3 px-5 py-3.5"
+                                        >
+                                            <div
+                                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                                                    isCredit
+                                                        ? 'bg-green-50 dark:bg-green-500/10'
+                                                        : 'bg-red-50 dark:bg-red-500/10'
+                                                }`}
+                                            >
+                                                {isCredit ? (
+                                                    <ArrowDownLeft className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                                ) : (
+                                                    <ArrowUpRight className="h-4 w-4 text-red-600 dark:text-red-400" />
+                                                )}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <p className="text-sm font-medium">
+                                                        {tx.type_label}
+                                                    </p>
+                                                    <span
+                                                        className={`shrink-0 text-sm font-semibold tabular-nums ${
+                                                            isCredit
+                                                                ? 'text-green-600 dark:text-green-400'
+                                                                : 'text-red-600 dark:text-red-400'
+                                                        }`}
+                                                    >
+                                                        {isCredit ? '+' : '-'}
+                                                        {formatCurrency(tx.amount)}
+                                                    </span>
+                                                </div>
+                                                <p className="mt-0.5 text-xs text-muted-foreground">
+                                                    {tx.description || tx.created_at}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
             </div>
         </AppLayout>
     );

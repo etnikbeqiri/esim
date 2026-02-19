@@ -61,7 +61,7 @@ export function EsimQrCard({
         : null;
 
     const androidDeeplink = esim.lpa_string
-        ? `https://lpa.ds/?${encodeURIComponent(esim.lpa_string.replace('LPA:1$', ''))}`
+        ? `https://esimsetup.android.com/esim_qrcode_provisioning?carddata=${encodeURIComponent(esim.lpa_string)}`
         : null;
 
     if (!qrValue) {

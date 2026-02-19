@@ -24,9 +24,9 @@ class InvoiceController extends Controller
     {
         $customer = $request->user()->customer;
 
-        if (! $customer || ! $customer->isB2B()) {
+        if (! $customer) {
             return redirect()->route('client.dashboard')
-                ->with('error', 'Invoices are only available for B2B accounts.');
+                ->with('error', 'Customer account required.');
         }
 
         $invoices = $this->invoiceService->getCustomerInvoices($customer);
@@ -65,9 +65,11 @@ class InvoiceController extends Controller
 
         $pdf = $this->invoiceService->generatePdf($invoice);
 
+        $disposition = $request->has('print') ? 'inline' : 'attachment';
+
         return response($pdf, 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="'.$invoice->invoice_number.'.pdf"',
+            'Content-Disposition' => $disposition.'; filename="'.$invoice->invoice_number.'.pdf"',
         ]);
     }
 

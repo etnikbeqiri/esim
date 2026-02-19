@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { CountryFlag } from '@/components/country-flag';
 import {
     Select,
     SelectContent,
@@ -8,22 +8,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
 import { useTrans } from '@/hooks/use-trans';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     CheckCircle2,
+    ChevronLeft,
+    ChevronRight,
+    ChevronRight as ArrowRight,
     Clock,
-    Eye,
     Loader2,
     Package,
     RefreshCw,
@@ -78,29 +72,30 @@ interface Props {
 function getStatusIcon(status: string) {
     switch (status) {
         case 'completed':
-            return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+            return <CheckCircle2 className="h-3.5 w-3.5" />;
         case 'processing':
-            return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
+        case 'provider_purchased':
+            return <Loader2 className="h-3.5 w-3.5 animate-spin" />;
         case 'pending_retry':
-            return <RefreshCw className="h-4 w-4 text-orange-500" />;
+            return <RefreshCw className="h-3.5 w-3.5" />;
         case 'failed':
-            return <XCircle className="h-4 w-4 text-red-500" />;
+            return <XCircle className="h-3.5 w-3.5" />;
         case 'awaiting_payment':
         case 'pending':
-            return <Clock className="h-4 w-4 text-yellow-500" />;
+            return <Clock className="h-3.5 w-3.5" />;
         default:
-            return <Clock className="h-4 w-4 text-gray-500" />;
+            return <Clock className="h-3.5 w-3.5" />;
     }
 }
 
-function getStatusBadgeClass(color: string): string {
+function getStatusStyle(color: string): string {
     const colors: Record<string, string> = {
-        green: 'bg-green-100 text-green-700 border-green-200',
-        yellow: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-        red: 'bg-red-100 text-red-700 border-red-200',
-        blue: 'bg-blue-100 text-blue-700 border-blue-200',
-        gray: 'bg-gray-100 text-gray-700 border-gray-200',
-        orange: 'bg-orange-100 text-orange-700 border-orange-200',
+        green: 'bg-green-50 text-green-700 ring-green-600/20 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20',
+        yellow: 'bg-yellow-50 text-yellow-700 ring-yellow-600/20 dark:bg-yellow-500/10 dark:text-yellow-400 dark:ring-yellow-500/20',
+        red: 'bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20',
+        blue: 'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20',
+        gray: 'bg-gray-50 text-gray-700 ring-gray-600/20 dark:bg-gray-500/10 dark:text-gray-400 dark:ring-gray-500/20',
+        orange: 'bg-orange-50 text-orange-700 ring-orange-600/20 dark:bg-orange-500/10 dark:text-orange-400 dark:ring-orange-500/20',
     };
     return colors[color] || colors.gray;
 }
@@ -109,15 +104,18 @@ export default function OrdersIndex({ orders, filters }: Props) {
     const { trans } = useTrans();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: trans('nav.destinations'), href: '/client/packages' }, // Using destinations as closest match for Shop/Marketplace
+        { title: trans('nav.destinations'), href: '/client/packages' },
         { title: trans('client_orders.title'), href: '/client/orders' },
     ];
 
-    // Poll for updates when there are orders in processing/pending states
     const hasActiveOrders = orders.data.some((order) =>
-        ['processing', 'pending_retry', 'pending', 'awaiting_payment'].includes(
-            order.status,
-        ),
+        [
+            'processing',
+            'provider_purchased',
+            'pending_retry',
+            'pending',
+            'awaiting_payment',
+        ].includes(order.status),
     );
 
     useEffect(() => {
@@ -145,37 +143,37 @@ export default function OrdersIndex({ orders, filters }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={trans('client_orders.title')} />
-            <div className="flex flex-col gap-4 p-4">
+            <div className="mx-auto w-full max-w-4xl space-y-5 p-4 md:space-y-6 md:p-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-semibold">
+                        <h1 className="text-xl font-semibold md:text-2xl">
                             {trans('client_orders.title')}
                         </h1>
-                        <p className="text-sm text-muted-foreground">
-                            {orders.total}{' '}
-                            {trans('client_orders.order').toLowerCase()}s
+                        <p className="mt-0.5 text-sm text-muted-foreground">
+                            {orders.total} {trans('client_orders.order').toLowerCase()}
+                            {orders.total !== 1 ? 's' : ''}
                         </p>
                     </div>
-                    <Button asChild>
+                    <Button asChild size="sm" className="gap-2">
                         <Link href="/client/packages">
-                            <ShoppingCart className="mr-2 h-4 w-4" />
-                            {trans('client_orders.new_order')}
+                            <ShoppingCart className="h-4 w-4" />
+                            <span className="hidden sm:inline">
+                                {trans('client_orders.new_order')}
+                            </span>
                         </Link>
                     </Button>
                 </div>
 
-                {/* Filters */}
-                <div className="flex gap-2">
+                {/* Filter */}
+                <div className="flex items-center gap-2">
                     <Select
                         value={filters.status || 'all'}
                         onValueChange={(v) => handleFilterChange('status', v)}
                     >
-                        <SelectTrigger className="w-[160px]">
+                        <SelectTrigger className="h-9 w-[160px]">
                             <SelectValue
-                                placeholder={trans(
-                                    'client_orders.all_statuses',
-                                )}
+                                placeholder={trans('client_orders.all_statuses')}
                             />
                         </SelectTrigger>
                         <SelectContent>
@@ -186,9 +184,7 @@ export default function OrdersIndex({ orders, filters }: Props) {
                                 {trans('client_orders.statuses.pending')}
                             </SelectItem>
                             <SelectItem value="awaiting_payment">
-                                {trans(
-                                    'client_orders.statuses.awaiting_payment',
-                                )}
+                                {trans('client_orders.statuses.awaiting_payment')}
                             </SelectItem>
                             <SelectItem value="processing">
                                 {trans('client_orders.statuses.processing')}
@@ -204,138 +200,164 @@ export default function OrdersIndex({ orders, filters }: Props) {
                             </SelectItem>
                         </SelectContent>
                     </Select>
+
+                    {filters.status && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-9 text-xs"
+                            onClick={() =>
+                                router.get(
+                                    '/client/orders',
+                                    {},
+                                    { preserveState: true },
+                                )
+                            }
+                        >
+                            Clear
+                        </Button>
+                    )}
                 </div>
 
-                {/* Orders Table */}
+                {/* Order list */}
                 {orders.data.length === 0 ? (
-                    <Card className="border-dashed">
-                        <CardContent className="flex flex-col items-center justify-center py-12">
-                            <div className="mb-3 rounded-full bg-muted p-3">
-                                <Package className="h-6 w-6 text-muted-foreground" />
+                    <div className="rounded-xl border bg-card">
+                        <div className="flex flex-col items-center justify-center py-16">
+                            <div className="mb-4 rounded-full bg-muted p-4">
+                                <Package className="h-7 w-7 text-muted-foreground" />
                             </div>
-                            <h3 className="font-semibold">
+                            <h3 className="text-base font-semibold">
                                 {trans('client_orders.no_orders')}
                             </h3>
-                            <p className="mt-1 mb-3 text-sm text-muted-foreground">
+                            <p className="mt-1 mb-5 max-w-xs text-center text-sm text-muted-foreground">
                                 {trans('client_orders.no_orders_desc')}
                             </p>
-                            <Button asChild size="sm">
+                            <Button asChild>
                                 <Link href="/client/packages">
                                     {trans('client_orders.browse_packages')}
                                 </Link>
                             </Button>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 ) : (
-                    <div className="rounded-lg border">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>
-                                        {trans('client_orders.order')}
-                                    </TableHead>
-                                    <TableHead className="hidden sm:table-cell">
-                                        {trans('client_orders.package')}
-                                    </TableHead>
-                                    <TableHead>
-                                        {trans('client_orders.status')}
-                                    </TableHead>
-                                    <TableHead className="text-right">
-                                        {trans('client_orders.amount')}
-                                    </TableHead>
-                                    <TableHead className="w-[50px]"></TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {orders.data.map((order) => (
-                                    <TableRow
-                                        key={order.uuid}
-                                        className="cursor-pointer hover:bg-muted/50"
-                                        onClick={() =>
-                                            router.visit(
-                                                `/client/orders/${order.uuid}`,
-                                            )
-                                        }
-                                    >
-                                        <TableCell>
-                                            <div className="font-mono text-sm">
+                    <div className="divide-y rounded-xl border bg-card">
+                        {orders.data.map((order) => (
+                            <Link
+                                key={order.uuid}
+                                href={`/client/orders/${order.uuid}`}
+                                className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/50 md:gap-5 md:py-5"
+                            >
+                                {/* Flag / Icon */}
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted md:h-14 md:w-14">
+                                    {order.package?.country_iso ? (
+                                        <CountryFlag
+                                            countryCode={order.package.country_iso}
+                                            size="md"
+                                        />
+                                    ) : (
+                                        <Package className="h-5 w-5 text-muted-foreground" />
+                                    )}
+                                </div>
+
+                                {/* Info */}
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-semibold text-foreground md:text-base">
+                                                {order.package?.name || order.order_number}
+                                            </p>
+                                            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+                                                {order.package && (
+                                                    <span>
+                                                        {order.package.data_label} &middot;{' '}
+                                                        {order.package.validity_label}
+                                                    </span>
+                                                )}
+                                                <span>{order.created_at}</span>
+                                            </div>
+                                        </div>
+                                        <div className="shrink-0 text-right">
+                                            <p className="text-sm font-semibold tabular-nums text-foreground md:text-base">
+                                                €{Number(order.amount).toFixed(2)}
+                                            </p>
+                                            <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
                                                 {order.order_number}
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">
-                                                {order.created_at}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="hidden sm:table-cell">
-                                            {order.package ? (
-                                                <div>
-                                                    <div className="max-w-[200px] truncate text-sm font-medium">
-                                                        {order.package.name}
-                                                    </div>
-                                                    <div className="text-xs text-muted-foreground">
-                                                        {
-                                                            order.package
-                                                                .data_label
-                                                        }{' '}
-                                                        •{' '}
-                                                        {
-                                                            order.package
-                                                                .validity_label
-                                                        }
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                '-'
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Bottom row: status + arrow */}
+                                    <div className="mt-2.5 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
                                             <Badge
-                                                variant="outline"
-                                                className={`${getStatusBadgeClass(order.status_color)} flex w-fit items-center gap-1`}
+                                                variant="secondary"
+                                                className={`${getStatusStyle(order.status_color)} inline-flex items-center gap-1 ring-1 ring-inset`}
                                             >
                                                 {getStatusIcon(order.status)}
-                                                <span className="hidden sm:inline">
-                                                    {order.status_label}
-                                                </span>
+                                                {order.status_label}
                                             </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right font-medium">
-                                            €{Number(order.amount).toFixed(2)}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Eye className="h-4 w-4 text-muted-foreground" />
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+
+                                            {/* Retry info */}
+                                            {order.status === 'pending_retry' && (
+                                                <span className="text-[11px] text-orange-600 dark:text-orange-400">
+                                                    Retry {order.retry_count}/{order.max_retries}
+                                                </span>
+                                            )}
+
+                                            {/* Failure reason */}
+                                            {order.status === 'failed' && order.failure_reason && (
+                                                <span className="max-w-[200px] truncate text-[11px] text-red-600 dark:text-red-400">
+                                                    {order.failure_reason}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <ArrowRight className="h-4 w-4 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-muted-foreground" />
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
                     </div>
                 )}
 
                 {/* Pagination */}
                 {orders.last_page > 1 && (
-                    <div className="flex justify-center gap-2">
-                        {Array.from(
-                            { length: Math.min(orders.last_page, 10) },
-                            (_, i) => i + 1,
-                        ).map((page) => (
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">
+                            Page {orders.current_page} of {orders.last_page}
+                        </span>
+                        <div className="flex items-center gap-1">
                             <Button
-                                key={page}
-                                variant={
-                                    page === orders.current_page
-                                        ? 'default'
-                                        : 'outline'
-                                }
+                                variant="outline"
                                 size="sm"
+                                className="h-8"
+                                disabled={orders.current_page === 1}
                                 onClick={() =>
                                     router.get('/client/orders', {
                                         ...filters,
-                                        page,
+                                        page: orders.current_page - 1,
                                     })
                                 }
                             >
-                                {page}
+                                <ChevronLeft className="h-4 w-4" />
                             </Button>
-                        ))}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8"
+                                disabled={
+                                    orders.current_page === orders.last_page
+                                }
+                                onClick={() =>
+                                    router.get('/client/orders', {
+                                        ...filters,
+                                        page: orders.current_page + 1,
+                                    })
+                                }
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
                     </div>
                 )}
             </div>

@@ -85,7 +85,7 @@ class OrderController extends Controller
 
         $order = Order::where('uuid', $uuid)
             ->where('customer_id', $customer->id)
-            ->with(['package.country', 'esimProfile', 'payments', 'provider'])
+            ->with(['package.country', 'esimProfile', 'payments', 'provider', 'invoice'])
             ->firstOrFail();
 
         // Mask admin_review as "processing" for customers
@@ -137,6 +137,13 @@ class OrderController extends Controller
                 'created_at' => $order->created_at->format('M j, Y H:i'),
                 'completed_at' => $order->completed_at?->format('M j, Y H:i'),
                 'paid_at' => $order->paid_at?->format('M j, Y H:i'),
+                'invoice' => $order->invoice ? [
+                    'uuid' => $order->invoice->uuid,
+                    'invoice_number' => $order->invoice->invoice_number,
+                    'status' => $order->invoice->status->value,
+                    'status_label' => $order->invoice->status->label(),
+                    'formatted_total' => $order->invoice->formatted_total,
+                ] : null,
             ],
             'customer' => [
                 'is_b2b' => $customer->isB2B(),

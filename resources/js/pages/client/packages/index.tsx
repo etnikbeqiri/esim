@@ -1,12 +1,5 @@
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { CountryFlag } from '@/components/country-flag';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -19,7 +12,14 @@ import { useTrans } from '@/hooks/use-trans';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Globe, Search, Star, Wifi } from 'lucide-react';
+import {
+    ChevronLeft,
+    ChevronRight,
+    Globe,
+    HardDrive,
+    Search,
+    Timer,
+} from 'lucide-react';
 import { FormEvent, useState } from 'react';
 
 interface Package {
@@ -76,7 +76,6 @@ interface Props {
 export default function PackagesIndex({
     packages,
     countries,
-    regions,
     filters,
     customer,
 }: Props) {
@@ -84,7 +83,7 @@ export default function PackagesIndex({
     const [search, setSearch] = useState(filters.search || '');
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Client', href: '/client' },
+        { title: 'Dashboard', href: '/client' },
         { title: trans('client_packages.title'), href: '/client/packages' },
     ];
 
@@ -105,59 +104,54 @@ export default function PackagesIndex({
         router.get('/client/packages', newFilters, { preserveState: true });
     }
 
+    const hasFilters = filters.country || filters.search || filters.sort;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={trans('client_packages.title')} />
-            <div className="flex flex-col gap-6 p-4">
+            <div className="mx-auto w-full max-w-4xl space-y-5 p-4 md:space-y-6 md:p-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-semibold">
+                        <h1 className="text-xl font-semibold md:text-2xl">
                             {trans('client_packages.title')}
                         </h1>
-                        <p className="text-muted-foreground">
-                            {trans('client_packages.available_packages', {
-                                count: packages.total.toString(),
-                            })}
+                        <p className="mt-0.5 text-sm text-muted-foreground">
+                            {packages.total} {trans('client_packages.title').toLowerCase()}
                         </p>
                     </div>
                     {customer?.is_b2b && (
-                        <Badge variant="outline" className="px-4 py-2 text-lg">
-                            {trans('client_packages.balance')}: €
-                            {Number(customer.balance || 0).toFixed(2)}
-                        </Badge>
+                        <Link
+                            href="/client/balance"
+                            className="flex items-center gap-2 rounded-xl bg-green-50 px-4 py-2 text-sm font-semibold text-green-700 ring-1 ring-inset ring-green-600/20 transition-colors hover:bg-green-100 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20"
+                        >
+                            €{Number(customer.balance || 0).toFixed(2)}
+                        </Link>
                     )}
                 </div>
 
-                {/* Filters */}
-                <div className="flex flex-wrap gap-3">
-                    <form onSubmit={handleSearch} className="flex gap-2">
+                {/* Search & Filters */}
+                <div className="flex flex-wrap items-center gap-2">
+                    <form onSubmit={handleSearch} className="contents">
                         <div className="relative">
                             <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                                 type="search"
-                                placeholder={trans(
-                                    'client_packages.search_placeholder',
-                                )}
+                                placeholder={trans('client_packages.search_placeholder')}
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-[250px] pl-9"
+                                className="h-9 w-[200px] pl-9 sm:w-[240px]"
                             />
                         </div>
-                        <Button type="submit" variant="secondary">
-                            {trans('client_packages.search')}
-                        </Button>
                     </form>
 
                     <Select
                         value={filters.country || 'all'}
                         onValueChange={(v) => handleFilterChange('country', v)}
                     >
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="h-9 w-[160px]">
                             <SelectValue
-                                placeholder={trans(
-                                    'client_packages.all_countries',
-                                )}
+                                placeholder={trans('client_packages.all_countries')}
                             />
                         </SelectTrigger>
                         <SelectContent>
@@ -176,7 +170,7 @@ export default function PackagesIndex({
                         value={filters.sort || 'price'}
                         onValueChange={(v) => handleFilterChange('sort', v)}
                     >
-                        <SelectTrigger className="w-[150px]">
+                        <SelectTrigger className="h-9 w-[130px]">
                             <SelectValue
                                 placeholder={trans('client_packages.sort_by')}
                             />
@@ -197,103 +191,155 @@ export default function PackagesIndex({
                         </SelectContent>
                     </Select>
 
-                    <Select
-                        value={filters.direction || 'asc'}
-                        onValueChange={(v) =>
-                            handleFilterChange('direction', v)
-                        }
-                    >
-                        <SelectTrigger className="w-[130px]">
-                            <SelectValue
-                                placeholder={trans('client_packages.order')}
-                            />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="asc">
-                                {trans('client_packages.direction.asc')}
-                            </SelectItem>
-                            <SelectItem value="desc">
-                                {trans('client_packages.direction.desc')}
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
+                    {hasFilters && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-9 text-xs"
+                            onClick={() =>
+                                router.get(
+                                    '/client/packages',
+                                    {},
+                                    { preserveState: true },
+                                )
+                            }
+                        >
+                            Clear
+                        </Button>
+                    )}
                 </div>
 
-                {/* Packages Grid */}
+                {/* Packages list */}
                 {packages.data.length === 0 ? (
-                    <div className="py-12 text-center">
-                        <Globe className="mx-auto h-12 w-12 text-muted-foreground" />
-                        <h3 className="mt-4 text-lg font-medium">
-                            {trans('client_packages.no_packages')}
-                        </h3>
-                        <p className="text-muted-foreground">
-                            {trans('client_packages.no_packages_desc')}
-                        </p>
+                    <div className="rounded-xl border bg-card">
+                        <div className="flex flex-col items-center justify-center py-16">
+                            <div className="mb-4 rounded-full bg-muted p-4">
+                                <Globe className="h-7 w-7 text-muted-foreground" />
+                            </div>
+                            <h3 className="text-base font-semibold">
+                                {trans('client_packages.no_packages')}
+                            </h3>
+                            <p className="mt-1 max-w-xs text-center text-sm text-muted-foreground">
+                                {trans('client_packages.no_packages_desc')}
+                            </p>
+                            {hasFilters && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-4"
+                                    onClick={() =>
+                                        router.get(
+                                            '/client/packages',
+                                            {},
+                                            { preserveState: true },
+                                        )
+                                    }
+                                >
+                                    Clear filters
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 ) : (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <div className="divide-y rounded-xl border bg-card">
                         {packages.data.map((pkg) => (
-                            <Card key={pkg.id} className="flex flex-col">
-                                <CardHeader className="pb-3">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <CardTitle className="line-clamp-2 text-base">
-                                                {pkg.name}
-                                            </CardTitle>
-                                            <p className="mt-1 text-sm text-muted-foreground">
-                                                {pkg.country ||
-                                                    pkg.region ||
-                                                    trans(
-                                                        'client_packages.global',
-                                                    )}
-                                            </p>
-                                        </div>
-                                        {pkg.is_featured && (
-                                            <Star className="h-5 w-5 shrink-0 fill-yellow-500 text-yellow-500" />
+                            <div
+                                key={pkg.id}
+                                className="flex items-center gap-4 px-5 py-4 md:gap-5"
+                            >
+                                {/* Flag */}
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted md:h-14 md:w-14">
+                                    {pkg.country_iso ? (
+                                        <CountryFlag
+                                            countryCode={pkg.country_iso}
+                                            size="md"
+                                        />
+                                    ) : (
+                                        <Globe className="h-5 w-5 text-muted-foreground" />
+                                    )}
+                                </div>
+
+                                {/* Info */}
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-semibold md:text-base">
+                                        {pkg.name}
+                                    </p>
+                                    <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                                        <span className="flex items-center gap-1">
+                                            <HardDrive className="h-3 w-3" />
+                                            {pkg.data_label}
+                                        </span>
+                                        <span className="flex items-center gap-1">
+                                            <Timer className="h-3 w-3" />
+                                            {pkg.validity_label}
+                                        </span>
+                                        {pkg.country && (
+                                            <span>{pkg.country}</span>
                                         )}
                                     </div>
-                                </CardHeader>
-                                <CardContent className="flex-1">
-                                    <div className="space-y-2 text-sm">
-                                        <div className="flex items-center gap-2">
-                                            <Wifi className="h-4 w-4 text-muted-foreground" />
-                                            <span>{pkg.data_label}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground">
-                                                {trans(
-                                                    'client_packages.validity',
-                                                )}
-                                                :
-                                            </span>
-                                            <span>{pkg.validity_label}</span>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="flex items-center justify-between border-t pt-3">
-                                    <div>
-                                        <span className="text-xl font-bold">
+                                </div>
+
+                                {/* Price + Buy */}
+                                <div className="flex shrink-0 items-center gap-3 md:gap-4">
+                                    <div className="text-right">
+                                        <p className="text-base font-semibold tabular-nums md:text-lg">
                                             €{Number(pkg.price).toFixed(2)}
-                                        </span>
+                                        </p>
                                         {pkg.has_discount && (
-                                            <span className="ml-2 text-sm text-muted-foreground line-through">
-                                                €
-                                                {Number(
-                                                    pkg.original_price,
-                                                ).toFixed(2)}
-                                            </span>
+                                            <p className="text-xs text-muted-foreground line-through">
+                                                €{Number(pkg.original_price).toFixed(2)}
+                                            </p>
                                         )}
                                     </div>
                                     <Button size="sm" asChild>
-                                        <Link
-                                            href={`/client/checkout/${pkg.id}`}
-                                        >
+                                        <Link href={`/client/checkout/${pkg.id}`}>
                                             {trans('client_packages.buy_now')}
                                         </Link>
                                     </Button>
-                                </CardFooter>
-                            </Card>
+                                </div>
+                            </div>
                         ))}
+                    </div>
+                )}
+
+                {/* Pagination */}
+                {packages.last_page > 1 && (
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">
+                            Page {packages.current_page} of {packages.last_page}
+                        </span>
+                        <div className="flex items-center gap-1">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8"
+                                disabled={packages.current_page === 1}
+                                onClick={() =>
+                                    router.get('/client/packages', {
+                                        ...filters,
+                                        page: packages.current_page - 1,
+                                    })
+                                }
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8"
+                                disabled={
+                                    packages.current_page === packages.last_page
+                                }
+                                onClick={() =>
+                                    router.get('/client/packages', {
+                                        ...filters,
+                                        page: packages.current_page + 1,
+                                    })
+                                }
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
                     </div>
                 )}
             </div>

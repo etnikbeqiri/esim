@@ -1,13 +1,7 @@
-import { BackButton } from '@/components/back-button';
+import { CountryFlag } from '@/components/country-flag';
+import { EsimQrCard } from '@/components/esim-qr-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -19,24 +13,22 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     ArrowLeft,
-    CheckCircle,
+    Calendar,
     CheckCircle2,
     Clock,
-    Copy,
     CreditCard,
+    FileText,
     Globe,
     HardDrive,
     Loader2,
     Mail,
     Package,
     RefreshCw,
-    Smartphone,
     Timer,
     XCircle,
 } from 'lucide-react';
@@ -87,6 +79,13 @@ interface Order {
     created_at: string;
     completed_at: string | null;
     paid_at: string | null;
+    invoice: {
+        uuid: string;
+        invoice_number: string;
+        status: string;
+        status_label: string;
+        formatted_total: string;
+    } | null;
 }
 
 interface Customer {
@@ -98,38 +97,38 @@ interface Props {
     customer: Customer;
 }
 
-function getStatusIcon(status: string) {
-    switch (status) {
-        case 'completed':
-            return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-        case 'processing':
-            return <Loader2 className="h-5 w-5 animate-spin text-blue-500" />;
-        case 'pending_retry':
-            return <RefreshCw className="h-5 w-5 text-orange-500" />;
-        case 'failed':
-            return <XCircle className="h-5 w-5 text-red-500" />;
-        case 'awaiting_payment':
-        case 'pending':
-            return <Clock className="h-5 w-5 text-yellow-500" />;
-        default:
-            return <Clock className="h-5 w-5 text-gray-500" />;
-    }
-}
-
-function getStatusBadgeClass(color: string): string {
+function getStatusStyle(color: string): string {
     const colors: Record<string, string> = {
-        green: 'bg-green-100 text-green-700 border-green-200',
-        yellow: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-        red: 'bg-red-100 text-red-700 border-red-200',
-        blue: 'bg-blue-100 text-blue-700 border-blue-200',
-        gray: 'bg-gray-100 text-gray-700 border-gray-200',
-        orange: 'bg-orange-100 text-orange-700 border-orange-200',
+        green: 'bg-green-50 text-green-700 ring-green-600/20 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20',
+        yellow: 'bg-yellow-50 text-yellow-700 ring-yellow-600/20 dark:bg-yellow-500/10 dark:text-yellow-400 dark:ring-yellow-500/20',
+        red: 'bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20',
+        blue: 'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20',
+        gray: 'bg-gray-50 text-gray-700 ring-gray-600/20 dark:bg-gray-500/10 dark:text-gray-400 dark:ring-gray-500/20',
+        orange: 'bg-orange-50 text-orange-700 ring-orange-600/20 dark:bg-orange-500/10 dark:text-orange-400 dark:ring-orange-500/20',
     };
     return colors[color] || colors.gray;
 }
 
+function getStatusIcon(status: string) {
+    switch (status) {
+        case 'completed':
+            return <CheckCircle2 className="h-3.5 w-3.5" />;
+        case 'processing':
+        case 'provider_purchased':
+            return <Loader2 className="h-3.5 w-3.5 animate-spin" />;
+        case 'pending_retry':
+            return <RefreshCw className="h-3.5 w-3.5" />;
+        case 'failed':
+            return <XCircle className="h-3.5 w-3.5" />;
+        case 'awaiting_payment':
+        case 'pending':
+            return <Clock className="h-3.5 w-3.5" />;
+        default:
+            return <Clock className="h-3.5 w-3.5" />;
+    }
+}
+
 export default function OrderShow({ order, customer }: Props) {
-    const [copied, setCopied] = useState<string | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
 
     const resendForm = useForm({
@@ -142,12 +141,12 @@ export default function OrderShow({ order, customer }: Props) {
         { title: order.order_number, href: '#' },
     ];
 
-    // Poll for updates when order is still processing
     const isActive = [
         'processing',
         'pending_retry',
         'pending',
         'awaiting_payment',
+        'provider_purchased',
     ].includes(order.status);
 
     useEffect(() => {
@@ -164,12 +163,6 @@ export default function OrderShow({ order, customer }: Props) {
         return () => clearInterval(interval);
     }, [isActive, order.status]);
 
-    function copyToClipboard(text: string, field: string) {
-        navigator.clipboard.writeText(text);
-        setCopied(field);
-        setTimeout(() => setCopied(null), 2000);
-    }
-
     function handleResendEsim(e: React.FormEvent) {
         e.preventDefault();
         resendForm.post(route('client.orders.resend-esim', order.uuid), {
@@ -182,423 +175,473 @@ export default function OrderShow({ order, customer }: Props) {
 
     const isPendingRetry = order.status === 'pending_retry';
     const isFailed = order.status === 'failed';
-    const isProcessing = order.status === 'processing';
+    const isProcessing =
+        order.status === 'processing' ||
+        order.status === 'provider_purchased';
     const isCompleted = order.status === 'completed';
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Order ${order.order_number}`} />
-            <div className="flex h-full flex-1 flex-col gap-6 p-4 md:p-6">
-                {/* Header */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-4">
-                        <Button variant="outline" size="icon" asChild>
-                            <Link href="/client/orders">
-                                <ArrowLeft className="h-4 w-4" />
-                            </Link>
-                        </Button>
-                        <div>
-                            <h1 className="text-2xl font-bold tracking-tight">
-                                {order.order_number}
-                            </h1>
-                            <p className="text-sm text-muted-foreground">
-                                Placed on {order.created_at}
-                            </p>
+            <div className="mx-auto w-full max-w-4xl space-y-5 p-4 md:space-y-6 md:p-6">
+                {/* Back link */}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 text-muted-foreground"
+                    asChild
+                >
+                    <Link href="/client/orders">
+                        <ArrowLeft className="h-3.5 w-3.5" />
+                        Back to Orders
+                    </Link>
+                </Button>
+
+                {/* Order header card */}
+                <div className="rounded-xl border bg-card">
+                    <div className="flex items-center gap-4 p-5 md:p-6">
+                        {/* Flag / icon */}
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted md:h-16 md:w-16">
+                            {order.package?.country_iso ? (
+                                <CountryFlag
+                                    countryCode={order.package.country_iso}
+                                    size="lg"
+                                />
+                            ) : (
+                                <Package className="h-6 w-6 text-muted-foreground" />
+                            )}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                    <h1 className="truncate text-lg font-semibold md:text-xl">
+                                        {order.package?.name || 'eSIM Order'}
+                                    </h1>
+                                    <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                                        {order.order_number}
+                                    </p>
+                                </div>
+                                <div className="shrink-0 text-right">
+                                    <p className="text-lg font-semibold tabular-nums md:text-xl">
+                                        €{Number(order.amount).toFixed(2)}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                                <Badge
+                                    variant="secondary"
+                                    className={`${getStatusStyle(order.status_color)} inline-flex items-center gap-1 ring-1 ring-inset`}
+                                >
+                                    {getStatusIcon(order.status)}
+                                    {order.status_label}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                    Placed {order.created_at}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <Badge
-                        variant="outline"
-                        className={`${getStatusBadgeClass(order.status_color)} flex w-fit items-center gap-2 px-3 py-1.5 text-sm`}
-                    >
-                        {getStatusIcon(order.status)}
-                        {order.status_label}
-                    </Badge>
                 </div>
 
-                {/* Status Alerts */}
+                {/* Status alerts */}
                 {(isPendingRetry || isProcessing) && (
-                    <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/30">
-                        <CardContent className="flex items-center gap-3 py-4">
-                            <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                    <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/30 md:p-5">
+                        <div className="flex items-start gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+                                <Loader2 className="h-4.5 w-4.5 animate-spin text-blue-600 dark:text-blue-400" />
+                            </div>
                             <div className="flex-1">
-                                <p className="font-medium text-blue-700 dark:text-blue-400">
+                                <p className="font-medium text-blue-800 dark:text-blue-300">
                                     Processing your order...
                                 </p>
-                                <p className="text-sm text-blue-600 dark:text-blue-500">
+                                <p className="mt-0.5 text-sm text-blue-600 dark:text-blue-400">
                                     This may take a few moments. The page will
                                     update automatically.
                                 </p>
+                                {isPendingRetry && (
+                                    <div className="mt-3">
+                                        <div className="mb-1.5 flex items-center justify-between text-xs font-medium text-blue-700 dark:text-blue-300">
+                                            <span>
+                                                Attempt {order.retry_count} of{' '}
+                                                {order.max_retries}
+                                            </span>
+                                        </div>
+                                        <Progress
+                                            value={
+                                                (order.retry_count /
+                                                    order.max_retries) *
+                                                100
+                                            }
+                                            className="h-1.5"
+                                        />
+                                    </div>
+                                )}
                             </div>
-                            {isPendingRetry && (
-                                <div className="w-24">
-                                    <Progress
-                                        value={
-                                            (order.retry_count /
-                                                order.max_retries) *
-                                            100
-                                        }
-                                        className="h-2"
-                                    />
-                                    <p className="mt-1 text-xs text-blue-600">
-                                        Attempt {order.retry_count}/
-                                        {order.max_retries}
-                                    </p>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 )}
 
                 {isFailed && (
-                    <Card className="border-red-200 bg-red-50 dark:bg-red-950/30">
-                        <CardContent className="flex items-center gap-3 py-4">
-                            <XCircle className="h-5 w-5 text-red-600" />
+                    <div className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950/30 md:p-5">
+                        <div className="flex items-start gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
+                                <XCircle className="h-4.5 w-4.5 text-red-600 dark:text-red-400" />
+                            </div>
                             <div>
-                                <p className="font-medium text-red-700 dark:text-red-400">
+                                <p className="font-medium text-red-800 dark:text-red-300">
                                     Order could not be completed
                                 </p>
-                                <p className="text-sm text-red-600 dark:text-red-500">
+                                <p className="mt-0.5 text-sm text-red-600 dark:text-red-400">
                                     {customer.is_b2b
                                         ? 'Your balance has been refunded. Please try again or contact support.'
                                         : 'Your payment has been refunded. Please try again or contact support.'}
                                 </p>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 )}
 
                 {isCompleted && (
-                    <Card className="border-green-200 bg-green-50 dark:bg-green-950/30">
-                        <CardContent className="flex items-center gap-3 py-4">
-                            <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <div className="rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950/30 md:p-5">
+                        <div className="flex items-start gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+                                <CheckCircle2 className="h-4.5 w-4.5 text-green-600 dark:text-green-400" />
+                            </div>
                             <div>
-                                <p className="font-medium text-green-700 dark:text-green-400">
+                                <p className="font-medium text-green-800 dark:text-green-300">
                                     Order completed successfully!
                                 </p>
-                                <p className="text-sm text-green-600 dark:text-green-500">
+                                <p className="mt-0.5 text-sm text-green-600 dark:text-green-400">
                                     Your eSIM is ready. Scan the QR code or use
                                     the activation code to install it.
                                 </p>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 )}
 
-                <div className="grid gap-6 lg:grid-cols-2">
-                    {/* Package Details */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Package className="h-5 w-5" />
-                                Package Details
-                            </CardTitle>
-                            <CardDescription>
-                                Information about your purchased eSIM package
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {order.package ? (
-                                <>
-                                    <div className="rounded-lg bg-muted/50 p-4">
-                                        <h3 className="text-lg font-semibold">
-                                            {order.package.name}
-                                        </h3>
-                                        {order.package.country && (
-                                            <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                                                <Globe className="h-3.5 w-3.5" />
-                                                {order.package.country}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <Separator />
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="rounded-full bg-blue-100 p-2 dark:bg-blue-900">
-                                                <HardDrive className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Data
-                                                </p>
-                                                <p className="font-medium">
-                                                    {order.package.data_label}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="rounded-full bg-purple-100 p-2 dark:bg-purple-900">
-                                                <Timer className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Validity
-                                                </p>
-                                                <p className="font-medium">
-                                                    {
-                                                        order.package
-                                                            .validity_label
-                                                    }
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <Separator />
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <CreditCard className="h-4 w-4 text-muted-foreground" />
-                                            <span className="text-muted-foreground">
-                                                Total Paid
-                                            </span>
-                                        </div>
-                                        <span className="text-xl font-bold">
-                                            €{Number(order.amount).toFixed(2)}
-                                        </span>
-                                    </div>
-                                </>
-                            ) : (
-                                <p className="text-muted-foreground">
-                                    Package information not available
-                                </p>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    {/* eSIM Details */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Smartphone className="h-5 w-5" />
+                {/* eSIM Installation */}
+                {order.esim ? (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-base font-semibold">
                                 eSIM Installation
-                            </CardTitle>
-                            <CardDescription>
-                                {order.esim
-                                    ? 'Scan the QR code with your phone or enter the code manually'
-                                    : 'Your eSIM details will appear here once ready'}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {order.esim ? (
-                                <div className="space-y-6">
-                                    {/* QR Code */}
-                                    {order.esim.qr_code_data && (
-                                        <div className="flex justify-center">
-                                            <div className="rounded-xl border-2 border-dashed border-muted-foreground/25 bg-white p-4">
-                                                <img
-                                                    src={
-                                                        order.esim.qr_code_data
-                                                    }
-                                                    alt="eSIM QR Code"
-                                                    className="h-48 w-48"
-                                                />
+                            </h2>
+                            {isCompleted && (
+                                <Dialog
+                                    open={dialogOpen}
+                                    onOpenChange={setDialogOpen}
+                                >
+                                    <DialogTrigger asChild>
+                                        <Button variant="outline" size="sm">
+                                            <Mail className="mr-1.5 h-3.5 w-3.5" />
+                                            Resend to Email
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>
+                                                Resend eSIM Data
+                                            </DialogTitle>
+                                            <DialogDescription>
+                                                We'll resend your eSIM QR code
+                                                and activation details to your
+                                                email. You can also specify a
+                                                different email address if
+                                                needed.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <form onSubmit={handleResendEsim}>
+                                            <div className="grid gap-4 py-4">
+                                                <div className="space-y-2">
+                                                    <label
+                                                        htmlFor="email"
+                                                        className="text-sm font-medium"
+                                                    >
+                                                        Email Address (optional)
+                                                    </label>
+                                                    <Input
+                                                        id="email"
+                                                        type="email"
+                                                        placeholder="Leave empty to use original email"
+                                                        value={
+                                                            resendForm.data
+                                                                .email
+                                                        }
+                                                        onChange={(e) =>
+                                                            resendForm.setData(
+                                                                'email',
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            resendForm.processing
+                                                        }
+                                                    />
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Leave empty to send to
+                                                        the email used during
+                                                        checkout.
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
-
-                                    {/* LPA String / Activation Code */}
-                                    {order.esim.lpa_string && (
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between">
-                                                <label className="text-sm font-medium">
-                                                    Activation Code
-                                                </label>
+                                            <DialogFooter>
                                                 <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-7 gap-1.5"
+                                                    type="button"
+                                                    variant="outline"
                                                     onClick={() =>
-                                                        copyToClipboard(
-                                                            order.esim!
-                                                                .lpa_string!,
-                                                            'lpa',
-                                                        )
+                                                        setDialogOpen(false)
+                                                    }
+                                                    disabled={
+                                                        resendForm.processing
                                                     }
                                                 >
-                                                    {copied === 'lpa' ? (
+                                                    Cancel
+                                                </Button>
+                                                <Button
+                                                    type="submit"
+                                                    disabled={
+                                                        resendForm.processing
+                                                    }
+                                                >
+                                                    {resendForm.processing ? (
                                                         <>
-                                                            <CheckCircle className="h-3.5 w-3.5 text-green-500" />
-                                                            <span className="text-green-600">
-                                                                Copied!
-                                                            </span>
+                                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                            Sending...
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <Copy className="h-3.5 w-3.5" />
-                                                            <span>Copy</span>
+                                                            <Mail className="mr-2 h-4 w-4" />
+                                                            Send eSIM Data
                                                         </>
                                                     )}
                                                 </Button>
-                                            </div>
-                                            <div className="rounded-lg bg-muted p-3">
-                                                <code className="font-mono text-xs break-all">
-                                                    {order.esim.lpa_string}
-                                                </code>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <Separator />
-
-                                    {/* ICCID */}
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm font-medium">
-                                                ICCID
-                                            </p>
-                                            <code className="font-mono text-xs text-muted-foreground">
-                                                {order.esim.iccid}
-                                            </code>
-                                        </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8"
-                                            onClick={() =>
-                                                copyToClipboard(
-                                                    order.esim!.iccid,
-                                                    'iccid',
-                                                )
-                                            }
-                                        >
-                                            {copied === 'iccid' ? (
-                                                <CheckCircle className="h-4 w-4 text-green-500" />
-                                            ) : (
-                                                <Copy className="h-4 w-4" />
-                                            )}
-                                        </Button>
-                                    </div>
-
-                                    <Separator />
-
-                                    {/* Resend eSIM Email */}
-                                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                                        <DialogTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                className="w-full"
-                                            >
-                                                <Mail className="mr-2 h-4 w-4" />
-                                                Resend eSIM to Email
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent>
-                                            <DialogHeader>
-                                                <DialogTitle>Resend eSIM Data</DialogTitle>
-                                                <DialogDescription>
-                                                    We'll resend your eSIM QR code and activation details to your email. You can also specify a different email address if needed.
-                                                </DialogDescription>
-                                            </DialogHeader>
-                                            <form onSubmit={handleResendEsim}>
-                                                <div className="grid gap-4 py-4">
-                                                    <div className="space-y-2">
-                                                        <label htmlFor="email" className="text-sm font-medium">
-                                                            Email Address (optional)
-                                                        </label>
-                                                        <Input
-                                                            id="email"
-                                                            type="email"
-                                                            placeholder="Leave empty to use original email"
-                                                            value={resendForm.data.email}
-                                                            onChange={(e) => resendForm.setData('email', e.target.value)}
-                                                            disabled={resendForm.processing}
-                                                        />
-                                                        <p className="text-xs text-muted-foreground">
-                                                            Leave empty to send to the email used during checkout.
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <DialogFooter>
-                                                    <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        onClick={() => setDialogOpen(false)}
-                                                        disabled={resendForm.processing}
-                                                    >
-                                                        Cancel
-                                                    </Button>
-                                                    <Button
-                                                        type="submit"
-                                                        disabled={resendForm.processing}
-                                                    >
-                                                        {resendForm.processing ? (
-                                                            <>
-                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                                Sending...
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <Mail className="mr-2 h-4 w-4" />
-                                                                Send eSIM Data
-                                                            </>
-                                                        )}
-                                                    </Button>
-                                                </DialogFooter>
-                                            </form>
-                                        </DialogContent>
-                                    </Dialog>
-                                </div>
-                            ) : (
-                                <div className="flex flex-col items-center justify-center py-12 text-center">
-                                    {isActive ? (
-                                        <>
-                                            <div className="rounded-full bg-blue-100 p-4 dark:bg-blue-900">
-                                                <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
-                                            </div>
-                                            <h3 className="mt-4 font-semibold">
-                                                Preparing your eSIM...
-                                            </h3>
-                                            <p className="mt-1 text-sm text-muted-foreground">
-                                                This usually takes less than a
-                                                minute
-                                            </p>
-                                        </>
-                                    ) : isFailed ? (
-                                        <>
-                                            <div className="rounded-full bg-red-100 p-4 dark:bg-red-900">
-                                                <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
-                                            </div>
-                                            <h3 className="mt-4 font-semibold">
-                                                eSIM not available
-                                            </h3>
-                                            <p className="mt-1 text-sm text-muted-foreground">
-                                                The order could not be completed
-                                            </p>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="rounded-full bg-muted p-4">
-                                                <Smartphone className="h-8 w-8 text-muted-foreground" />
-                                            </div>
-                                            <h3 className="mt-4 font-semibold">
-                                                eSIM details pending
-                                            </h3>
-                                            <p className="mt-1 text-sm text-muted-foreground">
-                                                Details will appear here once
-                                                the order is processed
-                                            </p>
-                                        </>
-                                    )}
-                                </div>
+                                            </DialogFooter>
+                                        </form>
+                                    </DialogContent>
+                                </Dialog>
                             )}
-                        </CardContent>
-                    </Card>
+                        </div>
+
+                        {order.esim.lpa_string ? (
+                            <EsimQrCard
+                                esim={{
+                                    iccid: order.esim.iccid,
+                                    lpa_string: order.esim.lpa_string,
+                                    qr_code_data: order.esim.qr_code_data,
+                                    smdp_address: order.esim.smdp_address,
+                                    activation_code:
+                                        order.esim.activation_code,
+                                }}
+                                title="Scan to Install eSIM"
+                                description="Use your phone's camera to scan the QR code"
+                            />
+                        ) : (
+                            <div className="rounded-xl border bg-card">
+                                <div className="px-5 py-10 text-center text-sm text-muted-foreground">
+                                    QR code is not available for this eSIM.
+                                    Please use the manual installation details
+                                    provided in your email.
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        <h2 className="text-base font-semibold">
+                            eSIM Installation
+                        </h2>
+                        <div className="rounded-xl border bg-card">
+                            <div className="flex flex-col items-center justify-center py-14 text-center">
+                                {isActive ? (
+                                    <>
+                                        <div className="rounded-full bg-blue-50 p-4 dark:bg-blue-900/30">
+                                            <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
+                                        </div>
+                                        <h3 className="mt-4 font-semibold">
+                                            Preparing your eSIM...
+                                        </h3>
+                                        <p className="mt-1 text-sm text-muted-foreground">
+                                            This usually takes less than a
+                                            minute
+                                        </p>
+                                    </>
+                                ) : isFailed ? (
+                                    <>
+                                        <div className="rounded-full bg-red-50 p-4 dark:bg-red-900/30">
+                                            <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+                                        </div>
+                                        <h3 className="mt-4 font-semibold">
+                                            eSIM not available
+                                        </h3>
+                                        <p className="mt-1 text-sm text-muted-foreground">
+                                            The order could not be completed
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="rounded-full bg-muted p-4">
+                                            <Package className="h-8 w-8 text-muted-foreground" />
+                                        </div>
+                                        <h3 className="mt-4 font-semibold">
+                                            eSIM details pending
+                                        </h3>
+                                        <p className="mt-1 text-sm text-muted-foreground">
+                                            Details will appear here once the
+                                            order is processed
+                                        </p>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Order details card */}
+                <div className="rounded-xl border bg-card">
+                    <div className="border-b px-5 py-4">
+                        <h2 className="text-base font-semibold">
+                            Order Details
+                        </h2>
+                    </div>
+                    <div className="divide-y">
+                        {order.package && (
+                            <>
+                                <div className="flex items-center justify-between px-5 py-3.5">
+                                    <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                                        <Package className="h-4 w-4" />
+                                        Plan
+                                    </div>
+                                    <span className="text-sm font-medium">
+                                        {order.package.name}
+                                    </span>
+                                </div>
+                                {order.package.country && (
+                                    <div className="flex items-center justify-between px-5 py-3.5">
+                                        <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                                            <Globe className="h-4 w-4" />
+                                            Region
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm">
+                                            {order.package.country_iso && (
+                                                <CountryFlag
+                                                    countryCode={
+                                                        order.package
+                                                            .country_iso
+                                                    }
+                                                    size="sm"
+                                                />
+                                            )}
+                                            {order.package.country}
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between px-5 py-3.5">
+                                    <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                                        <HardDrive className="h-4 w-4" />
+                                        Data
+                                    </div>
+                                    <span className="text-sm font-medium">
+                                        {order.package.data_label}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between px-5 py-3.5">
+                                    <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                                        <Timer className="h-4 w-4" />
+                                        Validity
+                                    </div>
+                                    <span className="text-sm">
+                                        {order.package.validity_label}
+                                    </span>
+                                </div>
+                            </>
+                        )}
+                        <div className="flex items-center justify-between px-5 py-3.5">
+                            <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                                <CreditCard className="h-4 w-4" />
+                                Total Paid
+                            </div>
+                            <span className="text-sm font-semibold">
+                                €{Number(order.amount).toFixed(2)}
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex flex-wrap gap-3">
-                    <BackButton
-                        href="/client/orders"
-                        label="Back to Orders"
-                        variant="outline"
-                    />
-                    {(isFailed || isCompleted) && (
-                        <Button asChild>
-                            <Link href="/client/packages">
-                                <Package className="mr-2 h-4 w-4" />
-                                Order Another eSIM
-                            </Link>
-                        </Button>
-                    )}
+                {/* Timeline card */}
+                <div className="rounded-xl border bg-card">
+                    <div className="border-b px-5 py-4">
+                        <h2 className="text-base font-semibold">Timeline</h2>
+                    </div>
+                    <div className="divide-y">
+                        <div className="flex items-center justify-between px-5 py-3.5">
+                            <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                                <Calendar className="h-4 w-4" />
+                                Ordered
+                            </div>
+                            <span className="text-sm">
+                                {order.created_at}
+                            </span>
+                        </div>
+                        {order.paid_at && (
+                            <div className="flex items-center justify-between px-5 py-3.5">
+                                <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                                    <CreditCard className="h-4 w-4" />
+                                    Paid
+                                </div>
+                                <span className="text-sm">
+                                    {order.paid_at}
+                                </span>
+                            </div>
+                        )}
+                        {order.completed_at && (
+                            <div className="flex items-center justify-between px-5 py-3.5">
+                                <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                                    <CheckCircle2 className="h-4 w-4" />
+                                    Completed
+                                </div>
+                                <span className="text-sm">
+                                    {order.completed_at}
+                                </span>
+                            </div>
+                        )}
+                        {order.payments.length > 0 && (
+                            <div className="flex items-center justify-between px-5 py-3.5">
+                                <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                                    <CreditCard className="h-4 w-4" />
+                                    Payment
+                                </div>
+                                <Badge
+                                    variant={
+                                        order.payments[0].status ===
+                                        'completed'
+                                            ? 'default'
+                                            : 'secondary'
+                                    }
+                                >
+                                    {order.payments[0].status_label}
+                                </Badge>
+                            </div>
+                        )}
+                        {order.invoice && (
+                            <div className="flex items-center justify-between px-5 py-3.5">
+                                <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                                    <FileText className="h-4 w-4" />
+                                    Invoice
+                                </div>
+                                <Link
+                                    href={`/client/invoices/${order.invoice.uuid}`}
+                                    className="text-sm font-medium text-primary hover:underline"
+                                >
+                                    {order.invoice.invoice_number}
+                                </Link>
+                            </div>
+                        )}
+                    </div>
                 </div>
+
             </div>
         </AppLayout>
     );

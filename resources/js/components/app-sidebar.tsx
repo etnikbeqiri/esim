@@ -39,8 +39,13 @@ export function AppSidebar() {
     const { auth, currency } = usePage<SharedData>().props;
     const user = auth.user;
 
-    // Build navigation items based on user type
-    const { mainNavItems, clientNavItems, adminNavItems } = useMemo(() => {
+    const {
+        mainNavItems,
+        clientNavItems,
+        adminCatalogItems,
+        adminSalesItems,
+        adminSystemItems,
+    } = useMemo(() => {
         const isAdmin = user?.is_admin ?? false;
         const isB2B = user?.is_b2b ?? false;
         const hasCustomer = user?.has_customer ?? false;
@@ -54,113 +59,73 @@ export function AppSidebar() {
             },
         ];
 
-        // Client nav items - only for users with customer profile
-        const clientNavItems: NavItem[] = hasCustomer
-            ? [
-                  {
-                      title: 'Browse Packages',
-                      href: '/client/packages',
-                      icon: Package,
-                  },
-                  {
-                      title: 'My Orders',
-                      href: '/client/orders',
-                      icon: ShoppingCart,
-                  },
-              ]
-            : [];
+        if (hasCustomer) {
+            mainNavItems.push(
+                {
+                    title: 'Destinations',
+                    href: '/client/packages',
+                    icon: Globe,
+                },
+                {
+                    title: 'My Orders',
+                    href: '/client/orders',
+                    icon: ShoppingCart,
+                },
+                {
+                    title: 'Invoices',
+                    href: '/client/invoices',
+                    icon: Receipt,
+                },
+            );
+        }
 
-        // B2B gets Balance and Invoices pages
+        // B2B-only items
+        const clientNavItems: NavItem[] = [];
         if (isB2B && hasCustomer) {
             clientNavItems.push({
                 title: 'Balance',
                 href: '/client/balance',
                 icon: Wallet,
             });
-            clientNavItems.push({
-                title: 'Invoices',
-                href: '/client/invoices',
-                icon: Receipt,
-            });
         }
 
-        // Admin nav items - only for admins
-        const adminNavItems: NavItem[] = isAdmin
+        // Admin nav — split into logical groups
+        const adminCatalogItems: NavItem[] = isAdmin
             ? [
-                  {
-                      title: 'Providers',
-                      href: '/admin/providers',
-                      icon: Server,
-                  },
-                  {
-                      title: 'Countries',
-                      href: '/admin/countries',
-                      icon: Globe,
-                  },
-                  {
-                      title: 'Packages',
-                      href: '/admin/packages',
-                      icon: Package,
-                  },
-                  {
-                      title: 'Coupons',
-                      href: '/admin/coupons',
-                      icon: Ticket,
-                  },
-                  {
-                      title: 'Orders',
-                      href: '/admin/orders',
-                      icon: ShoppingCart,
-                  },
-                  {
-                      title: 'Customers',
-                      href: '/admin/customers',
-                      icon: Users,
-                  },
-                  {
-                      title: 'Sync Jobs',
-                      href: '/admin/sync-jobs',
-                      icon: RefreshCw,
-                  },
-                  {
-                      title: 'Currencies',
-                      href: '/admin/currencies',
-                      icon: Coins,
-                  },
-                  {
-                      title: 'Articles',
-                      href: '/admin/articles',
-                      icon: FileText,
-                  },
-                  {
-                      title: 'Invoices',
-                      href: '/admin/invoices',
-                      icon: Receipt,
-                  },
-                  {
-                      title: 'Tickets',
-                      href: '/admin/tickets',
-                      icon: LifeBuoy,
-                  },
-                  {
-                      title: 'Devices',
-                      href: '/admin/devices',
-                      icon: Smartphone,
-                  },
-                  {
-                      title: 'Brands',
-                      href: '/admin/brands',
-                      icon: Tag,
-                  },
-                  {
-                      title: 'Settings',
-                      href: '/admin/settings',
-                      icon: Monitor,
-                  },
+                  { title: 'Providers', href: '/admin/providers', icon: Server },
+                  { title: 'Countries', href: '/admin/countries', icon: Globe },
+                  { title: 'Packages', href: '/admin/packages', icon: Package },
+                  { title: 'Coupons', href: '/admin/coupons', icon: Ticket },
               ]
             : [];
 
-        return { mainNavItems, clientNavItems, adminNavItems };
+        const adminSalesItems: NavItem[] = isAdmin
+            ? [
+                  { title: 'Orders', href: '/admin/orders', icon: ShoppingCart },
+                  { title: 'Customers', href: '/admin/customers', icon: Users },
+                  { title: 'Invoices', href: '/admin/invoices', icon: Receipt },
+                  { title: 'Tickets', href: '/admin/tickets', icon: LifeBuoy },
+              ]
+            : [];
+
+        const adminSystemItems: NavItem[] = isAdmin
+            ? [
+                  { title: 'Articles', href: '/admin/articles', icon: FileText },
+                  { title: 'Devices', href: '/admin/devices', icon: Smartphone },
+                  { title: 'Brands', href: '/admin/brands', icon: Tag },
+                  { title: 'Currencies', href: '/admin/currencies', icon: Coins },
+                  { title: 'Sync Jobs', href: '/admin/sync-jobs', icon: RefreshCw },
+                  { title: 'Settings', href: '/admin/settings', icon: Monitor },
+              ]
+            : [];
+
+        return {
+            mainNavItems,
+            clientNavItems,
+            adminCatalogItems,
+            adminSalesItems,
+            adminSystemItems,
+        };
     }, [user]);
 
     return (
@@ -182,17 +147,33 @@ export function AppSidebar() {
                 {clientNavItems.length > 0 && (
                     <NavMainCollapsible
                         items={clientNavItems}
-                        label={user?.is_b2b ? 'Business' : 'My Account'}
+                        label="Business"
                         icon={Briefcase}
                         defaultOpen={true}
                     />
                 )}
-                {adminNavItems.length > 0 && (
+                {adminCatalogItems.length > 0 && (
                     <NavMainCollapsible
-                        items={adminNavItems}
-                        label="Admin"
-                        icon={Settings}
+                        items={adminCatalogItems}
+                        label="Catalog"
+                        icon={Package}
                         defaultOpen={true}
+                    />
+                )}
+                {adminSalesItems.length > 0 && (
+                    <NavMainCollapsible
+                        items={adminSalesItems}
+                        label="Sales"
+                        icon={ShoppingCart}
+                        defaultOpen={true}
+                    />
+                )}
+                {adminSystemItems.length > 0 && (
+                    <NavMainCollapsible
+                        items={adminSystemItems}
+                        label="System"
+                        icon={Settings}
+                        defaultOpen={false}
                     />
                 )}
             </SidebarContent>
