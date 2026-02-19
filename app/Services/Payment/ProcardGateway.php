@@ -65,7 +65,7 @@ class ProcardGateway implements PaymentGatewayContract
                 'operation' => 'Purchase',
                 'merchant_id' => $this->merchantId,
                 'order_id' => $orderId,
-                'amount' => $amount,
+                'amount' => $amountStr,
                 'currency_iso' => $currencyCode,
                 'description' => $description,
                 'signature' => $signature,
@@ -271,6 +271,18 @@ class ProcardGateway implements PaymentGatewayContract
                 'pc_approval_code' => $payload['pcApprovalCode'] ?? null,
                 'created_date' => $payload['createdDate'] ?? null,
             ],
+        ];
+    }
+
+    public function generateAcknowledgement(string $orderReference, string $status = 'accept'): array
+    {
+        $time = (string) time();
+
+        return [
+            'orderReference' => $orderReference,
+            'status' => $status,
+            'time' => $time,
+            'signature' => $this->generateSignature($orderReference, $status, $time),
         ];
     }
 

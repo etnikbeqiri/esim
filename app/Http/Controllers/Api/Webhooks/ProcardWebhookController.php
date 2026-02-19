@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Services\Payment\PaymentGatewayFactory;
+use App\Services\Payment\ProcardGateway;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -26,6 +27,7 @@ class ProcardWebhookController extends Controller
 
         Log::info('Procard webhook received', ['payload' => $payload]);
 
+        /** @var ProcardGateway $gateway */
         $gateway = $this->gatewayFactory->make(PaymentProvider::Procard);
         $parsed = $gateway->handleWebhook($payload);
 
@@ -59,18 +61,22 @@ class ProcardWebhookController extends Controller
             payload: $payload,
         );
 
-        return match ($eventType) {
+        match ($eventType) {
             'payment.success' => $this->handleSuccess($payment, $data, $status),
             'payment.failed' => $this->handleFailed($payment, $status),
             'payment.pending' => $this->handlePending($payment),
-            default => response()->json(['status' => 'acknowledged']),
+            default => null,
         };
+
+        return response()->json(
+            $gateway->generateAcknowledgement($referenceId),
+        );
     }
 
-    private function handleSuccess(Payment $payment, array $data, ?string $status): JsonResponse
+    private function handleSuccess(Payment $payment, array $data, ?string $status): void
     {
         if ($payment->isSuccessful()) {
-            return response()->json(['status' => 'already_processed']);
+            return;
         }
 
         PaymentSucceeded::fire(
@@ -94,14 +100,12 @@ class ProcardWebhookController extends Controller
             'order_id' => $payment->order_id,
             'transaction_id' => $data['gateway_id'] ?? null,
         ]);
-
-        return response()->json(['status' => 'success']);
     }
 
-    private function handleFailed(Payment $payment, ?string $status): JsonResponse
+    private function handleFailed(Payment $payment, ?string $status): void
     {
         if ($payment->status->isTerminal()) {
-            return response()->json(['status' => 'already_processed']);
+            return;
         }
 
         PaymentFailed::fire(
@@ -115,14 +119,10 @@ class ProcardWebhookController extends Controller
             'payment_id' => $payment->id,
             'status' => $status,
         ]);
-
-        return response()->json(['status' => 'failed']);
     }
 
-    private function handlePending(Payment $payment): JsonResponse
+    private function handlePending(Payment $payment): void
     {
         Log::info('Procard payment needs clarification', ['payment_id' => $payment->id]);
-
-        return response()->json(['status' => 'pending']);
     }
 }
