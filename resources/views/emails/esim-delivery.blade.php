@@ -6,11 +6,11 @@
     <x-email.text>Your eSIM for <strong>{{ $package->name }}</strong> has been provisioned and is ready to install.</x-email.text>
 
     {{-- QR Code --}}
-    @if($esimProfile->qr_code_data)
+    @if($esimProfile->lpa_string)
         <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 24px 0 16px 0;">
             <tr>
                 <td align="center">
-                    <img src="{{ 'data:image/svg+xml;base64,' . $esimProfile->qr_code_data }}" alt="QR Code" width="180" height="180" style="display: block; max-width: 180px; height: auto;">
+                    <img src="{{ URL::signedRoute('esim.qr', ['order' => $order->uuid]) }}" alt="QR Code" width="180" height="180" style="display: block; max-width: 180px; height: auto;">
                 </td>
             </tr>
             <tr>

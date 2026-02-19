@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\EmailPreviewController;
+use App\Http\Controllers\EsimQrCodeController;
 use App\Http\Controllers\Public\ArticleController;
 use App\Http\Controllers\Public\DeviceController;
 use App\Http\Controllers\Public\HomeController;
@@ -9,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/preview-email', [EmailPreviewController::class, 'index'])->name('emails.preview');
 Route::get('/preview-email/{template}', [EmailPreviewController::class, 'preview'])->name('emails.preview.template');
+
+Route::get('/esim/qr/{order:uuid}', EsimQrCodeController::class)->name('esim.qr');
 
 Route::get('/sitemap.xml', [SitemapController::class, '__invoke'])->name('sitemap');
 
