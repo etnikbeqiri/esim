@@ -4,8 +4,8 @@ namespace App\Events\Order;
 
 use App\Enums\OrderStatus;
 use App\Models\Order;
+use App\Jobs\Order\GenerateOrderInvoice;
 use App\Services\EmailService;
-use App\Services\InvoiceService;
 use App\States\OrderState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
@@ -64,16 +64,8 @@ class OrderCompleted extends Event
             $emailService->notifyAdminNewOrder($order);
 
             // Generate invoice for all completed orders
-            $invoiceService = app(InvoiceService::class);
-
-            // Prevent duplicate invoices
-            if (! $invoiceService->hasOrderInvoice($order)) {
-                $invoiceService->createPurchaseInvoice(
-                    $order->customer,
-                    $order,
-                    $order->payment
-                );
-            }
+            GenerateOrderInvoice::dispatch($this->order_id)
+                ->delay(now()->addSeconds(5));
         });
     }
 }
