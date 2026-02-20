@@ -7,6 +7,7 @@ use App\Models\Currency;
 use App\Models\Package;
 use App\Models\Provider;
 use App\Models\Country;
+use App\Services\Competitors\CompetitorPricingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,6 +15,10 @@ use Inertia\Response;
 
 class PackageController extends Controller
 {
+    public function __construct(
+        private CompetitorPricingService $competitorPricing,
+    ) {}
+
     public function index(Request $request): Response
     {
         $sortableColumns = ['name', 'data_mb', 'validity_days', 'cost_price', 'retail_price', 'is_active', 'is_featured', 'created_at', 'provider', 'country'];
@@ -98,12 +103,16 @@ class PackageController extends Controller
             return $package;
         });
 
+        // Bulk-match competitor pricing for all packages on this page
+        $competitorPricing = $this->competitorPricing->matchForPackages($packages->getCollection());
+
         return Inertia::render('admin/packages/index', [
             'packages' => $packages,
             'providers' => Provider::select('id', 'name')->orderBy('name')->get(),
             'countries' => Country::select('id', 'name', 'iso_code', 'is_active')->orderBy('name')->get(),
             'filters' => $request->only('search', 'provider_id', 'country_id', 'is_active', 'country_active', 'sort_by', 'sort_dir', 'per_page'),
             'defaultCurrency' => Currency::getDefault(),
+            'competitorPricing' => $competitorPricing,
         ]);
     }
 
@@ -119,9 +128,16 @@ class PackageController extends Controller
         // Make hidden fields visible for admin
         $package->makeVisible(['cost_price', 'retail_price', 'custom_retail_price', 'provider_package_id', 'source_cost_price', 'source_currency_id']);
 
+        $competitorPricing = $this->competitorPricing->findMatchingPlans(
+            $package->country->iso_code ?? '',
+            $package->data_mb,
+            $package->validity_days,
+        );
+
         return Inertia::render('admin/packages/show', [
             'package' => $package,
             'defaultCurrency' => Currency::getDefault(),
+            'competitorPricing' => $competitorPricing,
         ]);
     }
 
@@ -132,9 +148,16 @@ class PackageController extends Controller
         // Make hidden fields visible for admin
         $package->makeVisible(['cost_price', 'retail_price', 'custom_retail_price', 'provider_package_id', 'source_cost_price', 'source_currency_id']);
 
+        $competitorPricing = $this->competitorPricing->findMatchingPlans(
+            $package->country->iso_code ?? '',
+            $package->data_mb,
+            $package->validity_days,
+        );
+
         return Inertia::render('admin/packages/edit', [
             'package' => $package,
             'defaultCurrency' => Currency::getDefault(),
+            'competitorPricing' => $competitorPricing,
         ]);
     }
 
@@ -207,5 +230,12 @@ class PackageController extends Controller
 
         $status = $package->is_active ? 'activated' : 'deactivated';
         return back()->with('success', "Package {$status} successfully.");
+    }
+
+    public function refreshCompetitorPricing(): RedirectResponse
+    {
+        $this->competitorPricing->refreshCache();
+
+        return back()->with('success', 'Competitor pricing cache refreshed.');
     }
 }

@@ -21,13 +21,22 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
     AlertTriangle,
     ArrowDown,
     ArrowUp,
     ArrowUpDown,
     ChevronLeft,
     ChevronRight,
+    CircleCheck,
+    CircleMinus,
     Eye,
+    Info,
     Pencil,
     RotateCcw,
     Search,
@@ -72,6 +81,28 @@ interface Currency {
     symbol: string;
 }
 
+interface CompetitorPlan {
+    competitor: string;
+    plan_code: string;
+    plan_name: string;
+    price: number;
+    currency: string;
+    data_gb: number;
+    duration_days: number;
+    destination_code: string;
+    destination_name: string;
+    is_regional: boolean;
+}
+
+interface CompetitorMatch {
+    competitor: string;
+    display_name: string;
+    currency: string;
+    exact: CompetitorPlan | null;
+    same_gb: CompetitorPlan[];
+    same_days: CompetitorPlan[];
+}
+
 interface Props {
     packages: {
         data: Package[];
@@ -92,6 +123,7 @@ interface Props {
         per_page?: string;
     };
     defaultCurrency: Currency | null;
+    competitorPricing: Record<number, Record<string, CompetitorMatch>>;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -149,12 +181,227 @@ function SortableHeader({
     );
 }
 
+function CompetitorPriceCell({
+    matches,
+    ourPrice,
+    currencySymbol,
+}: {
+    matches: Record<string, CompetitorMatch> | undefined;
+    ourPrice: number;
+    currencySymbol: string;
+}) {
+    if (!matches) return <span className="text-muted-foreground">-</span>;
+
+    const entries = Object.values(matches);
+    if (entries.length === 0)
+        return <span className="text-muted-foreground">-</span>;
+
+    return (
+        <div className="flex flex-col gap-1">
+            {entries.map((match) => {
+                const { exact, same_gb, same_days } = match;
+                const hasData = exact || same_gb.length > 0 || same_days.length > 0;
+
+                if (!hasData) {
+                    return (
+                        <div
+                            key={match.competitor}
+                            className="flex items-center gap-1 text-xs text-muted-foreground"
+                        >
+                            <CircleMinus className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
+                            <span>{match.display_name}</span>
+                        </div>
+                    );
+                }
+
+                if (exact) {
+                    const diff = exact.price - ourPrice;
+                    const diffPct =
+                        ourPrice > 0
+                            ? ((diff / ourPrice) * 100).toFixed(0)
+                            : '0';
+                    const isHigher = diff > 0;
+                    const isLower = diff < 0;
+
+                    return (
+                        <TooltipProvider key={match.competitor}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="flex items-center gap-1.5 text-xs">
+                                        <CircleCheck className="h-3.5 w-3.5 shrink-0 text-green-600 dark:text-green-400" />
+                                        <span className="font-medium text-muted-foreground">
+                                            {match.display_name}:
+                                        </span>
+                                        <span className="font-semibold tabular-nums">
+                                            {currencySymbol}
+                                            {exact.price.toFixed(2)}
+                                        </span>
+                                        <span
+                                            className={`rounded px-1 py-0.5 text-[10px] font-medium ${
+                                                isHigher
+                                                    ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
+                                                    : isLower
+                                                      ? 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400'
+                                                      : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                                            }`}
+                                        >
+                                            {isHigher ? '+' : ''}
+                                            {diffPct}%
+                                        </span>
+                                        {exact.is_regional && (
+                                            <span className="rounded bg-blue-100 px-1 py-0.5 text-[10px] text-blue-700 dark:bg-blue-950 dark:text-blue-400">
+                                                {exact.destination_name}
+                                            </span>
+                                        )}
+                                        {(same_gb.length > 0 ||
+                                            same_days.length > 0) && (
+                                            <Info className="h-3 w-3 text-muted-foreground" />
+                                        )}
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent
+                                    side="left"
+                                    className="max-w-xs"
+                                >
+                                    <div className="space-y-2 text-xs">
+                                        <div>
+                                            <span className="font-semibold">
+                                                Exact match
+                                                {exact.is_regional
+                                                    ? ` (${exact.destination_name})`
+                                                    : ''}
+                                                :
+                                            </span>{' '}
+                                            {exact.plan_name} -{' '}
+                                            {currencySymbol}
+                                            {exact.price.toFixed(2)}
+                                        </div>
+                                        {same_gb.length > 0 && (
+                                            <div>
+                                                <span className="font-semibold">
+                                                    Same GB, different days:
+                                                </span>
+                                                <ul className="mt-0.5 space-y-0.5">
+                                                    {same_gb.map((p) => (
+                                                        <li
+                                                            key={p.plan_code}
+                                                            className="text-muted-foreground"
+                                                        >
+                                                            {p.duration_days}d -{' '}
+                                                            {currencySymbol}
+                                                            {p.price.toFixed(2)}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                        {same_days.length > 0 && (
+                                            <div>
+                                                <span className="font-semibold">
+                                                    Same days, different GB:
+                                                </span>
+                                                <ul className="mt-0.5 space-y-0.5">
+                                                    {same_days.map((p) => (
+                                                        <li
+                                                            key={p.plan_code}
+                                                            className="text-muted-foreground"
+                                                        >
+                                                            {p.data_gb === 0
+                                                                ? 'Unlimited'
+                                                                : `${p.data_gb}GB`}{' '}
+                                                            - {currencySymbol}
+                                                            {p.price.toFixed(2)}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    );
+                }
+
+                // No exact match - show alternatives summary
+                return (
+                    <TooltipProvider key={match.competitor}>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="flex items-center gap-1.5 text-xs">
+                                    <CircleMinus className="h-3.5 w-3.5 shrink-0 text-yellow-500 dark:text-yellow-400" />
+                                    <span className="font-medium text-muted-foreground">
+                                        {match.display_name}:
+                                    </span>
+                                    <span className="italic text-muted-foreground">
+                                        ~{same_gb.length + same_days.length}{' '}
+                                        similar
+                                    </span>
+                                    <Info className="h-3 w-3 text-muted-foreground" />
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="left" className="max-w-xs">
+                                <div className="space-y-2 text-xs">
+                                    <div className="font-medium text-yellow-600 dark:text-yellow-400">
+                                        No exact match found
+                                    </div>
+                                    {same_gb.length > 0 && (
+                                        <div>
+                                            <span className="font-semibold">
+                                                Same GB, different days:
+                                            </span>
+                                            <ul className="mt-0.5 space-y-0.5">
+                                                {same_gb.map((p) => (
+                                                    <li
+                                                        key={p.plan_code}
+                                                        className="text-muted-foreground"
+                                                    >
+                                                        {p.duration_days}d -{' '}
+                                                        {currencySymbol}
+                                                        {p.price.toFixed(2)}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                    {same_days.length > 0 && (
+                                        <div>
+                                            <span className="font-semibold">
+                                                Same days, different GB:
+                                            </span>
+                                            <ul className="mt-0.5 space-y-0.5">
+                                                {same_days.map((p) => (
+                                                    <li
+                                                        key={p.plan_code}
+                                                        className="text-muted-foreground"
+                                                    >
+                                                        {p.data_gb === 0
+                                                            ? 'Unlimited'
+                                                            : `${p.data_gb}GB`}{' '}
+                                                        - {currencySymbol}
+                                                        {p.price.toFixed(2)}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                );
+            })}
+        </div>
+    );
+}
+
 export default function PackagesIndex({
     packages,
     providers,
     countries,
     filters,
     defaultCurrency,
+    competitorPricing,
 }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -278,16 +525,32 @@ export default function PackagesIndex({
                             {packages.total.toLocaleString()}
                         </Badge>
                     </div>
-                    {hasActiveFilters && (
+                    <div className="flex items-center gap-2">
                         <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            onClick={resetFilters}
+                            onClick={() =>
+                                router.post(
+                                    '/admin/competitor-pricing/refresh',
+                                    {},
+                                    { preserveState: true },
+                                )
+                            }
                         >
                             <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-                            Reset
+                            Refresh Competitors
                         </Button>
-                    )}
+                        {hasActiveFilters && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={resetFilters}
+                            >
+                                <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                                Reset
+                            </Button>
+                        )}
+                    </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -484,6 +747,7 @@ export default function PackagesIndex({
                                     currentDir={filters.sort_dir}
                                     onSort={handleSort}
                                 />
+                                <TableHead>Competitor</TableHead>
                                 <TableHead className="w-[100px] text-right">
                                     Actions
                                 </TableHead>
@@ -493,7 +757,7 @@ export default function PackagesIndex({
                             {packages.data.length === 0 ? (
                                 <TableRow className="hover:bg-transparent">
                                     <TableCell
-                                        colSpan={10}
+                                        colSpan={11}
                                         className="py-8 text-center text-sm text-muted-foreground"
                                     >
                                         No packages found
@@ -585,6 +849,19 @@ export default function PackagesIndex({
                                                         ? 'Active'
                                                         : 'Inactive'}
                                                 </Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <CompetitorPriceCell
+                                                    matches={
+                                                        competitorPricing?.[
+                                                            pkg.id
+                                                        ]
+                                                    }
+                                                    ourPrice={price}
+                                                    currencySymbol={
+                                                        currencySymbol
+                                                    }
+                                                />
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex justify-end gap-0.5">

@@ -12,7 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, CircleCheck, CircleMinus, Save } from 'lucide-react';
 import { FormEvent } from 'react';
 
 interface Package {
@@ -41,9 +41,28 @@ interface Currency {
     symbol: string;
 }
 
+interface CompetitorPlan {
+    plan_name: string;
+    price: number;
+    data_gb: number;
+    duration_days: number;
+    destination_name: string;
+    is_regional: boolean;
+}
+
+interface CompetitorMatch {
+    competitor: string;
+    display_name: string;
+    currency: string;
+    exact: CompetitorPlan | null;
+    same_gb: CompetitorPlan[];
+    same_days: CompetitorPlan[];
+}
+
 interface Props {
     package: Package;
     defaultCurrency: Currency | null;
+    competitorPricing: Record<string, CompetitorMatch>;
 }
 
 function formatData(mb: number): string {
@@ -53,7 +72,11 @@ function formatData(mb: number): string {
     return `${mb} MB`;
 }
 
-export default function PackageEdit({ package: pkg, defaultCurrency }: Props) {
+export default function PackageEdit({
+    package: pkg,
+    defaultCurrency,
+    competitorPricing,
+}: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
         { title: 'Packages', href: '/admin/packages' },
@@ -275,6 +298,162 @@ export default function PackageEdit({ package: pkg, defaultCurrency }: Props) {
                                 )}
                             </CardContent>
                         </Card>
+
+                        {competitorPricing &&
+                            Object.keys(competitorPricing).length > 0 && (
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>
+                                            Competitor Pricing
+                                        </CardTitle>
+                                        <CardDescription>
+                                            Compare with competitor prices for{' '}
+                                            {formatData(pkg.data_mb)} /{' '}
+                                            {pkg.validity_days}d
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        {Object.values(competitorPricing).map(
+                                            (match) => {
+                                                const {
+                                                    exact,
+                                                    same_gb,
+                                                    same_days,
+                                                } = match;
+                                                const hasData =
+                                                    exact ||
+                                                    same_gb.length > 0 ||
+                                                    same_days.length > 0;
+
+                                                return (
+                                                    <div
+                                                        key={match.competitor}
+                                                        className="space-y-2"
+                                                    >
+                                                        <div className="flex items-center gap-2">
+                                                            {exact ? (
+                                                                <CircleCheck className="h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
+                                                            ) : (
+                                                                <CircleMinus
+                                                                    className={`h-4 w-4 shrink-0 ${hasData ? 'text-yellow-500' : 'text-muted-foreground/50'}`}
+                                                                />
+                                                            )}
+                                                            <span className="text-sm font-medium">
+                                                                {
+                                                                    match.display_name
+                                                                }
+                                                            </span>
+                                                            {exact && (
+                                                                <span className="ml-auto text-sm font-semibold">
+                                                                    {
+                                                                        currencySymbol
+                                                                    }
+                                                                    {exact.price.toFixed(
+                                                                        2,
+                                                                    )}
+                                                                    {(() => {
+                                                                        const ourPrice =
+                                                                            customPrice ??
+                                                                            retailPrice;
+                                                                        const diff =
+                                                                            exact.price -
+                                                                            ourPrice;
+                                                                        const pct =
+                                                                            ourPrice >
+                                                                            0
+                                                                                ? (
+                                                                                      (diff /
+                                                                                          ourPrice) *
+                                                                                      100
+                                                                                  ).toFixed(
+                                                                                      0,
+                                                                                  )
+                                                                                : '0';
+                                                                        return (
+                                                                            <span
+                                                                                className={`ml-1.5 rounded px-1 py-0.5 text-[10px] font-medium ${
+                                                                                    diff >
+                                                                                    0
+                                                                                        ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
+                                                                                        : diff <
+                                                                                            0
+                                                                                          ? 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400'
+                                                                                          : 'bg-gray-100 text-gray-600'
+                                                                                }`}
+                                                                            >
+                                                                                {diff >
+                                                                                0
+                                                                                    ? '+'
+                                                                                    : ''}
+                                                                                {
+                                                                                    pct
+                                                                                }
+                                                                                %
+                                                                            </span>
+                                                                        );
+                                                                    })()}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {exact && (
+                                                            <p className="ml-6 text-xs text-muted-foreground">
+                                                                {
+                                                                    exact.plan_name
+                                                                }
+                                                                {exact.is_regional &&
+                                                                    ` (${exact.destination_name})`}
+                                                            </p>
+                                                        )}
+                                                        {!exact && hasData && (
+                                                            <p className="ml-6 text-xs text-muted-foreground">
+                                                                No exact match.{' '}
+                                                                {same_gb.length >
+                                                                    0 &&
+                                                                    `${same_gb.length} same GB. `}
+                                                                {same_days.length >
+                                                                    0 &&
+                                                                    `${same_days.length} same days.`}
+                                                            </p>
+                                                        )}
+                                                        {same_gb.length >
+                                                            0 && (
+                                                            <div className="ml-6 flex flex-wrap gap-1.5">
+                                                                {same_gb.map(
+                                                                    (p) => (
+                                                                        <span
+                                                                            key={
+                                                                                p.plan_name
+                                                                            }
+                                                                            className="rounded border bg-muted/50 px-1.5 py-0.5 text-[11px]"
+                                                                        >
+                                                                            {
+                                                                                p.duration_days
+                                                                            }
+                                                                            d ={' '}
+                                                                            {
+                                                                                currencySymbol
+                                                                            }
+                                                                            {p.price.toFixed(
+                                                                                2,
+                                                                            )}
+                                                                        </span>
+                                                                    ),
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {!hasData && (
+                                                            <p className="ml-6 text-xs text-muted-foreground">
+                                                                No matching
+                                                                plans
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                );
+                                            },
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            )}
 
                         <Card>
                             <CardHeader>

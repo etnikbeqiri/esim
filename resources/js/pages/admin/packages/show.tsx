@@ -11,7 +11,14 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, ExternalLink, Pencil, Star } from 'lucide-react';
+import {
+    ArrowLeft,
+    CircleCheck,
+    CircleMinus,
+    ExternalLink,
+    Pencil,
+    Star,
+} from 'lucide-react';
 
 interface Order {
     id: number;
@@ -50,9 +57,28 @@ interface Currency {
     symbol: string;
 }
 
+interface CompetitorPlan {
+    plan_name: string;
+    price: number;
+    data_gb: number;
+    duration_days: number;
+    destination_name: string;
+    is_regional: boolean;
+}
+
+interface CompetitorMatch {
+    competitor: string;
+    display_name: string;
+    currency: string;
+    exact: CompetitorPlan | null;
+    same_gb: CompetitorPlan[];
+    same_days: CompetitorPlan[];
+}
+
 interface Props {
     package: PackageData;
     defaultCurrency: Currency | null;
+    competitorPricing: Record<string, CompetitorMatch>;
 }
 
 function formatData(mb: number): string {
@@ -77,7 +103,11 @@ function getStatusColor(status: string): string {
     }
 }
 
-export default function PackageShow({ package: pkg, defaultCurrency }: Props) {
+export default function PackageShow({
+    package: pkg,
+    defaultCurrency,
+    competitorPricing,
+}: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
         { title: 'Packages', href: '/admin/packages' },
@@ -268,6 +298,219 @@ export default function PackageShow({ package: pkg, defaultCurrency }: Props) {
                                     </div>
                                 </div>
                             </div>
+
+                            {competitorPricing &&
+                                Object.keys(competitorPricing).length > 0 && (
+                                    <div className="mt-6">
+                                        <h2 className="mb-3 text-sm font-medium">
+                                            Competitor Pricing
+                                        </h2>
+                                        <div className="rounded-lg border">
+                                            <div className="divide-y">
+                                                {Object.values(
+                                                    competitorPricing,
+                                                ).map((match) => {
+                                                    const {
+                                                        exact,
+                                                        same_gb,
+                                                        same_days,
+                                                    } = match;
+                                                    const hasData =
+                                                        exact ||
+                                                        same_gb.length > 0 ||
+                                                        same_days.length > 0;
+
+                                                    return (
+                                                        <div
+                                                            key={
+                                                                match.competitor
+                                                            }
+                                                            className="px-4 py-3"
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                {exact ? (
+                                                                    <CircleCheck className="h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
+                                                                ) : (
+                                                                    <CircleMinus
+                                                                        className={`h-4 w-4 shrink-0 ${hasData ? 'text-yellow-500' : 'text-muted-foreground/50'}`}
+                                                                    />
+                                                                )}
+                                                                <span className="text-sm font-medium">
+                                                                    {
+                                                                        match.display_name
+                                                                    }
+                                                                </span>
+                                                            </div>
+
+                                                            {exact && (
+                                                                <div className="mt-2 ml-6">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-sm font-semibold">
+                                                                            {
+                                                                                currencySymbol
+                                                                            }
+                                                                            {exact.price.toFixed(
+                                                                                2,
+                                                                            )}
+                                                                        </span>
+                                                                        {(() => {
+                                                                            const diff =
+                                                                                exact.price -
+                                                                                effectivePrice;
+                                                                            const pct =
+                                                                                effectivePrice >
+                                                                                0
+                                                                                    ? (
+                                                                                          (diff /
+                                                                                              effectivePrice) *
+                                                                                          100
+                                                                                      ).toFixed(
+                                                                                          0,
+                                                                                      )
+                                                                                    : '0';
+                                                                            const isHigher =
+                                                                                diff >
+                                                                                0;
+                                                                            const isLower =
+                                                                                diff <
+                                                                                0;
+                                                                            return (
+                                                                                <span
+                                                                                    className={`rounded px-1.5 py-0.5 text-xs font-medium ${
+                                                                                        isHigher
+                                                                                            ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
+                                                                                            : isLower
+                                                                                              ? 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400'
+                                                                                              : 'bg-gray-100 text-gray-600'
+                                                                                    }`}
+                                                                                >
+                                                                                    {isHigher
+                                                                                        ? '+'
+                                                                                        : ''}
+                                                                                    {
+                                                                                        pct
+                                                                                    }
+                                                                                    %
+                                                                                </span>
+                                                                            );
+                                                                        })()}
+                                                                        {exact.is_regional && (
+                                                                            <span className="rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-700 dark:bg-blue-950 dark:text-blue-400">
+                                                                                {
+                                                                                    exact.destination_name
+                                                                                }
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                                                        {
+                                                                            exact.plan_name
+                                                                        }
+                                                                    </p>
+                                                                </div>
+                                                            )}
+
+                                                            {!exact &&
+                                                                hasData && (
+                                                                    <p className="mt-1 ml-6 text-xs text-muted-foreground">
+                                                                        No exact
+                                                                        match
+                                                                    </p>
+                                                                )}
+
+                                                            {same_gb.length >
+                                                                0 && (
+                                                                <div className="mt-2 ml-6">
+                                                                    <p className="text-xs font-medium text-muted-foreground">
+                                                                        Same
+                                                                        GB,
+                                                                        different
+                                                                        days:
+                                                                    </p>
+                                                                    <div className="mt-1 flex flex-wrap gap-2">
+                                                                        {same_gb.map(
+                                                                            (
+                                                                                p,
+                                                                            ) => (
+                                                                                <span
+                                                                                    key={
+                                                                                        p.plan_name
+                                                                                    }
+                                                                                    className="rounded border bg-muted/50 px-2 py-1 text-xs"
+                                                                                >
+                                                                                    {
+                                                                                        p.duration_days
+                                                                                    }
+
+                                                                                    d
+                                                                                    ={' '}
+                                                                                    {
+                                                                                        currencySymbol
+                                                                                    }
+
+                                                                                    {p.price.toFixed(
+                                                                                        2,
+                                                                                    )}
+                                                                                </span>
+                                                                            ),
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            {same_days.length >
+                                                                0 && (
+                                                                <div className="mt-2 ml-6">
+                                                                    <p className="text-xs font-medium text-muted-foreground">
+                                                                        Same
+                                                                        days,
+                                                                        different
+                                                                        GB:
+                                                                    </p>
+                                                                    <div className="mt-1 flex flex-wrap gap-2">
+                                                                        {same_days.map(
+                                                                            (
+                                                                                p,
+                                                                            ) => (
+                                                                                <span
+                                                                                    key={
+                                                                                        p.plan_name
+                                                                                    }
+                                                                                    className="rounded border bg-muted/50 px-2 py-1 text-xs"
+                                                                                >
+                                                                                    {p.data_gb ===
+                                                                                    0
+                                                                                        ? 'Unlimited'
+                                                                                        : `${p.data_gb}GB`}
+
+                                                                                    ={' '}
+                                                                                    {
+                                                                                        currencySymbol
+                                                                                    }
+
+                                                                                    {p.price.toFixed(
+                                                                                        2,
+                                                                                    )}
+                                                                                </span>
+                                                                            ),
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            {!hasData && (
+                                                                <p className="mt-1 ml-6 text-xs text-muted-foreground">
+                                                                    No matching
+                                                                    plans found
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                             {pkg.description && (
                                 <div className="mt-6">

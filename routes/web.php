@@ -131,6 +131,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('packages/{package}', [\App\Http\Controllers\Admin\PackageController::class, 'update'])->name('packages.update');
         Route::post('packages/{package}/toggle-featured', [\App\Http\Controllers\Admin\PackageController::class, 'toggleFeatured'])->name('packages.toggle-featured');
         Route::post('packages/{package}/toggle-active', [\App\Http\Controllers\Admin\PackageController::class, 'toggleActive'])->name('packages.toggle-active');
+        Route::post('competitor-pricing/refresh', [\App\Http\Controllers\Admin\PackageController::class, 'refreshCompetitorPricing'])->name('competitor-pricing.refresh');
 
         Route::get('orders', [\App\Http\Controllers\Admin\OrderController::class, 'index'])->name('orders.index');
         Route::get('orders/{order}', [\App\Http\Controllers\Admin\OrderController::class, 'show'])->name('orders.show');
