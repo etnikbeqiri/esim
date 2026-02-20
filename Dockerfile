@@ -5,7 +5,7 @@ FROM composer:latest AS composer
 
 WORKDIR /app
 COPY composer.json composer.lock ./
-RUN COMPOSE_BAKE=true composer install --optimize-autoloader --no-interaction --no-scripts --no-dev --ignore-platform-req=ext-pcntl
+RUN COMPOSE_BAKE=true composer install --optimize-autoloader --no-interaction --no-scripts --no-dev --ignore-platform-reqs
 
 # Copy full source so post-autoload-dump scripts work
 COPY . .
@@ -14,7 +14,7 @@ RUN composer dump-autoload --optimize
 # ============================================
 # Stage 2: Node build (SSR + Vite assets)
 # ============================================
-FROM php:8.5-alpine AS node
+FROM php:8.4-alpine AS node
 
 # Install Node.js
 RUN apk add --no-cache nodejs npm
@@ -32,7 +32,7 @@ RUN npm run build:ssr
 # ============================================
 # Stage 3: Runtime
 # ============================================
-FROM php:8.5-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 # Install required packages
 RUN apk add --no-cache \
