@@ -14,16 +14,21 @@ RUN composer dump-autoload --optimize
 # ============================================
 # Stage 2: Node build (SSR + Vite assets)
 # ============================================
-FROM php:8.4-alpine AS node
+FROM alpine:3.21 AS node
 
-# Install Node.js
-RUN apk add --no-cache nodejs npm
+# PHP + Node needed for Wayfinder vite plugin (runs php artisan wayfinder:generate)
+RUN apk add --no-cache \
+    nodejs npm \
+    php84 php84-tokenizer php84-mbstring php84-openssl php84-phar \
+    php84-session php84-xml php84-dom php84-xmlwriter php84-ctype \
+    php84-fileinfo php84-curl php84-iconv \
+    && ln -sf /usr/bin/php84 /usr/bin/php
 
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Copy source and composer deps (needed for Wayfinder vite plugin: php artisan wayfinder:generate)
+# Copy source and composer deps (needed for artisan to boot)
 COPY . .
 COPY --from=composer /app/vendor ./vendor
 
@@ -32,62 +37,25 @@ RUN npm run build:ssr
 # ============================================
 # Stage 3: Runtime
 # ============================================
-FROM php:8.4-fpm-alpine
+FROM alpine:3.21
 
-# Install required packages
+# Install PHP-FPM + all extensions as pre-compiled packages (no compilation needed)
 RUN apk add --no-cache \
-    nginx \
-    supervisor \
-    curl \
-    mariadb-client \
-    mariadb-connector-c \
-    mariadb-connector-c-dev \
-    freetype \
-    freetype-dev \
-    libjpeg-turbo \
-    libjpeg-turbo-dev \
-    libpng \
-    libpng-dev \
-    libwebp \
-    libwebp-dev \
-    libzip-dev \
-    nodejs \
-    npm \
-    linux-headers \
-    $PHPIZE_DEPS
+    php84-fpm php84-pdo_mysql php84-gd php84-zip php84-pcntl \
+    php84-redis php84-opcache php84-session php84-tokenizer \
+    php84-mbstring php84-openssl php84-phar php84-dom php84-xml \
+    php84-xmlwriter php84-ctype php84-fileinfo php84-curl \
+    php84-iconv php84-bcmath php84-pdo php84-simplexml \
+    nginx supervisor curl nodejs npm \
+    && ln -sf /usr/bin/php84 /usr/bin/php \
+    && ln -sf /usr/sbin/php-fpm84 /usr/sbin/php-fpm
 
 # Create directories used by supervisor
 RUN mkdir -p /var/log/supervisor /etc/supervisor/conf.d
 
-# Configure and install PHP extensions
-RUN docker-php-ext-configure gd \
-    --with-freetype \
-    --with-jpeg \
-    --with-webp
-
-RUN docker-php-ext-install -j1 pdo_mysql \
-    && docker-php-ext-install -j1 gd \
-    && docker-php-ext-install -j1 zip \
-    && docker-php-ext-install -j1 pcntl
-
-# Install phpredis
-RUN pecl install redis && docker-php-ext-enable redis
-
-# Enable opcache
-RUN docker-php-ext-enable opcache || true
-
-# Clean up dev dependencies
-RUN apk del --no-cache \
-    freetype-dev \
-    libjpeg-turbo-dev \
-    libpng-dev \
-    libwebp-dev \
-    linux-headers \
-    $PHPIZE_DEPS
-
 # Copy config files
-COPY docker/php/production.ini /usr/local/etc/php/conf.d/production.ini
-COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+COPY docker/php/production.ini /etc/php84/conf.d/99-production.ini
+COPY docker/php/www.conf /etc/php84/php-fpm.d/www.conf
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/nginx/default.conf /etc/nginx/http.d/default.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
@@ -111,7 +79,7 @@ COPY --from=node /app/public/build ./public/build
 COPY --from=node /app/bootstrap/ssr ./bootstrap/ssr
 
 # Copy application code
-COPY --chown=www-data:www-data . .
+COPY --chown=nobody:nobody . .
 
 # Remove any .env that slipped through (will be provided via Docker secrets)
 RUN rm -f .env
@@ -123,7 +91,7 @@ RUN php artisan storage:link 2>/dev/null || true
 RUN chmod -R 775 storage bootstrap/cache \
     && touch storage/logs/laravel.log \
     && chmod 664 storage/logs/laravel.log \
-    && chown -R www-data:www-data /var/www/html
+    && chown -R nobody:nobody /var/www/html
 
 EXPOSE 80
 

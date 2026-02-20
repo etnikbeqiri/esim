@@ -8,7 +8,7 @@ echo "Starting container with role: $CONTAINER_ROLE"
 # Load .env from Docker secret if mounted
 if [ -f /run/secrets/backend_secret_env ]; then
     cp /run/secrets/backend_secret_env /var/www/html/.env
-    chown www-data:www-data /var/www/html/.env
+    chown nobody:nobody /var/www/html/.env
     echo "Loaded .env from Docker secret"
 fi
 
