@@ -14,13 +14,19 @@ RUN composer dump-autoload --optimize
 # ============================================
 # Stage 2: Node build (SSR + Vite assets)
 # ============================================
-FROM node:22-alpine AS node
+FROM php:8.5-alpine AS node
+
+# Install Node.js
+RUN apk add --no-cache nodejs npm
 
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# Copy source and composer deps (needed for Wayfinder vite plugin: php artisan wayfinder:generate)
 COPY . .
+COPY --from=composer /app/vendor ./vendor
+
 RUN npm run build:ssr
 
 # ============================================
