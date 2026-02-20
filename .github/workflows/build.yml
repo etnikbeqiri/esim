@@ -1,3 +1,4 @@
+# Build Docker image and push to AWS ECR
 name: Build & Push to ECR
 
 on:
