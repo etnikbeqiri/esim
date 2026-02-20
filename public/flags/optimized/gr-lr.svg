@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" sizes="16x16 32x32" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:image" content="/link-preview.jpg" />
+    <meta
+      property="og:title"
+      content="thirr.com - Internet 5G për ty në lëvizje"
+    />
+    <meta
+      property="og:description"
+      content="Instalim i menjëhershëm, Hotspot i lejuar dhe 24/7 suport"
+    />
+    <meta property="og:url" content="https://thirr.com" />
+    <meta property="og:type" content="website" />
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-FQ3G0E26LQ"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-FQ3G0E26LQ");
+    </script>
+    <!-- Cloudflare Web Analytics -->
+    <script
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon='{"token": "2c1238cfe975409a89a925da2abc1d73"}'
+    ></script>
+    <!-- End Cloudflare Web Analytics -->
+    <!-- Facebook Pixel Code -->
+    <script>
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod
+            ? n.callMethod.apply(n, arguments)
+            : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = "2.0";
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(
+        window,
+        document,
+        "script",
+        "https://connect.facebook.net/en_US/fbevents.js",
+      );
+      fbq("init", "386231787819744");
+      fbq("track", "PageView");
+    </script>
+    <!-- End Facebook Pixel Code -->
+    <title>Thirr App</title>
+    <script type="module" crossorigin src="/assets/index-CIw8yYpS.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-D7VwldT5.css">
+  </head>
+  <body>
+    <header>
+      <div class="header">
+        <div class="contact">
+          <a href="https://m.me/thirr.esim">
+            <div>
+              <div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="21.364"
+                  height="21.364"
+                  viewBox="0 0 21.364 21.364"
+                  xmlns:xlink="http://www.w3.org/1999/xlink"
+                  role="img"
+                >
+                  <path
+                    d="M18.165,5.355A10.59,10.59,0,0,0,1.5,18.13L0,23.614l5.613-1.474a10.555,10.555,0,0,0,5.06,1.288h0A10.689,10.689,0,0,0,21.364,12.842a10.628,10.628,0,0,0-3.2-7.487Zm-7.487,16.29a8.784,8.784,0,0,1-4.483-1.226l-.32-.191L2.547,21.1l.887-3.248-.21-.334a8.816,8.816,0,1,1,16.352-4.678A8.9,8.9,0,0,1,10.677,21.645ZM15.5,15.054c-.262-.134-1.564-.773-1.807-.858s-.42-.134-.6.134-.682.858-.839,1.04-.31.2-.572.067a7.2,7.2,0,0,1-3.6-3.147c-.272-.467.272-.434.777-1.445a.49.49,0,0,0-.024-.463c-.067-.134-.6-1.435-.815-1.965s-.434-.444-.6-.453-.329-.01-.505-.01a.98.98,0,0,0-.706.329,2.973,2.973,0,0,0-.925,2.208,5.182,5.182,0,0,0,1.078,2.737,11.821,11.821,0,0,0,4.521,4,5.176,5.176,0,0,0,3.176.663,2.709,2.709,0,0,0,1.784-1.259A2.212,2.212,0,0,0,16,15.369C15.942,15.25,15.766,15.183,15.5,15.054Z"
+                    transform="translate(0 -2.25)"
+                    fill="#4b4a4a"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+            <div class="text">
+              <div>WhatsApp 24/7</div>
+              <div class="phone">+1 202 922 1767</div>
+            </div></a
+          >
+        </div>
+        <div class="logo">
+          <a href="https://thirr.com/"><img alt="Logo" src="/logo.gif" /></a>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div id="app"></div>
+    </main>
+    <footer>
+      <div class="footer">
+        <div class="paymentOptions">
+          <div class="p">
+            <!-- thirr.com pranon të gjitha llojet e kartelave Visa/MasterCard nga të
+            gjitha bankat. -->
+          </div>
+          <div class="logos">
+            <img src="/icon-mastercard.png" />
+            <img src="/icon-visa.png" />
+            <img src="/icon-paysera.png" />
+          </div>
+        </div>
+        <div class="logo">
+          <img src="/logo-footer.png" />
+        </div>
+        <div class="contact">
+          <div><a href="https://wa.me/+12029221767">+1 202 922 1767</a></div>
+          <div><a href="mailto:esim@thirr.com">esim@thirr.com</a></div>
+          <div>EIN: 812101583</div>
+        </div>
+        <div class="socialMedia">
+          <div><a href="https://facebook.com/thirr.esim">Facebook</a></div>
+          <div><a href="https://instagram.com/thirr.esim">Instagram</a></div>
+          <div><a href="https://linkedin.com/company/thirr">LinkedIn</a></div>
+        </div>
+        <div class="copyright">2024 © Thirr, LLC</div>
+      </div>
+    </footer>
+    <noscript>
+      <img
+        height="1"
+        width="1"
+        style="display: none"
+        src="https://www.facebook.com/tr?id=386231787819744&ev=PageView&noscript=1"
+      />
+    </noscript>
+  </body>
+</html>

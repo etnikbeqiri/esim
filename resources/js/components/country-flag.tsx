@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 interface CountryFlagProps {
     countryCode: string;
     size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -17,7 +19,10 @@ export function CountryFlag({
     className = '',
 }: CountryFlagProps) {
     const code = countryCode.toLowerCase();
-    const src = `https://flagcdn.com/${code}.svg`;
+    const localSrc = `/flags/optimized/${code}.svg`;
+    const fallbackSrc = `https://flagcdn.com/${code}.svg`;
+
+    const [src, setSrc] = useState(localSrc);
 
     return (
         <img
@@ -25,6 +30,11 @@ export function CountryFlag({
             alt={`${countryCode.toUpperCase()} flag`}
             className={`inline-block object-cover ${sizeClasses[size]} ${className}`}
             loading="lazy"
+            onError={() => {
+                if (src !== fallbackSrc) {
+                    setSrc(fallbackSrc);
+                }
+            }}
         />
     );
 }
