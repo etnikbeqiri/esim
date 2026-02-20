@@ -5,7 +5,7 @@ FROM composer:latest AS composer
 
 WORKDIR /app
 COPY composer.json composer.lock ./
-RUN COMPOSE_BAKE=true composer install --optimize-autoloader --no-interaction --no-scripts --no-dev
+RUN COMPOSE_BAKE=true composer install --optimize-autoloader --no-interaction --no-scripts --no-dev --ignore-platform-req=ext-pcntl
 
 # Copy full source so post-autoload-dump scripts work
 COPY . .
