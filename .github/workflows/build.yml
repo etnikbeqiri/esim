@@ -16,39 +16,29 @@ jobs:
     name: Build & Push
     runs-on: self-hosted
 
-    permissions:
-      contents: read
-      id-token: write
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      - name: Set up QEMU for ARM builds
+        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+      - name: Create Buildx builder
+        run: |
+          docker buildx create --name arm-builder --use 2>/dev/null || docker buildx use arm-builder
+          docker buildx inspect --bootstrap
 
       - name: Login to Amazon ECR
-        id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Set release tag
-        id: tag
-        run: echo "RELEASE_TAG=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ${{ env.AWS_REGION }}
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
 
       - name: Build & push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          platforms: linux/arm64
-          tags: ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.RELEASE_TAG }}
+        run: |
+          docker buildx build \
+            --platform linux/arm64 \
+            --tag ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --push \
+            .
