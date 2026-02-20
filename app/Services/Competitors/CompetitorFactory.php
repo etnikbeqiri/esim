@@ -10,8 +10,7 @@ class CompetitorFactory
     private static array $competitors = [
         'thirr' => ThirrCompetitor::class,
         'viaesim' => ViaesimCompetitor::class,
-        // 'airalo' => AiraloCompetitor::class,
-        // 'holafly' => HolaflyCompetitor::class,
+        '99esim' => NinetyNineEsimCompetitor::class,
     ];
 
     public function make(string $slug): CompetitorContract

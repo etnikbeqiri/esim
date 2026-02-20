@@ -42,6 +42,7 @@ interface Currency {
 }
 
 interface CompetitorPlan {
+    plan_code: string;
     plan_name: string;
     price: number;
     data_gb: number;
@@ -421,15 +422,38 @@ export default function PackageEdit({
                                                                 {same_gb.map(
                                                                     (p) => (
                                                                         <span
-                                                                            key={
-                                                                                p.plan_name
-                                                                            }
+                                                                            key={`${p.plan_code}-${p.duration_days}-${p.price}`}
                                                                             className="rounded border bg-muted/50 px-1.5 py-0.5 text-[11px]"
                                                                         >
                                                                             {
                                                                                 p.duration_days
                                                                             }
                                                                             d ={' '}
+                                                                            {
+                                                                                currencySymbol
+                                                                            }
+                                                                            {p.price.toFixed(
+                                                                                2,
+                                                                            )}
+                                                                        </span>
+                                                                    ),
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {same_days.length >
+                                                            0 && (
+                                                            <div className="ml-6 flex flex-wrap gap-1.5">
+                                                                {same_days.map(
+                                                                    (p) => (
+                                                                        <span
+                                                                            key={`${p.plan_code}-${p.data_gb}-${p.price}`}
+                                                                            className="rounded border bg-muted/50 px-1.5 py-0.5 text-[11px]"
+                                                                        >
+                                                                            {p.data_gb ===
+                                                                            0
+                                                                                ? 'Unlim'
+                                                                                : `${p.data_gb}GB`}
+                                                                            ={' '}
                                                                             {
                                                                                 currencySymbol
                                                                             }

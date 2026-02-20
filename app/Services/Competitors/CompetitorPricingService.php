@@ -48,11 +48,12 @@ class CompetitorPricingService
         foreach ($this->factory->slugs() as $slug) {
             $indexed = $this->getCachedIndex($slug);
             $countryPlans = $indexed[$isoCode] ?? [];
+            $competitor = $this->factory->make($slug);
 
             $result[$slug] = [
                 'competitor' => $slug,
-                'display_name' => $this->factory->make($slug)->getDisplayName(),
-                'currency' => $this->factory->make($slug)->getCurrency(),
+                'display_name' => $competitor->getDisplayName(),
+                'currency' => $competitor->getCurrency(),
                 ...$this->matchPlans($countryPlans, $dataGb, $validityDays),
             ];
         }

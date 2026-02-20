@@ -125,15 +125,6 @@ class ViaesimCompetitor implements CompetitorContract
     private function resolveEnglishName(array $package): string
     {
         $destination = $package['destination'] ?? [];
-        $isRegional = $this->isKnownRegional($package);
-
-        // For known regionals: use first country's English name if it describes the region,
-        // otherwise derive from slug
-        // For single-country: always use slug (countries[] data is unreliable)
-        if ($isRegional) {
-            $countries = $destination['countries'] ?? [];
-            // Regional destinations have many countries, slug is more descriptive
-        }
 
         // Derive English name from slug
         // "germany" -> "Germany", "europe" -> "Europe", "north-america" -> "North America"
@@ -144,7 +135,6 @@ class ViaesimCompetitor implements CompetitorContract
             return ucwords(str_replace('-', ' ', $slug));
         }
 
-        // Last resort: Albanian name
         return $package['country_name'] ?? 'Unknown';
     }
 

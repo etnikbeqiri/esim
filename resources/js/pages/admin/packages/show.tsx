@@ -58,6 +58,7 @@ interface Currency {
 }
 
 interface CompetitorPlan {
+    plan_code: string;
     plan_name: string;
     price: number;
     data_gb: number;
@@ -433,9 +434,7 @@ export default function PackageShow({
                                                                                 p,
                                                                             ) => (
                                                                                 <span
-                                                                                    key={
-                                                                                        p.plan_name
-                                                                                    }
+                                                                                    key={`${p.plan_code}-${p.duration_days}-${p.price}`}
                                                                                     className="rounded border bg-muted/50 px-2 py-1 text-xs"
                                                                                 >
                                                                                     {
@@ -473,9 +472,7 @@ export default function PackageShow({
                                                                                 p,
                                                                             ) => (
                                                                                 <span
-                                                                                    key={
-                                                                                        p.plan_name
-                                                                                    }
+                                                                                    key={`${p.plan_code}-${p.data_gb}-${p.price}`}
                                                                                     className="rounded border bg-muted/50 px-2 py-1 text-xs"
                                                                                 >
                                                                                     {p.data_gb ===
