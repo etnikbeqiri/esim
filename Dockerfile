@@ -65,7 +65,10 @@ RUN docker-php-ext-configure gd \
     --with-jpeg \
     --with-webp
 
-RUN docker-php-ext-install -j$(nproc) pdo_mysql gd zip pcntl
+RUN docker-php-ext-install -j1 pdo_mysql \
+    && docker-php-ext-install -j1 gd \
+    && docker-php-ext-install -j1 zip \
+    && docker-php-ext-install -j1 pcntl
 
 # Install phpredis
 RUN pecl install redis && docker-php-ext-enable redis
