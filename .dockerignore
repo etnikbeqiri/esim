@@ -35,9 +35,9 @@ public/build
 public/hot
 public/storage
 
-# Environment files
+# Environment files (provided via Docker secrets at runtime)
+.env
 .env.*
-!.env
 !.env.example
 
 # Logs and cache

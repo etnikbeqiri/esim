@@ -1,14 +1,38 @@
+# ============================================
+# Stage 1: Composer dependencies
+# ============================================
+FROM composer:latest AS composer
+
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN COMPOSE_BAKE=true composer install --optimize-autoloader --no-interaction --no-scripts --no-dev
+
+# Copy full source so post-autoload-dump scripts work
+COPY . .
+RUN composer dump-autoload --optimize
+
+# ============================================
+# Stage 2: Node build (SSR + Vite assets)
+# ============================================
+FROM node:22-alpine AS node
+
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build:ssr
+
+# ============================================
+# Stage 3: Runtime
+# ============================================
 FROM php:8.5-fpm-alpine
 
 # Install required packages
 RUN apk add --no-cache \
     nginx \
     supervisor \
-    git \
-    zip \
-    unzip \
-    nodejs \
-    npm \
+    curl \
     mariadb-client \
     mariadb-connector-c \
     mariadb-connector-c-dev \
@@ -20,11 +44,14 @@ RUN apk add --no-cache \
     libpng-dev \
     libwebp \
     libwebp-dev \
-    libzip-dev
+    libzip-dev \
+    nodejs \
+    npm \
+    linux-headers \
+    $PHPIZE_DEPS
 
 # Create directories used by supervisor
-RUN mkdir -p /var/log/supervisor \
-    && mkdir -p /etc/supervisor/conf.d
+RUN mkdir -p /var/log/supervisor /etc/supervisor/conf.d
 
 # Configure and install PHP extensions
 RUN docker-php-ext-configure gd \
@@ -32,11 +59,12 @@ RUN docker-php-ext-configure gd \
     --with-jpeg \
     --with-webp
 
-RUN docker-php-ext-install -j$(nproc) pdo_mysql
-RUN docker-php-ext-install -j$(nproc) gd
-RUN docker-php-ext-install -j$(nproc) zip
+RUN docker-php-ext-install -j$(nproc) pdo_mysql gd zip pcntl
 
-# Enable opcache (built-in with PHP 8.5)
+# Install phpredis
+RUN pecl install redis && docker-php-ext-enable redis
+
+# Enable opcache
 RUN docker-php-ext-enable opcache || true
 
 # Clean up dev dependencies
@@ -44,67 +72,50 @@ RUN apk del --no-cache \
     freetype-dev \
     libjpeg-turbo-dev \
     libpng-dev \
-    libwebp-dev
+    libwebp-dev \
+    linux-headers \
+    $PHPIZE_DEPS
 
 # Copy config files
 COPY docker/php/production.ini /usr/local/etc/php/conf.d/production.ini
 COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/nginx/default.conf /etc/nginx/http.d/default.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Copy the cron job file
-COPY docker/cron/laravel-cron /etc/cron.d/laravel-cron
-
 # Copy entrypoint script
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-
-# Set permissions for the cron job file and entrypoint
-RUN chmod 0644 /etc/cron.d/laravel-cron && \
-    crontab /etc/cron.d/laravel-cron && \
-    chmod +x /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 WORKDIR /var/www/html
 
-# Create storage directories with correct ownership BEFORE copying files
-RUN mkdir -p storage/logs storage/app/public storage/app/backup storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
-    && chown -R www-data:www-data /var/www/html
+# Create storage directories with correct ownership
+RUN mkdir -p storage/logs storage/app/public storage/app/backup \
+    storage/framework/cache storage/framework/sessions storage/framework/views \
+    bootstrap/cache
 
-# ============================================
-# LAYER 1: Composer dependencies (cached if composer.json/lock unchanged)
-# ============================================
-COPY --chown=www-data:www-data composer.json composer.lock ./
-RUN COMPOSE_BAKE=true composer install --optimize-autoloader --no-interaction --no-scripts
+# Copy composer dependencies from stage 1
+COPY --from=composer /app/vendor ./vendor
 
-# ============================================
-# LAYER 2: NPM dependencies (cached if package.json/lock unchanged)
-# ============================================
-COPY --chown=www-data:www-data package.json package-lock.json ./
-RUN npm ci
+# Copy built assets from stage 2
+COPY --from=node /app/public/build ./public/build
+COPY --from=node /app/bootstrap/ssr ./bootstrap/ssr
 
-# ============================================
-# LAYER 3: Application code (changes most frequently)
-# ============================================
+# Copy application code
 COPY --chown=www-data:www-data . .
 
-# Copy .env before running composer scripts that need it
-COPY --chown=www-data:www-data .env .env
-
-# Run composer scripts that need the full codebase
-RUN composer dump-autoload --optimize
-
-RUN npm run build:ssr
+# Remove any .env that slipped through (will be provided via Docker secrets)
+RUN rm -f .env
 
 # Create storage link
-RUN php artisan storage:link
+RUN php artisan storage:link 2>/dev/null || true
 
-# Ensure storage and cache directories have correct permissions
+# Ensure correct permissions
 RUN chmod -R 775 storage bootstrap/cache \
     && touch storage/logs/laravel.log \
-    && chmod 664 storage/logs/laravel.log
+    && chmod 664 storage/logs/laravel.log \
+    && chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
 
-# Run entrypoint which caches config then starts Supervisor
 CMD ["/usr/local/bin/entrypoint.sh"]

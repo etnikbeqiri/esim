@@ -1,0 +1,81 @@
+version: "3.8"
+
+services:
+  backend:
+    image: ${ECR_REGISTRY}/${IMAGE_NAME}:${RELEASE_TAG}
+    environment:
+      CONTAINER_ROLE: app
+    ports:
+      - "127.0.0.1:6044:80"
+    secrets:
+      - backend_secret_env
+    networks:
+      - massive-network
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 30s
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+  queue:
+    image: ${ECR_REGISTRY}/${IMAGE_NAME}:${RELEASE_TAG}
+    environment:
+      CONTAINER_ROLE: horizon
+    secrets:
+      - backend_secret_env
+    networks:
+      - massive-network
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+    healthcheck:
+      test: ["CMD", "php", "/var/www/html/artisan", "horizon:status"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  scheduler:
+    image: ${ECR_REGISTRY}/${IMAGE_NAME}:${RELEASE_TAG}
+    environment:
+      CONTAINER_ROLE: scheduler
+    secrets:
+      - backend_secret_env
+    networks:
+      - massive-network
+    deploy:
+      replicas: 0
+      labels:
+        - "swarm.cronjob.enable=true"
+        - "swarm.cronjob.schedule=* * * * *"
+        - "swarm.cronjob.skip-running=true"
+      restart_policy:
+        condition: none
+
+networks:
+  massive-network:
+    external: true
+
+secrets:
+  backend_secret_env:
+    external: true
