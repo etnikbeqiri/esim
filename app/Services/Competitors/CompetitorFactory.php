@@ -11,6 +11,7 @@ class CompetitorFactory
         'thirr' => ThirrCompetitor::class,
         'viaesim' => ViaesimCompetitor::class,
         '99esim' => NinetyNineEsimCompetitor::class,
+        'kudoesim' => KudoesimCompetitor::class,
     ];
 
     public function make(string $slug): CompetitorContract
