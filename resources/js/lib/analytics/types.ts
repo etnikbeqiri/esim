@@ -8,11 +8,14 @@ export interface AnalyticsConfig {
 }
 
 export interface EcommerceItem {
+    id?: string;
     item_id: string;
+    name?: string;
     item_name: string;
     item_category?: string;
     item_category2?: string;
     item_brand?: string;
+    variant?: string;
     price?: number;
     quantity?: number;
     currency?: string;
@@ -35,6 +38,7 @@ export type PageType =
     | 'checkout_success'
     | 'order_status'
     | 'blog'
+    | 'blog_post'
     | 'blog_article'
     | 'how_it_works'
     | 'faq'
@@ -119,7 +123,7 @@ export interface FormInteractionParams {
 }
 
 export interface FilterParams {
-    filter_type: 'region' | 'sort' | 'brand' | 'data' | 'validity' | 'price';
+    filter_type: 'region' | 'sort' | 'brand' | 'data' | 'data_size' | 'duration' | 'validity' | 'price' | 'featured';
     filter_value: string;
     page_type: PageType;
 }
@@ -152,7 +156,7 @@ export interface SupportContactParams {
 }
 
 export interface ContentEngagementParams {
-    content_type: 'article' | 'faq' | 'help' | 'guide' | 'esim_activation';
+    content_type: 'article' | 'blog' | 'faq' | 'help' | 'guide' | 'esim_activation';
     content_id: string;
     content_title: string;
     action: 'view' | 'scroll' | 'share' | 'copy_link' | 'expand' | 'collapse';

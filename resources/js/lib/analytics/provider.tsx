@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import analytics from './service';
 import type { AnalyticsConfig, UserProperties } from './types';
 
-interface SharedData {
+interface SharedData extends Record<string, unknown> {
     auth?: {
         user?: {
             id: number;

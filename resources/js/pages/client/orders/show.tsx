@@ -157,7 +157,7 @@ export default function OrderShow({ order, customer }: Props) {
                 only: ['order'],
                 preserveState: true,
                 preserveScroll: true,
-            });
+            } as Parameters<typeof router.reload>[0]);
         }, 3000);
 
         return () => clearInterval(interval);
@@ -165,7 +165,7 @@ export default function OrderShow({ order, customer }: Props) {
 
     function handleResendEsim(e: React.FormEvent) {
         e.preventDefault();
-        resendForm.post(route('client.orders.resend-esim', order.uuid), {
+        resendForm.post(`/client/orders/${order.uuid}/resend-esim`, {
             onSuccess: () => {
                 setDialogOpen(false);
                 resendForm.reset();

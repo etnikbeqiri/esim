@@ -4,9 +4,37 @@ import { Input } from '@/components/ui/input';
 import { useTrans } from '@/hooks/use-trans';
 import { Link, usePage } from '@inertiajs/react';
 
+interface TicketFilters {
+    status?: string;
+}
+
+interface Ticket {
+    id: number;
+    uuid: string;
+    ticket_number: string;
+    subject: string;
+    status: string;
+    status_label: string;
+    status_color: string;
+    priority: string;
+    priority_label: string;
+    created_at: string;
+    updated_at: string;
+    last_reply_at: string | null;
+}
+
+interface PaginatedTickets {
+    data: Ticket[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    links: Array<{ url: string | null; label: string; active: boolean }>;
+}
+
 export default function TicketIndex() {
     const { trans } = useTrans();
-    const { tickets, filters } = usePage().props;
+    const { tickets, filters } = usePage().props as unknown as { tickets: PaginatedTickets; filters: TicketFilters };
 
     const getStatusColor = (color: string) => {
         const colors: Record<string, string> = {
@@ -53,9 +81,7 @@ export default function TicketIndex() {
                     </Link>
                     <div className="mt-2 space-y-2">
                         <Link
-                            href={route('client.tickets.index', {
-                                status: 'open',
-                            })}
+                            href={`/client/tickets?status=open`}
                             preserveState
                         >
                             <Button
@@ -71,9 +97,7 @@ export default function TicketIndex() {
                             </Button>
                         </Link>
                         <Link
-                            href={route('client.tickets.index', {
-                                status: 'in_progress',
-                            })}
+                            href={`/client/tickets?status=in_progress`}
                             preserveState
                         >
                             <Button
@@ -89,9 +113,7 @@ export default function TicketIndex() {
                             </Button>
                         </Link>
                         <Link
-                            href={route('client.tickets.index', {
-                                status: 'closed',
-                            })}
+                            href={`/client/tickets?status=closed`}
                             preserveState
                         >
                             <Button

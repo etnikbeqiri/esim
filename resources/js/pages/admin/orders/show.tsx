@@ -315,7 +315,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                 only: ['order'],
                 preserveState: true,
                 preserveScroll: true,
-            });
+            } as Parameters<typeof router.reload>[0]);
         }, 5000);
         return () => clearInterval(interval);
     }, [isActive, order.status]);

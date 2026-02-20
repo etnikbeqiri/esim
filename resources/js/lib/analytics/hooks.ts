@@ -4,9 +4,14 @@ import type {
     ContactMethod,
     ContentEngagementParams,
     EcommerceItem,
+    ErrorParams,
+    FilterParams,
     PageType,
     PaymentMethod,
+    PurchaseParams,
     SearchParams,
+    SupportContactParams,
+    ViewItemParams,
 } from './types';
 
 export function useAnalytics() {

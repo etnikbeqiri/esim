@@ -104,7 +104,7 @@ class AnalyticsService {
             logEvent(
                 this.analytics,
                 eventName as string,
-                enrichedParams as Record<string, unknown>,
+                enrichedParams as unknown as Record<string, unknown>,
             );
             this.log(`Event tracked: ${eventName}`, enrichedParams);
         };
@@ -206,6 +206,7 @@ class AnalyticsService {
         category?: string;
         category2?: string;
         brand?: string;
+        variant?: string;
         price?: number;
         quantity?: number;
         currency?: string;

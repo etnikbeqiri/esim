@@ -47,9 +47,8 @@ export function TicketCreateForm({ storeRoute }: TicketCreateFormProps = {}) {
                         placeholder={
                             trans('ticket.placeholder.name') || 'Your name'
                         }
-                        error={errors.name}
                     />
-                    {errors.name && <AlertError message={errors.name} />}
+                    {errors.name && <AlertError errors={[errors.name]} />}
                 </div>
 
                 <div className="space-y-2">
@@ -60,9 +59,8 @@ export function TicketCreateForm({ storeRoute }: TicketCreateFormProps = {}) {
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
                         placeholder="your@email.com"
-                        error={errors.email}
                     />
-                    {errors.email && <AlertError message={errors.email} />}
+                    {errors.email && <AlertError errors={[errors.email]} />}
                 </div>
             </div>
 
@@ -76,9 +74,8 @@ export function TicketCreateForm({ storeRoute }: TicketCreateFormProps = {}) {
                         trans('ticket.placeholder.subject') ||
                         'Brief summary...'
                     }
-                    error={errors.subject}
                 />
-                {errors.subject && <AlertError message={errors.subject} />}
+                {errors.subject && <AlertError errors={[errors.subject]} />}
             </div>
 
             <div className="space-y-2">
@@ -115,9 +112,8 @@ export function TicketCreateForm({ storeRoute }: TicketCreateFormProps = {}) {
                         trans('ticket.placeholder.message') ||
                         'Describe your issue...'
                     }
-                    error={errors.message}
                 />
-                {errors.message && <AlertError message={errors.message} />}
+                {errors.message && <AlertError errors={[errors.message]} />}
             </div>
 
             <Button type="submit" disabled={processing} className="w-full">

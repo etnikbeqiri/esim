@@ -5,6 +5,7 @@ interface Step {
     description: string;
     features: string[];
     icon: LucideIcon;
+    image?: string;
 }
 
 interface StepsSectionProps {

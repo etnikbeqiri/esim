@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
-import type { PaymentMethod } from '@/lib/analytics';
+import type { PaymentMethod as AnalyticsPaymentMethod } from '@/lib/analytics';
 import { useAnalytics, useFormTracking } from '@/lib/analytics';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
@@ -267,7 +267,7 @@ export default function Checkout({
         addPaymentInfo(
             'EUR',
             Number(pkg.retail_price),
-            value as PaymentMethod,
+            value as AnalyticsPaymentMethod,
             [packageItem],
         );
     }
@@ -960,7 +960,7 @@ export default function Checkout({
                                                         {trans(
                                                             'checkout_page.summary.vat',
                                                             {
-                                                                rate: currentVatRate,
+                                                                rate: String(currentVatRate),
                                                             },
                                                         )}
                                                     </span>

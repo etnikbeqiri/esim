@@ -126,7 +126,7 @@ export default function OrdersIndex({ orders, filters }: Props) {
                 only: ['orders'],
                 preserveState: true,
                 preserveScroll: true,
-            });
+            } as Parameters<typeof router.reload>[0]);
         }, 3000);
 
         return () => clearInterval(interval);

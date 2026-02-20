@@ -278,7 +278,7 @@ export default function GenerateInvoice({
             data.end_date = dateRange.end;
         }
 
-        router.post('/admin/invoices/generate', data, {
+        router.post('/admin/invoices/generate', data as Record<string, string | number | number[] | string[]>, {
             onFinish: () => setSubmitting(false),
         });
     }

@@ -184,7 +184,7 @@ export default function OrdersIndex({
                 only: ['orders'],
                 preserveState: true,
                 preserveScroll: true,
-            });
+            } as Parameters<typeof router.reload>[0]);
         }, 5000);
         return () => clearInterval(interval);
     }, [hasActiveOrders]);

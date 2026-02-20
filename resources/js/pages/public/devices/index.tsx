@@ -305,11 +305,11 @@ export default function DevicesIndex({
                 .slice(0, 20)
                 .map((device, index) =>
                     createItem({
-                        item_id: device.id.toString(),
-                        item_name: device.name,
-                        item_brand: device.brand?.name,
-                        item_category: 'Device',
-                        item_category2: device.esim_supported
+                        id: device.id.toString(),
+                        name: device.name,
+                        brand: device.brand?.name,
+                        category: 'Device',
+                        category2: device.esim_supported
                             ? 'eSIM Compatible'
                             : 'Not Compatible',
                         index,
@@ -334,11 +334,11 @@ export default function DevicesIndex({
     const handleDeviceClick = useCallback(
         (device: Device) => {
             const item = createItem({
-                item_id: device.id.toString(),
-                item_name: device.name,
-                item_brand: device.brand?.name,
-                item_category: 'Device',
-                item_category2: device.esim_supported
+                id: device.id.toString(),
+                name: device.name,
+                brand: device.brand?.name,
+                category: 'Device',
+                category2: device.esim_supported
                     ? 'eSIM Compatible'
                     : 'Not Compatible',
             });
@@ -459,11 +459,11 @@ export default function DevicesIndex({
                             <p className="mb-6 text-sm text-primary-600">
                                 {filteredDevices.length === 1
                                     ? trans('devices_page.results.showing', {
-                                          count: filteredDevices.length,
+                                          count: String(filteredDevices.length),
                                       })
                                     : trans(
                                           'devices_page.results.showing_plural',
-                                          { count: filteredDevices.length },
+                                          { count: String(filteredDevices.length) },
                                       )}
                                 {searchQuery &&
                                     ` ${trans('devices_page.results.matching', { query: searchQuery })}`}

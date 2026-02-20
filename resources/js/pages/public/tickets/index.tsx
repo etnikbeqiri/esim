@@ -47,10 +47,6 @@ interface UserTicket {
 }
 
 interface TicketsPageProps extends SharedData {
-    flash?: {
-        success?: string;
-        error?: string;
-    };
     prefill?: {
         name: string;
         email: string;
@@ -79,10 +75,10 @@ export default function TicketsIndex() {
         if (userTickets && userTickets.length > 0) {
             const items = userTickets.map((ticket, index) =>
                 createItem({
-                    item_id: ticket.uuid,
-                    item_name: ticket.subject,
-                    item_category: 'support_ticket',
-                    item_category2: ticket.status,
+                    id: ticket.uuid,
+                    name: ticket.subject,
+                    category: 'support_ticket',
+                    category2: ticket.status,
                     index,
                 }),
             );
@@ -93,10 +89,10 @@ export default function TicketsIndex() {
     const handleTicketClick = useCallback(
         (ticket: UserTicket, index: number) => {
             const item = createItem({
-                item_id: ticket.uuid,
-                item_name: ticket.subject,
-                item_category: 'support_ticket',
-                item_category2: ticket.status,
+                id: ticket.uuid,
+                name: ticket.subject,
+                category: 'support_ticket',
+                category2: ticket.status,
                 index,
             });
             selectItem(item, 'user_tickets', 'User Support Tickets');

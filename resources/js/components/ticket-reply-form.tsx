@@ -62,9 +62,8 @@ export function TicketReplyForm({
                             ? trans('ticket.messages.internal_placeholder')
                             : trans('ticket.messages.reply_placeholder')
                     }
-                    error={errors.message}
                 />
-                {errors.message && <AlertError message={errors.message} />}
+                {errors.message && <AlertError errors={[errors.message]} />}
             </div>
 
             {isInternal && (
