@@ -1,3 +1,4 @@
+import { index as balanceIndex } from '@/actions/App/Http/Controllers/Client/BalanceController';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Icon } from '@/components/icon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -148,7 +149,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     <div className="ml-auto flex items-center space-x-2">
                         {auth.user?.is_b2b && auth.user?.balance && (
                             <Link
-                                href="/client/balance"
+                                href={balanceIndex.url()}
                                 className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-1.5 text-sm hover:bg-muted"
                             >
                                 <Wallet className="h-4 w-4 text-muted-foreground" />

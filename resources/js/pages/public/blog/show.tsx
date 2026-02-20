@@ -1,3 +1,5 @@
+import { destinations, howItWorks } from '@/actions/App/Http/Controllers/Public/HomeController';
+import { index as blogIndex } from '@/actions/App/Http/Controllers/Public/ArticleController';
 import { BackButton } from '@/components/back-button';
 import { Button } from '@/components/ui/button';
 import { useTrans } from '@/hooks/use-trans';
@@ -256,7 +258,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                     <div className="relative z-10 container mx-auto px-4">
                         {/* Back link */}
                         <BackButton
-                            href="/blog"
+                            href={blogIndex.url()}
                             label={trans('blog.article.back')}
                             className="mb-8"
                         />
@@ -544,7 +546,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                 className="border-primary-200 bg-white text-primary-700 shadow-sm transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-800 hover:shadow-md"
                                 asChild
                             >
-                                <Link href="/blog">
+                                <Link href={blogIndex.url()}>
                                     <BookOpen className="mr-2 h-4 w-4" />
                                     {trans('blog.article.view_all')}
                                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -582,7 +584,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                 asChild
                             >
                                 <Link
-                                    href="/destinations"
+                                    href={destinations.url()}
                                     onClick={() =>
                                         trackCtaClick('browse_plans')
                                     }
@@ -598,7 +600,7 @@ export default function BlogShow({ article, relatedArticles, meta }: Props) {
                                 asChild
                             >
                                 <Link
-                                    href="/how-it-works"
+                                    href={howItWorks.url()}
                                     onClick={() => trackCtaClick('learn_how')}
                                 >
                                     {trans('cta_blog.learn_how')}

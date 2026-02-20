@@ -1,3 +1,4 @@
+import { index as publicTicketsIndex } from '@/actions/App/Http/Controllers/Public/TicketController';
 import { TicketMessage } from '@/components/ticket-message';
 import { TicketReplyForm } from '@/components/ticket-reply-form';
 import { Badge } from '@/components/ui/badge';
@@ -185,7 +186,7 @@ export default function TicketShow() {
                         {/* Back Link */}
                         <div className="mb-6 flex items-center justify-between">
                             <a
-                                href="/tickets"
+                                href={publicTicketsIndex.url()}
                                 className="inline-flex items-center gap-2 text-sm text-primary-600 transition-colors hover:text-primary-900"
                             >
                                 <ArrowLeft className="h-4 w-4" />

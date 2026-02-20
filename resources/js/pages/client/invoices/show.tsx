@@ -1,3 +1,5 @@
+import { index as invoicesIndex } from '@/actions/App/Http/Controllers/Client/InvoiceController';
+import { index as packagesIndex } from '@/actions/App/Http/Controllers/Client/PackageController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useTrans } from '@/hooks/use-trans';
@@ -36,8 +38,8 @@ export default function InvoiceShow({
     const { trans } = useTrans();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: trans('nav.destinations'), href: '/client/packages' },
-        { title: trans('client_invoices.title'), href: '/client/invoices' },
+        { title: trans('nav.destinations'), href: packagesIndex.url() },
+        { title: trans('client_invoices.title'), href: invoicesIndex.url() },
         { title: invoice.invoice_number, href: '#' },
     ];
 
@@ -60,7 +62,7 @@ export default function InvoiceShow({
                     className="gap-1.5 text-muted-foreground"
                     asChild
                 >
-                    <Link href="/client/invoices">
+                    <Link href={invoicesIndex.url()}>
                         <ArrowLeft className="h-3.5 w-3.5" />
                         Back to Invoices
                     </Link>

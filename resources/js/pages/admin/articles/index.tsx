@@ -1,3 +1,4 @@
+import { index as articlesIndex, create as articlesCreate, destroy as articlesDestroy } from '@/actions/App/Http/Controllers/Admin/ArticleController';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -73,7 +74,7 @@ export default function ArticlesIndex({ articles, filters }: Props) {
     function handleSearch(e: FormEvent) {
         e.preventDefault();
         router.get(
-            '/admin/articles',
+            articlesIndex.url(),
             { ...filters, search },
             { preserveState: true },
         );
@@ -84,7 +85,7 @@ export default function ArticlesIndex({ articles, filters }: Props) {
             ...filters,
             [key]: value === 'all' ? undefined : value,
         };
-        router.get('/admin/articles', newFilters, { preserveState: true });
+        router.get(articlesIndex.url(), newFilters, { preserveState: true });
     }
 
     function handleTogglePublish(article: Article) {
@@ -97,7 +98,7 @@ export default function ArticlesIndex({ articles, filters }: Props) {
 
     function handleDelete() {
         if (!deleteArticle) return;
-        router.delete(`/admin/articles/${deleteArticle.id}`, {
+        router.delete(articlesDestroy.url(deleteArticle.id), {
             preserveState: true,
             onSuccess: () => setDeleteArticle(null),
         });
@@ -114,7 +115,7 @@ export default function ArticlesIndex({ articles, filters }: Props) {
                             {articles.total} articles
                         </span>
                         <Button asChild>
-                            <Link href="/admin/articles/create">
+                            <Link href={articlesCreate.url()}>
                                 <Plus className="mr-2 h-4 w-4" />
                                 New Article
                             </Link>
@@ -272,7 +273,7 @@ export default function ArticlesIndex({ articles, filters }: Props) {
                                 }
                                 size="sm"
                                 onClick={() =>
-                                    router.get('/admin/articles', {
+                                    router.get(articlesIndex.url(), {
                                         ...filters,
                                         page,
                                     })

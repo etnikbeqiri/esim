@@ -1,3 +1,4 @@
+import { toggleActive as currencyToggle, setDefault as currencySetDefault } from '@/actions/App/Http/Controllers/Admin/CurrencyController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -66,11 +67,11 @@ export default function CurrenciesIndex({
     }
 
     function handleToggle(currency: Currency) {
-        router.post(`/admin/currencies/${currency.id}/toggle`);
+        router.post(currencyToggle.url(currency.id));
     }
 
     function handleSetDefault(currency: Currency) {
-        router.post(`/admin/currencies/${currency.id}/set-default`);
+        router.post(currencySetDefault.url(currency.id));
     }
 
     function formatDate(dateString: string | null): string {

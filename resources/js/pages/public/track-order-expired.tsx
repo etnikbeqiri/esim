@@ -1,3 +1,4 @@
+import { index as trackIndex } from '@/actions/App/Http/Controllers/Public/TrackOrderController';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, Link } from '@inertiajs/react';
@@ -25,7 +26,7 @@ export default function TrackOrderExpired() {
                                     {trans('track_order_expired.description')}
                                 </p>
                                 <Link
-                                    href="/track"
+                                    href={trackIndex.url()}
                                     className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-800"
                                 >
                                     <RotateCcw className="h-4 w-4" />

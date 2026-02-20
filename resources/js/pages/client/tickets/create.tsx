@@ -1,3 +1,4 @@
+import { index as ticketsIndex } from '@/actions/App/Http/Controllers/Client/TicketController';
 import { TicketCreateForm } from '@/components/ticket-create-form';
 import { useTrans } from '@/hooks/use-trans';
 import { Link } from '@inertiajs/react';
@@ -10,7 +11,7 @@ export default function TicketCreate() {
         <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
             <div className="mb-6">
                 <Link
-                    href="/client/tickets"
+                    href={ticketsIndex.url()}
                     className="inline-flex items-center text-sm text-primary-600 hover:text-primary-700"
                 >
                     <ArrowLeft className="mr-2 h-4 w-4" />

@@ -1,3 +1,5 @@
+import { index as invoicesIndex } from '@/actions/App/Http/Controllers/Client/InvoiceController';
+import { index as packagesIndex } from '@/actions/App/Http/Controllers/Client/PackageController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useTrans } from '@/hooks/use-trans';
@@ -66,8 +68,8 @@ export default function InvoicesIndex({ invoices }: Props) {
     const { trans } = useTrans();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: trans('nav.destinations'), href: '/client/packages' },
-        { title: trans('client_invoices.title'), href: '/client/invoices' },
+        { title: trans('nav.destinations'), href: packagesIndex.url() },
+        { title: trans('client_invoices.title'), href: invoicesIndex.url() },
     ];
 
     return (
@@ -170,7 +172,7 @@ export default function InvoicesIndex({ invoices }: Props) {
                                 className="h-8"
                                 disabled={invoices.current_page === 1}
                                 onClick={() =>
-                                    router.get('/client/invoices', {
+                                    router.get(invoicesIndex.url(), {
                                         page: invoices.current_page - 1,
                                     })
                                 }
@@ -185,7 +187,7 @@ export default function InvoicesIndex({ invoices }: Props) {
                                     invoices.current_page === invoices.last_page
                                 }
                                 onClick={() =>
-                                    router.get('/client/invoices', {
+                                    router.get(invoicesIndex.url(), {
                                         page: invoices.current_page + 1,
                                     })
                                 }

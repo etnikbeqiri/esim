@@ -1,3 +1,7 @@
+import { index as ordersIndex } from '@/actions/App/Http/Controllers/Admin/OrderController';
+import { index as customersIndex } from '@/actions/App/Http/Controllers/Admin/CustomerController';
+import { index as packagesIndex } from '@/actions/App/Http/Controllers/Admin/PackageController';
+import { index as syncJobsIndex } from '@/actions/App/Http/Controllers/Admin/SyncJobController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -372,25 +376,25 @@ export default function AdminDashboard({
                 {/* Quick Actions */}
                 <div className="flex flex-wrap gap-2">
                     <Button variant="outline" asChild>
-                        <Link href="/admin/orders">
+                        <Link href={ordersIndex.url()}>
                             <ShoppingCart className="mr-2 h-4 w-4" />
                             View Orders
                         </Link>
                     </Button>
                     <Button variant="outline" asChild>
-                        <Link href="/admin/customers">
+                        <Link href={customersIndex.url()}>
                             <Users className="mr-2 h-4 w-4" />
                             View Customers
                         </Link>
                     </Button>
                     <Button variant="outline" asChild>
-                        <Link href="/admin/packages">
+                        <Link href={packagesIndex.url()}>
                             <Package className="mr-2 h-4 w-4" />
                             Manage Packages
                         </Link>
                     </Button>
                     <Button variant="outline" asChild>
-                        <Link href="/admin/sync-jobs">
+                        <Link href={syncJobsIndex.url()}>
                             <RefreshCw className="mr-2 h-4 w-4" />
                             Sync Jobs
                         </Link>
@@ -457,7 +461,7 @@ export default function AdminDashboard({
                                 </CardDescription>
                             </div>
                             <Button variant="outline" size="sm" asChild>
-                                <Link href="/admin/orders?status=failed">
+                                <Link href={ordersIndex.url({ query: { status: 'failed' } })}>
                                     {trans('admin.dashboard.view_all_orders')}
                                     <ArrowUpRight className="ml-1 h-4 w-4" />
                                 </Link>
@@ -533,7 +537,7 @@ export default function AdminDashboard({
                                 </CardDescription>
                             </div>
                             <Button variant="outline" size="sm" asChild>
-                                <Link href="/admin/orders">
+                                <Link href={ordersIndex.url()}>
                                     {trans('admin.dashboard.view_all_orders')}
                                     <ArrowUpRight className="ml-1 h-4 w-4" />
                                 </Link>
@@ -608,7 +612,7 @@ export default function AdminDashboard({
                                 </CardDescription>
                             </div>
                             <Button variant="outline" size="sm" asChild>
-                                <Link href="/admin/sync-jobs">
+                                <Link href={syncJobsIndex.url()}>
                                     View All
                                     <ArrowUpRight className="ml-1 h-4 w-4" />
                                 </Link>

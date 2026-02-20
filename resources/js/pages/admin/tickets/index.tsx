@@ -1,3 +1,4 @@
+import { destroy as ticketsDestroy } from '@/actions/App/Http/Controllers/Admin/TicketController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -166,7 +167,7 @@ export default function TicketsIndex({
         e.preventDefault();
         e.stopPropagation();
         if (confirm('Are you sure you want to delete this ticket?')) {
-            router.delete(`/admin/tickets/${ticketUuid}`);
+            router.delete(ticketsDestroy.url(ticketUuid));
         }
     }
 

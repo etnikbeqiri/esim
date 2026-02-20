@@ -1,3 +1,4 @@
+import { togglePublish as articlesTogglePublish } from '@/actions/App/Http/Controllers/Admin/ArticleController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,7 +41,7 @@ export default function ArticlesShow({ article }: Props) {
     ];
 
     function handleTogglePublish() {
-        router.post(`/admin/articles/${article.id}/toggle-publish`);
+        router.post(articlesTogglePublish.url(article.id));
     }
 
     return (

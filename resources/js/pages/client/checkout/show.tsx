@@ -1,3 +1,4 @@
+import { index as packagesIndex } from '@/actions/App/Http/Controllers/Client/PackageController';
 import { BackButton } from '@/components/back-button';
 import { CountryFlag } from '@/components/country-flag';
 import { PaymentProviderSelect } from '@/components/payment-provider-select';
@@ -78,7 +79,7 @@ export default function CheckoutShow({
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Client', href: '/client' },
-        { title: trans('client_packages.title'), href: '/client/packages' },
+        { title: trans('client_packages.title'), href: packagesIndex.url() },
         { title: trans('client_checkout_show.title'), href: '#' },
     ];
 
@@ -108,7 +109,7 @@ export default function CheckoutShow({
             <div className="p-4 md:p-6">
                 {/* Back Button */}
                 <BackButton
-                    href="/client/packages"
+                    href={packagesIndex.url()}
                     label={trans('client_checkout_show.back_to_packages')}
                     variant="ghost"
                     className="mb-6"

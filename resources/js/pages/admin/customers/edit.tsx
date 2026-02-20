@@ -1,3 +1,4 @@
+import { impersonate as customersImpersonate } from '@/actions/App/Http/Controllers/Admin/CustomerController';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -149,7 +150,7 @@ export default function EditCustomer({ customer, customerTypes }: Props) {
 
     function handleImpersonate() {
         setImpersonateLoading(true);
-        router.post(`/admin/customers/${customer.id}/impersonate`);
+        router.post(customersImpersonate.url(customer.id));
     }
 
     const isB2B = data.type === 'b2b';

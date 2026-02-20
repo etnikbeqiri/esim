@@ -1,3 +1,4 @@
+import { index as packagesIndex } from '@/actions/App/Http/Controllers/Client/PackageController';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -254,7 +255,7 @@ export default function CheckoutSuccess({ order, payment_status }: Props) {
                         </Link>
                     </Button>
                     <Button className="flex-1" asChild>
-                        <Link href="/client/packages">
+                        <Link href={packagesIndex.url()}>
                             {trans(
                                 'client_checkout_success.actions.browse_more',
                             )}

@@ -1,3 +1,4 @@
+import { index as countriesIndex, toggleActive as countryToggleActive } from '@/actions/App/Http/Controllers/Admin/CountryController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -77,7 +78,7 @@ export default function CountryShow({
     const currencySymbol = defaultCurrency?.symbol || '€';
 
     function handleToggleActive() {
-        router.post(`/admin/countries/${country.id}/toggle-active`);
+        router.post(countryToggleActive.url(country.id));
     }
 
     function getEffectivePrice(pkg: Package): {
@@ -102,7 +103,7 @@ export default function CountryShow({
                             className="shrink-0"
                             asChild
                         >
-                            <Link href="/admin/countries">
+                            <Link href={countriesIndex.url()}>
                                 <ArrowLeft className="h-4 w-4" />
                             </Link>
                         </Button>

@@ -1,3 +1,4 @@
+import { lookup as ticketsLookup, show as ticketsShow, store as ticketsStore } from '@/actions/App/Http/Controllers/Public/TicketController';
 import { CTASection } from '@/components/cta-section';
 import { HeroSection } from '@/components/hero-section';
 import { Button } from '@/components/ui/button';
@@ -140,7 +141,7 @@ export default function TicketsIndex() {
                 | 'urgent',
             ticket_subject: data.subject,
         });
-        post('/tickets', {
+        post(ticketsStore.url(), {
             onSuccess: () => {
                 reset();
             },
@@ -153,7 +154,7 @@ export default function TicketsIndex() {
 
     const handleCheckStatus = (e: React.FormEvent) => {
         e.preventDefault();
-        lookupForm.post('/tickets/lookup', {
+        lookupForm.post(ticketsLookup.url(), {
             preserveState: true,
             preserveScroll: true,
         });
@@ -239,7 +240,7 @@ export default function TicketsIndex() {
                                     {userTickets.map((ticket, index) => (
                                         <Link
                                             key={ticket.uuid}
-                                            href={`/tickets/${ticket.uuid}/${prefill?.email}`}
+                                            href={ticketsShow.url({ uuid: ticket.uuid, email: prefill?.email ?? '' })}
                                             className="flex items-center justify-between rounded-xl border border-primary-100 bg-primary-50/50 p-4 transition-all hover:border-primary-200 hover:bg-primary-50"
                                             onClick={() =>
                                                 handleTicketClick(ticket, index)

@@ -1,3 +1,4 @@
+import { index as providersIndex, destroy as providersDestroy } from '@/actions/App/Http/Controllers/Admin/ProviderController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -126,7 +127,7 @@ export default function ProviderShow({
                 `Delete provider "${provider.name}"? This will also delete all associated packages.`,
             )
         ) {
-            router.delete(`/admin/providers/${provider.id}`);
+            router.delete(providersDestroy.url(provider.id));
         }
     }
 
@@ -152,7 +153,7 @@ export default function ProviderShow({
                             className="shrink-0"
                             asChild
                         >
-                            <Link href="/admin/providers">
+                            <Link href={providersIndex.url()}>
                                 <ArrowLeft className="h-4 w-4" />
                             </Link>
                         </Button>

@@ -1,3 +1,4 @@
+import { destinations, howItWorks } from '@/actions/App/Http/Controllers/Public/HomeController';
 import { BackButton } from '@/components/back-button';
 import { CountryFlag } from '@/components/country-flag';
 import { FeatureItem } from '@/components/feature-item';
@@ -695,7 +696,7 @@ export default function CountryPage({ country, packages, regionalBundles }: Prop
 
                 <div className="relative z-10 container mx-auto px-4">
                     <BackButton
-                        href="/destinations"
+                        href={destinations.url()}
                         label={trans('country_page.back_to_destinations')}
                         className="mb-3 md:mb-6"
                     />
@@ -797,7 +798,7 @@ export default function CountryPage({ country, packages, regionalBundles }: Prop
                                 })}
                             </p>
                             <GoldButton className="mt-5 md:mt-6" asChild>
-                                <Link href="/destinations">
+                                <Link href={destinations.url()}>
                                     {trans(
                                         'country_page.no_plans.browse_other',
                                     )}
@@ -1501,7 +1502,7 @@ export default function CountryPage({ country, packages, regionalBundles }: Prop
                             asChild
                             className="h-8 rounded-full border-primary-300 bg-white px-3 text-xs text-primary-900 shadow-sm hover:border-primary-400 hover:bg-primary-50 md:h-9 md:px-4 md:text-sm"
                         >
-                            <Link href="/how-it-works">
+                            <Link href={howItWorks.url()}>
                                 {trans('country_page.buttons.how_it_works')}
                             </Link>
                         </Button>

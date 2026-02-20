@@ -1,3 +1,4 @@
+import { destinations, howItWorks } from '@/actions/App/Http/Controllers/Public/HomeController';
 import { EsimQrCard } from '@/components/esim-qr-card';
 import { OrderSummaryCard } from '@/components/order-summary-card';
 import { SetupGuide } from '@/components/setup-guide';
@@ -327,7 +328,7 @@ export default function CheckoutSuccess({ order }: Props) {
                                 </GoldButton>
                             )}
                             <Link
-                                href="/destinations"
+                                href={destinations.url()}
                                 className="inline-flex h-11 items-center justify-center rounded-xl border border-primary-200 bg-white px-6 text-[13px] font-semibold text-primary-700 shadow-sm transition-colors hover:bg-primary-50 md:h-12 md:text-sm"
                             >
                                 <Globe className="mr-2 h-4 w-4" />
@@ -352,7 +353,7 @@ export default function CheckoutSuccess({ order }: Props) {
                             </p>
                             <div className="mt-3 grid grid-cols-3 gap-2">
                                 <Link
-                                    href="/how-it-works"
+                                    href={howItWorks.url()}
                                     className="flex flex-col items-center gap-1.5 rounded-xl border border-primary-100 bg-white px-2 py-3 text-center transition-colors hover:bg-primary-50"
                                 >
                                     <BookOpen className="h-4 w-4 text-primary-400" />
@@ -374,7 +375,7 @@ export default function CheckoutSuccess({ order }: Props) {
                                     </span>
                                 </Link>
                                 <Link
-                                    href="/destinations"
+                                    href={destinations.url()}
                                     className="flex flex-col items-center gap-1.5 rounded-xl border border-primary-100 bg-white px-2 py-3 text-center transition-colors hover:bg-primary-50"
                                 >
                                     <Globe className="h-4 w-4 text-primary-400" />

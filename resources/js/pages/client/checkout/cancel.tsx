@@ -1,3 +1,5 @@
+import { index as clientDashboard } from '@/actions/App/Http/Controllers/Client/DashboardController';
+import { index as packagesIndex } from '@/actions/App/Http/Controllers/Client/PackageController';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -46,14 +48,14 @@ export default function CheckoutCancel() {
                                 className="flex-1"
                                 asChild
                             >
-                                <Link href="/client/packages">
+                                <Link href={packagesIndex.url()}>
                                     {trans(
                                         'client_checkout_cancel.browse_packages',
                                     )}
                                 </Link>
                             </Button>
                             <Button className="flex-1" asChild>
-                                <Link href="/client">
+                                <Link href={clientDashboard.url()}>
                                     {trans('client_checkout_cancel.dashboard')}
                                 </Link>
                             </Button>

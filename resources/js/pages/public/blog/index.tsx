@@ -1,3 +1,4 @@
+import { destinations, howItWorks } from '@/actions/App/Http/Controllers/Public/HomeController';
 import { HeroSection } from '@/components/hero-section';
 import { Button } from '@/components/ui/button';
 import { useTrans } from '@/hooks/use-trans';
@@ -391,7 +392,7 @@ export default function BlogIndex({ articles, meta }: Props) {
                                 className="btn-gold shadow-lg shadow-accent-500/25 transition-shadow hover:shadow-accent-500/40"
                                 asChild
                             >
-                                <Link href="/destinations">
+                                <Link href={destinations.url()}>
                                     <Sparkles className="mr-2 h-4 w-4" />
                                     {trans('cta_blog.browse_plans')}
                                 </Link>
@@ -402,7 +403,7 @@ export default function BlogIndex({ articles, meta }: Props) {
                                 className="border-primary-300 bg-white text-primary-700 shadow-sm transition-all hover:border-accent-400 hover:bg-accent-50 hover:text-accent-800 hover:shadow-md"
                                 asChild
                             >
-                                <Link href="/how-it-works">
+                                <Link href={howItWorks.url()}>
                                     {trans('cta_blog.learn_how')}
                                 </Link>
                             </Button>

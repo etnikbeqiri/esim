@@ -1,3 +1,4 @@
+import { index as packagesIndex } from '@/actions/App/Http/Controllers/Admin/PackageController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -426,7 +427,7 @@ export default function PackagesIndex({
     function resetFilters() {
         setSearch('');
         router.get(
-            '/admin/packages',
+            packagesIndex.url(),
             { per_page: filters.per_page },
             { preserveState: true },
         );
@@ -435,7 +436,7 @@ export default function PackagesIndex({
     function handleSearch(e: FormEvent) {
         e.preventDefault();
         router.get(
-            '/admin/packages',
+            packagesIndex.url(),
             { ...filters, search },
             { preserveState: true },
         );
@@ -443,7 +444,7 @@ export default function PackagesIndex({
 
     function handleFilterChange(key: string, value: string) {
         router.get(
-            '/admin/packages',
+            packagesIndex.url(),
             { ...filters, [key]: value === 'all' ? undefined : value },
             { preserveState: true },
         );
@@ -455,7 +456,7 @@ export default function PackagesIndex({
                 ? 'desc'
                 : 'asc';
         router.get(
-            '/admin/packages',
+            packagesIndex.url(),
             { ...filters, sort_by: column, sort_dir: newDir, page: 1 },
             { preserveState: true },
         );
@@ -463,7 +464,7 @@ export default function PackagesIndex({
 
     function handlePerPageChange(value: string) {
         router.get(
-            '/admin/packages',
+            packagesIndex.url(),
             { ...filters, per_page: value, page: 1 },
             { preserveState: true },
         );
@@ -925,7 +926,7 @@ export default function PackagesIndex({
                                 className="h-8"
                                 disabled={packages.current_page === 1}
                                 onClick={() =>
-                                    router.get('/admin/packages', {
+                                    router.get(packagesIndex.url(), {
                                         ...filters,
                                         page: packages.current_page - 1,
                                     })
@@ -941,7 +942,7 @@ export default function PackagesIndex({
                                     packages.current_page === packages.last_page
                                 }
                                 onClick={() =>
-                                    router.get('/admin/packages', {
+                                    router.get(packagesIndex.url(), {
                                         ...filters,
                                         page: packages.current_page + 1,
                                     })

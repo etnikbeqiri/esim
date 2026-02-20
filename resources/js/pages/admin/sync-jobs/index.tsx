@@ -1,3 +1,4 @@
+import { index as syncJobsIndex } from '@/actions/App/Http/Controllers/Admin/SyncJobController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -105,7 +106,7 @@ export default function SyncJobsIndex({
             ...filters,
             [key]: value === 'all' ? undefined : value,
         };
-        router.get('/admin/sync-jobs', newFilters, { preserveState: true });
+        router.get(syncJobsIndex.url(), newFilters, { preserveState: true });
     }
 
     function handleStartSync(e: React.FormEvent) {
@@ -331,7 +332,7 @@ export default function SyncJobsIndex({
                                 }
                                 size="sm"
                                 onClick={() =>
-                                    router.get('/admin/sync-jobs', {
+                                    router.get(syncJobsIndex.url(), {
                                         ...filters,
                                         page,
                                     })

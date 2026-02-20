@@ -1,3 +1,4 @@
+import { stopImpersonating } from '@/actions/App/Http/Controllers/Admin/CustomerController';
 import { Button } from '@/components/ui/button';
 import { SharedData } from '@/types';
 import { router, usePage } from '@inertiajs/react';
@@ -14,7 +15,7 @@ export function ImpersonationBanner() {
 
     function handleStopImpersonating() {
         setLoading(true);
-        router.post('/stop-impersonating');
+        router.post(stopImpersonating.url());
     }
 
     return (

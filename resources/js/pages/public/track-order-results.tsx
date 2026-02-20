@@ -1,3 +1,4 @@
+import { destinations } from '@/actions/App/Http/Controllers/Public/HomeController';
 import { CountryFlag } from '@/components/country-flag';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
@@ -106,7 +107,7 @@ export default function TrackOrderResults({ email, orders }: Props) {
                                         {trans('track_order_results.no_orders_description')}
                                     </p>
                                     <Link
-                                        href="/destinations"
+                                        href={destinations.url()}
                                         className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-800"
                                     >
                                         <Globe className="h-4 w-4" />
@@ -191,7 +192,7 @@ export default function TrackOrderResults({ email, orders }: Props) {
                         {/* Browse more */}
                         <div className="mt-8 text-center">
                             <Link
-                                href="/destinations"
+                                href={destinations.url()}
                                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600 transition-colors hover:text-primary-900"
                             >
                                 {trans('track_order_results.browse_more')}

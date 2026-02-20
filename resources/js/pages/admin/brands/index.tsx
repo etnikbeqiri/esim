@@ -1,3 +1,5 @@
+import { index as brandsIndex, store as brandsStore, update as brandsUpdate, destroy as brandsDestroy } from '@/actions/App/Http/Controllers/Admin/BrandController';
+import { index as devicesIndex } from '@/actions/App/Http/Controllers/Admin/DeviceController';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -134,7 +136,7 @@ export default function BrandsIndex({ brands, filters }: Props) {
     function handleSearch(e: FormEvent) {
         e.preventDefault();
         router.get(
-            '/admin/brands',
+            brandsIndex.url(),
             { ...filters, search },
             { preserveState: true },
         );
@@ -146,7 +148,7 @@ export default function BrandsIndex({ brands, filters }: Props) {
                 ? 'desc'
                 : 'asc';
         router.get(
-            '/admin/brands',
+            brandsIndex.url(),
             { ...filters, sort: field, direction: newDirection },
             { preserveState: true },
         );
@@ -173,7 +175,7 @@ export default function BrandsIndex({ brands, filters }: Props) {
 
     function handleDelete() {
         if (!deleteBrand) return;
-        router.delete(`/admin/brands/${deleteBrand.slug}`, {
+        router.delete(brandsDestroy.url(deleteBrand.slug), {
             preserveState: true,
             onSuccess: () => setDeleteBrand(null),
         });
@@ -233,7 +235,7 @@ export default function BrandsIndex({ brands, filters }: Props) {
         };
 
         if (editBrand) {
-            router.put(`/admin/brands/${editBrand.slug}`, data, {
+            router.put(brandsUpdate.url(editBrand.slug), data, {
                 preserveState: true,
                 onSuccess: () => {
                     setIsCreateOpen(false);
@@ -242,7 +244,7 @@ export default function BrandsIndex({ brands, filters }: Props) {
                 onFinish: () => setIsSubmitting(false),
             });
         } else {
-            router.post('/admin/brands', data, {
+            router.post(brandsStore.url(), data, {
                 preserveState: true,
                 onSuccess: () => setIsCreateOpen(false),
                 onFinish: () => setIsSubmitting(false),
@@ -266,7 +268,7 @@ export default function BrandsIndex({ brands, filters }: Props) {
                             {brands.total} brands
                         </span>
                         <Button asChild variant="outline">
-                            <Link href="/admin/devices">
+                            <Link href={devicesIndex.url()}>
                                 <ArrowLeft className="mr-2 h-4 w-4" />
                                 Back to Devices
                             </Link>
@@ -516,7 +518,7 @@ export default function BrandsIndex({ brands, filters }: Props) {
                                 }
                                 size="sm"
                                 onClick={() =>
-                                    router.get('/admin/brands', {
+                                    router.get(brandsIndex.url(), {
                                         ...filters,
                                         page,
                                     })

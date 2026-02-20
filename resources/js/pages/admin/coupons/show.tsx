@@ -1,3 +1,4 @@
+import { index as couponsIndex, destroy as couponsDestroy, toggleActive as couponsToggle } from '@/actions/App/Http/Controllers/Admin/CouponController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,18 +28,18 @@ interface Props {
 export default function ShowCoupon({ coupon, analytics, recentUsages }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
-        { title: 'Coupons', href: '/admin/coupons' },
+        { title: 'Coupons', href: couponsIndex.url() },
         { title: coupon.code, href: '#' },
     ];
 
     function handleDelete() {
         if (confirm(`Delete coupon "${coupon.code}"?`)) {
-            router.delete(`/admin/coupons/${coupon.id}`);
+            router.delete(couponsDestroy.url(coupon.id));
         }
     }
 
     function handleToggle() {
-        router.post(`/admin/coupons/${coupon.id}/toggle`);
+        router.post(couponsToggle.url(coupon.id));
     }
 
     function getStatusBadge() {
@@ -63,7 +64,7 @@ export default function ShowCoupon({ coupon, analytics, recentUsages }: Props) {
                             className="shrink-0"
                             asChild
                         >
-                            <Link href="/admin/coupons">
+                            <Link href={couponsIndex.url()}>
                                 <ArrowLeft className="h-4 w-4" />
                             </Link>
                         </Button>

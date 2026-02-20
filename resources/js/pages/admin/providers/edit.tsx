@@ -1,3 +1,4 @@
+import { index as providersIndex } from '@/actions/App/Http/Controllers/Admin/ProviderController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -302,7 +303,7 @@ export default function ProvidersEdit({ provider }: Props) {
                                     Update Provider
                                 </Button>
                                 <Button type="button" variant="outline" asChild>
-                                    <Link href="/admin/providers">Cancel</Link>
+                                    <Link href={providersIndex.url()}>Cancel</Link>
                                 </Button>
                             </div>
                         </form>

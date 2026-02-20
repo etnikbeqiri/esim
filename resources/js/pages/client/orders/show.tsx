@@ -1,3 +1,9 @@
+import {
+    index as ordersIndex,
+    resendEsim,
+} from '@/actions/App/Http/Controllers/Client/OrderController';
+import { show as invoiceShow } from '@/actions/App/Http/Controllers/Client/InvoiceController';
+import { index as packagesIndex } from '@/actions/App/Http/Controllers/Client/PackageController';
 import { CountryFlag } from '@/components/country-flag';
 import { EsimQrCard } from '@/components/esim-qr-card';
 import { Badge } from '@/components/ui/badge';
@@ -136,8 +142,8 @@ export default function OrderShow({ order, customer }: Props) {
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Shop', href: '/client/packages' },
-        { title: 'My Orders', href: '/client/orders' },
+        { title: 'Shop', href: packagesIndex.url() },
+        { title: 'My Orders', href: ordersIndex.url() },
         { title: order.order_number, href: '#' },
     ];
 
@@ -165,7 +171,7 @@ export default function OrderShow({ order, customer }: Props) {
 
     function handleResendEsim(e: React.FormEvent) {
         e.preventDefault();
-        resendForm.post(`/client/orders/${order.uuid}/resend-esim`, {
+        resendForm.post(resendEsim.url(order.uuid), {
             onSuccess: () => {
                 setDialogOpen(false);
                 resendForm.reset();
@@ -191,7 +197,7 @@ export default function OrderShow({ order, customer }: Props) {
                     className="gap-1.5 text-muted-foreground"
                     asChild
                 >
-                    <Link href="/client/orders">
+                    <Link href={ordersIndex.url()}>
                         <ArrowLeft className="h-3.5 w-3.5" />
                         Back to Orders
                     </Link>
@@ -632,7 +638,7 @@ export default function OrderShow({ order, customer }: Props) {
                                     Invoice
                                 </div>
                                 <Link
-                                    href={`/client/invoices/${order.invoice.uuid}`}
+                                    href={invoiceShow.url(order.invoice.uuid)}
                                     className="text-sm font-medium text-primary hover:underline"
                                 >
                                     {order.invoice.invoice_number}

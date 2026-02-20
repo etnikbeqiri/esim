@@ -1,3 +1,5 @@
+import { index as ordersIndex } from '@/actions/App/Http/Controllers/Client/OrderController';
+import { index as packagesIndex } from '@/actions/App/Http/Controllers/Client/PackageController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CountryFlag } from '@/components/country-flag';
@@ -104,8 +106,8 @@ export default function OrdersIndex({ orders, filters }: Props) {
     const { trans } = useTrans();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: trans('nav.destinations'), href: '/client/packages' },
-        { title: trans('client_orders.title'), href: '/client/orders' },
+        { title: trans('nav.destinations'), href: packagesIndex.url() },
+        { title: trans('client_orders.title'), href: ordersIndex.url() },
     ];
 
     const hasActiveOrders = orders.data.some((order) =>
@@ -137,7 +139,7 @@ export default function OrdersIndex({ orders, filters }: Props) {
             ...filters,
             [key]: value === 'all' ? undefined : value,
         };
-        router.get('/client/orders', newFilters, { preserveState: true });
+        router.get(ordersIndex.url(), newFilters, { preserveState: true });
     }
 
     return (
@@ -156,7 +158,7 @@ export default function OrdersIndex({ orders, filters }: Props) {
                         </p>
                     </div>
                     <Button asChild size="sm" className="gap-2">
-                        <Link href="/client/packages">
+                        <Link href={packagesIndex.url()}>
                             <ShoppingCart className="h-4 w-4" />
                             <span className="hidden sm:inline">
                                 {trans('client_orders.new_order')}
@@ -208,7 +210,7 @@ export default function OrdersIndex({ orders, filters }: Props) {
                             className="h-9 text-xs"
                             onClick={() =>
                                 router.get(
-                                    '/client/orders',
+                                    ordersIndex.url(),
                                     {},
                                     { preserveState: true },
                                 )
@@ -233,7 +235,7 @@ export default function OrdersIndex({ orders, filters }: Props) {
                                 {trans('client_orders.no_orders_desc')}
                             </p>
                             <Button asChild>
-                                <Link href="/client/packages">
+                                <Link href={packagesIndex.url()}>
                                     {trans('client_orders.browse_packages')}
                                 </Link>
                             </Button>
@@ -333,7 +335,7 @@ export default function OrdersIndex({ orders, filters }: Props) {
                                 className="h-8"
                                 disabled={orders.current_page === 1}
                                 onClick={() =>
-                                    router.get('/client/orders', {
+                                    router.get(ordersIndex.url(), {
                                         ...filters,
                                         page: orders.current_page - 1,
                                     })
@@ -349,7 +351,7 @@ export default function OrdersIndex({ orders, filters }: Props) {
                                     orders.current_page === orders.last_page
                                 }
                                 onClick={() =>
-                                    router.get('/client/orders', {
+                                    router.get(ordersIndex.url(), {
                                         ...filters,
                                         page: orders.current_page + 1,
                                     })

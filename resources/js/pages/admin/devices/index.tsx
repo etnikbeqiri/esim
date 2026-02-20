@@ -1,3 +1,5 @@
+import { index as devicesIndex, store as devicesStore, update as devicesUpdate, destroy as devicesDestroy } from '@/actions/App/Http/Controllers/Admin/DeviceController';
+import { index as brandsIndex } from '@/actions/App/Http/Controllers/Admin/BrandController';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -151,7 +153,7 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
     function handleSearch(e: FormEvent) {
         e.preventDefault();
         router.get(
-            '/admin/devices',
+            devicesIndex.url(),
             { ...filters, search },
             { preserveState: true },
         );
@@ -162,7 +164,7 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
             ...filters,
             [key]: value === 'all' ? undefined : value,
         };
-        router.get('/admin/devices', newFilters, { preserveState: true });
+        router.get(devicesIndex.url(), newFilters, { preserveState: true });
     }
 
     function handleToggleActive(device: Device) {
@@ -175,7 +177,7 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
 
     function handleDelete() {
         if (!deleteDevice) return;
-        router.delete(`/admin/devices/${deleteDevice.slug}`, {
+        router.delete(devicesDestroy.url(deleteDevice.slug), {
             preserveState: true,
             onSuccess: () => setDeleteDevice(null),
         });
@@ -216,7 +218,7 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
         }
 
         router.get(
-            '/admin/devices',
+            devicesIndex.url(),
             { ...filters, sort: field, direction: newDirection },
             { preserveState: true },
         );
@@ -278,7 +280,7 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
         };
 
         if (editDevice) {
-            router.put(`/admin/devices/${editDevice.slug}`, data, {
+            router.put(devicesUpdate.url(editDevice.slug), data, {
                 preserveState: true,
                 onSuccess: () => {
                     setIsCreateOpen(false);
@@ -287,7 +289,7 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                 onFinish: () => setIsSubmitting(false),
             });
         } else {
-            router.post('/admin/devices', data, {
+            router.post(devicesStore.url(), data, {
                 preserveState: true,
                 onSuccess: () => setIsCreateOpen(false),
                 onFinish: () => setIsSubmitting(false),
@@ -311,7 +313,7 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                             {devices.total} devices
                         </span>
                         <Button asChild variant="outline">
-                            <Link href="/admin/brands">
+                            <Link href={brandsIndex.url()}>
                                 <Smartphone className="mr-2 h-4 w-4" />
                                 Manage Brands
                             </Link>
@@ -572,7 +574,7 @@ export default function DevicesIndex({ devices, brands, filters }: Props) {
                                 }
                                 size="sm"
                                 onClick={() =>
-                                    router.get('/admin/devices', {
+                                    router.get(devicesIndex.url(), {
                                         ...filters,
                                         page,
                                     })

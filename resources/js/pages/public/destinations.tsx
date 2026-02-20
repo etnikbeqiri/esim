@@ -1,3 +1,4 @@
+import { howItWorks } from '@/actions/App/Http/Controllers/Public/HomeController';
 import { DestinationCard } from '@/components/destination-card';
 import { HeroSection } from '@/components/hero-section';
 import {
@@ -421,7 +422,7 @@ export default function Destinations({ countries, regions, filters }: Props) {
                         </p>
                         <div className="flex justify-center gap-3">
                             <Link
-                                href="/how-it-works"
+                                href={howItWorks.url()}
                                 className="inline-flex h-8 items-center justify-center rounded-full border border-primary-200 bg-white px-4 text-sm font-medium text-primary-700 shadow-sm transition-colors hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700"
                             >
                                 {trans('nav.how_it_works')}

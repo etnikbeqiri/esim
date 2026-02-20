@@ -1,3 +1,4 @@
+import { index as balanceIndex } from '@/actions/App/Http/Controllers/Client/BalanceController';
 import { PaymentMethodIcons } from '@/components/payment-method-icons';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -113,7 +114,7 @@ export default function BalanceIndex({
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Client', href: '/client' },
-        { title: trans('client_balance.title'), href: '/client/balance' },
+        { title: trans('client_balance.title'), href: balanceIndex.url() },
     ];
 
     const [amount, setAmount] = useState('100');
@@ -580,7 +581,7 @@ export default function BalanceIndex({
                                 }
                                 size="sm"
                                 onClick={() =>
-                                    router.get('/client/balance', { page })
+                                    router.get(balanceIndex.url(), { page })
                                 }
                             >
                                 {page}

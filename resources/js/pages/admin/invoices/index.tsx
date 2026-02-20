@@ -1,3 +1,4 @@
+import { index as invoicesIndex, generate as invoicesGenerate } from '@/actions/App/Http/Controllers/Admin/InvoiceController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -113,7 +114,7 @@ export default function InvoicesIndex({
     function handleSearch(e: FormEvent) {
         e.preventDefault();
         router.get(
-            '/admin/invoices',
+            invoicesIndex.url(),
             { ...filters, search },
             { preserveState: true },
         );
@@ -124,7 +125,7 @@ export default function InvoicesIndex({
             ...filters,
             [key]: value === 'all' ? undefined : value,
         };
-        router.get('/admin/invoices', newFilters, { preserveState: true });
+        router.get(invoicesIndex.url(), newFilters, { preserveState: true });
     }
 
     return (
@@ -138,7 +139,7 @@ export default function InvoicesIndex({
                             {invoices.total} invoices
                         </span>
                         <Button asChild>
-                            <Link href="/admin/invoices/generate">
+                            <Link href={invoicesGenerate.url()}>
                                 <Plus className="mr-2 h-4 w-4" />
                                 Generate Invoice
                             </Link>
@@ -323,7 +324,7 @@ export default function InvoicesIndex({
                                 }
                                 size="sm"
                                 onClick={() =>
-                                    router.get('/admin/invoices', {
+                                    router.get(invoicesIndex.url(), {
                                         ...filters,
                                         page,
                                     })

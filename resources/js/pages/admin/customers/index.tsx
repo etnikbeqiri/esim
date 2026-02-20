@@ -1,3 +1,4 @@
+import { index as customersIndex } from '@/actions/App/Http/Controllers/Admin/CustomerController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -87,7 +88,7 @@ export default function CustomersIndex({ customers, filters }: Props) {
     function handleSearch(e: FormEvent) {
         e.preventDefault();
         router.get(
-            '/admin/customers',
+            customersIndex.url(),
             { ...filters, search, page: 1 },
             { preserveState: true },
         );
@@ -99,7 +100,7 @@ export default function CustomersIndex({ customers, filters }: Props) {
             [key]: value === 'all' ? undefined : value,
             page: 1,
         };
-        router.get('/admin/customers', newFilters, { preserveState: true });
+        router.get(customersIndex.url(), newFilters, { preserveState: true });
     }
 
     return (
@@ -162,7 +163,7 @@ export default function CustomersIndex({ customers, filters }: Props) {
                             className="h-9"
                             onClick={() =>
                                 router.get(
-                                    '/admin/customers',
+                                    customersIndex.url(),
                                     {},
                                     { preserveState: true },
                                 )
@@ -398,7 +399,7 @@ export default function CustomersIndex({ customers, filters }: Props) {
                                 disabled={customers.current_page === 1}
                                 onClick={() =>
                                     router.get(
-                                        '/admin/customers',
+                                        customersIndex.url(),
                                         {
                                             ...filters,
                                             page: customers.current_page - 1,
@@ -422,7 +423,7 @@ export default function CustomersIndex({ customers, filters }: Props) {
                                 }
                                 onClick={() =>
                                     router.get(
-                                        '/admin/customers',
+                                        customersIndex.url(),
                                         {
                                             ...filters,
                                             page: customers.current_page + 1,

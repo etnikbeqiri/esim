@@ -1,3 +1,4 @@
+import { index as providersIndex } from '@/actions/App/Http/Controllers/Admin/ProviderController';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -178,7 +179,7 @@ export default function ProvidersCreate() {
                                     Create Provider
                                 </Button>
                                 <Button type="button" variant="outline" asChild>
-                                    <Link href="/admin/providers">Cancel</Link>
+                                    <Link href={providersIndex.url()}>Cancel</Link>
                                 </Button>
                             </div>
                         </form>

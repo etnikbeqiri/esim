@@ -1,3 +1,4 @@
+import { index as couponsIndex } from '@/actions/App/Http/Controllers/Admin/CouponController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -76,7 +77,7 @@ export default function CreateCoupon({
             <div className="mx-auto flex max-w-4xl flex-col gap-4 p-4">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="icon" asChild>
-                        <Link href="/admin/coupons">
+                        <Link href={couponsIndex.url()}>
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>
@@ -513,7 +514,7 @@ export default function CreateCoupon({
                     {/* Actions */}
                     <div className="flex justify-end gap-3">
                         <Button type="button" variant="outline" asChild>
-                            <Link href="/admin/coupons">Cancel</Link>
+                            <Link href={couponsIndex.url()}>Cancel</Link>
                         </Button>
                         <Button type="submit" disabled={processing}>
                             <Save className="mr-2 h-4 w-4" />

@@ -1,3 +1,8 @@
+import {
+    index as ticketsIndex,
+    create as ticketsCreate,
+    show as ticketsShow,
+} from '@/actions/App/Http/Controllers/Client/TicketController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,7 +64,7 @@ export default function TicketIndex() {
                     </p>
                 </div>
 
-                <Link href={'/client/tickets/create'}>
+                <Link href={ticketsCreate.url()}>
                     <Button>{trans('ticket.create_title')}</Button>
                 </Link>
             </div>
@@ -70,7 +75,7 @@ export default function TicketIndex() {
                     <label className="mb-2 block text-sm font-medium text-gray-700">
                         {trans('ticket.status')}
                     </label>
-                    <Link href={'/client/tickets'} preserveState>
+                    <Link href={ticketsIndex.url()} preserveState>
                         <Button
                             variant={!filters.status ? 'default' : 'outline'}
                             size="sm"
@@ -81,7 +86,7 @@ export default function TicketIndex() {
                     </Link>
                     <div className="mt-2 space-y-2">
                         <Link
-                            href={`/client/tickets?status=open`}
+                            href={ticketsIndex.url({ query: { status: 'open' } })}
                             preserveState
                         >
                             <Button
@@ -97,7 +102,7 @@ export default function TicketIndex() {
                             </Button>
                         </Link>
                         <Link
-                            href={`/client/tickets?status=in_progress`}
+                            href={ticketsIndex.url({ query: { status: 'in_progress' } })}
                             preserveState
                         >
                             <Button
@@ -113,7 +118,7 @@ export default function TicketIndex() {
                             </Button>
                         </Link>
                         <Link
-                            href={`/client/tickets?status=closed`}
+                            href={ticketsIndex.url({ query: { status: 'closed' } })}
                             preserveState
                         >
                             <Button
@@ -146,7 +151,7 @@ export default function TicketIndex() {
                         {trans('ticket.no_tickets_desc')}
                     </p>
                     <Link
-                        href={'/client/tickets/create'}
+                        href={ticketsCreate.url()}
                         className="mt-4 inline-block"
                     >
                         <Button>{trans('ticket.create_title')}</Button>
@@ -157,7 +162,7 @@ export default function TicketIndex() {
                     {tickets.data.map((ticket: any) => (
                         <Link
                             key={ticket.uuid}
-                            href={'/client/tickets/' + ticket.uuid}
+                            href={ticketsShow.url(ticket.uuid)}
                             className="block rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-primary-300"
                         >
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

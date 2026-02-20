@@ -1,3 +1,4 @@
+import { index as articlesIndex } from '@/actions/App/Http/Controllers/Admin/ArticleController';
 import { ImageUpload } from '@/components/image-upload';
 import { TiptapEditor } from '@/components/tiptap-editor';
 import { Button } from '@/components/ui/button';
@@ -193,7 +194,7 @@ export default function ArticlesCreate() {
                                             variant="outline"
                                             asChild
                                         >
-                                            <Link href="/admin/articles">
+                                            <Link href={articlesIndex.url()}>
                                                 Cancel
                                             </Link>
                                         </Button>

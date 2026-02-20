@@ -1,3 +1,4 @@
+import { index as invoicesIndex, store as invoicesStore } from '@/actions/App/Http/Controllers/Admin/InvoiceController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -278,7 +279,7 @@ export default function GenerateInvoice({
             data.end_date = dateRange.end;
         }
 
-        router.post('/admin/invoices/generate', data as Record<string, string | number | number[] | string[]>, {
+        router.post(invoicesStore.url(), data as Record<string, string | number | number[] | string[]>, {
             onFinish: () => setSubmitting(false),
         });
     }
@@ -334,7 +335,7 @@ export default function GenerateInvoice({
                 {/* Header */}
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="icon" asChild>
-                        <Link href="/admin/invoices">
+                        <Link href={invoicesIndex.url()}>
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>

@@ -1,3 +1,4 @@
+import { index as couponsIndex, create as couponsCreate, destroy as couponsDestroy, toggleActive as couponsToggle } from '@/actions/App/Http/Controllers/Admin/CouponController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -116,7 +117,7 @@ export default function CouponsIndex({ coupons, filters }: Props) {
     function handleSearch(e: FormEvent) {
         e.preventDefault();
         router.get(
-            '/admin/coupons',
+            couponsIndex.url(),
             { ...filters, search },
             { preserveState: true },
         );
@@ -124,7 +125,7 @@ export default function CouponsIndex({ coupons, filters }: Props) {
 
     function handleFilterChange(key: string, value: string) {
         router.get(
-            '/admin/coupons',
+            couponsIndex.url(),
             { ...filters, [key]: value === 'all' ? undefined : value, page: 1 },
             { preserveState: true },
         );
@@ -136,7 +137,7 @@ export default function CouponsIndex({ coupons, filters }: Props) {
                 ? 'desc'
                 : 'asc';
         router.get(
-            '/admin/coupons',
+            couponsIndex.url(),
             { ...filters, sort_by: column, sort_dir: newDir },
             { preserveState: true },
         );
@@ -144,17 +145,17 @@ export default function CouponsIndex({ coupons, filters }: Props) {
 
     function resetFilters() {
         setSearch('');
-        router.get('/admin/coupons', {}, { preserveState: true });
+        router.get(couponsIndex.url(), {}, { preserveState: true });
     }
 
     function handleDelete(coupon: Coupon) {
         if (confirm(`Delete coupon "${coupon.code}"?`)) {
-            router.delete(`/admin/coupons/${coupon.id}`);
+            router.delete(couponsDestroy.url(coupon.id));
         }
     }
 
     function handleToggle(coupon: Coupon) {
-        router.post(`/admin/coupons/${coupon.id}/toggle`);
+        router.post(couponsToggle.url(coupon.id));
     }
 
     function toggleSelectAll() {
@@ -222,7 +223,7 @@ export default function CouponsIndex({ coupons, filters }: Props) {
                             </Button>
                         )}
                         <Button size="sm" asChild>
-                            <Link href="/admin/coupons/create">
+                            <Link href={couponsCreate.url()}>
                                 <Plus className="mr-1.5 h-3.5 w-3.5" />
                                 Add Coupon
                             </Link>
@@ -551,7 +552,7 @@ export default function CouponsIndex({ coupons, filters }: Props) {
                                 className="h-8"
                                 disabled={coupons.current_page === 1}
                                 onClick={() =>
-                                    router.get('/admin/coupons', {
+                                    router.get(couponsIndex.url(), {
                                         ...filters,
                                         page: coupons.current_page - 1,
                                     })
@@ -567,7 +568,7 @@ export default function CouponsIndex({ coupons, filters }: Props) {
                                     coupons.current_page === coupons.last_page
                                 }
                                 onClick={() =>
-                                    router.get('/admin/coupons', {
+                                    router.get(couponsIndex.url(), {
                                         ...filters,
                                         page: coupons.current_page + 1,
                                     })

@@ -1,3 +1,4 @@
+import { destinations, howItWorks } from '@/actions/App/Http/Controllers/Public/HomeController';
 import { EsimQrCard } from '@/components/esim-qr-card';
 import { OrderSummaryCard } from '@/components/order-summary-card';
 import { SetupGuide } from '@/components/setup-guide';
@@ -644,7 +645,7 @@ export default function OrderStatus({ order }: Props) {
                             </p>
                             <div className="mt-3 grid grid-cols-3 gap-2">
                                 <Link
-                                    href="/how-it-works"
+                                    href={howItWorks.url()}
                                     onClick={() => {
                                         contentView(
                                             'guide',
@@ -676,7 +677,7 @@ export default function OrderStatus({ order }: Props) {
                                     </span>
                                 </Link>
                                 <Link
-                                    href="/destinations"
+                                    href={destinations.url()}
                                     className="flex flex-col items-center gap-1.5 rounded-xl border border-primary-100 bg-white px-2 py-3 text-center transition-colors hover:bg-primary-50"
                                 >
                                     <Globe className="h-4 w-4 text-primary-400" />

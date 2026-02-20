@@ -1,3 +1,4 @@
+import { index as invoicesIndex, voidMethod as invoiceVoid } from '@/actions/App/Http/Controllers/Admin/InvoiceController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -34,7 +35,7 @@ export default function InvoiceShow({
 }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
-        { title: 'Invoices', href: '/admin/invoices' },
+        { title: 'Invoices', href: invoicesIndex.url() },
         {
             title: invoice.invoice_number,
             href: `/admin/invoices/${invoice.uuid}`,
@@ -55,7 +56,7 @@ export default function InvoiceShow({
         ) {
             return;
         }
-        router.post(`/admin/invoices/${invoice.uuid}/void`);
+        router.post(invoiceVoid.url(invoice.uuid));
     }
 
     return (
@@ -66,7 +67,7 @@ export default function InvoiceShow({
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" size="sm" asChild>
-                            <Link href="/admin/invoices">
+                            <Link href={invoicesIndex.url()}>
                                 <ArrowLeft className="mr-1 h-4 w-4" />
                                 Back
                             </Link>

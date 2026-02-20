@@ -1,3 +1,4 @@
+import { destinations } from '@/actions/App/Http/Controllers/Public/HomeController';
 import { CountryFlag } from '@/components/country-flag';
 import { GoldButton } from '@/components/ui/gold-button';
 import { useTrans } from '@/hooks/use-trans';
@@ -232,7 +233,7 @@ export function FeaturedPackagesSection({
                         </div>
 
                         <Link
-                            href="/destinations"
+                            href={destinations.url()}
                             className="group flex items-center gap-1.5 rounded-full bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-100 hover:text-primary-900 md:px-5"
                         >
                             {trans('featured_packages.view_all')}

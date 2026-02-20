@@ -1,3 +1,4 @@
+import { index as packagesIndex } from '@/actions/App/Http/Controllers/Admin/PackageController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -142,7 +143,7 @@ export default function PackageShow({
                             className="shrink-0"
                             asChild
                         >
-                            <Link href="/admin/packages">
+                            <Link href={packagesIndex.url()}>
                                 <ArrowLeft className="h-4 w-4" />
                             </Link>
                         </Button>

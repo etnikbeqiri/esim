@@ -1,3 +1,4 @@
+import { index as providersIndex, create as providersCreate, destroy as providersDestroy } from '@/actions/App/Http/Controllers/Admin/ProviderController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -113,7 +114,7 @@ export default function ProvidersIndex({ providers, filters }: Props) {
     function handleSearch(e: FormEvent) {
         e.preventDefault();
         router.get(
-            '/admin/providers',
+            providersIndex.url(),
             { ...filters, search },
             { preserveState: true },
         );
@@ -121,7 +122,7 @@ export default function ProvidersIndex({ providers, filters }: Props) {
 
     function handleFilterChange(key: string, value: string) {
         router.get(
-            '/admin/providers',
+            providersIndex.url(),
             { ...filters, [key]: value === 'all' ? undefined : value },
             { preserveState: true },
         );
@@ -133,7 +134,7 @@ export default function ProvidersIndex({ providers, filters }: Props) {
                 ? 'desc'
                 : 'asc';
         router.get(
-            '/admin/providers',
+            providersIndex.url(),
             { ...filters, sort_by: column, sort_dir: newDir },
             { preserveState: true },
         );
@@ -141,12 +142,12 @@ export default function ProvidersIndex({ providers, filters }: Props) {
 
     function resetFilters() {
         setSearch('');
-        router.get('/admin/providers', {}, { preserveState: true });
+        router.get(providersIndex.url(), {}, { preserveState: true });
     }
 
     function handleDelete(provider: Provider) {
         if (confirm(`Are you sure you want to delete "${provider.name}"?`)) {
-            router.delete(`/admin/providers/${provider.id}`);
+            router.delete(providersDestroy.url(provider.id));
         }
     }
 
@@ -173,7 +174,7 @@ export default function ProvidersIndex({ providers, filters }: Props) {
                             </Button>
                         )}
                         <Button size="sm" asChild>
-                            <Link href="/admin/providers/create">
+                            <Link href={providersCreate.url()}>
                                 <Plus className="mr-1.5 h-3.5 w-3.5" />
                                 Add Provider
                             </Link>
@@ -371,7 +372,7 @@ export default function ProvidersIndex({ providers, filters }: Props) {
                                 className="h-8"
                                 disabled={providers.current_page === 1}
                                 onClick={() =>
-                                    router.get('/admin/providers', {
+                                    router.get(providersIndex.url(), {
                                         ...filters,
                                         page: providers.current_page - 1,
                                     })
@@ -388,7 +389,7 @@ export default function ProvidersIndex({ providers, filters }: Props) {
                                     providers.last_page
                                 }
                                 onClick={() =>
-                                    router.get('/admin/providers', {
+                                    router.get(providersIndex.url(), {
                                         ...filters,
                                         page: providers.current_page + 1,
                                     })

@@ -1,3 +1,5 @@
+import { index as balanceIndex } from '@/actions/App/Http/Controllers/Client/BalanceController';
+import { index as packagesIndex } from '@/actions/App/Http/Controllers/Client/PackageController';
 import { Button } from '@/components/ui/button';
 import { CountryFlag } from '@/components/country-flag';
 import { Input } from '@/components/ui/input';
@@ -84,13 +86,13 @@ export default function PackagesIndex({
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/client' },
-        { title: trans('client_packages.title'), href: '/client/packages' },
+        { title: trans('client_packages.title'), href: packagesIndex.url() },
     ];
 
     function handleSearch(e: FormEvent) {
         e.preventDefault();
         router.get(
-            '/client/packages',
+            packagesIndex.url(),
             { ...filters, search },
             { preserveState: true },
         );
@@ -101,7 +103,7 @@ export default function PackagesIndex({
             ...filters,
             [key]: value === 'all' ? undefined : value,
         };
-        router.get('/client/packages', newFilters, { preserveState: true });
+        router.get(packagesIndex.url(), newFilters, { preserveState: true });
     }
 
     const hasFilters = filters.country || filters.search || filters.sort;
@@ -122,7 +124,7 @@ export default function PackagesIndex({
                     </div>
                     {customer?.is_b2b && (
                         <Link
-                            href="/client/balance"
+                            href={balanceIndex.url()}
                             className="flex items-center gap-2 rounded-xl bg-green-50 px-4 py-2 text-sm font-semibold text-green-700 ring-1 ring-inset ring-green-600/20 transition-colors hover:bg-green-100 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20"
                         >
                             €{Number(customer.balance || 0).toFixed(2)}
@@ -198,7 +200,7 @@ export default function PackagesIndex({
                             className="h-9 text-xs"
                             onClick={() =>
                                 router.get(
-                                    '/client/packages',
+                                    packagesIndex.url(),
                                     {},
                                     { preserveState: true },
                                 )
@@ -229,7 +231,7 @@ export default function PackagesIndex({
                                     className="mt-4"
                                     onClick={() =>
                                         router.get(
-                                            '/client/packages',
+                                            packagesIndex.url(),
                                             {},
                                             { preserveState: true },
                                         )
@@ -315,7 +317,7 @@ export default function PackagesIndex({
                                 className="h-8"
                                 disabled={packages.current_page === 1}
                                 onClick={() =>
-                                    router.get('/client/packages', {
+                                    router.get(packagesIndex.url(), {
                                         ...filters,
                                         page: packages.current_page - 1,
                                     })
@@ -331,7 +333,7 @@ export default function PackagesIndex({
                                     packages.current_page === packages.last_page
                                 }
                                 onClick={() =>
-                                    router.get('/client/packages', {
+                                    router.get(packagesIndex.url(), {
                                         ...filters,
                                         page: packages.current_page + 1,
                                     })

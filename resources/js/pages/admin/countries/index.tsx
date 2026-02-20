@@ -1,3 +1,4 @@
+import { index as countriesIndex, syncDisabledCountries } from '@/actions/App/Http/Controllers/Admin/CountryController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -80,7 +81,7 @@ export default function CountriesIndex({ countries, regions, filters }: Props) {
     function handleSearch(e: FormEvent) {
         e.preventDefault();
         router.get(
-            '/admin/countries',
+            countriesIndex.url(),
             { ...filters, search },
             { preserveState: true },
         );
@@ -88,7 +89,7 @@ export default function CountriesIndex({ countries, regions, filters }: Props) {
 
     function handleFilterChange(key: string, value: string) {
         router.get(
-            '/admin/countries',
+            countriesIndex.url(),
             { ...filters, [key]: value === 'all' ? undefined : value },
             { preserveState: true },
         );
@@ -96,7 +97,7 @@ export default function CountriesIndex({ countries, regions, filters }: Props) {
 
     function resetFilters() {
         setSearch('');
-        router.get('/admin/countries', {}, { preserveState: true });
+        router.get(countriesIndex.url(), {}, { preserveState: true });
     }
 
     function toggleSelectAll() {
@@ -159,7 +160,7 @@ export default function CountriesIndex({ countries, regions, filters }: Props) {
                             variant="outline"
                             size="sm"
                             onClick={() =>
-                                router.post('/admin/countries/sync-disabled')
+                                router.post(syncDisabledCountries.url())
                             }
                         >
                             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
@@ -392,7 +393,7 @@ export default function CountriesIndex({ countries, regions, filters }: Props) {
                                 className="h-8"
                                 disabled={countries.current_page === 1}
                                 onClick={() =>
-                                    router.get('/admin/countries', {
+                                    router.get(countriesIndex.url(), {
                                         ...filters,
                                         page: countries.current_page - 1,
                                     })
@@ -409,7 +410,7 @@ export default function CountriesIndex({ countries, regions, filters }: Props) {
                                     countries.last_page
                                 }
                                 onClick={() =>
-                                    router.get('/admin/countries', {
+                                    router.get(countriesIndex.url(), {
                                         ...filters,
                                         page: countries.current_page + 1,
                                     })

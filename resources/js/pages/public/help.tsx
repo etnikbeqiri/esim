@@ -1,3 +1,4 @@
+import { destinations, howItWorks } from '@/actions/App/Http/Controllers/Public/HomeController';
 import { CTASection } from '@/components/cta-section';
 import { FAQItem, FAQSection } from '@/components/faq-section';
 import { HelpCard } from '@/components/help-card';
@@ -111,7 +112,7 @@ export default function Help() {
                                 'help_page.categories.getting_started.description',
                             )}
                             icon={BookOpen}
-                            href="/how-it-works"
+                            href={howItWorks.url()}
                             onClick={() =>
                                 handleCategoryClick(
                                     'getting-started',
@@ -127,7 +128,7 @@ export default function Help() {
                                 'help_page.categories.installation.description',
                             )}
                             icon={QrCode}
-                            href="/how-it-works"
+                            href={howItWorks.url()}
                             onClick={() =>
                                 handleCategoryClick(
                                     'installation',
@@ -143,7 +144,7 @@ export default function Help() {
                                 'help_page.categories.compatibility.description',
                             )}
                             icon={Smartphone}
-                            href="/how-it-works"
+                            href={howItWorks.url()}
                             onClick={() =>
                                 handleCategoryClick(
                                     'compatibility',
@@ -182,7 +183,7 @@ export default function Help() {
                                 'help_page.categories.coverage.description',
                             )}
                             icon={Wifi}
-                            href="/destinations"
+                            href={destinations.url()}
                             onClick={() =>
                                 handleCategoryClick(
                                     'coverage',

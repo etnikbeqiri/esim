@@ -1,3 +1,4 @@
+import { index as ticketsIndex, create as ticketsCreate } from '@/actions/App/Http/Controllers/Client/TicketController';
 import { TicketMessage } from '@/components/ticket-message';
 import { TicketReplyForm } from '@/components/ticket-reply-form';
 import { Badge } from '@/components/ui/badge';
@@ -55,7 +56,7 @@ interface SseUpdateData {
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/client' },
-    { title: 'Tickets', href: '/client/tickets' },
+    { title: 'Tickets', href: ticketsIndex.url() },
     { title: 'Ticket Details', href: '#' },
 ];
 
@@ -166,7 +167,7 @@ export default function TicketShow() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" size="icon" asChild>
-                            <Link href="/client/tickets">
+                            <Link href={ticketsIndex.url()}>
                                 <ArrowLeft className="h-4 w-4" />
                             </Link>
                         </Button>
@@ -261,7 +262,7 @@ export default function TicketShow() {
                             `This ticket is ${ticket.status_label}. No further messages can be added.`}
                         <div className="mt-4">
                             <Button asChild>
-                                <Link href="/client/tickets/create">
+                                <Link href={ticketsCreate.url()}>
                                     {trans('ticket.create_title') ||
                                         'Create New Ticket'}
                                 </Link>

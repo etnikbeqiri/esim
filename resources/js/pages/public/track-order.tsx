@@ -1,3 +1,4 @@
+import { sendLink as trackSendLink } from '@/actions/App/Http/Controllers/Public/TrackOrderController';
 import { useTrans } from '@/hooks/use-trans';
 import GuestLayout from '@/layouts/guest-layout';
 import { Head, useForm, usePage } from '@inertiajs/react';
@@ -29,7 +30,7 @@ export default function TrackOrder() {
 
     function handleSubmit(e: FormEvent) {
         e.preventDefault();
-        form.post('/track', {
+        form.post(trackSendLink.url(), {
             preserveScroll: true,
         });
     }

@@ -1,3 +1,4 @@
+import { index as ordersIndex } from '@/actions/App/Http/Controllers/Admin/OrderController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -192,7 +193,7 @@ export default function OrdersIndex({
     function handleSearch(e: FormEvent) {
         e.preventDefault();
         router.get(
-            '/admin/orders',
+            ordersIndex.url(),
             { ...filters, search },
             { preserveState: true },
         );
@@ -203,7 +204,7 @@ export default function OrdersIndex({
             ...filters,
             [key]: value === 'all' ? undefined : value,
         };
-        router.get('/admin/orders', newFilters, { preserveState: true });
+        router.get(ordersIndex.url(), newFilters, { preserveState: true });
     }
 
     function handleSort(column: string) {
@@ -212,7 +213,7 @@ export default function OrdersIndex({
                 ? 'desc'
                 : 'asc';
         router.get(
-            '/admin/orders',
+            ordersIndex.url(),
             { ...filters, sort_by: column, sort_dir: newDir },
             { preserveState: true },
         );
@@ -304,7 +305,7 @@ export default function OrdersIndex({
                             className="h-9"
                             onClick={() =>
                                 router.get(
-                                    '/admin/orders',
+                                    ordersIndex.url(),
                                     {},
                                     { preserveState: true },
                                 )
@@ -579,7 +580,7 @@ export default function OrdersIndex({
                                 className="h-8"
                                 disabled={orders.current_page === 1}
                                 onClick={() =>
-                                    router.get('/admin/orders', {
+                                    router.get(ordersIndex.url(), {
                                         ...filters,
                                         page: orders.current_page - 1,
                                     })
@@ -595,7 +596,7 @@ export default function OrdersIndex({
                                     orders.current_page === orders.last_page
                                 }
                                 onClick={() =>
-                                    router.get('/admin/orders', {
+                                    router.get(ordersIndex.url(), {
                                         ...filters,
                                         page: orders.current_page + 1,
                                     })

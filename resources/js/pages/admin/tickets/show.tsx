@@ -1,3 +1,4 @@
+import { index as ticketsIndex, destroy as ticketsDestroy } from '@/actions/App/Http/Controllers/Admin/TicketController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -248,7 +249,7 @@ export default function TicketShow({
 
     function deleteTicket() {
         if (confirm('Are you sure you want to delete this ticket?')) {
-            router.delete(`/admin/tickets/${ticket.uuid}`);
+            router.delete(ticketsDestroy.url(ticket.uuid));
         }
     }
 
@@ -261,7 +262,7 @@ export default function TicketShow({
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" size="icon" asChild>
-                            <Link href="/admin/tickets">
+                            <Link href={ticketsIndex.url()}>
                                 <ArrowLeft className="h-4 w-4" />
                             </Link>
                         </Button>

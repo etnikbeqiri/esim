@@ -1,3 +1,4 @@
+import { index as ordersIndex, syncEsim, resendEsimEmail, retry as ordersRetry, fail as ordersFail } from '@/actions/App/Http/Controllers/Admin/OrderController';
 import { EsimQrCard } from '@/components/esim-qr-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -274,7 +275,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
     const [resendEmailSuccess, setResendEmailSuccess] = useState(false);
 
     function handleSyncEsim() {
-        syncForm.post(`/admin/orders/${order.uuid}/sync-esim`, {
+        syncForm.post(syncEsim.url(order.uuid), {
             preserveScroll: true,
             onSuccess: () => {
                 setSyncSuccess(true);
@@ -285,7 +286,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
 
     function handleResendEsimEmail(e: React.FormEvent) {
         e.preventDefault();
-        resendEmailForm.post(`/admin/orders/${order.uuid}/resend-esim-email`, {
+        resendEmailForm.post(resendEsimEmail.url(order.uuid), {
             preserveScroll: true,
             onSuccess: () => {
                 setResendEmailSuccess(true);
@@ -296,14 +297,14 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
     }
 
     function handleRetry() {
-        retryForm.post(`/admin/orders/${order.uuid}/retry`, {
+        retryForm.post(ordersRetry.url(order.uuid), {
             preserveScroll: true,
         });
     }
 
     function handleFail() {
         if (!confirm(trans('admin.orders.actions.mark_failed_confirm'))) return;
-        failForm.post(`/admin/orders/${order.uuid}/fail`, {
+        failForm.post(ordersFail.url(order.uuid), {
             preserveScroll: true,
         });
     }
@@ -332,7 +333,7 @@ export default function OrderShow({ order, defaultCurrency }: Props) {
                             className="shrink-0"
                             asChild
                         >
-                            <Link href="/admin/orders">
+                            <Link href={ordersIndex.url()}>
                                 <ArrowLeft className="h-4 w-4" />
                             </Link>
                         </Button>

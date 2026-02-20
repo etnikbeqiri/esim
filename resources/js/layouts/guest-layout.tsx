@@ -1,3 +1,11 @@
+import { index as clientDashboard } from '@/actions/App/Http/Controllers/Client/DashboardController';
+import { index as homeIndex, destinations, howItWorks } from '@/actions/App/Http/Controllers/Public/HomeController';
+import { index as blogIndex } from '@/actions/App/Http/Controllers/Public/ArticleController';
+import { index as devicesIndex } from '@/actions/App/Http/Controllers/Public/DeviceController';
+import { index as publicTicketsIndex } from '@/actions/App/Http/Controllers/Public/TicketController';
+import { index as trackIndex } from '@/actions/App/Http/Controllers/Public/TrackOrderController';
+import { create as loginPage } from '@/actions/Laravel/Fortify/Http/Controllers/AuthenticatedSessionController';
+import { create as registerPage } from '@/actions/Laravel/Fortify/Http/Controllers/RegisteredUserController';
 import LanguageSwitcher from '@/components/language-switcher';
 import { PayseraTrustBadge } from '@/components/paysera-trust-badge';
 import { Button } from '@/components/ui/button';
@@ -25,7 +33,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                 <header className="sticky top-0 z-50 w-full border-b border-primary-100 bg-white/80 backdrop-blur-lg">
                     <div className="container mx-auto flex h-20 items-center justify-between px-4">
                         {/* Logo */}
-                        <Link href="/" className="flex items-center gap-2 md:gap-3">
+                        <Link href={homeIndex.url()} className="flex items-center gap-2 md:gap-3">
                             <img
                                 alt={trans('common.logo')}
                                 className="h-8 w-8 object-contain md:h-12 md:w-12"
@@ -39,31 +47,31 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                         {/* Desktop Navigation */}
                         <nav className="hidden items-center gap-1 md:flex">
                             <Link
-                                href="/"
+                                href={homeIndex.url()}
                                 className="rounded-full px-5 py-2.5 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-50 hover:text-primary-900"
                             >
                                 {trans('nav.home')}
                             </Link>
                             <Link
-                                href="/destinations"
+                                href={destinations.url()}
                                 className="rounded-full px-5 py-2.5 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-50 hover:text-primary-900"
                             >
                                 {trans('nav.destinations')}
                             </Link>
                             <Link
-                                href="/how-it-works"
+                                href={howItWorks.url()}
                                 className="rounded-full px-5 py-2.5 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-50 hover:text-primary-900"
                             >
                                 {trans('nav.how_it_works')}
                             </Link>
                             <Link
-                                href="/blog"
+                                href={blogIndex.url()}
                                 className="rounded-full px-5 py-2.5 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-50 hover:text-primary-900"
                             >
                                 {trans('nav.blog')}
                             </Link>
                             <Link
-                                href="/devices"
+                                href={devicesIndex.url()}
                                 className="rounded-full px-5 py-2.5 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-50 hover:text-primary-900"
                             >
                                 {trans('nav.devices')}
@@ -73,7 +81,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                         {/* Desktop Auth Buttons */}
                         <div className="hidden items-center gap-3 md:flex">
                             <Link
-                                href="/track"
+                                href={trackIndex.url()}
                                 className="text-sm font-medium text-primary-500 transition-colors hover:text-primary-900"
                             >
                                 {trans('nav.track_order')}
@@ -85,7 +93,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                     size="sm"
                                     className="rounded-full px-6"
                                 >
-                                    <Link href="/client">
+                                    <Link href={clientDashboard.url()}>
                                         <User className="mr-2 h-4 w-4" />
                                         {trans('nav.my_account')}
                                     </Link>
@@ -98,7 +106,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                         size="sm"
                                         className="rounded-full px-5 font-semibold text-primary-700 hover:bg-primary-50 hover:text-primary-900"
                                     >
-                                        <Link href="/login">
+                                        <Link href={loginPage.url()}>
                                             {trans('nav.login')}
                                         </Link>
                                     </Button>
@@ -107,7 +115,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                         size="sm"
                                         className="rounded-full px-6"
                                     >
-                                        <Link href="/register">
+                                        <Link href={registerPage.url()}>
                                             {trans('nav.get_started')}
                                         </Link>
                                     </GoldButton>
@@ -118,7 +126,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                         {/* Mobile Language Switcher & Menu Button */}
                         <div className="flex items-center gap-2 md:hidden">
                             <Link
-                                href="/track"
+                                href={trackIndex.url()}
                                 className="rounded-lg p-2 text-primary-500 hover:bg-primary-50 hover:text-primary-800"
                                 aria-label={trans('nav.track_order')}
                             >
@@ -145,35 +153,35 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                         <div className="border-t border-primary-100 bg-white md:hidden">
                             <nav className="container mx-auto flex flex-col gap-1 px-4 py-4">
                                 <Link
-                                    href="/"
+                                    href={homeIndex.url()}
                                     className="rounded-xl px-4 py-3 text-sm font-medium text-primary-900 hover:bg-primary-50"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     {trans('nav.home')}
                                 </Link>
                                 <Link
-                                    href="/destinations"
+                                    href={destinations.url()}
                                     className="rounded-xl px-4 py-3 text-sm font-medium text-primary-900 hover:bg-primary-50"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     {trans('nav.destinations')}
                                 </Link>
                                 <Link
-                                    href="/how-it-works"
+                                    href={howItWorks.url()}
                                     className="rounded-xl px-4 py-3 text-sm font-medium text-primary-900 hover:bg-primary-50"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     {trans('nav.how_it_works')}
                                 </Link>
                                 <Link
-                                    href="/blog"
+                                    href={blogIndex.url()}
                                     className="rounded-xl px-4 py-3 text-sm font-medium text-primary-900 hover:bg-primary-50"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     {trans('nav.blog')}
                                 </Link>
                                 <Link
-                                    href="/devices"
+                                    href={devicesIndex.url()}
                                     className="rounded-xl px-4 py-3 text-sm font-medium text-primary-900 hover:bg-primary-50"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
@@ -189,7 +197,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                             size="sm"
                                             className="w-full"
                                         >
-                                            <Link href="/client">
+                                            <Link href={clientDashboard.url()}>
                                                 {trans('nav.my_account')}
                                             </Link>
                                         </GoldButton>
@@ -201,7 +209,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                                 size="sm"
                                                 className="w-full rounded-xl border-primary-200 text-primary-700 hover:bg-primary-50 hover:text-primary-900"
                                             >
-                                                <Link href="/login">
+                                                <Link href={loginPage.url()}>
                                                     {trans('nav.login')}
                                                 </Link>
                                             </Button>
@@ -210,7 +218,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                                 size="sm"
                                                 className="w-full"
                                             >
-                                                <Link href="/register">
+                                                <Link href={registerPage.url()}>
                                                     {trans('nav.get_started')}
                                                 </Link>
                                             </GoldButton>
@@ -239,7 +247,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                             {/* Brand */}
                             <div className="md:col-span-1">
                                 <Link
-                                    href="/"
+                                    href={homeIndex.url()}
                                     className="flex items-center gap-3"
                                 >
                                     <img
@@ -264,7 +272,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                 <ul className="space-y-4 text-sm text-primary-600">
                                     <li>
                                         <Link
-                                            href="/destinations"
+                                            href={destinations.url()}
                                             className="transition-colors hover:text-primary-900"
                                         >
                                             {trans('nav.destinations')}
@@ -272,7 +280,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                     </li>
                                     <li>
                                         <Link
-                                            href="/how-it-works"
+                                            href={howItWorks.url()}
                                             className="transition-colors hover:text-primary-900"
                                         >
                                             {trans('nav.how_it_works')}
@@ -288,7 +296,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                     </li>
                                     <li>
                                         <Link
-                                            href="/blog"
+                                            href={blogIndex.url()}
                                             className="transition-colors hover:text-primary-900"
                                         >
                                             {trans('nav.blog')}
@@ -296,7 +304,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                     </li>
                                     <li>
                                         <Link
-                                            href="/devices"
+                                            href={devicesIndex.url()}
                                             className="transition-colors hover:text-primary-900"
                                         >
                                             {trans('nav.devices')}
@@ -313,7 +321,7 @@ export default function GuestLayout({ children }: GuestLayoutProps) {
                                 <ul className="space-y-4 text-sm text-primary-600">
                                     <li>
                                         <Link
-                                            href="/tickets"
+                                            href={publicTicketsIndex.url()}
                                             className="transition-colors hover:text-primary-900"
                                         >
                                             {trans('footer.links.contact')}

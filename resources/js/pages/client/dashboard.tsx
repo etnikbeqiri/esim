@@ -1,3 +1,6 @@
+import { index as balanceIndex } from '@/actions/App/Http/Controllers/Client/BalanceController';
+import { index as ordersIndex } from '@/actions/App/Http/Controllers/Client/OrderController';
+import { index as packagesIndex } from '@/actions/App/Http/Controllers/Client/PackageController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CountryFlag } from '@/components/country-flag';
@@ -191,7 +194,7 @@ export default function ClientDashboard({
                         </div>
                     </div>
                     <Button asChild size="sm" className="gap-2">
-                        <Link href="/client/packages">
+                        <Link href={packagesIndex.url()}>
                             <Globe className="h-4 w-4" />
                             <span className="hidden sm:inline">
                                 {trans('client_dashboard.browse_packages')}
@@ -207,7 +210,7 @@ export default function ClientDashboard({
                     >
                         {isB2B && (
                             <Link
-                                href="/client/balance"
+                                href={balanceIndex.url()}
                                 className="flex items-center gap-3 px-5 py-4 transition-colors hover:bg-muted/50"
                             >
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 dark:bg-green-500/10">
@@ -370,7 +373,7 @@ export default function ClientDashboard({
                                 className="gap-1 text-xs text-muted-foreground"
                                 asChild
                             >
-                                <Link href="/client/orders">
+                                <Link href={ordersIndex.url()}>
                                     {trans('client_dashboard.view_all')}
                                     <ChevronRight className="h-3.5 w-3.5" />
                                 </Link>
@@ -385,7 +388,7 @@ export default function ClientDashboard({
                                     {trans('client_dashboard.no_orders')}
                                 </p>
                                 <Button asChild size="sm" className="mt-3">
-                                    <Link href="/client/packages">
+                                    <Link href={packagesIndex.url()}>
                                         {trans('client_dashboard.browse_packages')}
                                     </Link>
                                 </Button>
@@ -452,7 +455,7 @@ export default function ClientDashboard({
                                     className="gap-1 text-xs text-muted-foreground"
                                     asChild
                                 >
-                                    <Link href="/client/balance">
+                                    <Link href={balanceIndex.url()}>
                                         {trans('client_dashboard.view_all')}
                                         <ChevronRight className="h-3.5 w-3.5" />
                                     </Link>

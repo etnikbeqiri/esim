@@ -1,3 +1,4 @@
+import { index as customersIndex, impersonate as customersImpersonate } from '@/actions/App/Http/Controllers/Admin/CustomerController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -179,7 +180,7 @@ export default function CustomerShow({
             )
         )
             return;
-        impersonateForm.post(`/admin/customers/${customer.id}/impersonate`);
+        impersonateForm.post(customersImpersonate.url(customer.id));
     }
 
     function handleResetPassword() {
@@ -213,7 +214,7 @@ export default function CustomerShow({
                             className="shrink-0"
                             asChild
                         >
-                            <Link href="/admin/customers">
+                            <Link href={customersIndex.url()}>
                                 <ArrowLeft className="h-4 w-4" />
                             </Link>
                         </Button>
