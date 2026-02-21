@@ -69,6 +69,6 @@ jobs:
 
       - name: Deploy to Portainer
         run: |
-          curl -sf -X POST ${{ secrets.PORTAINER_WEBHOOK_BACKEND }} || true
-          curl -sf -X POST ${{ secrets.PORTAINER_WEBHOOK_QUEUE }} || true
-          curl -sf -X POST ${{ secrets.PORTAINER_WEBHOOK_SCHEDULER }} || true
+          curl -sfk -X POST ${{ secrets.PORTAINER_WEBHOOK_BACKEND }} || true
+          curl -sfk -X POST ${{ secrets.PORTAINER_WEBHOOK_QUEUE }} || true
+          curl -sfk -X POST ${{ secrets.PORTAINER_WEBHOOK_SCHEDULER }} || true
