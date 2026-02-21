@@ -17,12 +17,16 @@ fi
 
 php artisan config:cache || true
 
+chown -R nobody:nobody /var/www/html/bootstrap/cache /var/www/html/storage
+
 case "${CONTAINER_ROLE}" in
     app)
         php artisan route:cache || true
         php artisan view:cache  || true
         php artisan event:cache || true
         php artisan storage:link 2>/dev/null || true
+
+        chown -R nobody:nobody /var/www/html/bootstrap/cache /var/www/html/storage
 
         flock -n /tmp/migrate.lock php artisan migrate --force --no-interaction \
             || log "Migration skipped (another replica is running it)"
