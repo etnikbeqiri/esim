@@ -100,6 +100,6 @@ RUN chmod 444 /etc/nginx/nginx.conf \
 EXPOSE 80
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-    CMD curl -sf http://localhost/up || exit 1
+    CMD if [ "${CONTAINER_ROLE}" = "app" ]; then curl -sf http://localhost/up; elif [ "${CONTAINER_ROLE}" = "horizon" ]; then php /var/www/html/artisan horizon:status; else pgrep -f "schedule:work" > /dev/null; fi
 
 CMD ["/bin/sh", "/usr/local/bin/entrypoint.sh"]
