@@ -1,47 +1,69 @@
 #!/bin/sh
-set -e
+# =============================================================================
+# Container entrypoint -- routes to the correct role (app/horizon/scheduler)
+# Designed for the distroless-inspired stripped Alpine runtime.
+# Shell: /bin/sh (busybox) -- no bashisms allowed.
+# =============================================================================
+set -eu
 
-CONTAINER_ROLE=${CONTAINER_ROLE:-app}
+# Restrictive umask: files 640, directories 750
+umask 027
 
-echo "Starting container with role: $CONTAINER_ROLE"
+CONTAINER_ROLE="${CONTAINER_ROLE:-app}"
 
-# Load .env from Docker secret if mounted
+log() {
+    printf '[entrypoint] %s\n' "$1"
+}
+
+log "Starting container with role: ${CONTAINER_ROLE}"
+
+# ---------------------------------------------------------------------------
+# Load .env from Docker secret if mounted (Swarm)
+# ---------------------------------------------------------------------------
 if [ -f /run/secrets/backend_secret_env ]; then
     cp /run/secrets/backend_secret_env /var/www/html/.env
     chown nobody:nobody /var/www/html/.env
-    echo "Loaded .env from Docker secret"
+    chmod 440 /var/www/html/.env
+    log "Loaded .env from Docker secret"
 fi
 
-# Cache config for all roles
-echo "Caching Laravel configuration..."
+# ---------------------------------------------------------------------------
+# Cache Laravel config (all roles benefit from this)
+# ---------------------------------------------------------------------------
+log "Caching Laravel configuration..."
 php artisan config:cache || true
 
-case "$CONTAINER_ROLE" in
+# ---------------------------------------------------------------------------
+# Role-based startup
+# ---------------------------------------------------------------------------
+case "${CONTAINER_ROLE}" in
     app)
-        echo "Running Laravel optimizations..."
-        php artisan route:cache || echo "Route cache skipped"
-        php artisan view:cache || true
+        log "Running Laravel optimizations..."
+        php artisan route:cache || log "Route cache skipped"
+        php artisan view:cache  || true
         php artisan event:cache || true
+        php artisan storage:link 2>/dev/null || true
 
-        echo "Running database migrations (with lock to prevent race condition)..."
-        flock -n /tmp/migrate.lock php artisan migrate --force --no-interaction || echo "Migration skipped (another replica is running it)"
+        log "Running database migrations (with lock to prevent race condition)..."
+        flock -n /tmp/migrate.lock php artisan migrate --force --no-interaction \
+            || log "Migration skipped (another replica is running it)"
 
-        echo "Starting supervisor (nginx + php-fpm + ssr)..."
+        log "Starting supervisor (nginx + php-fpm + ssr)..."
         exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
         ;;
 
     horizon)
-        echo "Starting Laravel Horizon..."
+        log "Starting Laravel Horizon..."
         exec php artisan horizon
         ;;
 
     scheduler)
-        echo "Running scheduled tasks..."
-        exec php artisan schedule:run
+        log "Starting scheduler daemon..."
+        exec php artisan schedule:work
         ;;
 
     *)
-        echo "Unknown CONTAINER_ROLE: $CONTAINER_ROLE"
+        log "ERROR: Unknown CONTAINER_ROLE: ${CONTAINER_ROLE}"
         exit 1
         ;;
 esac
