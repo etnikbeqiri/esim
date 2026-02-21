@@ -21,7 +21,7 @@ RUN apk add --no-cache \
     nodejs npm \
     php84 php84-tokenizer php84-mbstring php84-openssl php84-phar \
     php84-session php84-xml php84-dom php84-xmlwriter php84-ctype \
-    php84-fileinfo php84-curl php84-iconv \
+    php84-fileinfo php84-curl php84-iconv php84-pdo php84-pdo_sqlite \
     && ln -sf /usr/bin/php84 /usr/bin/php
 
 WORKDIR /app
