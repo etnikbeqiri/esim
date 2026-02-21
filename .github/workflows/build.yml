@@ -66,3 +66,9 @@ jobs:
             --no-progress \
             --format table \
             ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Deploy to Portainer
+        run: |
+          curl -sf -X POST ${{ secrets.PORTAINER_WEBHOOK_BACKEND }} || true
+          curl -sf -X POST ${{ secrets.PORTAINER_WEBHOOK_QUEUE }} || true
+          curl -sf -X POST ${{ secrets.PORTAINER_WEBHOOK_SCHEDULER }} || true
