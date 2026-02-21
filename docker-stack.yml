@@ -67,6 +67,12 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 5
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'schedule:work' || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
 networks:
   massive-network:
